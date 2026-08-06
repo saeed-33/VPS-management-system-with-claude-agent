@@ -62,92 +62,128 @@ class OllamaAnalysisClient(LLMAnalysisClient):
             .model_json_schema()
         )
 
-        payload: dict[str, Any] = {
-            "model": self._model,
-            "stream": False,
-            "think": False,
-            "keep_alive": "15m",
-            "format": schema,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt,
+        def make_payload(num_predict: int) -> dict[str, Any]:
+            return {
+                "model": self._model,
+                "stream": False,
+                "think": False,
+                "keep_alive": "15m",
+                "format": schema,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_prompt,
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt,
+                    },
+                ],
+                "options": {
+                    "temperature": 0,
+                    "num_predict": num_predict,
                 },
-                {
-                    "role": "user",
-                    "content": user_prompt,
-                },
-            ],
-            "options": {
-                "temperature": 0,
-                "num_predict": 1500,
-            },
-        }
+            }
 
-        try:
-            response = await self._client.post(
-                "/api/chat",
-                json=payload,
+        last_error: Exception | None = None
+
+        for attempt, num_predict in [(1, 4096), (2, 8192)]:
+            payload = make_payload(num_predict)
+
+            try:
+                response = await self._client.post(
+                    "/api/chat",
+                    json=payload,
+                )
+
+                response.raise_for_status()
+
+            except httpx.ConnectError as exc:
+                raise RuntimeError(
+                    "Cannot connect to Ollama at "
+                    f"{self._base_url}. Ensure Ollama "
+                    "is running."
+                ) from exc
+
+            except httpx.ReadTimeout as exc:
+                raise RuntimeError(
+                    "Ollama analysis exceeded the "
+                    f"{self._timeout_seconds}-second timeout. "
+                    "Use a smaller model, reduce the report "
+                    "size, or increase the timeout."
+                ) from exc
+
+            except httpx.HTTPStatusError as exc:
+                response_text = (
+                    exc.response.text[:2000]
+                )
+
+                raise RuntimeError(
+                    "Ollama returned HTTP "
+                    f"{exc.response.status_code}: "
+                    f"{response_text}"
+                ) from exc
+
+            try:
+                body = response.json()
+            except ValueError as exc:
+                if attempt == 1:
+                    last_error = exc
+                    continue
+                raise RuntimeError(
+                    "Ollama returned invalid JSON. "
+                    "Response could not be parsed."
+                ) from exc
+
+            message = body.get("message")
+
+            if not isinstance(message, dict):
+                raise RuntimeError(
+                    "Ollama response does not contain "
+                    "a valid message."
+                )
+
+            content = message.get("content")
+
+            if not isinstance(content, str):
+                raise RuntimeError(
+                    "Ollama response does not contain "
+                    "text content."
+                )
+
+            try:
+                decoded = json.loads(content)
+            except json.JSONDecodeError as exc:
+                done_reason = body.get("done_reason")
+                if attempt == 1 and (
+                    done_reason == "length"
+                    or True
+                ):
+                    last_error = exc
+                    continue
+                raise RuntimeError(
+                    "Ollama returned invalid JSON. "
+                    f"Response: {content[:1000]}"
+                ) from exc
+
+            if (
+                attempt == 1
+                and body.get("done_reason") == "length"
+            ):
+                last_error = RuntimeError(
+                    "Ollama response truncated due to length. "
+                    "Retrying with a larger output limit."
+                )
+                continue
+
+            return ReportAnalysisResult.model_validate(
+                decoded
             )
 
-            response.raise_for_status()
-
-        except httpx.ConnectError as exc:
-            raise RuntimeError(
-                "Cannot connect to Ollama at "
-                f"{self._base_url}. Ensure Ollama "
-                "is running."
-            ) from exc
-
-        except httpx.ReadTimeout as exc:
-            raise RuntimeError(
-                "Ollama analysis exceeded the "
-                f"{self._timeout_seconds}-second timeout. "
-                "Use a smaller model, reduce the report "
-                "size, or increase the timeout."
-            ) from exc
-
-        except httpx.HTTPStatusError as exc:
-            response_text = (
-                exc.response.text[:2000]
-            )
-
-            raise RuntimeError(
-                "Ollama returned HTTP "
-                f"{exc.response.status_code}: "
-                f"{response_text}"
-            ) from exc
-
-        body = response.json()
-
-        message = body.get("message")
-
-        if not isinstance(message, dict):
-            raise RuntimeError(
-                "Ollama response does not contain "
-                "a valid message."
-            )
-
-        content = message.get("content")
-
-        if not isinstance(content, str):
-            raise RuntimeError(
-                "Ollama response does not contain "
-                "text content."
-            )
-
-        try:
-            decoded = json.loads(content)
-
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(
-                "Ollama returned invalid JSON. "
-                f"Response: {content[:1000]}"
-            ) from exc
-
-        return ReportAnalysisResult.model_validate(
-            decoded
-        )
+        raise RuntimeError(
+            "Ollama analysis failed after retrying with "
+            "a larger output limit."
+        ) from last_error
 
     async def health_check(self) -> None:
         try:

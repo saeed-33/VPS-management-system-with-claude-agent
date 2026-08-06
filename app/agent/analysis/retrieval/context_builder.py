@@ -10,8 +10,8 @@ class RagContextBuilder:
         self,
         *,
         max_cases: int = 3,
-        max_summary_characters: int = 1200,
-        max_issue_characters: int = 1800,
+        max_summary_characters: int = 600,
+        max_issue_characters: int = 1000,
     ) -> None:
         self._max_cases = max_cases
         self._max_summary_characters = (

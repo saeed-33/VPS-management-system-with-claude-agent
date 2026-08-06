@@ -142,60 +142,101 @@ class AnalysisOrchestrator:
                     reusable_analysis.id,
                 )
 
-                if self._retrieval_indexer is not None:
+                if (
+                    self._analysis_source_repository
+                    is not None
+                ):
                     try:
-                        await self._retrieval_indexer.index_analysis(
-                            reused.id
+                        sources = [
+                            {
+                                "source_type": (
+                                    "current_report"
+                                ),
+                                "source_report_id": (
+                                    report_id
+                                ),
+                                "source_analysis_id": None,
+                                "retrieval_strategy": None,
+                                "similarity_score": None,
+                                "rank": 0,
+                                "title": (
+                                    "Current monitoring "
+                                    f"report #{report_id}"
+                                ),
+                                "excerpt": (
+                                    normalized_report[:1000]
+                                ),
+                                "source_metadata": {},
+                                "used_in_prompt": False,
+                            },
+                            {
+                                "source_type": (
+                                    "reused_analysis"
+                                ),
+                                "source_report_id": (
+                                    reusable_analysis.report_id
+                                ),
+                                "source_analysis_id": (
+                                    reusable_analysis.id
+                                ),
+                                "retrieval_strategy": (
+                                    "exact_fingerprint"
+                                ),
+                                "similarity_score": 1.0,
+                                "rank": 1,
+                                "title": (
+                                    "Reused analysis "
+                                    f"#{reusable_analysis.id}"
+                                ),
+                                "excerpt": (
+                                    reusable_analysis.summary
+                                    or ""
+                                )[:1000],
+                                "source_metadata": {
+                                    "health_status": (
+                                        reusable_analysis
+                                        .health_status
+                                    ),
+                                },
+                                "used_in_prompt": False,
+                            },
+                        ]
+
+                        (
+                            self
+                            ._analysis_source_repository
+                            .replace_for_analysis(
+                                analysis_id=reused.id,
+                                sources=sources,
+                            )
                         )
+
                     except Exception:
                         logger.exception(
-                            "Analysis saved, but retrieval indexing failed | analysis_id=%s",
+                            "Reused analysis saved, but "
+                            "source recording failed | "
+                            "analysis_id=%s",
                             reused.id,
                         )
 
-            if self._analysis_source_repository is not None:
-                sources = [
-                    {
-                        "source_type": "current_report",
-                        "source_report_id": report_id,
-                        "source_analysis_id": None,
-                        "retrieval_strategy": None,
-                        "similarity_score": None,
-                        "rank": 0,
-                        "title": (
-                            f"Current monitoring report #{report_id}"
-                        ),
-                        "excerpt": (
-                            normalized_report[:1000]
-                        ),
-                        "source_metadata": {},
-                        "used_in_prompt": False,
-                    },
-                    {
-                        "source_type": "reused_analysis",
-                        "source_report_id": reusable_analysis.report_id,
-                        "source_analysis_id": reusable_analysis.id,
-                        "retrieval_strategy": "exact_fingerprint",
-                        "similarity_score": 1.0,
-                        "rank": 1,
-                        "title": (
-                            f"Reused analysis #{reusable_analysis.id}"
-                        ),
-                        "excerpt": (
-                            reusable_analysis.summary or ""
-                        )[:1000],
-                        "source_metadata": {
-                            "health_status": reusable_analysis.health_status,
-                        },
-                        "used_in_prompt": True,
-                    },
-                ]
-                self._analysis_source_repository.replace_for_analysis(
-                    analysis_id=reused.id,
-                    sources=sources,
-                )
+                if self._retrieval_indexer is not None:
+                    try:
+                        await (
+                            self._retrieval_indexer
+                            .index_analysis(
+                                reused.id
+                            )
+                        )
 
-            return reused.id
+                    except Exception:
+                        logger.exception(
+                            "Analysis saved, but retrieval "
+                            "indexing failed | "
+                            "analysis_id=%s",
+                            reused.id,
+                        )
+
+                return reused.id
 
         retrieved_contexts = []
         rag_prompt_context = []

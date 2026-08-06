@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 
 from app.admin.services.ssh_test_service import (
@@ -69,6 +70,8 @@ from app.shared.services.server_service import (
     ServerService,
 )
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(slots=True)
 class ApplicationContainer:
@@ -78,6 +81,7 @@ class ApplicationContainer:
     profile_repository: MonitoringProfileRepository
     report_repository: ReportRepository
     analysis_repository: AnalysisRepository
+    analysis_source_repository: AnalysisSourceRepository
 
     # Shared services
     server_service: ServerService
@@ -96,7 +100,7 @@ class ApplicationContainer:
     report_analyzer: ReportAnalyzer | None
     analysis_orchestrator: AnalysisOrchestrator | None
     analysis_agent_manager: AnalysisAgentManager | None
-    report_pdf_service: ReportPdfService
+    report_pdf_service: ReportPdfService | None
 
 
 def build_container() -> ApplicationContainer:
@@ -148,9 +152,16 @@ def build_container() -> ApplicationContainer:
     retrieval_indexer = None
     rag_retriever = None
     rag_context_builder = None
-    report_pdf_service = ReportPdfService(
-        font_path=settings.pdf_font_path,
-    )
+    report_pdf_service = None
+
+    try:
+        report_pdf_service = ReportPdfService(
+            font_path=settings.pdf_font_path,
+        )
+    except FileNotFoundError:
+        logger.exception(
+            "PDF service disabled because font was not found."
+        )
 
     if (
         settings.rag_vector_enabled
@@ -294,6 +305,9 @@ def build_container() -> ApplicationContainer:
         profile_repository=profile_repository,
         report_repository=report_repository,
         analysis_repository=analysis_repository,
+        analysis_source_repository=(
+            analysis_source_repository
+        ),
         server_service=server_service,
         command_service=command_service,
         monitoring_profile_service=(

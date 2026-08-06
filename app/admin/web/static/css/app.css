@@ -698,9 +698,40 @@ html[data-theme="dark"] .theme-light-icon {
     font-size: 16px;
 }
 
+.analysis-sources-list {
+    display: grid;
+    gap: 14px;
+}
+
+.analysis-source-card {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.analysis-source-card > header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.analysis-source-card > header strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 @media (max-width: 680px) {
     .analysis-source-banner {
         align-items: stretch;
+        flex-direction: column;
+    }
+
+    .analysis-source-card > header {
+        align-items: flex-start;
         flex-direction: column;
     }
 }

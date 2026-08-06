@@ -27,6 +27,14 @@
 
     <div class="page-actions">
         <a
+            href="/api/reports/{{ report_id }}/pdf"
+            class="button button-primary"
+            target="_blank"
+        >
+            تصدير PDF
+        </a>
+
+        <a
             href="/reports"
             class="button button-secondary"
         >
@@ -117,6 +125,29 @@
             <div class="empty-state">
                 <span class="loading-spinner"></span>
             </div>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                مصادر التحليل
+            </h2>
+
+            <p class="panel-subtitle">
+                التقارير والتحليلات التاريخية المستخدمة.
+            </p>
+        </div>
+    </header>
+
+    <div
+        id="analysis-sources"
+        class="panel-body"
+    >
+        <div class="empty-state">
+            <span class="loading-spinner"></span>
         </div>
     </div>
 </section>
@@ -217,6 +248,7 @@ async function loadReportDetails() {
         );
 
         await loadReportAnalysis();
+        await loadAnalysisSources();
 
     } catch (error) {
         showToast(
@@ -251,6 +283,153 @@ async function loadReportAnalysis() {
             </div>
         `;
     }
+}
+
+async function loadAnalysisSources() {
+    const container =
+        document.getElementById(
+            "analysis-sources"
+        );
+
+    try {
+        const response = await apiRequest(
+            `/api/reports/${reportId}/analysis-sources`
+        );
+
+        renderAnalysisSources(
+            response.sources || []
+        );
+
+    } catch (error) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>لا توجد مصادر مسجلة</h3>
+                <p>
+                    قد يكون التحليل غير مكتمل أو أُنشئ
+                    قبل إضافة تتبع المصادر.
+                </p>
+            </div>
+        `;
+    }
+}
+
+
+function renderAnalysisSources(sources) {
+    const container =
+        document.getElementById(
+            "analysis-sources"
+        );
+
+    if (!sources.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>لا توجد مصادر</h3>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="analysis-sources-list">
+            ${sources.map(source => `
+                <article class="analysis-source-card">
+                    <header>
+                        <strong>
+                            ${escapeHtml(source.title)}
+                        </strong>
+
+                        <span class="badge ${
+                            source.used_in_prompt
+                                ? "badge-enabled"
+                                : "badge-unknown"
+                        }">
+                            ${
+                                source.used_in_prompt
+                                    ? "استُخدم داخل سياق LLM"
+                                    : "مرجع فقط"
+                            }
+                        </span>
+                    </header>
+
+                    <div class="analysis-summary">
+                        <div>
+                            <span class="form-label">
+                                نوع المصدر
+                            </span>
+                            <strong>
+                                ${escapeHtml(
+                                    source.source_type
+                                )}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span class="form-label">
+                                رقم التقرير
+                            </span>
+                            <strong>
+                                ${
+                                    source.source_report_id
+                                        ? `#${source.source_report_id}`
+                                        : "-"
+                                }
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span class="form-label">
+                                رقم التحليل
+                            </span>
+                            <strong>
+                                ${
+                                    source.source_analysis_id
+                                        ? `#${source.source_analysis_id}`
+                                        : "-"
+                                }
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span class="form-label">
+                                طريقة الاسترجاع
+                            </span>
+                            <strong>
+                                ${formatRetrievalStrategy(
+                                    source.retrieval_strategy
+                                )}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span class="form-label">
+                                درجة التشابه
+                            </span>
+                            <strong>
+                                ${
+                                    source.similarity_score !== null
+                                    && source.similarity_score !== undefined
+                                        ? `${Math.round(
+                                            source.similarity_score * 100
+                                        )}%`
+                                        : "-"
+                                }
+                            </strong>
+                        </div>
+                    </div>
+
+                    ${
+                        source.excerpt
+                            ? `
+                                <pre class="analysis-evidence">${escapeHtml(
+                                    source.excerpt
+                                )}</pre>
+                            `
+                            : ""
+                    }
+                </article>
+            `).join("")}
+        </div>
+    `;
 }
 
 function renderReportAnalysis(analysis) {

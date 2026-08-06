@@ -23,6 +23,9 @@ from app.shared.database.models.report_analysis import (
 from app.shared.database.models.report_retrieval_document import (
     ReportRetrievalDocumentModel,
 )
+from app.shared.database.models.report_analysis_source import (
+    ReportAnalysisSourceModel,
+)
 
 __all__ = [
     "ServerModel",
@@ -33,5 +36,6 @@ __all__ = [
     "CommandExecutionModel",
     "ReportAnalysisModel",
     "ReportRetrievalDocumentModel",
+    "ReportAnalysisSourceModel",
     "AnalysisJobStatus",
 ]

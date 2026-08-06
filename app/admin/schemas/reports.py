@@ -109,3 +109,32 @@ class ReportAnalysisResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True
     )
+
+
+class ReportAnalysisSourceResponse(BaseModel):
+    id: int
+    source_type: str
+
+    source_report_id: int | None
+    source_analysis_id: int | None
+
+    retrieval_strategy: str | None
+    similarity_score: float | None
+    rank: int | None
+
+    title: str
+    excerpt: str | None
+    source_metadata: dict[str, Any]
+
+    used_in_prompt: bool
+    created_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
+class ReportAnalysisSourcesResponse(BaseModel):
+    report_id: int
+    analysis_id: int
+    sources: list[ReportAnalysisSourceResponse]

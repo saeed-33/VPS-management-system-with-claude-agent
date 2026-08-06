@@ -2,6 +2,12 @@ from app.bootstrap import container
 from app.admin.services.ssh_test_service import (
     SSHTestService,
 )
+from app.admin.services.report_pdf_service import (
+    ReportPdfService,
+)
+from app.shared.database.repositories.analysis_source_repository import (
+    AnalysisSourceRepository,
+)
 from app.shared.services import (
     CommandService,
     ReportQueryService,
@@ -37,3 +43,19 @@ def get_ssh_test_service() -> SSHTestService:
 
 def get_analysis_repository() -> AnalysisRepository:
     return container.analysis_repository
+
+
+def get_analysis_source_repository(
+) -> AnalysisSourceRepository:
+    return container.analysis_source_repository
+
+
+def get_report_pdf_service() -> ReportPdfService:
+    service = container.report_pdf_service
+
+    if service is None:
+        raise RuntimeError(
+            "PDF export service is not configured."
+        )
+
+    return service
