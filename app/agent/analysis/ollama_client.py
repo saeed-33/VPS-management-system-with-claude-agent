@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any
 
 import httpx
@@ -9,6 +10,8 @@ from app.agent.analysis.llm_client import (
 from app.shared.dto.analysis import (
     ReportAnalysisResult,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class OllamaAnalysisClient(LLMAnalysisClient):
@@ -51,6 +54,28 @@ class OllamaAnalysisClient(LLMAnalysisClient):
     def model_name(self) -> str:
         return self._model
 
+    def _extract_json_content(
+        self,
+        content: str,
+    ) -> str:
+        cleaned = content.strip()
+
+        if cleaned.startswith("```"):
+            lines = cleaned.splitlines()
+
+            if lines and lines[0].strip().lower() in {
+                "```json",
+                "```",
+            }:
+                lines = lines[1:]
+
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+
+            cleaned = "\n".join(lines).strip()
+
+        return cleaned
+
     async def analyze_report(
         self,
         *,
@@ -62,13 +87,35 @@ class OllamaAnalysisClient(LLMAnalysisClient):
             .model_json_schema()
         )
 
+        schema_text = json.dumps(
+            schema,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+        effective_user_prompt = f"""
+{user_prompt}
+
+Return exactly one complete JSON object matching
+the following JSON Schema:
+
+{schema_text}
+
+Output requirements:
+- Return JSON only.
+- Do not include Markdown code fences.
+- Do not include text before or after the JSON.
+- Include every required property.
+- Do not stop before closing the JSON object.
+"""
+
         def make_payload(num_predict: int) -> dict[str, Any]:
             return {
                 "model": self._model,
                 "stream": False,
                 "think": False,
                 "keep_alive": "15m",
-                "format": schema,
+                "format": "json",
                 "messages": [
                     {
                         "role": "system",
@@ -76,7 +123,9 @@ class OllamaAnalysisClient(LLMAnalysisClient):
                     },
                     {
                         "role": "user",
-                        "content": user_prompt,
+                        "content": (
+                            effective_user_prompt
+                        ),
                     },
                 ],
                 "options": {
@@ -151,19 +200,38 @@ class OllamaAnalysisClient(LLMAnalysisClient):
                     "text content."
                 )
 
+            logger.info(
+                "Ollama response metadata: done_reason=%s, "
+                "prompt_eval_count=%s, eval_count=%s, "
+                "content_length=%s, thinking_length=%s",
+                body.get("done_reason"),
+                body.get("prompt_eval_count"),
+                body.get("eval_count"),
+                len(content),
+                body.get("thinking_length"),
+            )
+
             try:
-                decoded = json.loads(content)
+                json_content = self._extract_json_content(
+                    content
+                )
+                decoded = json.loads(
+                    json_content
+                )
             except json.JSONDecodeError as exc:
                 done_reason = body.get("done_reason")
-                if attempt == 1 and (
-                    done_reason == "length"
-                    or True
+
+                if (
+                    attempt == 1
+                    and done_reason == "length"
                 ):
                     last_error = exc
                     continue
+
                 raise RuntimeError(
                     "Ollama returned invalid JSON. "
-                    f"Response: {content[:1000]}"
+                    f"done_reason={done_reason!r}. "
+                    f"Response: {content[:2000]}"
                 ) from exc
 
             if (
