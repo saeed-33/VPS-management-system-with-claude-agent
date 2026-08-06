@@ -12,6 +12,9 @@ from app.agent.analysis.client_factory import (
 from app.agent.analysis.report_analyzer import (
     ReportAnalyzer,
 )
+from app.agent.analysis.analysis_orchestrator import (
+    AnalysisOrchestrator,
+)
 from app.agent.monitoring_service import (
     MonitoringService,
 )
@@ -70,6 +73,7 @@ class ApplicationContainer:
 
     # LLM analysis
     report_analyzer: ReportAnalyzer | None
+    analysis_orchestrator: AnalysisOrchestrator | None
     analysis_agent_manager: AnalysisAgentManager | None
 
 
@@ -142,6 +146,10 @@ def build_container() -> ApplicationContainer:
 
     report_analyzer: ReportAnalyzer | None = None
 
+    analysis_orchestrator: (
+        AnalysisOrchestrator | None
+    ) = None
+
     analysis_agent_manager: (
         AnalysisAgentManager | None
     ) = None
@@ -160,9 +168,26 @@ def build_container() -> ApplicationContainer:
             ),
         )
 
+        analysis_orchestrator = (
+            AnalysisOrchestrator(
+                report_query_service=(
+                    report_query_service
+                ),
+                analysis_repository=(
+                    analysis_repository
+                ),
+                report_analyzer=report_analyzer,
+                exact_reuse_enabled=(
+                    settings.rag_exact_reuse_enabled
+                ),
+            )
+        )
+
         analysis_agent_manager = (
             AnalysisAgentManager(
-                report_analyzer=report_analyzer,
+                analysis_orchestrator=(
+                    analysis_orchestrator
+                ),
                 analysis_repository=(
                     analysis_repository
                 ),
@@ -222,6 +247,7 @@ def build_container() -> ApplicationContainer:
         monitoring_service=monitoring_service,
         scheduler=scheduler,
         report_analyzer=report_analyzer,
+        analysis_orchestrator=analysis_orchestrator,
         analysis_agent_manager=(
             analysis_agent_manager
         ),

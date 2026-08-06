@@ -14,6 +14,7 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
 )
+from sqlmodel import JSON
 
 from app.shared.database.base import Base
 
@@ -24,7 +25,17 @@ class CommandExecutionModel(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True,
     )
+    fingerprint_strategy: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="full_output",
+    )
 
+    fingerprint_config: Mapped[dict] = mapped_column(
+        JSON,
+        nullable=False,
+        default=dict,
+    )
     report_id: Mapped[int] = mapped_column(
         ForeignKey(
             "monitoring_reports.id",

@@ -8,7 +8,8 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy import JSON, String
+from sqlalchemy.orm import Mapped, mapped_column
 from app.shared.database.base import Base
 from app.shared.utils.datetime import utc_now
 
@@ -26,7 +27,18 @@ class MonitorCommandModel(Base):
         unique=True,
         index=True,
     )
+    fingerprint_strategy: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="full_output",
+    )
 
+    fingerprint_config: Mapped[dict] = mapped_column(
+        JSON,
+        nullable=False,
+        default=dict,
+    )
+    
     description: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,

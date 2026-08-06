@@ -34,6 +34,12 @@ class ReportService:
                 started_at=item.started_at,
                 finished_at=item.finished_at,
                 duration_ms=item.duration_ms,
+                fingerprint_strategy=(
+                    item.fingerprint_strategy
+                ),
+                fingerprint_config=(
+                    item.fingerprint_config
+                ),
             )
             for item in executions
         ]

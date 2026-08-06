@@ -131,3 +131,37 @@ def get_report_analysis(
         )
 
     return analysis
+
+
+@router.get(
+    "/{report_id}/analysis-summary",
+)
+def get_report_analysis_summary(
+    report_id: int,
+    repository: Annotated[
+        AnalysisRepository,
+        Depends(get_analysis_repository),
+    ],
+) -> dict:
+    analysis = repository.get_by_report_id(
+        report_id
+    )
+
+    if analysis is None:
+        return {
+            "available": False,
+            "status": None,
+            "analysis_source": None,
+            "llm_called": None,
+            "reused_from_analysis_id": None,
+        }
+
+    return {
+        "available": True,
+        "status": analysis.status,
+        "analysis_source": analysis.analysis_source,
+        "llm_called": analysis.llm_called,
+        "reused_from_analysis_id": (
+            analysis.reused_from_analysis_id
+        ),
+    }

@@ -99,6 +99,13 @@ class ReportAnalysisResponse(BaseModel):
     duration_ms: float | None
     attempts: int
 
+    report_fingerprint: str | None
+    analysis_source: str
+    reused_from_analysis_id: int | None
+    retrieval_strategy: str | None
+    retrieval_score: float | None
+    llm_called: bool
+
     model_config = ConfigDict(
         from_attributes=True
     )

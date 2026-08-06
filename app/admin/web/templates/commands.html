@@ -1,20 +1,30 @@
 {% extends "base.html" %}
 
 {% block title %}
-أوامر المراقبة
+تعليمات المراقبة
 {% endblock %}
 
 {% block content %}
 <header class="page-header">
     <div>
         <h1 class="page-heading">
-            أوامر المراقبة
+            تعليمات المراقبة
         </h1>
 
         <p class="page-description">
-            عرّف الأوامر التي ينفذها الوكيل عبر SSH
-            لجمع بيانات السيرفرات.
+            إدارة تعليمات Linux المستخدمة داخل ملفات المراقبة،
+            وتحديد سياسة إدخال نتائج كل تعليمة في ذاكرة التحليل.
         </p>
+    </div>
+
+    <div class="page-actions">
+        <button
+            id="reload-commands"
+            type="button"
+            class="button button-secondary"
+        >
+            تحديث القائمة
+        </button>
     </div>
 </header>
 
@@ -22,11 +32,12 @@
     <header class="panel-header">
         <div>
             <h2 class="panel-title">
-                إضافة أمر جديد
+                إنشاء تعليمة مراقبة
             </h2>
 
             <p class="panel-subtitle">
-                استخدم أوامر قراءة آمنة ولا تمرر مدخلات غير موثوقة.
+                التعليمة تُعرّف مرة واحدة، ثم تُضاف إلى ملف
+                مراقبة واحد أو أكثر.
             </p>
         </div>
     </header>
@@ -41,15 +52,17 @@
                     for="command-name"
                     class="form-label"
                 >
-                    اسم الأمر
+                    اسم التعليمة
                 </label>
 
                 <input
                     id="command-name"
                     class="form-control"
+                    type="text"
+                    maxlength="150"
                     placeholder="Memory usage"
                     required
-                >
+                />
             </div>
 
             <div class="form-group">
@@ -57,17 +70,81 @@
                     for="command-timeout"
                     class="form-label"
                 >
-                    Timeout بالثواني
+                    مهلة التنفيذ بالثواني
                 </label>
 
                 <input
                     id="command-timeout"
                     class="form-control"
                     type="number"
-                    value="20"
                     min="1"
+                    step="1"
+                    value="20"
                     required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="command-enabled"
+                    class="form-label"
                 >
+                    الحالة العامة
+                </label>
+
+                <select
+                    id="command-enabled"
+                    class="form-control"
+                >
+                    <option value="true">
+                        مفعلة
+                    </option>
+
+                    <option value="false">
+                        متوقفة
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="command-fingerprint-strategy"
+                    class="form-label"
+                >
+                    سياسة ذاكرة التحليل
+                </label>
+
+                <select
+                    id="command-fingerprint-strategy"
+                    class="form-control"
+                >
+                    <option value="full_output">
+                        استخدام المخرجات كاملة
+                    </option>
+
+                    <option value="status_only">
+                        حالة التنفيذ فقط
+                    </option>
+
+                    <option value="canonical_lines">
+                        ترتيب وإزالة تكرار الأسطر
+                    </option>
+
+                    <option value="error_signature">
+                        توقيع الأخطاء
+                    </option>
+
+                    <option value="exclude_output">
+                        تجاهل المخرجات
+                    </option>
+                </select>
+
+                <small
+                    id="command-strategy-help"
+                    class="form-help"
+                >
+                    تُستخدم المخرجات كاملة عند إنشاء بصمة التقرير.
+                </small>
             </div>
 
             <div class="form-group full-width">
@@ -75,13 +152,14 @@
                     for="command-text"
                     class="form-label"
                 >
-                    نص الأمر
+                    نص التعليمة
                 </label>
 
                 <textarea
                     id="command-text"
-                    class="form-control"
+                    class="form-control command-textarea"
                     dir="ltr"
+                    rows="4"
                     placeholder="free -m"
                     required
                 ></textarea>
@@ -98,16 +176,50 @@
                 <textarea
                     id="command-description"
                     class="form-control"
-                    placeholder="وصف وظيفة الأمر"
+                    rows="3"
+                    placeholder="جمع معلومات استخدام الذاكرة وSwap"
                 ></textarea>
             </div>
 
-            <div class="form-actions">
+            <div class="form-group full-width">
+                <label
+                    for="command-fingerprint-config"
+                    class="form-label"
+                >
+                    إعدادات سياسة الذاكرة
+                </label>
+
+                <textarea
+                    id="command-fingerprint-config"
+                    class="form-control command-config-textarea"
+                    dir="ltr"
+                    rows="4"
+                    spellcheck="false"
+                    placeholder='{}'
+                >{}</textarea>
+
+                <small class="form-help">
+                    يجب أن تكون القيمة JSON صحيحة. غالبًا تُترك
+                    فارغة بالشكل
+                    <code dir="ltr">{}</code>.
+                </small>
+            </div>
+
+            <div class="form-actions full-width">
                 <button
+                    id="reset-command-form"
+                    type="reset"
+                    class="button button-secondary"
+                >
+                    مسح الحقول
+                </button>
+
+                <button
+                    id="create-command-button"
                     type="submit"
                     class="button button-primary"
                 >
-                    إضافة الأمر
+                    إنشاء التعليمة
                 </button>
             </div>
         </form>
@@ -118,11 +230,14 @@
     <header class="panel-header">
         <div>
             <h2 class="panel-title">
-                قائمة الأوامر
+                التعليمات المعرفة
             </h2>
 
-            <p class="panel-subtitle">
-                الأوامر المتاحة للربط مع السيرفرات.
+            <p
+                id="commands-summary"
+                class="panel-subtitle"
+            >
+                جارٍ تحميل التعليمات...
             </p>
         </div>
     </header>
@@ -132,9 +247,10 @@
             <table class="data-table">
                 <thead>
                 <tr>
-                    <th>الاسم</th>
-                    <th>الأمر</th>
-                    <th>Timeout</th>
+                    <th>التعليمة</th>
+                    <th>أمر Linux</th>
+                    <th>المهلة</th>
+                    <th>سياسة الذاكرة</th>
                     <th>الحالة</th>
                     <th>الإجراءات</th>
                 </tr>
@@ -143,7 +259,7 @@
                 <tbody id="commands-table">
                 <tr>
                     <td
-                        colspan="5"
+                        colspan="6"
                         class="loading-row"
                     >
                         <span class="loading-spinner"></span>
@@ -154,29 +270,298 @@
         </div>
     </div>
 </section>
+
+<div
+    id="edit-command-modal"
+    class="modal-backdrop"
+    hidden
+>
+    <div class="modal-card">
+        <header class="modal-header">
+            <div>
+                <h2 class="modal-title">
+                    تعديل تعليمة المراقبة
+                </h2>
+
+                <p class="panel-subtitle">
+                    سيؤثر التعديل على ملفات المراقبة التي تستخدم
+                    هذه التعليمة في الدورات القادمة.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="icon-button"
+                aria-label="إغلاق"
+                onclick="closeEditCommandModal()"
+            >
+                <svg viewBox="0 0 24 24">
+                    <path d="m6 6 12 12M18 6 6 18"/>
+                </svg>
+            </button>
+        </header>
+
+        <form
+            id="edit-command-form"
+            class="modal-body form-grid"
+        >
+            <input
+                id="edit-command-id"
+                type="hidden"
+            />
+
+            <div class="form-group">
+                <label
+                    for="edit-command-name"
+                    class="form-label"
+                >
+                    اسم التعليمة
+                </label>
+
+                <input
+                    id="edit-command-name"
+                    class="form-control"
+                    type="text"
+                    maxlength="150"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-command-timeout"
+                    class="form-label"
+                >
+                    مهلة التنفيذ بالثواني
+                </label>
+
+                <input
+                    id="edit-command-timeout"
+                    class="form-control"
+                    type="number"
+                    min="1"
+                    step="1"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-command-enabled"
+                    class="form-label"
+                >
+                    الحالة العامة
+                </label>
+
+                <select
+                    id="edit-command-enabled"
+                    class="form-control"
+                >
+                    <option value="true">
+                        مفعلة
+                    </option>
+
+                    <option value="false">
+                        متوقفة
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-command-fingerprint-strategy"
+                    class="form-label"
+                >
+                    سياسة ذاكرة التحليل
+                </label>
+
+                <select
+                    id="edit-command-fingerprint-strategy"
+                    class="form-control"
+                >
+                    <option value="full_output">
+                        استخدام المخرجات كاملة
+                    </option>
+
+                    <option value="status_only">
+                        حالة التنفيذ فقط
+                    </option>
+
+                    <option value="canonical_lines">
+                        ترتيب وإزالة تكرار الأسطر
+                    </option>
+
+                    <option value="error_signature">
+                        توقيع الأخطاء
+                    </option>
+
+                    <option value="exclude_output">
+                        تجاهل المخرجات
+                    </option>
+                </select>
+
+                <small
+                    id="edit-command-strategy-help"
+                    class="form-help"
+                ></small>
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="edit-command-text"
+                    class="form-label"
+                >
+                    نص التعليمة
+                </label>
+
+                <textarea
+                    id="edit-command-text"
+                    class="form-control command-textarea"
+                    dir="ltr"
+                    rows="4"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="edit-command-description"
+                    class="form-label"
+                >
+                    الوصف
+                </label>
+
+                <textarea
+                    id="edit-command-description"
+                    class="form-control"
+                    rows="3"
+                ></textarea>
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="edit-command-fingerprint-config"
+                    class="form-label"
+                >
+                    إعدادات سياسة الذاكرة
+                </label>
+
+                <textarea
+                    id="edit-command-fingerprint-config"
+                    class="form-control command-config-textarea"
+                    dir="ltr"
+                    rows="5"
+                    spellcheck="false"
+                ></textarea>
+
+                <small class="form-help">
+                    مثال لاستراتيجية توقيع الأخطاء:
+                    <code dir="ltr">
+                        {"remove_timestamps": true}
+                    </code>
+                </small>
+            </div>
+
+            <div class="form-actions full-width">
+                <button
+                    type="button"
+                    class="button button-secondary"
+                    onclick="closeEditCommandModal()"
+                >
+                    إلغاء
+                </button>
+
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    حفظ التعديلات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+let currentCommands = [];
+
+const fingerprintStrategyInformation = {
+    full_output: {
+        label: "المخرجات كاملة",
+        description:
+            "يستخدم stdout وstderr كاملين بعد تنظيف المسافات. " +
+            "أي اختلاف في المخرجات يؤدي غالبًا إلى بصمة جديدة."
+    },
+
+    status_only: {
+        label: "حالة التنفيذ فقط",
+        description:
+            "يستخدم نجاح التعليمة وExit status فقط، " +
+            "ويتجاهل stdout وstderr."
+    },
+
+    canonical_lines: {
+        label: "أسطر مرتبة",
+        description:
+            "يرتب الأسطر ويزيل التكرار، لذلك لا يؤثر تغير " +
+            "ترتيب الأسطر في البصمة."
+    },
+
+    error_signature: {
+        label: "توقيع الأخطاء",
+        description:
+            "يستخدم النص بعد إزالة العناصر المتغيرة مثل " +
+            "التواريخ، وفق إعدادات fingerprint_config."
+    },
+
+    exclude_output: {
+        label: "تجاهل المخرجات",
+        description:
+            "يتجاهل stdout وstderr، لكنه يحتفظ ببيانات " +
+            "التعليمة وحالة تنفيذها."
+    }
+};
+
+
 async function loadCommands() {
-    const table =
-        document.getElementById(
-            "commands-table"
-        );
+    const table = document.getElementById(
+        "commands-table"
+    );
+
+    table.innerHTML = `
+        <tr>
+            <td colspan="6" class="loading-row">
+                <span class="loading-spinner"></span>
+            </td>
+        </tr>
+    `;
 
     try {
-        const commands =
-            await apiRequest("/api/commands");
+        const response = await apiRequest(
+            "/api/commands"
+        );
 
-        if (!commands.length) {
+        currentCommands = Array.isArray(response)
+            ? response
+            : response.items || [];
+
+        document.getElementById(
+            "commands-summary"
+        ).textContent =
+            `إجمالي التعليمات: ${currentCommands.length}`;
+
+        if (!currentCommands.length) {
             table.innerHTML = `
                 <tr>
-                    <td colspan="5">
+                    <td colspan="6">
                         <div class="empty-state">
-                            <h3>لا توجد أوامر</h3>
+                            <h3>لا توجد تعليمات مراقبة</h3>
+
                             <p>
-                                أضف أول أمر مراقبة
-                                باستخدام النموذج أعلاه.
+                                أنشئ أول تعليمة باستخدام
+                                النموذج الموجود أعلى الصفحة.
                             </p>
                         </div>
                     </td>
@@ -186,61 +571,352 @@ async function loadCommands() {
             return;
         }
 
-        table.innerHTML = commands
-            .map(command => `
-                <tr>
-                    <td>
-                        <span class="table-primary-text">
-                            ${escapeHtml(command.name)}
-                        </span>
+        table.innerHTML = currentCommands
+            .map(renderCommandRow)
+            .join("");
 
-                        <span class="table-secondary-text">
-                            ${
-                                escapeHtml(
-                                    command.description
-                                    || "بدون وصف"
-                                )
-                            }
-                        </span>
-                    </td>
+    } catch (error) {
+        console.error(
+            "Failed to load commands:",
+            error
+        );
 
-                    <td>
-                        <code class="code-block">
-                            ${escapeHtml(command.command)}
-                        </code>
-                    </td>
+        table.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <h3>تعذر تحميل التعليمات</h3>
 
-                    <td>
-                        ${command.timeout_seconds} ثانية
-                    </td>
+                        <p>
+                            ${escapeHtml(
+                                error.message ||
+                                "حدث خطأ غير معروف"
+                            )}
+                        </p>
 
-                    <td>
+                        <button
+                            type="button"
+                            class="button button-secondary"
+                            onclick="loadCommands()"
+                        >
+                            إعادة المحاولة
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        showToast(
+            error.message ||
+            "تعذر تحميل التعليمات.",
+            "error"
+        );
+    }
+}
+
+
+function renderCommandRow(command) {
+    const strategy =
+        command.fingerprint_strategy ||
+        "full_output";
+
+    const strategyData =
+        fingerprintStrategyInformation[strategy] ||
+        fingerprintStrategyInformation.full_output;
+
+    return `
+        <tr>
+            <td>
+                <span class="table-primary-text">
+                    ${escapeHtml(command.name)}
+                </span>
+
+                <span class="table-secondary-text">
+                    ${
+                        escapeHtml(
+                            command.description ||
+                            "بدون وصف"
+                        )
+                    }
+                </span>
+            </td>
+
+            <td>
+                <code
+                    class="command-table-code"
+                    dir="ltr"
+                    title="${escapeHtml(command.command)}"
+                >
+                    ${escapeHtml(command.command)}
+                </code>
+            </td>
+
+            <td>
+                <span class="table-primary-text">
+                    ${command.timeout_seconds}
+                    ثانية
+                </span>
+            </td>
+
+            <td>
+                <span class="badge badge-info">
+                    ${escapeHtml(strategyData.label)}
+                </span>
+
+                <span class="table-secondary-text">
+                    ${escapeHtml(strategy)}
+                </span>
+            </td>
+
+            <td>
+                ${
+                    command.enabled
+                        ? `
+                            <span class="badge badge-success">
+                                مفعلة
+                            </span>
+                        `
+                        : `
+                            <span class="badge badge-unknown">
+                                متوقفة
+                            </span>
+                        `
+                }
+            </td>
+
+            <td>
+                <div class="table-actions">
+                    <button
+                        type="button"
+                        class="button button-secondary button-sm"
+                        onclick="openEditCommandModal(${command.id})"
+                    >
+                        تعديل
+                    </button>
+
+                    <button
+                        type="button"
+                        class="button ${
+                            command.enabled
+                                ? "button-warning"
+                                : "button-success"
+                        } button-sm"
+                        onclick="toggleCommand(
+                            ${command.id},
+                            ${command.enabled}
+                        )"
+                    >
                         ${
                             command.enabled
-                                ? `
-                                    <span class="badge badge-enabled">
-                                        مفعل
-                                    </span>
-                                `
-                                : `
-                                    <span class="badge badge-unknown">
-                                        متوقف
-                                    </span>
-                                `
+                                ? "إيقاف"
+                                : "تفعيل"
                         }
-                    </td>
+                    </button>
 
-                    <td>
-                        <button
-                            class="button button-danger button-sm"
-                            onclick="deleteCommand(${command.id})"
-                        >
-                            حذف
-                        </button>
-                    </td>
-                </tr>
-            `)
-            .join("");
+                    <button
+                        type="button"
+                        class="button button-danger button-sm"
+                        onclick="deleteCommand(${command.id})"
+                    >
+                        حذف
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+
+function parseFingerprintConfig(
+    rawValue,
+    fieldName
+) {
+    const normalizedValue =
+        rawValue.trim() || "{}";
+
+    let parsedValue;
+
+    try {
+        parsedValue = JSON.parse(
+            normalizedValue
+        );
+
+    } catch (error) {
+        throw new Error(
+            `${fieldName} يجب أن يحتوي JSON صحيحًا.`
+        );
+    }
+
+    if (
+        parsedValue === null ||
+        Array.isArray(parsedValue) ||
+        typeof parsedValue !== "object"
+    ) {
+        throw new Error(
+            `${fieldName} يجب أن يكون JSON Object.`
+        );
+    }
+
+    return parsedValue;
+}
+
+
+function updateStrategyHelp(
+    selectId,
+    helpId
+) {
+    const select = document.getElementById(
+        selectId
+    );
+
+    const help = document.getElementById(
+        helpId
+    );
+
+    if (!select || !help) {
+        return;
+    }
+
+    const strategy =
+        fingerprintStrategyInformation[
+            select.value
+        ];
+
+    help.textContent = strategy
+        ? strategy.description
+        : "";
+}
+
+
+function resetCreateCommandForm() {
+    document.getElementById(
+        "command-timeout"
+    ).value = "20";
+
+    document.getElementById(
+        "command-enabled"
+    ).value = "true";
+
+    document.getElementById(
+        "command-fingerprint-strategy"
+    ).value = "full_output";
+
+    document.getElementById(
+        "command-fingerprint-config"
+    ).value = "{}";
+
+    updateStrategyHelp(
+        "command-fingerprint-strategy",
+        "command-strategy-help"
+    );
+}
+
+
+function openEditCommandModal(commandId) {
+    const command = currentCommands.find(
+        item => item.id === commandId
+    );
+
+    if (!command) {
+        showToast(
+            "تعذر العثور على التعليمة.",
+            "error"
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        "edit-command-id"
+    ).value = command.id;
+
+    document.getElementById(
+        "edit-command-name"
+    ).value = command.name;
+
+    document.getElementById(
+        "edit-command-text"
+    ).value = command.command;
+
+    document.getElementById(
+        "edit-command-description"
+    ).value = command.description || "";
+
+    document.getElementById(
+        "edit-command-timeout"
+    ).value = command.timeout_seconds;
+
+    document.getElementById(
+        "edit-command-enabled"
+    ).value = String(command.enabled);
+
+    document.getElementById(
+        "edit-command-fingerprint-strategy"
+    ).value =
+        command.fingerprint_strategy ||
+        "full_output";
+
+    document.getElementById(
+        "edit-command-fingerprint-config"
+    ).value = JSON.stringify(
+        command.fingerprint_config || {},
+        null,
+        2
+    );
+
+    updateStrategyHelp(
+        "edit-command-fingerprint-strategy",
+        "edit-command-strategy-help"
+    );
+
+    const modal = document.getElementById(
+        "edit-command-modal"
+    );
+
+    modal.hidden = false;
+
+    document.body.classList.add(
+        "modal-open"
+    );
+}
+
+
+function closeEditCommandModal() {
+    const modal = document.getElementById(
+        "edit-command-modal"
+    );
+
+    modal.hidden = true;
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+}
+
+
+async function toggleCommand(
+    commandId,
+    currentlyEnabled
+) {
+    try {
+        await apiRequest(
+            `/api/commands/${commandId}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({
+                    enabled: !currentlyEnabled
+                })
+            }
+        );
+
+        showToast(
+            currentlyEnabled
+                ? "تم إيقاف التعليمة."
+                : "تم تفعيل التعليمة.",
+            "success"
+        );
+
+        await loadCommands();
 
     } catch (error) {
         showToast(
@@ -250,67 +926,19 @@ async function loadCommands() {
     }
 }
 
-document
-    .getElementById("command-form")
-    .addEventListener(
-        "submit",
-        async event => {
-            event.preventDefault();
-
-            try {
-                await apiRequest(
-                    "/api/commands",
-                    {
-                        method: "POST",
-                        body: JSON.stringify({
-                            name:
-                                document.getElementById(
-                                    "command-name"
-                                ).value.trim(),
-                            command:
-                                document.getElementById(
-                                    "command-text"
-                                ).value.trim(),
-                            description:
-                                document.getElementById(
-                                    "command-description"
-                                ).value.trim() || null,
-                            timeout_seconds:
-                                Number(
-                                    document.getElementById(
-                                        "command-timeout"
-                                    ).value
-                                ),
-                            enabled: true
-                        })
-                    }
-                );
-
-                showToast(
-                    "تمت إضافة الأمر بنجاح.",
-                    "success"
-                );
-
-                event.target.reset();
-
-                document.getElementById(
-                    "command-timeout"
-                ).value = 20;
-
-                await loadCommands();
-
-            } catch (error) {
-                showToast(
-                    error.message,
-                    "error"
-                );
-            }
-        }
-    );
 
 async function deleteCommand(commandId) {
+    const command = currentCommands.find(
+        item => item.id === commandId
+    );
+
+    const commandName =
+        command?.name || `#${commandId}`;
+
     const confirmed = window.confirm(
-        "هل تريد حذف هذا الأمر؟"
+        `هل تريد حذف التعليمة "${commandName}"؟\n\n` +
+        "قد يفشل الحذف إذا كانت التعليمة مرتبطة " +
+        "بملف مراقبة."
     );
 
     if (!confirmed) {
@@ -326,7 +954,7 @@ async function deleteCommand(commandId) {
         );
 
         showToast(
-            "تم حذف الأمر.",
+            "تم حذف التعليمة.",
             "success"
         );
 
@@ -340,6 +968,267 @@ async function deleteCommand(commandId) {
     }
 }
 
+
+document
+    .getElementById("command-form")
+    ?.addEventListener(
+        "submit",
+        async event => {
+            event.preventDefault();
+
+            const submitButton =
+                document.getElementById(
+                    "create-command-button"
+                );
+
+            submitButton.disabled = true;
+
+            try {
+                const fingerprintConfig =
+                    parseFingerprintConfig(
+                        document.getElementById(
+                            "command-fingerprint-config"
+                        ).value,
+                        "إعدادات سياسة الذاكرة"
+                    );
+
+                await apiRequest(
+                    "/api/commands",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            name:
+                                document.getElementById(
+                                    "command-name"
+                                ).value.trim(),
+
+                            description:
+                                document.getElementById(
+                                    "command-description"
+                                ).value.trim() || null,
+
+                            command:
+                                document.getElementById(
+                                    "command-text"
+                                ).value.trim(),
+
+                            timeout_seconds:
+                                Number(
+                                    document.getElementById(
+                                        "command-timeout"
+                                    ).value
+                                ),
+
+                            enabled:
+                                document.getElementById(
+                                    "command-enabled"
+                                ).value === "true",
+
+                            fingerprint_strategy:
+                                document.getElementById(
+                                    "command-fingerprint-strategy"
+                                ).value,
+
+                            fingerprint_config:
+                                fingerprintConfig
+                        })
+                    }
+                );
+
+                showToast(
+                    "تم إنشاء تعليمة المراقبة.",
+                    "success"
+                );
+
+                event.target.reset();
+                resetCreateCommandForm();
+
+                await loadCommands();
+
+            } catch (error) {
+                showToast(
+                    error.message,
+                    "error"
+                );
+
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+    );
+
+
+document
+    .getElementById("edit-command-form")
+    ?.addEventListener(
+        "submit",
+        async event => {
+            event.preventDefault();
+
+            const commandId = Number(
+                document.getElementById(
+                    "edit-command-id"
+                ).value
+            );
+
+            const submitButton =
+                event.target.querySelector(
+                    'button[type="submit"]'
+                );
+
+            submitButton.disabled = true;
+
+            try {
+                const fingerprintConfig =
+                    parseFingerprintConfig(
+                        document.getElementById(
+                            "edit-command-fingerprint-config"
+                        ).value,
+                        "إعدادات سياسة الذاكرة"
+                    );
+
+                await apiRequest(
+                    `/api/commands/${commandId}`,
+                    {
+                        method: "PATCH",
+                        body: JSON.stringify({
+                            name:
+                                document.getElementById(
+                                    "edit-command-name"
+                                ).value.trim(),
+
+                            description:
+                                document.getElementById(
+                                    "edit-command-description"
+                                ).value.trim() || null,
+
+                            command:
+                                document.getElementById(
+                                    "edit-command-text"
+                                ).value.trim(),
+
+                            timeout_seconds:
+                                Number(
+                                    document.getElementById(
+                                        "edit-command-timeout"
+                                    ).value
+                                ),
+
+                            enabled:
+                                document.getElementById(
+                                    "edit-command-enabled"
+                                ).value === "true",
+
+                            fingerprint_strategy:
+                                document.getElementById(
+                                    "edit-command-fingerprint-strategy"
+                                ).value,
+
+                            fingerprint_config:
+                                fingerprintConfig
+                        })
+                    }
+                );
+
+                closeEditCommandModal();
+
+                showToast(
+                    "تم تحديث تعليمة المراقبة.",
+                    "success"
+                );
+
+                await loadCommands();
+
+            } catch (error) {
+                showToast(
+                    error.message,
+                    "error"
+                );
+
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+    );
+
+
+document
+    .getElementById(
+        "command-fingerprint-strategy"
+    )
+    ?.addEventListener(
+        "change",
+        () => {
+            updateStrategyHelp(
+                "command-fingerprint-strategy",
+                "command-strategy-help"
+            );
+        }
+    );
+
+
+document
+    .getElementById(
+        "edit-command-fingerprint-strategy"
+    )
+    ?.addEventListener(
+        "change",
+        () => {
+            updateStrategyHelp(
+                "edit-command-fingerprint-strategy",
+                "edit-command-strategy-help"
+            );
+        }
+    );
+
+
+document
+    .getElementById("reload-commands")
+    ?.addEventListener(
+        "click",
+        loadCommands
+    );
+
+
+document
+    .getElementById("reset-command-form")
+    ?.addEventListener(
+        "click",
+        () => {
+            window.setTimeout(
+                resetCreateCommandForm,
+                0
+            );
+        }
+    );
+
+
+document
+    .getElementById("edit-command-modal")
+    ?.addEventListener(
+        "click",
+        event => {
+            if (
+                event.target.id ===
+                "edit-command-modal"
+            ) {
+                closeEditCommandModal();
+            }
+        }
+    );
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+        if (event.key === "Escape") {
+            closeEditCommandModal();
+        }
+    }
+);
+
+
+resetCreateCommandForm();
 loadCommands();
 </script>
 {% endblock %}

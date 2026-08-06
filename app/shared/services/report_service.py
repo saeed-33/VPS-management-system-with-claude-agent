@@ -117,6 +117,12 @@ class ReportQueryService:
                 started_at=execution.started_at,
                 finished_at=execution.finished_at,
                 duration_ms=execution.duration_ms,
+                fingerprint_strategy=(
+                    execution.fingerprint_strategy
+                ),
+                fingerprint_config=(
+                    execution.fingerprint_config
+                ),
             )
             for execution in report.executions
         ]

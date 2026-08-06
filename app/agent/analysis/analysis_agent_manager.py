@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
-from app.agent.analysis.report_analyzer import (
-    ReportAnalyzer,
+from app.agent.analysis.analysis_orchestrator import (
+    AnalysisOrchestrator,
 )
 from app.agent.analysis.server_analysis_agent import (
     ServerAnalysisAgent,
@@ -23,11 +23,13 @@ class AnalysisAgentManager:
     def __init__(
         self,
         *,
-        report_analyzer: ReportAnalyzer,
+        analysis_orchestrator: AnalysisOrchestrator,
         analysis_repository: AnalysisRepository,
         queue_size_per_server: int = 100,
     ) -> None:
-        self._report_analyzer = report_analyzer
+        self._analysis_orchestrator = (
+            analysis_orchestrator
+        )
 
         self._analysis_repository = (
             analysis_repository
@@ -140,8 +142,8 @@ class AnalysisAgentManager:
 
             agent = ServerAnalysisAgent(
                 server_id=server_id,
-                report_analyzer=(
-                    self._report_analyzer
+                analysis_orchestrator=(
+                    self._analysis_orchestrator
                 ),
                 queue_size=(
                     self._queue_size_per_server

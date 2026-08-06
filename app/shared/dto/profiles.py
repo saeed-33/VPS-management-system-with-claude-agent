@@ -20,5 +20,9 @@ class MonitoringProfileCommandConfig:
     id: int
     name: str
     command: str
+
     timeout_seconds: float
     execution_order: int
+
+    fingerprint_strategy: str
+    fingerprint_config: dict

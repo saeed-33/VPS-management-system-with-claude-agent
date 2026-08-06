@@ -15,6 +15,8 @@ ENV_FILE = PROJECT_ROOT / ".env"
 class Settings(BaseSettings):
     llm_enabled: bool = False
 
+    rag_exact_reuse_enabled: bool = True
+
     llm_provider: Literal[
         "openai",
         "ollama",

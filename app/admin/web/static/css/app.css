@@ -638,6 +638,73 @@ html[data-theme="dark"] .theme-light-icon {
     transform: translateY(-1px);
 }
 
+.badge-reused {
+    color: var(--info);
+    background: var(--info-soft);
+}
+
+.analysis-source-banner {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.analysis-source-banner.generated {
+    background: var(--primary-soft);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+.analysis-source-banner.reused {
+    background: var(--info-soft);
+    border-color: rgba(8, 145, 178, 0.2);
+}
+
+.analysis-source-banner > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+}
+
+.analysis-source-banner p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.analysis-source-reference {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 14px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.analysis-source-reference span {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.analysis-source-reference strong {
+    font-size: 16px;
+}
+
+@media (max-width: 680px) {
+    .analysis-source-banner {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
 .button-primary {
     color: #ffffff;
     background:
@@ -1648,4 +1715,61 @@ body.modal-open {
     .execution-card-header {
         flex-direction: column;
     }
+}
+.command-textarea,
+.command-config-textarea {
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.command-table-code {
+    direction: ltr;
+    display: block;
+    max-width: 430px;
+    padding: 8px 10px;
+    overflow: hidden;
+    color: var(--text-primary);
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+    font-size: 12px;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.form-help {
+    display: block;
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.form-help code {
+    direction: ltr;
+    display: inline-block;
+    padding: 1px 5px;
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+    background: var(--surface-secondary);
+    border-radius: 5px;
+}
+
+.badge-info {
+    color: var(--info, #0891b2);
+    background: var(
+        --info-soft,
+        rgba(8, 145, 178, 0.12)
+    );
 }

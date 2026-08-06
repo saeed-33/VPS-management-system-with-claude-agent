@@ -334,6 +334,12 @@ class MonitoringService:
                     timeout_seconds=(
                         command.timeout_seconds
                     ),
+                    fingerprint_strategy=(
+                        command.fingerprint_strategy
+                    ),
+                    fingerprint_config=(
+                        command.fingerprint_config
+                    ),
                 )
 
                 executions.append(result)

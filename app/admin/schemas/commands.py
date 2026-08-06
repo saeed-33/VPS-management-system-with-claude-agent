@@ -1,14 +1,29 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Any, Literal
 
+
+FingerprintStrategyValue = Literal[
+    "full_output",
+    "status_only",
+    "canonical_lines",
+    "error_signature",
+    "exclude_output",
+]
 
 class CommandCreateRequest(BaseModel):
     name: str = Field(
         min_length=1,
         max_length=150,
     )
+    fingerprint_strategy: (
+        FingerprintStrategyValue
+    ) = "full_output"
 
+    fingerprint_config: dict[str, Any] = Field(
+        default_factory=dict
+    )
     command: str = Field(
         min_length=1,
     )
@@ -54,7 +69,8 @@ class CommandResponse(BaseModel):
     enabled: bool
     created_at: datetime
     updated_at: datetime
-
+    fingerprint_strategy: str
+    fingerprint_config: dict[str, Any]
     model_config = ConfigDict(
         from_attributes=True
     )

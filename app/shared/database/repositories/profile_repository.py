@@ -277,14 +277,25 @@ class MonitoringProfileRepository:
                     id=command.id,
                     name=command.name,
                     command=command.command,
+
                     timeout_seconds=(
                         profile_command.custom_timeout_seconds
                         if profile_command.custom_timeout_seconds
                         is not None
                         else command.timeout_seconds
                     ),
+
                     execution_order=(
                         profile_command.execution_order
+                    ),
+
+                    fingerprint_strategy=(
+                        command.fingerprint_strategy
+                    ),
+
+                    fingerprint_config=(
+                        command.fingerprint_config
+                        or {}
                     ),
                 )
                 for command, profile_command in rows

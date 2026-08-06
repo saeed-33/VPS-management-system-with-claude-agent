@@ -62,6 +62,12 @@ class ReportRepository:
                 error_message=(
                     execution.error_message
                 ),
+                fingerprint_strategy=(
+                    execution.fingerprint_strategy
+                ),
+                fingerprint_config=(
+                    execution.fingerprint_config
+                ),
                 started_at=execution.started_at,
                 finished_at=execution.finished_at,
                 duration_ms=execution.duration_ms,

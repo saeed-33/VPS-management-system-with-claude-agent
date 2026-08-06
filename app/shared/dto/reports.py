@@ -28,6 +28,9 @@ class CommandExecutionData:
     finished_at: datetime
     duration_ms: float
 
+    fingerprint_strategy: str
+    fingerprint_config: dict
+
 
 @dataclass(slots=True)
 class MonitoringReportData:
@@ -70,6 +73,9 @@ class CommandExecutionDTO:
     finished_at: datetime
     duration_ms: float
 
+    fingerprint_strategy: str
+    fingerprint_config: dict
+
 
 @dataclass(slots=True, frozen=True)
 class ReportListItemDTO:
@@ -96,7 +102,6 @@ class ReportDetailsDTO:
     server_id: int
     server_name: str
     server_host: str
-
     status: str
 
     started_at: datetime

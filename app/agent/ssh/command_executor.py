@@ -22,6 +22,9 @@ class CommandExecutionResult:
     stderr: str
     error_message: str | None
 
+    fingerprint_strategy: str
+    fingerprint_config: dict
+
     started_at: datetime
     finished_at: datetime
     duration_ms: float
@@ -46,6 +49,8 @@ class SSHCommandExecutor:
         command_text: str,
         execution_order: int,
         timeout_seconds: float,
+        fingerprint_strategy: str,
+        fingerprint_config: dict,
     ) -> CommandExecutionResult:
         started_at = datetime.now(UTC)
         started_counter = perf_counter()
@@ -84,6 +89,8 @@ class SSHCommandExecutor:
                         "exit status."
                     )
                 ),
+                fingerprint_strategy=fingerprint_strategy,
+                fingerprint_config=fingerprint_config,
                 started_at=started_at,
                 finished_at=finished_at,
                 duration_ms=duration_ms,
@@ -103,6 +110,8 @@ class SSHCommandExecutor:
                     f"Command timed out after "
                     f"{timeout_seconds} seconds."
                 ),
+                fingerprint_strategy=fingerprint_strategy,
+                fingerprint_config=fingerprint_config,
                 started_at=started_at,
                 finished_at=datetime.now(UTC),
                 duration_ms=self._duration_ms(
@@ -126,6 +135,8 @@ class SSHCommandExecutor:
                 error_message=(
                     f"{type(exc).__name__}: {exc}"
                 ),
+                fingerprint_strategy=fingerprint_strategy,
+                fingerprint_config=fingerprint_config,
                 started_at=started_at,
                 finished_at=datetime.now(UTC),
                 duration_ms=self._duration_ms(
@@ -147,6 +158,8 @@ class SSHCommandExecutor:
                     f"Unexpected command error: "
                     f"{type(exc).__name__}: {exc}"
                 ),
+                fingerprint_strategy=fingerprint_strategy,
+                fingerprint_config=fingerprint_config,
                 started_at=started_at,
                 finished_at=datetime.now(UTC),
                 duration_ms=self._duration_ms(

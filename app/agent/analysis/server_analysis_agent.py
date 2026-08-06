@@ -2,8 +2,8 @@ import asyncio
 import logging
 from dataclasses import dataclass
 
-from app.agent.analysis.report_analyzer import (
-    ReportAnalyzer,
+from app.agent.analysis.analysis_orchestrator import (
+    AnalysisOrchestrator,
 )
 
 
@@ -29,13 +29,13 @@ class ServerAnalysisAgent:
         self,
         *,
         server_id: int,
-        report_analyzer: ReportAnalyzer,
+        analysis_orchestrator: AnalysisOrchestrator,
         queue_size: int = 100,
     ) -> None:
         self.server_id = server_id
 
-        self._report_analyzer = (
-            report_analyzer
+        self._analysis_orchestrator = (
+            analysis_orchestrator
         )
 
         self._queue: asyncio.Queue[
@@ -143,7 +143,7 @@ class ServerAnalysisAgent:
                 if job is None:
                     return
 
-                await self._report_analyzer.analyze(
+                await self._analysis_orchestrator.process(
                     report_id=job.report_id,
                     server_id=job.server_id,
                     force=job.force,

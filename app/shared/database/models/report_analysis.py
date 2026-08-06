@@ -4,6 +4,7 @@ from enum import StrEnum
 from sqlalchemy import (
     DateTime,
     Float,
+    Boolean,
     ForeignKey,
     Integer,
     JSON,
@@ -127,6 +128,49 @@ class ReportAnalysisModel(Base):
         Integer,
         nullable=False,
         default=0,
+    )
+
+    report_fingerprint: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
+    )
+
+    normalized_report: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    analysis_source: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="generated",
+        index=True,
+    )
+
+    reused_from_analysis_id: Mapped[int | None] = mapped_column(
+        ForeignKey(
+            "report_analyses.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
+    retrieval_strategy: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+
+    retrieval_score: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    llm_called: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(

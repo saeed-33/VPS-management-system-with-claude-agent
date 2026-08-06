@@ -320,16 +320,73 @@ function renderReportAnalysis(analysis) {
         return;
     }
 
+    const analysisSourceBadge =
+        analysis.llm_called
+            ? `
+                <span class="badge badge-enabled">
+                    تحليل جديد بواسطة LLM
+                </span>
+            `
+            : `
+                <span class="badge badge-reused">
+                    تحليل تاريخي معاد الاستخدام
+                </span>
+            `;
+
     const issues = analysis.issues || [];
 
     container.innerHTML = `
+        <div class="analysis-source-banner ${
+            analysis.llm_called ? "generated" : "reused"
+        }">
+            <div>
+                ${analysisSourceBadge}
+
+                <strong>
+                    ${
+                        analysis.llm_called
+                            ? "تم تحليل هذا التقرير بواسطة نموذج الذكاء الاصطناعي."
+                            : "لم يتم استدعاء نموذج الذكاء الاصطناعي لهذا التقرير."
+                    }
+                </strong>
+
+                <p>
+                    ${
+                        analysis.llm_called
+                            ? `
+                                النموذج المستخدم:
+                                ${escapeHtml(analysis.model_name)}
+                            `
+                            : `
+                                تم نسخ نتيجة تحليل سابق مطابق
+                                باستخدام بصمة التقرير.
+                            `
+                    }
+                </p>
+            </div>
+
+            ${
+                analysis.reused_from_analysis_id
+                    ? `
+                        <div class="analysis-source-reference">
+                            <span>التحليل المصدر</span>
+
+                            <strong>
+                                #${analysis.reused_from_analysis_id}
+                            </strong>
+                        </div>
+                    `
+                    : ""
+            }
+        </div>
+
         <div class="analysis-summary">
             <div>
                 <span class="form-label">
                     الحالة العامة
                 </span>
 
-                <div style="margin-top: 7px;">
+                <div>
                     ${analysisHealthBadge(
                         analysis.health_status
                     )}
@@ -338,29 +395,68 @@ function renderReportAnalysis(analysis) {
 
             <div>
                 <span class="form-label">
-                    المزود والنموذج
+                    مصدر التحليل
                 </span>
 
                 <strong>
-                    ${escapeHtml(
-                        analysis.provider_name
-                    )}
-                    /
-                    ${escapeHtml(
-                        analysis.model_name
+                    ${
+                        analysis.analysis_source === "reused"
+                            ? "تحليل سابق"
+                            : "تحليل جديد"
+                    }
+                </strong>
+            </div>
+
+            <div>
+                <span class="form-label">
+                    استدعاء LLM
+                </span>
+
+                <strong>
+                    ${
+                        analysis.llm_called
+                            ? "تم الاستدعاء"
+                            : "لم يتم الاستدعاء"
+                    }
+                </strong>
+            </div>
+
+            <div>
+                <span class="form-label">
+                    طريقة الاسترجاع
+                </span>
+
+                <strong>
+                    ${formatRetrievalStrategy(
+                        analysis.retrieval_strategy
                     )}
                 </strong>
             </div>
 
             <div>
                 <span class="form-label">
-                    مدة التحليل
+                    درجة التطابق
                 </span>
 
                 <strong>
-                    ${formatDuration(
-                        analysis.duration_ms
-                    )}
+                    ${
+                        analysis.retrieval_score !== null
+                        && analysis.retrieval_score !== undefined
+                            ? `${Math.round(
+                                analysis.retrieval_score * 100
+                            )}%`
+                            : "-"
+                    }
+                </strong>
+            </div>
+
+            <div>
+                <span class="form-label">
+                    النموذج
+                </span>
+
+                <strong>
+                    ${escapeHtml(analysis.model_name)}
                 </strong>
             </div>
         </div>
@@ -494,6 +590,20 @@ function renderAnalysisList(items) {
             `).join("")}
         </ul>
     `;
+}
+
+function formatRetrievalStrategy(strategy) {
+    const labels = {
+        exact_fingerprint: "تطابق البصمة",
+        structured: "بحث منظّم",
+        full_text: "بحث نصي",
+        vector: "بحث متجهي",
+        hybrid: "بحث هجين"
+    };
+
+    return strategy
+        ? labels[strategy] || strategy
+        : "لا يوجد";
 }
 
 function analysisHealthBadge(status) {
