@@ -14,6 +14,15 @@ from app.admin.schemas.reports import (
     PaginatedReportsResponse,
     ReportDetailsResponse,
 )
+from app.admin.dependencies import (
+    get_analysis_repository,
+)
+from app.admin.schemas.reports import (
+    ReportAnalysisResponse,
+)
+from app.shared.database.repositories.analysis_repository import (
+    AnalysisRepository,
+)
 from app.shared.exceptions import (
     ReportNotFoundError,
 )
@@ -95,3 +104,30 @@ def get_report(
             status_code=404,
             detail=str(exc),
         ) from exc
+
+
+@router.get(
+    "/{report_id}/analysis",
+    response_model=ReportAnalysisResponse,
+)
+def get_report_analysis(
+    report_id: int,
+    repository: Annotated[
+        AnalysisRepository,
+        Depends(get_analysis_repository),
+    ],
+):
+    analysis = repository.get_by_report_id(
+        report_id
+    )
+
+    if analysis is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "No LLM analysis exists for "
+                "this report."
+            ),
+        )
+
+    return analysis

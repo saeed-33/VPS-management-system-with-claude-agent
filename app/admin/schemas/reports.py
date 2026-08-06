@@ -1,9 +1,5 @@
 from datetime import datetime
-
-from pydantic import BaseModel
-
-
-from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -77,6 +73,31 @@ class ReportDetailsResponse(BaseModel):
     commands_failed: int
 
     executions: list[CommandExecutionResponse]
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
+class ReportAnalysisResponse(BaseModel):
+    id: int
+    report_id: int
+    server_id: int
+
+    provider_name: str
+    model_name: str
+    status: str
+
+    health_status: str | None
+    summary: str | None
+
+    issues: list[dict[str, Any]]
+    positive_findings: list[str]
+    recommended_actions: list[str]
+
+    analysis_error: str | None
+    duration_ms: float | None
+    attempts: int
 
     model_config = ConfigDict(
         from_attributes=True

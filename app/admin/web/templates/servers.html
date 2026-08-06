@@ -39,7 +39,7 @@
                     اسم السيرفر
                 </label>
 
-                <input id="server-name" class="form-control" placeholder="Production VPS" required>
+                <input id="server-name" class="form-control" placeholder="Production VPS" required />
             </div>
 
             <div class="form-group">
@@ -47,7 +47,7 @@
                     IP أو Hostname
                 </label>
 
-                <input id="server-host" class="form-control" placeholder="192.168.1.100" required>
+                <input id="server-host" class="form-control" placeholder="192.168.1.100" required />
             </div>
 
             <div class="form-group">
@@ -55,7 +55,7 @@
                     منفذ SSH
                 </label>
 
-                <input id="server-port" class="form-control" type="number" value="22" min="1" max="65535" required>
+                <input id="server-port" class="form-control" type="number" value="22" min="1" max="65535" required />
             </div>
 
             <div class="form-group">
@@ -63,7 +63,7 @@
                     مستخدم SSH
                 </label>
 
-                <input id="server-username" class="form-control" value="monitor" required>
+                <input id="server-username" class="form-control" value="monitor" required />
             </div>
 
             <div class="form-group">
@@ -71,7 +71,7 @@
                     فترة المراقبة
                 </label>
 
-                <input id="server-interval" class="form-control" type="number" value="60" min="5" required>
+                <input id="server-interval" class="form-control" type="number" value="60" min="5" required />
             </div>
 
             <div class="form-group">
@@ -79,7 +79,7 @@
                     مسار المفتاح الخاص
                 </label>
 
-                <input id="server-key" class="form-control" placeholder="اختياري">
+                <input id="server-key" class="form-control" placeholder="اختياري" />
             </div>
 
             <div class="form-group full-width">
@@ -148,11 +148,218 @@
         </div>
     </div>
 </section>
+<div
+    id="edit-server-modal"
+    class="modal-backdrop"
+    hidden
+>
+    <div class="modal-card">
+        <header class="modal-header">
+            <div>
+                <h2 class="modal-title">
+                    تعديل معلومات السيرفر
+                </h2>
+
+                <p class="panel-subtitle">
+                    عدّل معلومات الاتصال وإعدادات المراقبة.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="icon-button"
+                onclick="closeEditServerModal()"
+                aria-label="إغلاق"
+            >
+                <svg viewBox="0 0 24 24">
+                    <path d="m6 6 12 12M18 6 6 18"/>
+                </svg>
+            </button>
+        </header>
+
+        <form
+            id="edit-server-form"
+            class="modal-body form-grid"
+        >
+            <input
+                id="edit-server-id"
+                type="hidden"
+            />
+
+            <div class="form-group">
+                <label
+                    for="edit-server-name"
+                    class="form-label"
+                >
+                    اسم السيرفر
+                </label>
+
+                <input
+                    id="edit-server-name"
+                    class="form-control"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-server-host"
+                    class="form-label"
+                >
+                    IP أو Hostname
+                </label>
+
+                <input
+                    id="edit-server-host"
+                    class="form-control"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-server-port"
+                    class="form-label"
+                >
+                    منفذ SSH
+                </label>
+
+                <input
+                    id="edit-server-port"
+                    class="form-control"
+                    type="number"
+                    min="1"
+                    max="65535"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-server-username"
+                    class="form-label"
+                >
+                    مستخدم SSH
+                </label>
+
+                <input
+                    id="edit-server-username"
+                    class="form-control"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-server-interval"
+                    class="form-label"
+                >
+                    فترة المراقبة بالثواني
+                </label>
+
+                <input
+                    id="edit-server-interval"
+                    class="form-control"
+                    type="number"
+                    min="5"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-server-key"
+                    class="form-label"
+                >
+                    مسار المفتاح الخاص
+                </label>
+
+                <input
+                    id="edit-server-key"
+                    class="form-control"
+                    placeholder="اتركه فارغًا للمفتاح الافتراضي"
+                />
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-server-monitor-enabled"
+                    class="form-label"
+                >
+                    المراقبة الدورية
+                </label>
+
+                <select
+                    id="edit-server-monitor-enabled"
+                    class="form-control"
+                >
+                    <option value="true">
+                        مفعلة
+                    </option>
+
+                    <option value="false">
+                        متوقفة
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="edit-server-profile"
+                    class="form-label"
+                >
+                    ملف المراقبة
+                </label>
+
+                <select
+                    id="edit-server-profile"
+                    class="form-control"
+                >
+                    <option value="">
+                        بدون ملف مراقبة
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="edit-server-description"
+                    class="form-label"
+                >
+                    الوصف
+                </label>
+
+                <textarea
+                    id="edit-server-description"
+                    class="form-control"
+                ></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button
+                    type="button"
+                    class="button button-secondary"
+                    onclick="closeEditServerModal()"
+                >
+                    إلغاء
+                </button>
+
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    حفظ التعديلات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    let availableMonitoringProfiles = [];
+console.log("Servers page script loaded");
+
     async function assignProfileToServer(
     serverId,
     selectedValue
@@ -192,19 +399,11 @@
     }
 }
     async function loadAvailableMonitoringProfiles() {
-    try {
         availableMonitoringProfiles =
             await apiRequest(
                 "/api/monitoring-profiles"
             );
-
-    } catch (error) {
-        showToast(
-            error.message,
-            "error"
-        );
     }
-}
     async function loadServers() {
         const table =
             document.getElementById("servers-table");
@@ -217,9 +416,11 @@
         </tr>
     `;
 
-        try {
+            try {
             const servers =
                 await apiRequest("/api/servers");
+
+            currentServers = servers;
 
             if (!servers.length) {
                 table.innerHTML = `
@@ -322,6 +523,13 @@
                     <td>
                         <div class="table-actions">
     <button
+        class="button button-secondary button-sm"
+        onclick="openEditServerModal(${server.id})"
+    >
+        تعديل
+    </button>
+
+    <button
         class="button ${server.monitor_enabled
                         ? "button-warning"
                         : "button-success"
@@ -368,7 +576,7 @@
 
     document
         .getElementById("server-form")
-        .addEventListener(
+        ?.addEventListener(
             "submit",
             async event => {
                 event.preventDefault();
@@ -521,7 +729,7 @@
 
     document
         .getElementById("reload-servers")
-        .addEventListener(
+        ?.addEventListener(
             "click",
             loadServers
         );
@@ -570,8 +778,303 @@ async function toggleMonitoring(
         );
     }
 }
-Promise.all([
-    loadAvailableMonitoringProfiles(),
-]).then(loadServers);
+async function initializeServersPage() {
+    const table = document.getElementById(
+        "servers-table"
+    );
+
+    try {
+        console.log(
+            "Initializing servers page..."
+        );
+
+        await loadAvailableMonitoringProfiles();
+
+        console.log(
+            "Monitoring profiles loaded:",
+            availableMonitoringProfiles
+        );
+
+        await loadServers();
+
+        console.log(
+            "Servers loaded successfully."
+        );
+
+    } catch (error) {
+        console.error(
+            "Servers page initialization failed:",
+            error
+        );
+
+        if (table) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <h3>
+                                تعذر تحميل السيرفرات
+                            </h3>
+
+                            <p>
+                                ${escapeHtml(
+                                    error.message ||
+                                    "حدث خطأ غير معروف"
+                                )}
+                            </p>
+
+                            <button
+                                type="button"
+                                class="button button-secondary"
+                                onclick="initializeServersPage()"
+                            >
+                                إعادة المحاولة
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        showToast(
+            error.message ||
+            "تعذر تحميل صفحة السيرفرات.",
+            "error"
+        );
+    }
+}
+
+initializeServersPage();
+
+// Edit server modal handlers
+function openEditServerModal(serverId) {
+    const server = currentServers.find(
+        item => item.id === serverId
+    );
+
+    if (!server) {
+        showToast(
+            "تعذر العثور على بيانات السيرفر.",
+            "error"
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        "edit-server-id"
+    ).value = server.id;
+
+    document.getElementById(
+        "edit-server-name"
+    ).value = server.name;
+
+    document.getElementById(
+        "edit-server-host"
+    ).value = server.host;
+
+    document.getElementById(
+        "edit-server-port"
+    ).value = server.port;
+
+    document.getElementById(
+        "edit-server-username"
+    ).value = server.username;
+
+    document.getElementById(
+        "edit-server-interval"
+    ).value = server.interval_seconds;
+
+    document.getElementById(
+        "edit-server-key"
+    ).value = server.private_key_path || "";
+
+    document.getElementById(
+        "edit-server-description"
+    ).value = server.description || "";
+
+    document.getElementById(
+        "edit-server-monitor-enabled"
+    ).value = String(
+        server.monitor_enabled
+    );
+
+    const profileSelect =
+        document.getElementById(
+            "edit-server-profile"
+        );
+
+    profileSelect.innerHTML = `
+        <option value="">
+            بدون ملف مراقبة
+        </option>
+    ` + availableMonitoringProfiles
+        .map(profile => `
+            <option
+                value="${profile.id}"
+                ${
+                    profile.id ===
+                    server.monitoring_profile_id
+                        ? "selected"
+                        : ""
+                }
+            >
+                ${escapeHtml(profile.name)}
+            </option>
+        `)
+        .join("");
+
+    const modal = document.getElementById(
+        "edit-server-modal"
+    );
+
+    modal.hidden = false;
+
+    document.body.classList.add(
+        "modal-open"
+    );
+}
+
+function closeEditServerModal() {
+    const modal = document.getElementById(
+        "edit-server-modal"
+    );
+
+    modal.hidden = true;
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+}
+
+    document
+    .getElementById("edit-server-form")
+    ?.addEventListener(
+        "submit",
+        async event => {
+            event.preventDefault();
+
+            const serverId = Number(
+                document.getElementById(
+                    "edit-server-id"
+                ).value
+            );
+
+            const selectedProfileValue =
+                document.getElementById(
+                    "edit-server-profile"
+                ).value;
+
+            const profileId =
+                selectedProfileValue
+                    ? Number(selectedProfileValue)
+                    : null;
+
+            const submitButton =
+                event.target.querySelector(
+                    'button[type="submit"]'
+                );
+
+            submitButton.disabled = true;
+
+            try {
+                await apiRequest(
+                    `/api/servers/${serverId}`,
+                    {
+                        method: "PATCH",
+                        body: JSON.stringify({
+                            name:
+                                document.getElementById(
+                                    "edit-server-name"
+                                ).value.trim(),
+
+                            host:
+                                document.getElementById(
+                                    "edit-server-host"
+                                ).value.trim(),
+
+                            port:
+                                Number(
+                                    document.getElementById(
+                                        "edit-server-port"
+                                    ).value
+                                ),
+
+                            username:
+                                document.getElementById(
+                                    "edit-server-username"
+                                ).value.trim(),
+
+                            interval_seconds:
+                                Number(
+                                    document.getElementById(
+                                        "edit-server-interval"
+                                    ).value
+                                ),
+
+                            private_key_path:
+                                document.getElementById(
+                                    "edit-server-key"
+                                ).value.trim() || null,
+
+                            description:
+                                document.getElementById(
+                                    "edit-server-description"
+                                ).value.trim() || null,
+
+                            monitor_enabled:
+                                document.getElementById(
+                                    "edit-server-monitor-enabled"
+                                ).value === "true"
+                        })
+                    }
+                );
+
+                await apiRequest(
+                    `/api/servers/` +
+                    `${serverId}/monitoring-profile`,
+                    {
+                        method: "PUT",
+                        body: JSON.stringify({
+                            profile_id: profileId
+                        })
+                    }
+                );
+
+                closeEditServerModal();
+
+                showToast(
+                    "تم تحديث معلومات السيرفر.",
+                    "success"
+                );
+
+                await loadServers();
+
+            } catch (error) {
+                showToast(
+                    error.message,
+                    "error"
+                );
+
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+    );
+
+    document
+    .getElementById("edit-server-modal")
+    ?.addEventListener(
+        "click",
+        event => {
+            if (
+                event.target.id ===
+                "edit-server-modal"
+            ) {
+                closeEditServerModal();
+            }
+        }
+    );
+
 </script>
 {% endblock %}

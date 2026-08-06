@@ -125,6 +125,29 @@
     <header class="panel-header">
         <div>
             <h2 class="panel-title">
+                تحليل الذكاء الاصطناعي
+            </h2>
+
+            <p class="panel-subtitle">
+                تحليل دوري تم إنشاؤه بواسطة وكيل السيرفر.
+            </p>
+        </div>
+    </header>
+
+    <div
+        id="report-analysis"
+        class="panel-body"
+    >
+        <div class="empty-state">
+            <span class="loading-spinner"></span>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
                 نتائج التعليمات
             </h2>
 
@@ -143,6 +166,8 @@
         </div>
     </div>
 </section>
+
+
 {% endblock %}
 
 {% block scripts %}
@@ -191,12 +216,315 @@ async function loadReportDetails() {
             report.executions
         );
 
+        await loadReportAnalysis();
+
     } catch (error) {
         showToast(
             error.message,
             "error"
         );
     }
+}
+
+async function loadReportAnalysis() {
+    const container =
+        document.getElementById(
+            "report-analysis"
+        );
+
+    try {
+        const analysis = await apiRequest(
+            `/api/reports/${reportId}/analysis`
+        );
+
+        renderReportAnalysis(analysis);
+
+    } catch (error) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>التحليل غير متوفر</h3>
+
+                <p>
+                    قد يكون التحليل قيد التنفيذ،
+                    أو أن مزود LLM غير متاح.
+                </p>
+            </div>
+        `;
+    }
+}
+
+function renderReportAnalysis(analysis) {
+    const container =
+        document.getElementById(
+            "report-analysis"
+        );
+
+    if (analysis.status === "pending") {
+        container.innerHTML = `
+            <div class="analysis-state">
+                <span class="loading-spinner"></span>
+
+                <div>
+                    <strong>
+                        التحليل في قائمة الانتظار
+                    </strong>
+
+                    <p>
+                        سيقوم وكيل السيرفر بتحليل
+                        التقرير قريبًا.
+                    </p>
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    if (analysis.status === "running") {
+        container.innerHTML = `
+            <div class="analysis-state">
+                <span class="loading-spinner"></span>
+
+                <div>
+                    <strong>
+                        جارٍ تحليل التقرير
+                    </strong>
+
+                    <p>
+                        النموذج:
+                        ${escapeHtml(analysis.model_name)}
+                    </p>
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    if (analysis.status === "failed") {
+        container.innerHTML = `
+            <div class="analysis-error-card">
+                <strong>
+                    فشل تحليل التقرير
+                </strong>
+
+                <p>
+                    ${escapeHtml(
+                        analysis.analysis_error ||
+                        "خطأ غير معروف"
+                    )}
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    const issues = analysis.issues || [];
+
+    container.innerHTML = `
+        <div class="analysis-summary">
+            <div>
+                <span class="form-label">
+                    الحالة العامة
+                </span>
+
+                <div style="margin-top: 7px;">
+                    ${analysisHealthBadge(
+                        analysis.health_status
+                    )}
+                </div>
+            </div>
+
+            <div>
+                <span class="form-label">
+                    المزود والنموذج
+                </span>
+
+                <strong>
+                    ${escapeHtml(
+                        analysis.provider_name
+                    )}
+                    /
+                    ${escapeHtml(
+                        analysis.model_name
+                    )}
+                </strong>
+            </div>
+
+            <div>
+                <span class="form-label">
+                    مدة التحليل
+                </span>
+
+                <strong>
+                    ${formatDuration(
+                        analysis.duration_ms
+                    )}
+                </strong>
+            </div>
+        </div>
+
+        <div class="analysis-section">
+            <h3>الملخص</h3>
+
+            <p>
+                ${escapeHtml(
+                    analysis.summary ||
+                    "لا يوجد ملخص"
+                )}
+            </p>
+        </div>
+
+        <div class="analysis-section">
+            <h3>المشكلات المكتشفة</h3>
+
+            ${
+                issues.length
+                    ? issues.map(issue => `
+                        <article class="analysis-issue ${
+                            issue.severity
+                        }">
+                            <header>
+                                <strong>
+                                    ${escapeHtml(
+                                        issue.title
+                                    )}
+                                </strong>
+
+                                <span class="badge ${
+                                    issue.severity ===
+                                    "critical"
+                                        ? "badge-failed"
+                                        : issue.severity ===
+                                          "warning"
+                                            ? "badge-partial_failure"
+                                            : "badge-enabled"
+                                }">
+                                    ${escapeHtml(
+                                        issue.severity
+                                    )}
+                                </span>
+                            </header>
+
+                            <p>
+                                ${escapeHtml(
+                                    issue.description
+                                )}
+                            </p>
+
+                            ${
+                                issue.evidence
+                                    ? `
+                                        <div class="analysis-evidence">
+                                            <strong>
+                                                الدليل
+                                            </strong>
+
+                                            <pre>${escapeHtml(
+                                                issue.evidence
+                                            )}</pre>
+                                        </div>
+                                    `
+                                    : ""
+                            }
+
+                            ${
+                                issue.recommendation
+                                    ? `
+                                        <div class="analysis-recommendation">
+                                            <strong>
+                                                التوصية
+                                            </strong>
+
+                                            <p>
+                                                ${escapeHtml(
+                                                    issue.recommendation
+                                                )}
+                                            </p>
+                                        </div>
+                                    `
+                                    : ""
+                            }
+                        </article>
+                    `).join("")
+                    : `
+                        <p class="text-muted">
+                            لم يكتشف النموذج مشكلات.
+                        </p>
+                    `
+            }
+        </div>
+
+        <div class="analysis-lists">
+            <section>
+                <h3>النقاط الإيجابية</h3>
+
+                ${renderAnalysisList(
+                    analysis.positive_findings
+                )}
+            </section>
+
+            <section>
+                <h3>الإجراءات المقترحة</h3>
+
+                ${renderAnalysisList(
+                    analysis.recommended_actions
+                )}
+            </section>
+        </div>
+    `;
+}
+
+function renderAnalysisList(items) {
+    if (!items || !items.length) {
+        return `
+            <p class="text-muted">
+                لا توجد عناصر.
+            </p>
+        `;
+    }
+
+    return `
+        <ul class="analysis-list">
+            ${items.map(item => `
+                <li>
+                    ${escapeHtml(item)}
+                </li>
+            `).join("")}
+        </ul>
+    `;
+}
+
+function analysisHealthBadge(status) {
+    const values = {
+        healthy: {
+            label: "سليم",
+            className: "badge-success"
+        },
+        warning: {
+            label: "تحذير",
+            className: "badge-partial_failure"
+        },
+        critical: {
+            label: "حرج",
+            className: "badge-failed"
+        },
+        unknown: {
+            label: "غير معروف",
+            className: "badge-unknown"
+        }
+    };
+
+    const value =
+        values[status] ||
+        values.unknown;
+
+    return `
+        <span class="badge ${value.className}">
+            ${value.label}
+        </span>
+    `;
 }
 
 function renderReportInformation(report) {

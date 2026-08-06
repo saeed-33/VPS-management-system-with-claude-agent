@@ -1,3 +1,5 @@
+console.log("Global app.js loaded");
+
 const htmlElement = document.documentElement;
 const sidebar = document.getElementById("sidebar");
 const sidebarOverlay =

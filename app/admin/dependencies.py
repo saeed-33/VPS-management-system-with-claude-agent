@@ -10,6 +10,9 @@ from app.shared.services import (
 from app.shared.services.profile_service import (
     MonitoringProfileService,
 )
+from app.shared.database.repositories.analysis_repository import (
+    AnalysisRepository,
+)
 
 
 def get_monitoring_profile_service(
@@ -30,3 +33,7 @@ def get_report_query_service() -> ReportQueryService:
 
 def get_ssh_test_service() -> SSHTestService:
     return container.ssh_test_service
+
+
+def get_analysis_repository() -> AnalysisRepository:
+    return container.analysis_repository

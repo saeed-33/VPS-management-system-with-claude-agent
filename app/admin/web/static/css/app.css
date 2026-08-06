@@ -1202,6 +1202,208 @@ textarea.form-control {
     margin-bottom: 16px;
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(2, 6, 23, 0.64);
+    backdrop-filter: blur(6px);
+}
+
+.modal-backdrop[hidden] {
+    display: none;
+}
+
+.modal-card {
+    width: min(820px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 22px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 18px;
+}
+
+.modal-body {
+    padding: 22px;
+}
+
+/* Analysis UI styles */
+.analysis-state {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 18px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.analysis-state p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+}
+
+.analysis-error-card {
+    padding: 18px;
+    color: var(--danger);
+    background: var(--danger-soft);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: var(--radius-md);
+}
+
+.analysis-error-card p {
+    margin: 8px 0 0;
+    white-space: pre-wrap;
+}
+
+.analysis-summary {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.analysis-summary > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.analysis-section {
+    margin-top: 22px;
+}
+
+.analysis-section h3,
+.analysis-lists h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+}
+
+.analysis-section > p {
+    padding: 16px;
+    margin: 0;
+    color: var(--text-secondary);
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.analysis-issue {
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-right: 4px solid var(--primary);
+    border-radius: var(--radius-md);
+}
+
+.analysis-issue.warning {
+    border-right-color: var(--warning);
+}
+
+.analysis-issue.critical {
+    border-right-color: var(--danger);
+}
+
+.analysis-issue header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.analysis-issue > p {
+    margin: 10px 0 0;
+    color: var(--text-secondary);
+}
+
+.analysis-evidence,
+.analysis-recommendation {
+    margin-top: 12px;
+}
+
+.analysis-evidence pre {
+    direction: ltr;
+    padding: 12px;
+    overflow-x: auto;
+    color: var(--text-primary);
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    text-align: left;
+    white-space: pre-wrap;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.analysis-recommendation p {
+    margin: 5px 0 0;
+    color: var(--text-secondary);
+}
+
+.analysis-lists {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.analysis-list {
+    padding: 14px 30px 14px 14px;
+    margin: 0;
+    color: var(--text-secondary);
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.analysis-list li + li {
+    margin-top: 8px;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+    .analysis-summary,
+    .analysis-lists {
+        grid-template-columns: 1fr;
+    }
+}
+
 .compact-control {
     min-width: 85px;
     max-width: 120px;
