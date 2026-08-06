@@ -29,6 +29,8 @@ class RagRetriever:
         *,
         normalized_report: str,
         server_id: int,
+        monitoring_profile_id: int | None,
+        command_set_hash: str | None,
         exclude_report_id: int,
     ) -> list[RetrievedAnalysisContext]:
         embedding = await self._embedding_client.embed(
@@ -37,6 +39,8 @@ class RagRetriever:
 
         candidates = self._retrieval_repository.find_similar(
             server_id=server_id,
+            monitoring_profile_id=monitoring_profile_id,
+            command_set_hash=command_set_hash,
             embedding=embedding,
             exclude_report_id=exclude_report_id,
             minimum_score=self._minimum_score,

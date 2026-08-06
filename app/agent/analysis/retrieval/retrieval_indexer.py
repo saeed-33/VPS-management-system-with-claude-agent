@@ -24,13 +24,50 @@ class RetrievalIndexer:
             raise ValueError(f"Analysis {analysis_id} has no retrieval metadata.")
 
         embedding = await self._embedding_client.embed(analysis.normalized_report)
+        normalized_payload = json.loads(
+            analysis.normalized_report
+        )
+        executions = normalized_payload.get("executions", [])
+        failed_command_ids = sorted(
+            {
+                execution["command_id"]
+                for execution in executions
+                if not execution.get("success", False)
+                and execution.get("command_id") is not None
+            }
+        )
+        error_signatures = self._collect_error_signatures(
+            normalized_payload
+        )
         features = {
             "health_status": analysis.health_status,
             "analysis_source": analysis.analysis_source,
             "llm_called": analysis.llm_called,
+            "monitoring_profile_id": normalized_payload.get(
+                "monitoring_profile_id"
+            ),
+            "command_set_hash": normalized_payload.get(
+                "command_set_hash"
+            ),
+            "connection_successful": normalized_payload.get(
+                "connection_successful"
+            ),
+            "failed_command_ids": failed_command_ids,
+            "error_signatures": error_signatures,
         }
         self._retrieval_repository.upsert_document(
             report_id=analysis.report_id, analysis_id=analysis.id, server_id=analysis.server_id,
+            monitoring_profile_id=normalized_payload.get(
+                "monitoring_profile_id"
+            ),
+            command_set_hash=normalized_payload.get(
+                "command_set_hash"
+            ),
+            connection_successful=normalized_payload.get(
+                "connection_successful"
+            ),
+            failed_command_ids=failed_command_ids,
+            error_signatures=error_signatures,
             fingerprint=analysis.report_fingerprint, normalized_text=analysis.normalized_report,
             structured_features=features, embedding=embedding,
             embedding_provider=self._embedding_client.provider_name,
@@ -39,3 +76,22 @@ class RetrievalIndexer:
             analysis_health_status=analysis.health_status,
         )
         logger.info("Analysis retrieval document indexed | analysis_id=%s", analysis_id)
+
+    @staticmethod
+    def _collect_error_signatures(
+        payload: dict,
+    ) -> list[str]:
+        signatures: set[str] = set()
+
+        report_error = payload.get("error_message")
+        if report_error:
+            signatures.add(str(report_error)[:500])
+
+        for execution in payload.get("executions", []):
+            for field in ("error_message", "stderr"):
+                value = execution.get(field)
+                if value:
+                    signatures.add(str(value)[:500])
+
+        return sorted(signatures)
+

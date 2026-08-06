@@ -9,7 +9,26 @@ class RetrievalRepository:
     def __init__(self, session_factory: sessionmaker = SessionLocal) -> None:
         self._session_factory = session_factory
 
-    def upsert_document(self, *, report_id: int, analysis_id: int, server_id: int, fingerprint: str, normalized_text: str, structured_features: dict, embedding: list[float], embedding_provider: str, embedding_model: str, embedding_dimensions: int, analysis_health_status: str | None) -> ReportRetrievalDocumentModel:
+    def upsert_document(
+        self,
+        *,
+        report_id: int,
+        analysis_id: int,
+        server_id: int,
+        monitoring_profile_id: int | None,
+        command_set_hash: str | None,
+        connection_successful: bool | None,
+        failed_command_ids: list[int],
+        error_signatures: list[str],
+        fingerprint: str,
+        normalized_text: str,
+        structured_features: dict,
+        embedding: list[float],
+        embedding_provider: str,
+        embedding_model: str,
+        embedding_dimensions: int,
+        analysis_health_status: str | None,
+    ) -> ReportRetrievalDocumentModel:
         with self._session_factory() as session:
             existing = session.scalar(
                 select(ReportRetrievalDocumentModel).where(
@@ -22,6 +41,11 @@ class RetrievalRepository:
 
             existing.report_id = report_id
             existing.server_id = server_id
+            existing.monitoring_profile_id = monitoring_profile_id
+            existing.command_set_hash = command_set_hash
+            existing.connection_successful = connection_successful
+            existing.failed_command_ids = failed_command_ids
+            existing.error_signatures = error_signatures
             existing.fingerprint = fingerprint
             existing.normalized_text = normalized_text
             existing.structured_features = structured_features
@@ -38,6 +62,8 @@ class RetrievalRepository:
         self,
         *,
         server_id: int,
+        monitoring_profile_id: int | None,
+        command_set_hash: str | None,
         embedding: list[float],
         exclude_report_id: int | None = None,
         minimum_score: float = 0.0,
@@ -64,6 +90,19 @@ class RetrievalRepository:
             statement = statement.where(
                 ReportRetrievalDocumentModel.report_id
                 != exclude_report_id
+            )
+
+
+        if monitoring_profile_id is not None:
+            statement = statement.where(
+                ReportRetrievalDocumentModel.monitoring_profile_id
+                == monitoring_profile_id
+            )
+
+        if command_set_hash:
+            statement = statement.where(
+                ReportRetrievalDocumentModel.command_set_hash
+                == command_set_hash
             )
 
         with self._session_factory() as session:

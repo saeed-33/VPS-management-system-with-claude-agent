@@ -100,6 +100,7 @@ class ReportListItemDTO:
 class ReportDetailsDTO:
     id: int
     server_id: int
+    monitoring_profile_id: int | None
     server_name: str
     server_host: str
     status: str

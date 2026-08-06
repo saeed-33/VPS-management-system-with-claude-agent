@@ -92,6 +92,9 @@ class AnalysisOrchestrator:
             self._normalizer.normalize(report)
         )
 
+        command_set_hash = (
+            self._normalizer.command_set_hash(report)
+        )
         report_fingerprint = (
             self._fingerprint_service.create(
                 normalized_report
@@ -248,8 +251,11 @@ class AnalysisOrchestrator:
             try:
                 retrieved_contexts = await (
                     self._rag_retriever.retrieve(
-                        normalized_report=normalized_report,
-                        server_id=server_id,
+                        normalized_report=normalized_report,            server_id=server_id,
+                        monitoring_profile_id=(
+                            report.monitoring_profile_id
+                        ),
+                        command_set_hash=command_set_hash,
                         exclude_report_id=report_id,
                     )
                 )

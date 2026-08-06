@@ -130,6 +130,9 @@ class ReportQueryService:
         return ReportDetailsDTO(
             id=report.id,
             server_id=server.id,
+            monitoring_profile_id=(
+                server.monitoring_profile_id
+            ),
             server_name=server.name,
             server_host=server.host,
             status=report.status,
