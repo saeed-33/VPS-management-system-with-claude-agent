@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 from typing import Any
@@ -34,6 +35,12 @@ class ReportNormalizer:
     ) -> str:
         payload: dict[str, Any] = {
             "server_id": report.server_id,
+            "monitoring_profile_id": (
+                report.monitoring_profile_id
+            ),
+            "command_set_hash": self.command_set_hash(
+                report
+            ),
             "status": self._enum_value(
                 report.status
             ),
@@ -68,6 +75,41 @@ class ReportNormalizer:
             sort_keys=True,
             separators=(",", ":"),
         )
+
+    def command_set_hash(
+        self,
+        report: ReportDetailsDTO,
+    ) -> str:
+        command_set = [
+            {
+                "command_id": execution.command_id,
+                "command_name": self._normalize_text(
+                    execution.command_name
+                ),
+                "command_text": self._normalize_text(
+                    execution.command_text
+                ),
+                "execution_order": execution.execution_order,
+            }
+            for execution in sorted(
+                report.executions,
+                key=lambda item: (
+                    item.execution_order,
+                    item.command_id or 0,
+                ),
+            )
+        ]
+
+        canonical = json.dumps(
+            command_set,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+
+        return hashlib.sha256(
+            canonical.encode("utf-8")
+        ).hexdigest()
 
     def _normalize_execution(
         self,
@@ -106,11 +148,9 @@ class ReportNormalizer:
             result["stdout"] = self._canonicalize_lines(
                 execution.stdout or ""
             )
-
             result["stderr"] = self._canonicalize_lines(
                 execution.stderr or ""
             )
-
             return result
 
         if strategy == FingerprintStrategy.ERROR_SIGNATURE:
@@ -118,18 +158,15 @@ class ReportNormalizer:
                 execution.stdout or "",
                 execution.fingerprint_config,
             )
-
             result["stderr"] = self._error_signature(
                 execution.stderr or "",
                 execution.fingerprint_config,
             )
-
             return result
 
         result["stdout"] = self._normalize_text(
             execution.stdout or ""
         )
-
         result["stderr"] = self._normalize_text(
             execution.stderr or ""
         )
