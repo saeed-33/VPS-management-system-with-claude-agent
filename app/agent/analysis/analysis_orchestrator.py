@@ -9,6 +9,9 @@ from app.agent.analysis.retrieval.report_fingerprint import (
 from app.agent.analysis.retrieval.report_normalizer import (
     ReportNormalizer,
 )
+from app.agent.analysis.retrieval.retrieval_indexer import (
+    RetrievalIndexer,
+)
 from app.shared.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
@@ -32,6 +35,7 @@ class AnalysisOrchestrator:
         analysis_repository: AnalysisRepository,
         report_analyzer: ReportAnalyzer,
         exact_reuse_enabled: bool = True,
+        retrieval_indexer: RetrievalIndexer | None = None,
     ) -> None:
         self._report_query_service = (
             report_query_service
@@ -50,6 +54,7 @@ class AnalysisOrchestrator:
         )
 
         self._normalizer = ReportNormalizer()
+        self._retrieval_indexer = retrieval_indexer
 
         self._fingerprint_service = (
             ReportFingerprintService()
@@ -120,6 +125,17 @@ class AnalysisOrchestrator:
                     reusable_analysis.id,
                 )
 
+                if self._retrieval_indexer is not None:
+                    try:
+                        await self._retrieval_indexer.index_analysis(
+                            reused.id
+                        )
+                    except Exception:
+                        logger.exception(
+                            "Analysis saved, but retrieval indexing failed | analysis_id=%s",
+                            reused.id,
+                        )
+
                 return reused.id
 
         analysis_id = await (
@@ -140,6 +156,17 @@ class AnalysisOrchestrator:
             retrieval_score=None,
             llm_called=True,
         )
+
+        if self._retrieval_indexer is not None:
+            try:
+                await self._retrieval_indexer.index_analysis(
+                    analysis_id
+                )
+            except Exception:
+                logger.exception(
+                    "Analysis saved, but retrieval indexing failed | analysis_id=%s",
+                    analysis_id,
+                )
 
         logger.info(
             "New LLM analysis indexed | "

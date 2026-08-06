@@ -69,6 +69,13 @@ class Settings(BaseSettings):
         ge=5,
     )
 
+    rag_vector_enabled: bool = True
+    embedding_provider: Literal["ollama"] = "ollama"
+    ollama_embedding_model: str = "nomic-embed-text"
+    embedding_dimensions: int = Field(default=768, ge=1)
+    embedding_timeout_seconds: float = Field(default=60.0, gt=0)
+    rag_top_k: int = Field(default=5, ge=1, le=50)
+
     command_timeout_seconds: float = Field(
         default=20.0,
         gt=0,

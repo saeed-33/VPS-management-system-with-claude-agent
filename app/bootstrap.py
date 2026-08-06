@@ -15,6 +15,15 @@ from app.agent.analysis.report_analyzer import (
 from app.agent.analysis.analysis_orchestrator import (
     AnalysisOrchestrator,
 )
+from app.agent.analysis.retrieval.embedding_factory import (
+    create_embedding_client,
+)
+from app.agent.analysis.retrieval.retrieval_indexer import (
+    RetrievalIndexer,
+)
+from app.shared.database.repositories.retrieval_repository import (
+    RetrievalRepository,
+)
 from app.agent.monitoring_service import (
     MonitoringService,
 )
@@ -94,6 +103,7 @@ def build_container() -> ApplicationContainer:
     profile_repository = MonitoringProfileRepository()
     report_repository = ReportRepository()
     analysis_repository = AnalysisRepository()
+    retrieval_repository = RetrievalRepository()
 
     # -------------------------------------------------
     # Shared services
@@ -119,6 +129,17 @@ def build_container() -> ApplicationContainer:
     report_query_service = ReportQueryService(
         repository=report_repository,
     )
+
+    embedding_client = None
+    retrieval_indexer = None
+
+    if settings.rag_vector_enabled:
+        embedding_client = create_embedding_client(settings)
+        retrieval_indexer = RetrievalIndexer(
+            analysis_repository=analysis_repository,
+            retrieval_repository=retrieval_repository,
+            embedding_client=embedding_client,
+        )
 
     # -------------------------------------------------
     # Admin services
@@ -180,6 +201,7 @@ def build_container() -> ApplicationContainer:
                 exact_reuse_enabled=(
                     settings.rag_exact_reuse_enabled
                 ),
+                retrieval_indexer=retrieval_indexer,
             )
         )
 
