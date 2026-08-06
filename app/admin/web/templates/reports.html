@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}
+تقارير المراقبة
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-heading">
+            تقارير المراقبة
+        </h1>
+
+        <p class="page-description">
+            استعرض نتائج دورات المراقبة،
+            حالة الاتصال، وعدد الأوامر الناجحة والفاشلة.
+        </p>
+    </div>
+
+    <div class="page-actions">
+        <button
+            id="reload-reports"
+            class="button button-secondary"
+            type="button"
+        >
+            تحديث
+        </button>
+    </div>
+</header>
+
+<section class="panel">
+    <div class="panel-body">
+        <div class="reports-filters">
+            <div class="form-group">
+                <label
+                    for="filter-server"
+                    class="form-label"
+                >
+                    السيرفر
+                </label>
+
+                <select
+                    id="filter-server"
+                    class="form-control"
+                >
+                    <option value="">
+                        جميع السيرفرات
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="filter-status"
+                    class="form-label"
+                >
+                    الحالة
+                </label>
+
+                <select
+                    id="filter-status"
+                    class="form-control"
+                >
+                    <option value="">
+                        جميع الحالات
+                    </option>
+
+                    <option value="success">
+                        ناجح
+                    </option>
+
+                    <option value="partial_failure">
+                        فشل جزئي
+                    </option>
+
+                    <option value="connection_failed">
+                        فشل الاتصال
+                    </option>
+
+                    <option value="failed">
+                        فشل
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="filter-page-size"
+                    class="form-label"
+                >
+                    عدد النتائج
+                </label>
+
+                <select
+                    id="filter-page-size"
+                    class="form-control"
+                >
+                    <option value="25">25</option>
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+
+            <div class="reports-filter-action">
+                <button
+                    id="apply-report-filters"
+                    class="button button-primary"
+                    type="button"
+                >
+                    تطبيق
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                قائمة التقارير
+            </h2>
+
+            <p
+                id="reports-summary"
+                class="panel-subtitle"
+            >
+                جارٍ تحميل البيانات...
+            </p>
+        </div>
+    </header>
+
+    <div class="panel-body flush">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>رقم التقرير</th>
+                    <th>السيرفر</th>
+                    <th>الحالة</th>
+                    <th>وقت التنفيذ</th>
+                    <th>المدة</th>
+                    <th>النتائج</th>
+                    <th>الإجراء</th>
+                </tr>
+                </thead>
+
+                <tbody id="reports-table">
+                <tr>
+                    <td
+                        colspan="7"
+                        class="loading-row"
+                    >
+                        <span class="loading-spinner"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="panel-footer">
+        <div
+            id="reports-pagination"
+            class="pagination"
+        ></div>
+    </footer>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentPage = 1;
+let currentPageSize = 50;
+
+async function loadServerOptions() {
+    try {
+        const servers =
+            await apiRequest("/api/servers");
+
+        const select =
+            document.getElementById(
+                "filter-server"
+            );
+
+        select.innerHTML = `
+            <option value="">
+                جميع السيرفرات
+            </option>
+        ` + servers.map(server => `
+            <option value="${server.id}">
+                ${escapeHtml(server.name)}
+            </option>
+        `).join("");
+
+    } catch (error) {
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+function buildReportsQuery() {
+    const serverId =
+        document.getElementById(
+            "filter-server"
+        ).value;
+
+    const status =
+        document.getElementById(
+            "filter-status"
+        ).value;
+
+    currentPageSize = Number(
+        document.getElementById(
+            "filter-page-size"
+        ).value
+    );
+
+    const params = new URLSearchParams({
+        page: String(currentPage),
+        page_size: String(currentPageSize)
+    });
+
+    if (serverId) {
+        params.set(
+            "server_id",
+            serverId
+        );
+    }
+
+    if (status) {
+        params.set(
+            "status",
+            status
+        );
+    }
+
+    return params.toString();
+}
+
+async function loadReports() {
+    const table =
+        document.getElementById(
+            "reports-table"
+        );
+
+    table.innerHTML = `
+        <tr>
+            <td colspan="7" class="loading-row">
+                <span class="loading-spinner"></span>
+            </td>
+        </tr>
+    `;
+
+    try {
+        const data = await apiRequest(
+            `/api/reports?${buildReportsQuery()}`
+        );
+
+        document.getElementById(
+            "reports-summary"
+        ).textContent =
+            `إجمالي التقارير: ${data.total}`;
+
+        if (!data.items.length) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <h3>لا توجد تقارير</h3>
+
+                            <p>
+                                لا توجد نتائج تطابق
+                                عوامل التصفية الحالية.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            renderPagination(
+                data.page,
+                data.page_size,
+                data.total
+            );
+
+            return;
+        }
+
+        table.innerHTML = data.items
+            .map(report => `
+                <tr>
+                    <td>
+                        <span class="table-primary-text">
+                            #${report.id}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="table-primary-text">
+                            ${escapeHtml(
+                                report.server_name
+                            )}
+                        </span>
+
+                        <span class="table-secondary-text">
+                            Server ID:
+                            ${report.server_id}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${statusBadge(report.status)}
+                    </td>
+
+                    <td>
+                        ${formatDate(
+                            report.started_at
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatDuration(
+                            report.duration_ms
+                        )}
+                    </td>
+
+                    <td>
+                        <div class="report-result-badges">
+                            <span class="badge badge-success">
+                                ناجح:
+                                ${report.commands_succeeded}
+                            </span>
+
+                            <span class="badge badge-failed">
+                                فاشل:
+                                ${report.commands_failed}
+                            </span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <a
+                            href="/reports/${report.id}"
+                            class="button button-secondary button-sm"
+                        >
+                            عرض التفاصيل
+                        </a>
+                    </td>
+                </tr>
+            `)
+            .join("");
+
+        renderPagination(
+            data.page,
+            data.page_size,
+            data.total
+        );
+
+    } catch (error) {
+        table.innerHTML = "";
+
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+function renderPagination(
+    page,
+    pageSize,
+    total
+) {
+    const container =
+        document.getElementById(
+            "reports-pagination"
+        );
+
+    const totalPages = Math.max(
+        1,
+        Math.ceil(total / pageSize)
+    );
+
+    container.innerHTML = `
+        <button
+            class="button button-secondary button-sm"
+            type="button"
+            ${page <= 1 ? "disabled" : ""}
+            onclick="changeReportsPage(${page - 1})"
+        >
+            السابق
+        </button>
+
+        <span class="pagination-info">
+            الصفحة ${page} من ${totalPages}
+        </span>
+
+        <button
+            class="button button-secondary button-sm"
+            type="button"
+            ${page >= totalPages ? "disabled" : ""}
+            onclick="changeReportsPage(${page + 1})"
+        >
+            التالي
+        </button>
+    `;
+}
+
+function changeReportsPage(page) {
+    currentPage = page;
+    loadReports();
+}
+
+document
+    .getElementById("apply-report-filters")
+    .addEventListener(
+        "click",
+        () => {
+            currentPage = 1;
+            loadReports();
+        }
+    );
+
+document
+    .getElementById("reload-reports")
+    .addEventListener(
+        "click",
+        loadReports
+    );
+
+Promise.all([
+    loadServerOptions()
+]).then(loadReports);
+</script>
+{% endblock %}

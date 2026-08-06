@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}
+لوحة التحكم
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-heading">
+            لوحة التحكم
+        </h1>
+
+        <p class="page-description">
+            ملخص مباشر لحالة السيرفرات ونتائج المراقبة
+            الدورية وآخر التقارير المسجلة.
+        </p>
+    </div>
+
+    <div class="page-actions">
+        <a
+            href="/servers"
+            class="button button-primary"
+        >
+            <svg viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+
+            إضافة سيرفر
+        </a>
+    </div>
+</header>
+
+<section class="cards-grid">
+    <article class="metric-card primary">
+        <div class="metric-header">
+            <span class="metric-label">
+                إجمالي السيرفرات
+            </span>
+
+            <span class="metric-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v3A2.5 2.5 0 0 1 17.5 11h-11A2.5 2.5 0 0 1 4 8.5v-3Zm0 10A2.5 2.5 0 0 1 6.5 13h11a2.5 2.5 0 0 1 2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5v-3Z"/>
+                </svg>
+            </span>
+        </div>
+
+        <strong
+            id="servers-count"
+            class="metric-value"
+        >
+            -
+        </strong>
+
+        <div class="metric-footer">
+            جميع السيرفرات المسجلة
+        </div>
+    </article>
+
+    <article class="metric-card success">
+        <div class="metric-header">
+            <span class="metric-label">
+                السيرفرات المتصلة
+            </span>
+
+            <span class="metric-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="m5 12 4 4L19 6"/>
+                </svg>
+            </span>
+        </div>
+
+        <strong
+            id="online-count"
+            class="metric-value"
+        >
+            -
+        </strong>
+
+        <div class="metric-footer">
+            تعمل بصورة طبيعية
+        </div>
+    </article>
+
+    <article class="metric-card danger">
+        <div class="metric-header">
+            <span class="metric-label">
+                السيرفرات غير المتصلة
+            </span>
+
+            <span class="metric-icon">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="m9 9 6 6M15 9l-6 6"/>
+                </svg>
+            </span>
+        </div>
+
+        <strong
+            id="offline-count"
+            class="metric-value"
+        >
+            -
+        </strong>
+
+        <div class="metric-footer">
+            تحتاج إلى المراجعة
+        </div>
+    </article>
+
+    <article class="metric-card warning">
+        <div class="metric-header">
+            <span class="metric-label">
+                إجمالي التقارير
+            </span>
+
+            <span class="metric-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/>
+                    <path d="M14 3v6h6"/>
+                </svg>
+            </span>
+        </div>
+
+        <strong
+            id="reports-count"
+            class="metric-value"
+        >
+            -
+        </strong>
+
+        <div class="metric-footer">
+            تقارير محفوظة في PostgreSQL
+        </div>
+    </article>
+</section>
+
+<section class="content-grid">
+    <article class="panel">
+        <header class="panel-header">
+            <div>
+                <h2 class="panel-title">
+                    أحدث السيرفرات
+                </h2>
+
+                <p class="panel-subtitle">
+                    الحالة الحالية لآخر السيرفرات المضافة
+                </p>
+            </div>
+
+            <a
+                href="/servers"
+                class="button button-secondary button-sm"
+            >
+                عرض الكل
+            </a>
+        </header>
+
+        <div class="panel-body flush">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>السيرفر</th>
+                        <th>الحالة</th>
+                        <th>آخر فحص</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="dashboard-servers-table">
+                    <tr>
+                        <td
+                            colspan="3"
+                            class="loading-row"
+                        >
+                            <span class="loading-spinner"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </article>
+
+    <article class="panel">
+        <header class="panel-header">
+            <div>
+                <h2 class="panel-title">
+                    حالة النظام
+                </h2>
+
+                <p class="panel-subtitle">
+                    مكونات النظام الرئيسية
+                </p>
+            </div>
+        </header>
+
+        <div class="panel-body">
+            <div class="agent-status">
+                <span class="status-indicator"></span>
+
+                <div>
+                    <strong>Monitoring Scheduler</strong>
+                    <small>يعمل بصورة طبيعية</small>
+                </div>
+            </div>
+
+            <div
+                class="agent-status"
+                style="margin-top: 12px;"
+            >
+                <span class="status-indicator"></span>
+
+                <div>
+                    <strong>PostgreSQL</strong>
+                    <small>قاعدة البيانات متصلة</small>
+                </div>
+            </div>
+
+            <div
+                class="agent-status"
+                style="margin-top: 12px;"
+            >
+                <span class="status-indicator"></span>
+
+                <div>
+                    <strong>SSH Agent</strong>
+                    <small>جاهز لتنفيذ الأوامر</small>
+                </div>
+            </div>
+        </div>
+    </article>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDashboard() {
+    try {
+        const [servers, reports] =
+            await Promise.all([
+                apiRequest("/api/servers"),
+                apiRequest(
+                    "/api/reports?page=1&page_size=1"
+                )
+            ]);
+
+        document.getElementById(
+            "servers-count"
+        ).textContent = servers.length;
+
+        document.getElementById(
+            "online-count"
+        ).textContent = servers.filter(
+            server => server.status === "online"
+        ).length;
+
+        document.getElementById(
+            "offline-count"
+        ).textContent = servers.filter(
+            server => server.status === "offline"
+        ).length;
+
+        document.getElementById(
+            "reports-count"
+        ).textContent = reports.total;
+
+        const table = document.getElementById(
+            "dashboard-servers-table"
+        );
+
+        if (!servers.length) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="3">
+                        <div class="empty-state">
+                            <h3>لا توجد سيرفرات</h3>
+                            <p>
+                                أضف أول سيرفر للبدء
+                                بالمراقبة.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        table.innerHTML = servers
+            .slice(0, 6)
+            .map(server => `
+                <tr>
+                    <td>
+                        <span class="table-primary-text">
+                            ${escapeHtml(server.name)}
+                        </span>
+
+                        <span class="table-secondary-text">
+                            ${escapeHtml(server.host)}:
+                            ${server.port}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${statusBadge(server.status)}
+                    </td>
+
+                    <td>
+                        ${formatDate(
+                            server.last_checked_at
+                        )}
+                    </td>
+                </tr>
+            `)
+            .join("");
+
+    } catch (error) {
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+loadDashboard();
+</script>
+{% endblock %}

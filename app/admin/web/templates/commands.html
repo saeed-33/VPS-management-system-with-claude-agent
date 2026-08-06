@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+
+{% block title %}
+أوامر المراقبة
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-heading">
+            أوامر المراقبة
+        </h1>
+
+        <p class="page-description">
+            عرّف الأوامر التي ينفذها الوكيل عبر SSH
+            لجمع بيانات السيرفرات.
+        </p>
+    </div>
+</header>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                إضافة أمر جديد
+            </h2>
+
+            <p class="panel-subtitle">
+                استخدم أوامر قراءة آمنة ولا تمرر مدخلات غير موثوقة.
+            </p>
+        </div>
+    </header>
+
+    <div class="panel-body">
+        <form
+            id="command-form"
+            class="form-grid"
+        >
+            <div class="form-group">
+                <label
+                    for="command-name"
+                    class="form-label"
+                >
+                    اسم الأمر
+                </label>
+
+                <input
+                    id="command-name"
+                    class="form-control"
+                    placeholder="Memory usage"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="command-timeout"
+                    class="form-label"
+                >
+                    Timeout بالثواني
+                </label>
+
+                <input
+                    id="command-timeout"
+                    class="form-control"
+                    type="number"
+                    value="20"
+                    min="1"
+                    required
+                >
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="command-text"
+                    class="form-label"
+                >
+                    نص الأمر
+                </label>
+
+                <textarea
+                    id="command-text"
+                    class="form-control"
+                    dir="ltr"
+                    placeholder="free -m"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="command-description"
+                    class="form-label"
+                >
+                    الوصف
+                </label>
+
+                <textarea
+                    id="command-description"
+                    class="form-control"
+                    placeholder="وصف وظيفة الأمر"
+                ></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    إضافة الأمر
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                قائمة الأوامر
+            </h2>
+
+            <p class="panel-subtitle">
+                الأوامر المتاحة للربط مع السيرفرات.
+            </p>
+        </div>
+    </header>
+
+    <div class="panel-body flush">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>الأمر</th>
+                    <th>Timeout</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+                </thead>
+
+                <tbody id="commands-table">
+                <tr>
+                    <td
+                        colspan="5"
+                        class="loading-row"
+                    >
+                        <span class="loading-spinner"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadCommands() {
+    const table =
+        document.getElementById(
+            "commands-table"
+        );
+
+    try {
+        const commands =
+            await apiRequest("/api/commands");
+
+        if (!commands.length) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <h3>لا توجد أوامر</h3>
+                            <p>
+                                أضف أول أمر مراقبة
+                                باستخدام النموذج أعلاه.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        table.innerHTML = commands
+            .map(command => `
+                <tr>
+                    <td>
+                        <span class="table-primary-text">
+                            ${escapeHtml(command.name)}
+                        </span>
+
+                        <span class="table-secondary-text">
+                            ${
+                                escapeHtml(
+                                    command.description
+                                    || "بدون وصف"
+                                )
+                            }
+                        </span>
+                    </td>
+
+                    <td>
+                        <code class="code-block">
+                            ${escapeHtml(command.command)}
+                        </code>
+                    </td>
+
+                    <td>
+                        ${command.timeout_seconds} ثانية
+                    </td>
+
+                    <td>
+                        ${
+                            command.enabled
+                                ? `
+                                    <span class="badge badge-enabled">
+                                        مفعل
+                                    </span>
+                                `
+                                : `
+                                    <span class="badge badge-unknown">
+                                        متوقف
+                                    </span>
+                                `
+                        }
+                    </td>
+
+                    <td>
+                        <button
+                            class="button button-danger button-sm"
+                            onclick="deleteCommand(${command.id})"
+                        >
+                            حذف
+                        </button>
+                    </td>
+                </tr>
+            `)
+            .join("");
+
+    } catch (error) {
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+document
+    .getElementById("command-form")
+    .addEventListener(
+        "submit",
+        async event => {
+            event.preventDefault();
+
+            try {
+                await apiRequest(
+                    "/api/commands",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            name:
+                                document.getElementById(
+                                    "command-name"
+                                ).value.trim(),
+                            command:
+                                document.getElementById(
+                                    "command-text"
+                                ).value.trim(),
+                            description:
+                                document.getElementById(
+                                    "command-description"
+                                ).value.trim() || null,
+                            timeout_seconds:
+                                Number(
+                                    document.getElementById(
+                                        "command-timeout"
+                                    ).value
+                                ),
+                            enabled: true
+                        })
+                    }
+                );
+
+                showToast(
+                    "تمت إضافة الأمر بنجاح.",
+                    "success"
+                );
+
+                event.target.reset();
+
+                document.getElementById(
+                    "command-timeout"
+                ).value = 20;
+
+                await loadCommands();
+
+            } catch (error) {
+                showToast(
+                    error.message,
+                    "error"
+                );
+            }
+        }
+    );
+
+async function deleteCommand(commandId) {
+    const confirmed = window.confirm(
+        "هل تريد حذف هذا الأمر؟"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        await apiRequest(
+            `/api/commands/${commandId}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        showToast(
+            "تم حذف الأمر.",
+            "success"
+        );
+
+        await loadCommands();
+
+    } catch (error) {
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+loadCommands();
+</script>
+{% endblock %}

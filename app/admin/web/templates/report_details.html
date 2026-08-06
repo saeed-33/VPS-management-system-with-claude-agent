@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}
+تفاصيل التقرير
+{% endblock %}
+
+{% block content %}
+ <div
+    id="report-page-data"
+    data-report-id="{{ report_id }}"
+    hidden
+></div>
+<header class="page-header">
+   
+    <div>
+        <h1 class="page-heading">
+            تفاصيل التقرير
+        </h1>
+
+        <p
+            id="report-page-description"
+            class="page-description"
+        >
+            جارٍ تحميل التقرير...
+        </p>
+    </div>
+
+    <div class="page-actions">
+        <a
+            href="/reports"
+            class="button button-secondary"
+        >
+            العودة للتقارير
+        </a>
+    </div>
+</header>
+
+<section
+    id="report-summary-section"
+    class="cards-grid"
+>
+    <article class="metric-card primary">
+        <div class="metric-header">
+            <span class="metric-label">
+                حالة التقرير
+            </span>
+        </div>
+
+        <strong
+            id="report-status-value"
+            class="metric-value"
+        >
+            -
+        </strong>
+    </article>
+
+    <article class="metric-card success">
+        <div class="metric-header">
+            <span class="metric-label">
+                أوامر ناجحة
+            </span>
+        </div>
+
+        <strong
+            id="report-success-count"
+            class="metric-value"
+        >
+            -
+        </strong>
+    </article>
+
+    <article class="metric-card danger">
+        <div class="metric-header">
+            <span class="metric-label">
+                أوامر فاشلة
+            </span>
+        </div>
+
+        <strong
+            id="report-failed-count"
+            class="metric-value"
+        >
+            -
+        </strong>
+    </article>
+
+    <article class="metric-card warning">
+        <div class="metric-header">
+            <span class="metric-label">
+                مدة التنفيذ
+            </span>
+        </div>
+
+        <strong
+            id="report-duration"
+            class="metric-value"
+        >
+            -
+        </strong>
+    </article>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                معلومات التقرير
+            </h2>
+        </div>
+    </header>
+
+    <div class="panel-body">
+        <div
+            id="report-information"
+            class="report-information-grid"
+        >
+            <div class="empty-state">
+                <span class="loading-spinner"></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                نتائج التعليمات
+            </h2>
+
+            <p class="panel-subtitle">
+                المخرجات التفصيلية لكل تعليمة تم تنفيذها.
+            </p>
+        </div>
+    </header>
+
+    <div
+        id="command-executions"
+        class="panel-body"
+    >
+        <div class="empty-state">
+            <span class="loading-spinner"></span>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const reportPageData = document.getElementById(
+    "report-page-data"
+);
+
+const reportId = Number(
+    reportPageData.dataset.reportId
+);
+async function loadReportDetails() {
+    try {
+        const report = await apiRequest(
+            `/api/reports/${reportId}`
+        );
+
+        document.getElementById(
+            "report-page-description"
+        ).textContent =
+            `${report.server_name} — ` +
+            `${formatDate(report.started_at)}`;
+
+        document.getElementById(
+            "report-status-value"
+        ).innerHTML =
+            statusBadge(report.status);
+
+        document.getElementById(
+            "report-success-count"
+        ).textContent =
+            report.commands_succeeded;
+
+        document.getElementById(
+            "report-failed-count"
+        ).textContent =
+            report.commands_failed;
+
+        document.getElementById(
+            "report-duration"
+        ).textContent =
+            formatDuration(report.duration_ms);
+
+        renderReportInformation(report);
+        renderCommandExecutions(
+            report.executions
+        );
+
+    } catch (error) {
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+function renderReportInformation(report) {
+    const container =
+        document.getElementById(
+            "report-information"
+        );
+
+    container.innerHTML = `
+        <div class="report-info-item">
+            <span>رقم التقرير</span>
+            <strong>#${report.id}</strong>
+        </div>
+
+        <div class="report-info-item">
+            <span>السيرفر</span>
+            <strong>
+                ${escapeHtml(report.server_name)}
+            </strong>
+        </div>
+
+        <div class="report-info-item">
+            <span>العنوان</span>
+            <strong dir="ltr">
+                ${escapeHtml(report.server_host)}
+            </strong>
+        </div>
+
+        <div class="report-info-item">
+            <span>وقت البداية</span>
+            <strong>
+                ${formatDate(report.started_at)}
+            </strong>
+        </div>
+
+        <div class="report-info-item">
+            <span>وقت النهاية</span>
+            <strong>
+                ${formatDate(report.finished_at)}
+            </strong>
+        </div>
+
+        <div class="report-info-item">
+            <span>نجاح اتصال SSH</span>
+            <strong>
+                ${
+                    report.connection_successful
+                        ? "نعم"
+                        : "لا"
+                }
+            </strong>
+        </div>
+
+        <div class="report-info-item">
+            <span>إجمالي التعليمات</span>
+            <strong>
+                ${report.commands_total}
+            </strong>
+        </div>
+
+        <div class="report-info-item">
+            <span>رسالة الخطأ</span>
+            <strong>
+                ${
+                    escapeHtml(
+                        report.error_message ||
+                        "لا يوجد"
+                    )
+                }
+            </strong>
+        </div>
+    `;
+}
+
+function renderCommandExecutions(executions) {
+    const container =
+        document.getElementById(
+            "command-executions"
+        );
+
+    if (!executions.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>لا توجد نتائج تعليمات</h3>
+
+                <p>
+                    لم ينفذ هذا التقرير أي تعليمات.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML = executions
+        .sort(
+            (first, second) =>
+                first.execution_order -
+                second.execution_order
+        )
+        .map(execution => `
+            <article class="execution-card">
+                <header class="execution-card-header">
+                    <div>
+                        <span class="execution-order">
+                            ${execution.execution_order}
+                        </span>
+
+                        <div>
+                            <h3>
+                                ${escapeHtml(
+                                    execution.command_name
+                                )}
+                            </h3>
+
+                            <code class="execution-command">
+                                ${escapeHtml(
+                                    execution.command_text
+                                )}
+                            </code>
+                        </div>
+                    </div>
+
+                    <div class="execution-status">
+                        ${
+                            execution.success
+                                ? statusBadge("success")
+                                : statusBadge("failed")
+                        }
+                    </div>
+                </header>
+
+                <div class="execution-meta">
+                    <span>
+                        Exit status:
+                        ${execution.exit_status ?? "-"}
+                    </span>
+
+                    <span>
+                        المدة:
+                        ${formatDuration(
+                            execution.duration_ms
+                        )}
+                    </span>
+
+                    <span>
+                        البداية:
+                        ${formatDate(
+                            execution.started_at
+                        )}
+                    </span>
+                </div>
+
+                ${
+                    execution.error_message
+                        ? `
+                            <div class="execution-error">
+                                ${escapeHtml(
+                                    execution.error_message
+                                )}
+                            </div>
+                        `
+                        : ""
+                }
+
+                <div class="execution-output-grid">
+                    <section>
+                        <h4>stdout</h4>
+
+                        <pre>${escapeHtml(
+                            execution.stdout ||
+                            "لا توجد مخرجات"
+                        )}</pre>
+                    </section>
+
+                    <section>
+                        <h4>stderr</h4>
+
+                        <pre>${escapeHtml(
+                            execution.stderr ||
+                            "لا توجد أخطاء"
+                        )}</pre>
+                    </section>
+                </div>
+            </article>
+        `)
+        .join("");
+}
+
+loadReportDetails();
+</script>
+{% endblock %}
