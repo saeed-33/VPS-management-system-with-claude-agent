@@ -163,27 +163,24 @@ def build_container() -> ApplicationContainer:
             "PDF service disabled because font was not found."
         )
 
-    if settings.rag_vector_enabled:
-        embedding_client = create_embedding_client(
-            settings
-        )
+    if (
+        settings.rag_vector_enabled
+        and settings.rag_assisted_enabled
+    ):
+        embedding_client = create_embedding_client(settings)
         retrieval_indexer = RetrievalIndexer(
             analysis_repository=analysis_repository,
             retrieval_repository=retrieval_repository,
             embedding_client=embedding_client,
         )
-
-        if settings.rag_assisted_enabled:
-            rag_retriever = RagRetriever(
-                embedding_client=embedding_client,
-                retrieval_repository=retrieval_repository,
-                analysis_repository=analysis_repository,
-                top_k=settings.rag_context_top_k,
-                minimum_score=(
-                    settings.rag_minimum_similarity
-                ),
-            )
-            rag_context_builder = RagContextBuilder()
+        rag_retriever = RagRetriever(
+            embedding_client=embedding_client,
+            retrieval_repository=retrieval_repository,
+            analysis_repository=analysis_repository,
+            top_k=settings.rag_context_top_k,
+            minimum_score=settings.rag_minimum_similarity,
+        )
+        rag_context_builder = RagContextBuilder()
 
     # -------------------------------------------------
     # Admin services
@@ -250,9 +247,6 @@ def build_container() -> ApplicationContainer:
                 rag_context_builder=rag_context_builder,
                 analysis_source_repository=(
                     analysis_source_repository
-                ),
-                rag_assisted_enabled=(
-                    settings.rag_assisted_enabled
                 ),
             )
         )

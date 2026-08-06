@@ -18,10 +18,6 @@ from app.agent.analysis.retrieval.context_builder import (
 from app.agent.analysis.retrieval.rag_retriever import (
     RagRetriever,
 )
-from app.agent.analysis.retrieval.reuse_policy import (
-    AnalysisDecision,
-    AnalysisReusePolicy,
-)
 from app.shared.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
@@ -52,8 +48,6 @@ class AnalysisOrchestrator:
         rag_retriever: RagRetriever | None = None,
         rag_context_builder: RagContextBuilder | None = None,
         analysis_source_repository: AnalysisSourceRepository | None = None,
-        rag_assisted_enabled: bool = True,
-        analysis_reuse_policy: AnalysisReusePolicy | None = None,
     ) -> None:
         self._report_query_service = (
             report_query_service
@@ -77,11 +71,6 @@ class AnalysisOrchestrator:
         self._rag_context_builder = rag_context_builder
         self._analysis_source_repository = (
             analysis_source_repository
-        )
-        self._rag_assisted_enabled = rag_assisted_enabled
-        self._reuse_policy = (
-            analysis_reuse_policy
-            or AnalysisReusePolicy()
         )
 
         self._fingerprint_service = (
@@ -127,28 +116,7 @@ class AnalysisOrchestrator:
                 )
             )
 
-            exact_decision = self._reuse_policy.decide(
-                fingerprint_match=(
-                    reusable_analysis is not None
-                ),
-                historical_context_available=False,
-                assisted_enabled=False,
-                force=force,
-            )
-
-            if (
-                reusable_analysis is not None
-                and exact_decision.decision
-                == AnalysisDecision.REUSE
-            ):
-                logger.info(
-                    "Analysis decision | report_id=%s | "
-                    "decision=%s | reason=%s",
-                    report_id,
-                    exact_decision.decision.value,
-                    exact_decision.reason,
-                )
-
+            if reusable_analysis is not None:
                 reused = (
                     self._analysis_repository
                     .create_reused_analysis(
@@ -283,8 +251,7 @@ class AnalysisOrchestrator:
             try:
                 retrieved_contexts = await (
                     self._rag_retriever.retrieve(
-                        normalized_report=normalized_report,
-                        server_id=server_id,
+                        normalized_report=normalized_report,            server_id=server_id,
                         monitoring_profile_id=(
                             report.monitoring_profile_id
                         ),
@@ -304,33 +271,6 @@ class AnalysisOrchestrator:
                     report_id,
                 )
 
-        analysis_decision = self._reuse_policy.decide(
-            fingerprint_match=False,
-            historical_context_available=bool(
-                retrieved_contexts
-            ),
-            assisted_enabled=(
-                self._rag_assisted_enabled
-            ),
-            force=force,
-        )
-
-        if (
-            analysis_decision.decision
-            == AnalysisDecision.FULL
-        ):
-            retrieved_contexts = []
-            rag_prompt_context = []
-
-        logger.info(
-            "Analysis decision | report_id=%s | "
-            "decision=%s | reason=%s | contexts=%s",
-            report_id,
-            analysis_decision.decision.value,
-            analysis_decision.reason,
-            len(retrieved_contexts),
-        )
-
         analysis_id = await (
             self._report_analyzer.analyze(
                 report_id=report_id,
@@ -344,26 +284,14 @@ class AnalysisOrchestrator:
             analysis_id=analysis_id,
             report_fingerprint=report_fingerprint,
             normalized_report=normalized_report,
-            analysis_source=(
-                "generated_with_context"
-                if analysis_decision.decision
-                == AnalysisDecision.ASSISTED
-                else "generated"
-            ),
+            analysis_source="generated",
             reused_from_analysis_id=None,
-            retrieval_strategy=(
-                "vector"
-                if analysis_decision.decision
-                == AnalysisDecision.ASSISTED
-                else None
-            ),
+            retrieval_strategy="vector"
+            if retrieved_contexts
+            else None,
             retrieval_score=(
                 retrieved_contexts[0].score
-                if (
-                    analysis_decision.decision
-                    == AnalysisDecision.ASSISTED
-                    and retrieved_contexts
-                )
+                if retrieved_contexts
                 else None
             ),
             llm_called=True,
