@@ -65,6 +65,7 @@ class ReportAnalyzer:
         report_id: int,
         server_id: int,
         force: bool = False,
+        rag_context: list[dict] | None = None,
     ) -> int:
         stored_analysis = (
             self._analysis_repository
@@ -119,7 +120,10 @@ class ReportAnalyzer:
                     system_prompt=SYSTEM_PROMPT,
                     user_prompt=(
                         build_analysis_prompt(
-                            payload
+                            payload,
+                            historical_cases=(
+                                rag_context
+                            ),
                         )
                     ),
                 )

@@ -18,8 +18,20 @@ from app.agent.analysis.analysis_orchestrator import (
 from app.agent.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
+from app.agent.analysis.retrieval.context_builder import (
+    RagContextBuilder,
+)
+from app.agent.analysis.retrieval.rag_retriever import (
+    RagRetriever,
+)
 from app.agent.analysis.retrieval.retrieval_indexer import (
     RetrievalIndexer,
+)
+from app.admin.services.report_pdf_service import (
+    ReportPdfService,
+)
+from app.shared.database.repositories.analysis_source_repository import (
+    AnalysisSourceRepository,
 )
 from app.shared.database.repositories.retrieval_repository import (
     RetrievalRepository,
@@ -84,6 +96,7 @@ class ApplicationContainer:
     report_analyzer: ReportAnalyzer | None
     analysis_orchestrator: AnalysisOrchestrator | None
     analysis_agent_manager: AnalysisAgentManager | None
+    report_pdf_service: ReportPdfService
 
 
 def build_container() -> ApplicationContainer:
@@ -104,6 +117,7 @@ def build_container() -> ApplicationContainer:
     report_repository = ReportRepository()
     analysis_repository = AnalysisRepository()
     retrieval_repository = RetrievalRepository()
+    analysis_source_repository = AnalysisSourceRepository()
 
     # -------------------------------------------------
     # Shared services
@@ -132,14 +146,30 @@ def build_container() -> ApplicationContainer:
 
     embedding_client = None
     retrieval_indexer = None
+    rag_retriever = None
+    rag_context_builder = None
+    report_pdf_service = ReportPdfService(
+        font_path=settings.pdf_font_path,
+    )
 
-    if settings.rag_vector_enabled:
+    if (
+        settings.rag_vector_enabled
+        and settings.rag_assisted_enabled
+    ):
         embedding_client = create_embedding_client(settings)
         retrieval_indexer = RetrievalIndexer(
             analysis_repository=analysis_repository,
             retrieval_repository=retrieval_repository,
             embedding_client=embedding_client,
         )
+        rag_retriever = RagRetriever(
+            embedding_client=embedding_client,
+            retrieval_repository=retrieval_repository,
+            analysis_repository=analysis_repository,
+            top_k=settings.rag_context_top_k,
+            minimum_score=settings.rag_minimum_similarity,
+        )
+        rag_context_builder = RagContextBuilder()
 
     # -------------------------------------------------
     # Admin services
@@ -202,6 +232,11 @@ def build_container() -> ApplicationContainer:
                     settings.rag_exact_reuse_enabled
                 ),
                 retrieval_indexer=retrieval_indexer,
+                rag_retriever=rag_retriever,
+                rag_context_builder=rag_context_builder,
+                analysis_source_repository=(
+                    analysis_source_repository
+                ),
             )
         )
 
@@ -273,6 +308,7 @@ def build_container() -> ApplicationContainer:
         analysis_agent_manager=(
             analysis_agent_manager
         ),
+        report_pdf_service=report_pdf_service,
     )
 
 

@@ -12,3 +12,6 @@ jinja2
 python-multipart
 openai
 httpx
+reportlab
+arabic-reshaper
+python-bidi

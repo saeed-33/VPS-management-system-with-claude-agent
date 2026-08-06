@@ -1,5 +1,4 @@
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from app.shared.database.models.report_retrieval_document import ReportRetrievalDocumentModel
@@ -35,13 +34,42 @@ class RetrievalRepository:
             session.refresh(existing)
             return existing
 
-    def find_similar(self, *, server_id: int, embedding: list[float], limit: int = 5) -> list[tuple[ReportRetrievalDocumentModel, float]]:
-        distance = ReportRetrievalDocumentModel.embedding.cosine_distance(embedding)
+    def find_similar(
+        self,
+        *,
+        server_id: int,
+        embedding: list[float],
+        exclude_report_id: int | None = None,
+        minimum_score: float = 0.0,
+        limit: int = 5,
+    ):
+        distance = (
+            ReportRetrievalDocumentModel.embedding.cosine_distance(
+                embedding
+            )
+        )
+        score = (1.0 - distance).label("score")
+
         statement = (
-            select(ReportRetrievalDocumentModel, (1.0 - distance).label("score"))
-            .where(ReportRetrievalDocumentModel.server_id == server_id)
+            select(ReportRetrievalDocumentModel, score)
+            .where(
+                ReportRetrievalDocumentModel.server_id
+                == server_id
+            )
             .order_by(distance)
             .limit(limit)
         )
+
+        if exclude_report_id is not None:
+            statement = statement.where(
+                ReportRetrievalDocumentModel.report_id
+                != exclude_report_id
+            )
+
         with self._session_factory() as session:
-            return [(document, float(score)) for document, score in session.execute(statement).all()]
+            rows = session.execute(statement).all()
+            return [
+                (document, float(value))
+                for document, value in rows
+                if float(value) >= minimum_score
+            ]

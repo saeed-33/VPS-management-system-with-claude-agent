@@ -70,11 +70,21 @@ class Settings(BaseSettings):
     )
 
     rag_vector_enabled: bool = True
+    rag_assisted_enabled: bool = True
+    rag_minimum_similarity: float = Field(
+        default=0.72,
+        ge=0.0,
+        le=1.0,
+    )
+    rag_context_top_k: int = Field(default=3, ge=1, le=10)
     embedding_provider: Literal["ollama"] = "ollama"
     ollama_embedding_model: str = "nomic-embed-text"
     embedding_dimensions: int = Field(default=768, ge=1)
     embedding_timeout_seconds: float = Field(default=60.0, gt=0)
     rag_top_k: int = Field(default=5, ge=1, le=50)
+    pdf_font_path: Path = (
+        PROJECT_ROOT / "assets" / "fonts" / "NotoNaskhArabic-Regular.ttf"
+    )
 
     command_timeout_seconds: float = Field(
         default=20.0,
