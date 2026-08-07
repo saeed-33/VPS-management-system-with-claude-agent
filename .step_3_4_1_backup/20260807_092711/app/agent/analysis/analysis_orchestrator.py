@@ -365,13 +365,11 @@ class AnalysisOrchestrator:
                 else None
             ),
             retrieval_score=(
-                retrieved_contexts[0].vector_score
+                retrieved_contexts[0].score
                 if (
                     analysis_decision.decision
                     == AnalysisDecision.ASSISTED
                     and retrieved_contexts
-                    and retrieved_contexts[0].vector_score
-                    is not None
                 )
                 else None
             ),
@@ -406,7 +404,7 @@ class AnalysisOrchestrator:
                         "retrieval_strategy": (
                             item.retrieval_strategy
                         ),
-                        "similarity_score": item.vector_score,
+                        "similarity_score": item.score,
                         "rank": item.rank,
                         "title": (
                             f"Similar report #{item.source_report_id}"
@@ -418,7 +416,6 @@ class AnalysisOrchestrator:
                             "text_score": item.text_score,
                             "vector_rank": item.vector_rank,
                             "text_rank": item.text_rank,
-                            "rrf_score": item.score,
                         },
                         "used_in_prompt": True,
                     }

@@ -62,7 +62,6 @@ class HybridRetriever:
         full_text_retriever: FullTextRetriever | None,
         top_k: int = 3,
         rrf_k: int = 60,
-        minimum_vector_score: float = 0.82,
     ) -> None:
         if vector_retriever is None and full_text_retriever is None:
             raise ValueError(
@@ -74,7 +73,6 @@ class HybridRetriever:
         self._full_text_retriever = full_text_retriever
         self._top_k = top_k
         self._rrf_k = rrf_k
-        self._minimum_vector_score = minimum_vector_score
 
     async def retrieve(
         self,
@@ -144,18 +142,8 @@ class HybridRetriever:
                 candidate.text_rank = text_rank
                 candidate.text_score = text_candidate.rank
 
-        eligible_candidates = [
-            item
-            for item in candidates.values()
-            if (
-                item.vector_score is not None
-                and item.vector_score
-                >= self._minimum_vector_score
-            )
-        ]
-
         ordered = sorted(
-            eligible_candidates,
+            candidates.values(),
             key=lambda item: (
                 item.rrf_score(self._rrf_k),
                 item.vector_score or 0.0,
@@ -183,7 +171,7 @@ class HybridRetriever:
             "candidates=%s | contexts=%s",
             server_id,
             exclude_report_id,
-            len(eligible_candidates),
+            len(candidates),
             len(contexts),
         )
 

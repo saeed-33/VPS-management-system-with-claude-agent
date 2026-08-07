@@ -512,21 +512,7 @@ function renderReportAnalysis(analysis) {
                 </span>
             `;
 
-    const allIssues = analysis.issues || [];
-    const issues = allIssues.filter(
-        issue =>
-            issue.severity === "warning"
-            || issue.severity === "critical"
-    );
-
-    const informationalFindings = allIssues
-        .filter(issue => issue.severity === "info")
-        .map(issue => issue.description || issue.title);
-
-    const positiveFindings = [
-        ...(analysis.positive_findings || []),
-        ...informationalFindings
-    ];
+    const issues = analysis.issues || [];
 
     container.innerHTML = `
         <div class="analysis-source-banner ${
@@ -750,7 +736,7 @@ function renderReportAnalysis(analysis) {
                 <h3>النقاط الإيجابية</h3>
 
                 ${renderAnalysisList(
-                    positiveFindings
+                    analysis.positive_findings
                 )}
             </section>
 

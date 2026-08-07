@@ -214,9 +214,6 @@ def build_container() -> ApplicationContainer:
             full_text_retriever=full_text_retriever,
             top_k=settings.rag_context_top_k,
             rrf_k=settings.rag_rrf_k,
-            minimum_vector_score=(
-                settings.rag_minimum_similarity
-            ),
         )
         rag_context_builder = RagContextBuilder()
 

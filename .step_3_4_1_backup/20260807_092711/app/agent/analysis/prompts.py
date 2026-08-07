@@ -20,15 +20,6 @@ Your responsibilities:
   current server state.
 - Every current issue must be supported by evidence from the
   current report.
-- The `issues` array is ONLY for adverse conditions requiring
-  attention.
-- Normal, healthy, successful, or reassuring observations MUST
-  NOT be placed in `issues`; put them in `positive_findings`.
-- "No failed services", "no recent critical errors", successful
-  connectivity, and healthy resource levels are positive
-  findings, not issues.
-- Do not create an INFO issue for a healthy result. If there
-  are no adverse conditions, return `"issues": []`.
 - Do not copy a historical diagnosis when current evidence
   differs.
 - Provide safe and practical recommendations.
@@ -101,8 +92,6 @@ Interpretation notes:
 - Keep the complete JSON response compact.
 - Limit the summary to 120 words.
 - Return at most 5 issues.
-- Every item in `issues` must describe a real warning or
-  critical condition. Do not use `issues` for positive facts.
 - Keep each issue description under 100 words.
 - Return at most 5 positive findings.
 - Return at most 5 recommended actions.
