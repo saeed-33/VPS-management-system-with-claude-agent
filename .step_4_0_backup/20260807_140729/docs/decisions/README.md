@@ -28,9 +28,3 @@ Semantic similarity -> context only
 
 ## Consequence for UI
 تعرض الواجهة `vector_score` عند إظهار similarity. لا تعرض RRF كنسبة مئوية.
-
-## ADR-008 — Dynamic user-defined specialists
-**Accepted.** Specialist definitions are persisted user-managed data; the application provides a generic engine/registry/policy rather than hard-coded specialist classes. See `ADR-008-dynamic-specialists.md`.
-
-## ADR-009 — Hierarchical bounded read-only investigation
-**Accepted.** Server Coordinator + dynamic Specialists operate within specialist/round/action budgets. Phase 4 permits registered read-only diagnostics only; remediation is deferred to Phase 5. See `ADR-009-hierarchical-investigation.md`.

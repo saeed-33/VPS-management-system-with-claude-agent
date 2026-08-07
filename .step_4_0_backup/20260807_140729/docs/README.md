@@ -29,8 +29,3 @@
 - [Production Checklist](deployment/production-checklist.md)
 - [systemd Example](deployment/systemd-example.md)
 - [Security Baseline](security/security-baseline.md)
-
-## Phase 4
-- [Phase 4 implementation plan](roadmap/phase-4-implementation-plan.md)
-- [ADR-008: Dynamic specialists](decisions/ADR-008-dynamic-specialists.md)
-- [ADR-009: Hierarchical investigation](decisions/ADR-009-hierarchical-investigation.md)
