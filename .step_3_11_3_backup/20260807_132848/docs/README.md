@@ -18,14 +18,3 @@
 - [Running the Project](operations/running-project.md)
 - [Database Bootstrap](operations/database-bootstrap.md)
 
-## HTTP API and Admin UI
-
-- [HTTP API Reference](api/http-api.md)
-- [Admin Web UI](api/admin-web-ui.md)
-
-## Deployment and Security
-
-- [Production Deployment](deployment/production-deployment.md)
-- [Production Checklist](deployment/production-checklist.md)
-- [systemd Example](deployment/systemd-example.md)
-- [Security Baseline](security/security-baseline.md)
