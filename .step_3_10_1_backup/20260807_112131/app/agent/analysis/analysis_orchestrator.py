@@ -287,27 +287,11 @@ class AnalysisOrchestrator:
 
                 if self._retrieval_indexer is not None:
                     try:
-                        reuse_index_started = perf_counter()
-                        reuse_index_mode = await (
+                        await (
                             self._retrieval_indexer
-                            .index_reused_analysis(
-                                source_analysis_id=(
-                                    reusable_analysis.id
-                                ),
-                                target_analysis_id=reused.id,
+                            .index_analysis(
+                                reused.id
                             )
-                        )
-                        record_timing(
-                            "reuse_index_ms",
-                            (
-                                perf_counter()
-                                - reuse_index_started
-                            )
-                            * 1000,
-                        )
-                        set_counter(
-                            "reuse_index_mode",
-                            reuse_index_mode,
                         )
 
                     except Exception:
@@ -334,8 +318,7 @@ class AnalysisOrchestrator:
         rag_prompt_context = []
 
         if (
-            not force
-            and self._rag_retriever is not None
+            self._rag_retriever is not None
             and self._rag_context_builder is not None
         ):
             try:

@@ -1,5 +1,4 @@
 import logging
-from time import perf_counter
 
 from app.agent.analysis.report_analyzer import (
     ReportAnalyzer,
@@ -25,13 +24,6 @@ from app.agent.analysis.retrieval.hybrid_retriever import (
 from app.agent.analysis.retrieval.reuse_policy import (
     AnalysisDecision,
     AnalysisReusePolicy,
-)
-from app.agent.analysis.retrieval.performance_profiler import (
-    clear_profile,
-    record_timing,
-    set_counter,
-    snapshot,
-    start_profile,
 )
 from app.shared.database.repositories.analysis_repository import (
     AnalysisRepository,
@@ -106,20 +98,10 @@ class AnalysisOrchestrator:
         server_id: int,
         force: bool = False,
     ) -> int:
-        start_profile(report_id)
-        set_counter("server_id", server_id)
-        set_counter("force", force)
-
-        report_fetch_started = perf_counter()
         report = self._report_query_service.get_report(
             report_id
         )
-        record_timing(
-            "report_fetch_ms",
-            (perf_counter() - report_fetch_started) * 1000,
-        )
 
-        normalization_started = perf_counter()
         normalized_report = (
             self._normalizer.normalize(report)
         )
@@ -132,16 +114,11 @@ class AnalysisOrchestrator:
                 normalized_report
             )
         )
-        record_timing(
-            "normalization_fingerprint_ms",
-            (perf_counter() - normalization_started) * 1000,
-        )
 
         if (
             self._exact_reuse_enabled
             and not force
         ):
-            exact_lookup_started = perf_counter()
             reusable_analysis = (
                 self._analysis_repository
                 .find_completed_by_fingerprint(
@@ -151,11 +128,6 @@ class AnalysisOrchestrator:
                     ),
                     exclude_report_id=report_id,
                 )
-            )
-
-            record_timing(
-                "exact_lookup_ms",
-                (perf_counter() - exact_lookup_started) * 1000,
             )
 
             exact_decision = self._reuse_policy.decide(
@@ -287,27 +259,11 @@ class AnalysisOrchestrator:
 
                 if self._retrieval_indexer is not None:
                     try:
-                        reuse_index_started = perf_counter()
-                        reuse_index_mode = await (
+                        await (
                             self._retrieval_indexer
-                            .index_reused_analysis(
-                                source_analysis_id=(
-                                    reusable_analysis.id
-                                ),
-                                target_analysis_id=reused.id,
+                            .index_analysis(
+                                reused.id
                             )
-                        )
-                        record_timing(
-                            "reuse_index_ms",
-                            (
-                                perf_counter()
-                                - reuse_index_started
-                            )
-                            * 1000,
-                        )
-                        set_counter(
-                            "reuse_index_mode",
-                            reuse_index_mode,
                         )
 
                     except Exception:
@@ -318,28 +274,16 @@ class AnalysisOrchestrator:
                             reused.id,
                         )
 
-                set_counter("decision", "reuse")
-                performance_metrics = snapshot()
-                try:
-                    self._analysis_repository.update_performance_metrics(
-                        analysis_id=reused.id,
-                        performance_metrics=performance_metrics,
-                    )
-                finally:
-                    clear_profile()
-
                 return reused.id
 
         retrieved_contexts = []
         rag_prompt_context = []
 
         if (
-            not force
-            and self._rag_retriever is not None
+            self._rag_retriever is not None
             and self._rag_context_builder is not None
         ):
             try:
-                retrieval_started = perf_counter()
                 retrieved_contexts = await (
                     self._rag_retriever.retrieve(
                         normalized_report=normalized_report,
@@ -351,20 +295,10 @@ class AnalysisOrchestrator:
                         exclude_report_id=report_id,
                     )
                 )
-                record_timing(
-                    "retrieval_total_ms",
-                    (perf_counter() - retrieval_started) * 1000,
-                )
-
-                context_started = perf_counter()
                 rag_prompt_context = (
                     self._rag_context_builder.build(
                         retrieved_contexts
                     )
-                )
-                record_timing(
-                    "context_build_ms",
-                    (perf_counter() - context_started) * 1000,
                 )
             except Exception:
                 logger.exception(
@@ -400,16 +334,6 @@ class AnalysisOrchestrator:
             len(retrieved_contexts),
         )
 
-        set_counter(
-            "decision",
-            analysis_decision.decision.value,
-        )
-        set_counter(
-            "retrieved_contexts",
-            len(retrieved_contexts),
-        )
-
-        analyzer_started = perf_counter()
         analysis_id = await (
             self._report_analyzer.analyze(
                 report_id=report_id,
@@ -417,11 +341,6 @@ class AnalysisOrchestrator:
                 force=force,
                 rag_context=rag_prompt_context,
             )
-        )
-
-        record_timing(
-            "analyzer_total_ms",
-            (perf_counter() - analyzer_started) * 1000,
         )
 
         self._analysis_repository.update_retrieval_metadata(
@@ -511,32 +430,14 @@ class AnalysisOrchestrator:
 
         if self._retrieval_indexer is not None:
             try:
-                indexing_started = perf_counter()
                 await self._retrieval_indexer.index_analysis(
                     analysis_id
-                )
-                record_timing(
-                    "indexing_ms",
-                    (perf_counter() - indexing_started) * 1000,
                 )
             except Exception:
                 logger.exception(
                     "Analysis saved, but retrieval indexing failed | analysis_id=%s",
                     analysis_id,
                 )
-
-        performance_metrics = snapshot()
-        self._analysis_repository.update_performance_metrics(
-            analysis_id=analysis_id,
-            performance_metrics=performance_metrics,
-        )
-        logger.info(
-            "Analysis performance | report_id=%s | analysis_id=%s | metrics=%s",
-            report_id,
-            analysis_id,
-            performance_metrics,
-        )
-        clear_profile()
 
         logger.info(
             "New LLM analysis indexed | "

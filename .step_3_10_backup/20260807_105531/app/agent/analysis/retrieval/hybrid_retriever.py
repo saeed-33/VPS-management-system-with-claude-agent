@@ -1,5 +1,4 @@
 import logging
-from time import perf_counter
 from dataclasses import dataclass
 
 from app.agent.analysis.retrieval.full_text_retriever import (
@@ -19,10 +18,6 @@ from app.agent.analysis.retrieval.structured_compatibility import (
 )
 from app.shared.database.repositories.retrieval_repository import (
     RetrievalRepository,
-)
-from app.agent.analysis.retrieval.performance_profiler import (
-    record_timing,
-    set_counter,
 )
 
 
@@ -103,7 +98,6 @@ class HybridRetriever:
         candidates: dict[int, _FusionCandidate] = {}
 
         if self._vector_retriever is not None:
-            hybrid_vector_started = perf_counter()
             vector_contexts = await (
                 self._vector_retriever.retrieve(
                     normalized_report=normalized_report,
@@ -114,11 +108,6 @@ class HybridRetriever:
                     command_set_hash=command_set_hash,
                     exclude_report_id=exclude_report_id,
                 )
-            )
-
-            record_timing(
-                "hybrid_vector_branch_ms",
-                (perf_counter() - hybrid_vector_started) * 1000,
             )
 
             for vector_rank, context in enumerate(
@@ -139,7 +128,6 @@ class HybridRetriever:
                 candidate.vector_context = context
 
         if self._full_text_retriever is not None:
-            hybrid_text_started = perf_counter()
             text_candidates = (
                 self._full_text_retriever.retrieve(
                     normalized_report=normalized_report,
@@ -150,11 +138,6 @@ class HybridRetriever:
                     command_set_hash=command_set_hash,
                     exclude_report_id=exclude_report_id,
                 )
-            )
-
-            record_timing(
-                "hybrid_full_text_branch_ms",
-                (perf_counter() - hybrid_text_started) * 1000,
             )
 
             for text_rank, text_candidate in enumerate(
@@ -171,7 +154,6 @@ class HybridRetriever:
                 candidate.text_rank = text_rank
                 candidate.text_score = text_candidate.rank
 
-        fusion_started = perf_counter()
         eligible_candidates = [
             item
             for item in candidates.values()
@@ -192,19 +174,9 @@ class HybridRetriever:
             reverse=True,
         )
 
-        record_timing(
-            "fusion_sort_ms",
-            (perf_counter() - fusion_started) * 1000,
-        )
-        set_counter(
-            "hybrid_eligible_candidates",
-            len(eligible_candidates),
-        )
-
         contexts: list[RetrievedAnalysisContext] = []
 
         accepted_candidates = []
-        compatibility_started = perf_counter()
 
         for candidate in ordered:
             if not self._is_compatible(
@@ -217,15 +189,6 @@ class HybridRetriever:
 
             if len(accepted_candidates) >= self._top_k:
                 break
-
-        record_timing(
-            "compatibility_ms",
-            (perf_counter() - compatibility_started) * 1000,
-        )
-        set_counter(
-            "hybrid_accepted_candidates",
-            len(accepted_candidates),
-        )
 
         for final_rank, candidate in enumerate(
             accepted_candidates,

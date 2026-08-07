@@ -197,9 +197,6 @@ def build_container() -> ApplicationContainer:
             minimum_score=(
                 settings.rag_minimum_similarity
             ),
-            hnsw_ef_search=(
-                settings.rag_hnsw_ef_search
-            ),
         )
 
     if settings.rag_full_text_enabled:

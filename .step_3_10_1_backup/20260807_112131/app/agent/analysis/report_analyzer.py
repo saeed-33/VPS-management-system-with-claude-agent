@@ -1,11 +1,9 @@
-import json
 import logging
 from datetime import UTC, datetime
 from time import perf_counter
 
 from app.agent.analysis.retrieval.performance_profiler import (
     record_timing,
-    set_counter,
 )
 
 from app.agent.analysis.llm_client import (
@@ -124,34 +122,6 @@ class ReportAnalyzer:
                 "serialization_ms",
                 (perf_counter() - serialize_started) * 1000,
             )
-            set_counter(
-                "current_report_chars",
-                len(
-                    json.dumps(
-                        payload,
-                        ensure_ascii=False,
-                        default=str,
-                    )
-                ),
-            )
-            set_counter(
-                "historical_context_count",
-                len(rag_context or []),
-            )
-            set_counter(
-                "historical_context_chars",
-                len(
-                    json.dumps(
-                        rag_context or [],
-                        ensure_ascii=False,
-                        default=str,
-                    )
-                ),
-            )
-            set_counter(
-                "system_prompt_chars",
-                len(SYSTEM_PROMPT),
-            )
 
             prompt_started = perf_counter()
             user_prompt = build_analysis_prompt(
@@ -161,10 +131,6 @@ class ReportAnalyzer:
             record_timing(
                 "prompt_build_ms",
                 (perf_counter() - prompt_started) * 1000,
-            )
-            set_counter(
-                "user_prompt_chars",
-                len(user_prompt),
             )
 
             llm_started = perf_counter()

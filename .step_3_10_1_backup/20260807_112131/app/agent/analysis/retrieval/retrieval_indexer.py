@@ -14,51 +14,6 @@ class RetrievalIndexer:
         self._retrieval_repository = retrieval_repository
         self._embedding_client = embedding_client
 
-    async def index_reused_analysis(
-        self,
-        *,
-        source_analysis_id: int,
-        target_analysis_id: int,
-    ) -> str:
-        target_analysis = self._analysis_repository.get_by_id(
-            target_analysis_id
-        )
-
-        if target_analysis is None:
-            raise ValueError(
-                f"Analysis {target_analysis_id} was not found."
-            )
-
-        cloned = self._retrieval_repository.clone_document(
-            source_analysis_id=source_analysis_id,
-            target_analysis_id=target_analysis_id,
-            target_report_id=target_analysis.report_id,
-            target_server_id=target_analysis.server_id,
-            target_fingerprint=target_analysis.report_fingerprint,
-            target_normalized_text=target_analysis.normalized_report,
-            target_health_status=target_analysis.health_status,
-        )
-
-        if cloned is not None:
-            logger.info(
-                "Analysis retrieval document cloned | "
-                "source_analysis_id=%s | target_analysis_id=%s",
-                source_analysis_id,
-                target_analysis_id,
-            )
-            return "cloned"
-
-        await self.index_analysis(target_analysis_id)
-
-        logger.warning(
-            "Source retrieval document unavailable; "
-            "embedding regenerated | "
-            "source_analysis_id=%s | target_analysis_id=%s",
-            source_analysis_id,
-            target_analysis_id,
-        )
-        return "embedded_fallback"
-
     async def index_analysis(self, analysis_id: int) -> None:
         analysis = self._analysis_repository.get_by_id(analysis_id)
         if analysis is None:

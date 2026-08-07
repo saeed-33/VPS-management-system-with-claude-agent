@@ -330,28 +330,6 @@ class AnalysisRepository:
 
             session.commit()
 
-    def update_performance_metrics(
-        self,
-        *,
-        analysis_id: int,
-        performance_metrics: dict,
-    ) -> None:
-        with self._session_factory() as session:
-            model = session.get(
-                ReportAnalysisModel,
-                analysis_id,
-            )
-
-            if model is None:
-                raise ValueError(
-                    f"Analysis {analysis_id} was not found."
-                )
-
-            model.performance_metrics = performance_metrics
-            model.updated_at = utc_now()
-
-            session.commit()
-
     def create_reused_analysis(
         self,
         *,

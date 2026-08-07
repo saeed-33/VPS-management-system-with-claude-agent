@@ -1,14 +1,9 @@
 import json
 import logging
-from time import perf_counter
 from dataclasses import dataclass
 
 from app.shared.database.repositories.retrieval_repository import (
     RetrievalRepository,
-)
-from app.agent.analysis.retrieval.performance_profiler import (
-    record_timing,
-    set_counter,
 )
 
 
@@ -76,16 +71,10 @@ class FullTextRetriever:
         command_set_hash: str | None,
         exclude_report_id: int,
     ) -> list[FullTextCandidate]:
-        query_started = perf_counter()
         query_text = self._query_builder.build(
             normalized_report
         )
-        record_timing(
-            "full_text_query_build_ms",
-            (perf_counter() - query_started) * 1000,
-        )
 
-        search_started = perf_counter()
         rows = (
             self._retrieval_repository
             .find_by_full_text(
@@ -99,15 +88,6 @@ class FullTextRetriever:
                 minimum_rank=self._minimum_rank,
                 limit=self._candidate_limit,
             )
-        )
-
-        record_timing(
-            "full_text_search_ms",
-            (perf_counter() - search_started) * 1000,
-        )
-        set_counter(
-            "full_text_candidates",
-            len(rows),
         )
 
         candidates = [

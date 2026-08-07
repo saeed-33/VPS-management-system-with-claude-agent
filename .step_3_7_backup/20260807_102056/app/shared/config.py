@@ -89,11 +89,6 @@ class Settings(BaseSettings):
     )
     rag_context_top_k: int = Field(default=3, ge=1, le=10)
     rag_rrf_k: int = Field(default=60, ge=1, le=1000)
-    rag_hnsw_ef_search: int = Field(
-        default=100,
-        ge=10,
-        le=2000,
-    )
     embedding_provider: Literal["ollama"] = "ollama"
     ollama_embedding_model: str = "nomic-embed-text"
     embedding_dimensions: int = Field(default=768, ge=1)
@@ -194,7 +189,6 @@ class Settings(BaseSettings):
             ),
             "context_top_k": self.rag_context_top_k,
             "rrf_k": self.rag_rrf_k,
-            "hnsw_ef_search": self.rag_hnsw_ef_search,
             "candidate_budget": self.rag_candidate_budget,
         }
 

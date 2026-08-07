@@ -1,14 +1,9 @@
 import logging
-from time import perf_counter
 
 from app.agent.analysis.retrieval.embedding_client import EmbeddingClient
 from app.agent.analysis.retrieval.rag_context import RetrievedAnalysisContext
 from app.shared.database.repositories.analysis_repository import AnalysisRepository
 from app.shared.database.repositories.retrieval_repository import RetrievalRepository
-from app.agent.analysis.retrieval.performance_profiler import (
-    record_timing,
-    set_counter,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -40,16 +35,10 @@ class RagRetriever:
         command_set_hash: str | None,
         exclude_report_id: int,
     ) -> list[RetrievedAnalysisContext]:
-        embedding_started = perf_counter()
         embedding = await self._embedding_client.embed(
             normalized_report
         )
-        record_timing(
-            "embedding_ms",
-            (perf_counter() - embedding_started) * 1000,
-        )
 
-        vector_search_started = perf_counter()
         candidates = self._retrieval_repository.find_similar(
             server_id=server_id,
             monitoring_profile_id=monitoring_profile_id,
@@ -61,17 +50,7 @@ class RagRetriever:
             hnsw_ef_search=self._hnsw_ef_search,
         )
 
-        record_timing(
-            "vector_search_ms",
-            (perf_counter() - vector_search_started) * 1000,
-        )
-        set_counter(
-            "vector_candidates",
-            len(candidates),
-        )
-
         contexts: list[RetrievedAnalysisContext] = []
-        hydration_started = perf_counter()
 
         for rank, (document, score) in enumerate(
             candidates,
@@ -100,11 +79,6 @@ class RagRetriever:
                     ),
                 )
             )
-
-        record_timing(
-            "vector_context_hydration_ms",
-            (perf_counter() - hydration_started) * 1000,
-        )
 
         logger.info(
             "RAG retrieval completed | server_id=%s | "
