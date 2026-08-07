@@ -420,11 +420,9 @@ function renderAnalysisSources(sources) {
                     ${
                         source.excerpt
                             ? `
-                                <div class="analysis-source-excerpt">
-                                    <code>${escapeHtml(
-                                        source.excerpt
-                                    )}</code>
-                                </div>
+                                <pre class="analysis-evidence">${escapeHtml(
+                                    source.excerpt
+                                )}</pre>
                             `
                             : ""
                     }
