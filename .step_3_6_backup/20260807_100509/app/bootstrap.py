@@ -120,11 +120,6 @@ def build_container() -> ApplicationContainer:
     أو داخل الوكيل مباشرة.
     """
 
-    logger.info(
-        "RAG policy | %s",
-        settings.rag_policy_summary,
-    )
-
     # -------------------------------------------------
     # Repositories
     # -------------------------------------------------

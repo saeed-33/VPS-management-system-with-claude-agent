@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Literal
-from pydantic import Field, model_validator
+from pydantic import Field
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
@@ -115,82 +115,6 @@ class Settings(BaseSettings):
     )
 
     database_echo: bool = False
-
-    @model_validator(mode="after")
-    def validate_rag_policy(self) -> "Settings":
-        if (
-            self.rag_assisted_enabled
-            and not self.rag_vector_enabled
-        ):
-            raise ValueError(
-                "RAG_ASSISTED_ENABLED requires "
-                "RAG_VECTOR_ENABLED because historical "
-                "context must pass semantic similarity."
-            )
-
-        if (
-            self.rag_full_text_enabled
-            and not self.rag_vector_enabled
-        ):
-            raise ValueError(
-                "RAG_FULL_TEXT_ENABLED currently requires "
-                "RAG_VECTOR_ENABLED because both use the "
-                "retrieval-document indexing pipeline."
-            )
-
-        if (
-            self.rag_assisted_enabled
-            and self.rag_context_top_k > self.rag_top_k
-        ):
-            raise ValueError(
-                "RAG_CONTEXT_TOP_K must be less than or "
-                "equal to RAG_TOP_K because only "
-                "vector-qualified candidates may enter "
-                "the LLM context."
-            )
-
-        return self
-
-    @property
-    def rag_retrieval_enabled(self) -> bool:
-        return (
-            self.rag_vector_enabled
-            or self.rag_full_text_enabled
-        )
-
-    @property
-    def rag_candidate_budget(self) -> int:
-        total = 0
-
-        if self.rag_vector_enabled:
-            total += self.rag_top_k
-
-        if self.rag_full_text_enabled:
-            total += self.rag_full_text_candidate_limit
-
-        return total
-
-    @property
-    def rag_policy_summary(self) -> dict[str, object]:
-        return {
-            "exact_reuse": self.rag_exact_reuse_enabled,
-            "assisted": self.rag_assisted_enabled,
-            "vector": self.rag_vector_enabled,
-            "full_text": self.rag_full_text_enabled,
-            "structured_compatibility": (
-                self.rag_structured_compatibility_enabled
-            ),
-            "minimum_similarity": (
-                self.rag_minimum_similarity
-            ),
-            "vector_candidate_limit": self.rag_top_k,
-            "full_text_candidate_limit": (
-                self.rag_full_text_candidate_limit
-            ),
-            "context_top_k": self.rag_context_top_k,
-            "rrf_k": self.rag_rrf_k,
-            "candidate_budget": self.rag_candidate_budget,
-        }
 
     @property
     def database_url(self) -> URL:
