@@ -186,17 +186,3 @@ uv run python tools/list_routes.py
 ```powershell
 uv run python tools/list_routes.py --json artifacts/routes.json
 ```
-
-# Specialists API
-
-See [Specialists Management API](specialists-api.md).
-
-```text
-GET    /api/specialists
-GET    /api/specialists/{id}
-POST   /api/specialists
-PATCH  /api/specialists/{id}
-PUT    /api/specialists/{id}/enabled
-DELETE /api/specialists/{id}
-```
-

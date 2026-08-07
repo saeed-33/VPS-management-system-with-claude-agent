@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+
+{% block title %}
+الوكلاء المتخصصون
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-heading">
+            الوكلاء المتخصصون
+        </h1>
+
+        <p class="page-description">
+            عرّف الوكلاء الذين يستطيع نظام التحقيق اختيارهم
+            ديناميكيًا. هذه الصفحة تدير التعريفات فقط؛
+            لا يتم تشغيل أي وكيل في هذه المرحلة.
+        </p>
+    </div>
+</header>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2
+                id="specialist-form-title"
+                class="panel-title"
+            >
+                إنشاء وكيل متخصص
+            </h2>
+
+            <p class="panel-subtitle">
+                الـSlug معرف ثابت بعد الإنشاء.
+            </p>
+        </div>
+    </header>
+
+    <div class="panel-body">
+        <form
+            id="specialist-form"
+            class="form-grid"
+        >
+            <input
+                id="specialist-id"
+                type="hidden"
+            >
+
+            <div class="form-group">
+                <label
+                    for="specialist-slug"
+                    class="form-label"
+                >
+                    Slug
+                </label>
+                <input
+                    id="specialist-slug"
+                    class="form-control"
+                    placeholder="cpu"
+                    pattern="[A-Za-z][A-Za-z0-9_-]*"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-name"
+                    class="form-label"
+                >
+                    الاسم
+                </label>
+                <input
+                    id="specialist-name"
+                    class="form-control"
+                    placeholder="Linux CPU Investigator"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-priority"
+                    class="form-label"
+                >
+                    الأولوية
+                </label>
+                <input
+                    id="specialist-priority"
+                    class="form-control"
+                    type="number"
+                    value="100"
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-enabled"
+                    class="form-label"
+                >
+                    الحالة
+                </label>
+                <select
+                    id="specialist-enabled"
+                    class="form-control"
+                >
+                    <option value="true">مفعل</option>
+                    <option value="false">متوقف</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-max-rounds"
+                    class="form-label"
+                >
+                    أقصى جولات
+                </label>
+                <input
+                    id="specialist-max-rounds"
+                    class="form-control"
+                    type="number"
+                    min="1"
+                    value="2"
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-max-actions"
+                    class="form-label"
+                >
+                    أقصى إجراءات
+                </label>
+                <input
+                    id="specialist-max-actions"
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    value="4"
+                >
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="specialist-description"
+                    class="form-label"
+                >
+                    الوصف
+                </label>
+                <textarea
+                    id="specialist-description"
+                    class="form-control"
+                    placeholder="ما المجال الذي يختص به هذا الوكيل؟"
+                ></textarea>
+            </div>
+
+            <div class="form-group full-width">
+                <label
+                    for="specialist-instructions"
+                    class="form-label"
+                >
+                    تعليمات التخصص
+                </label>
+                <textarea
+                    id="specialist-instructions"
+                    class="form-control"
+                    placeholder="تعليمات التحليل الخاصة بالوكيل..."
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-domains"
+                    class="form-label"
+                >
+                    المجالات
+                </label>
+                <input
+                    id="specialist-domains"
+                    class="form-control"
+                    placeholder="cpu, process, performance"
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-trigger-hints"
+                    class="form-label"
+                >
+                    Trigger Hints
+                </label>
+                <input
+                    id="specialist-trigger-hints"
+                    class="form-control"
+                    placeholder="high cpu, load average"
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-knowledge-topics"
+                    class="form-label"
+                >
+                    مواضيع المعرفة
+                </label>
+                <input
+                    id="specialist-knowledge-topics"
+                    class="form-control"
+                    placeholder="linux cpu, scheduling"
+                >
+            </div>
+
+            <div class="form-group">
+                <label
+                    for="specialist-tool-ids"
+                    class="form-label"
+                >
+                    Allowed Tool IDs
+                </label>
+                <input
+                    id="specialist-tool-ids"
+                    class="form-control"
+                    placeholder="يترك فارغًا حاليًا"
+                >
+            </div>
+
+            <div class="form-actions">
+                <button
+                    id="cancel-specialist-edit"
+                    type="button"
+                    class="button button-secondary"
+                    hidden
+                >
+                    إلغاء التعديل
+                </button>
+
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    حفظ
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                التعريفات المتاحة
+            </h2>
+            <p class="panel-subtitle">
+                الترتيب حسب الأولوية ثم الاسم.
+            </p>
+        </div>
+
+        <button
+            id="reload-specialists"
+            type="button"
+            class="button button-secondary button-sm"
+        >
+            تحديث
+        </button>
+    </header>
+
+    <div
+        id="specialists-list"
+        class="panel-body"
+    >
+        <div class="empty-state">
+            <span class="loading-spinner"></span>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let specialists = [];
+
+function csvValues(value) {
+    return value
+        .split(",")
+        .map(item => item.trim())
+        .filter(Boolean);
+}
+
+function escapeText(value) {
+    const div = document.createElement("div");
+    div.textContent = value ?? "";
+    return div.innerHTML;
+}
+
+async function loadSpecialists() {
+    const container = document.getElementById(
+        "specialists-list"
+    );
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <span class="loading-spinner"></span>
+        </div>
+    `;
+
+    try {
+        specialists = await apiRequest(
+            "/api/specialists"
+        );
+        renderSpecialists();
+    } catch (error) {
+        container.innerHTML = "";
+        showToast(error.message, "error");
+    }
+}
+
+function renderSpecialists() {
+    const container = document.getElementById(
+        "specialists-list"
+    );
+
+    if (!specialists.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>لا توجد تعريفات</h3>
+                <p>
+                    أنشئ أول وكيل متخصص من النموذج أعلاه.
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = specialists.map(item => `
+        <article class="panel" style="margin-bottom: 1rem;">
+            <header class="panel-header">
+                <div>
+                    <h3 class="panel-title">
+                        ${escapeText(item.name)}
+                    </h3>
+                    <p class="panel-subtitle">
+                        ${escapeText(item.slug)}
+                        · أولوية ${item.priority}
+                        · ${item.enabled ? "مفعل" : "متوقف"}
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-secondary button-sm"
+                        type="button"
+                        onclick="editSpecialist(${item.id})"
+                    >
+                        تعديل
+                    </button>
+
+                    <button
+                        class="button button-secondary button-sm"
+                        type="button"
+                        onclick="toggleSpecialist(${item.id}, ${!item.enabled})"
+                    >
+                        ${item.enabled ? "تعطيل" : "تفعيل"}
+                    </button>
+
+                    <button
+                        class="button button-secondary button-sm"
+                        type="button"
+                        onclick="deleteSpecialist(${item.id})"
+                    >
+                        حذف
+                    </button>
+                </div>
+            </header>
+
+            <div class="panel-body">
+                <p>
+                    ${escapeText(item.description || "بدون وصف")}
+                </p>
+
+                <p>
+                    <strong>المجالات:</strong>
+                    ${escapeText(item.domains.join(", ") || "—")}
+                </p>
+
+                <p>
+                    <strong>مواضيع المعرفة:</strong>
+                    ${escapeText(item.knowledge_topics.join(", ") || "—")}
+                </p>
+
+                <p>
+                    <strong>الحدود:</strong>
+                    ${item.max_rounds} جولات /
+                    ${item.max_actions} إجراءات
+                </p>
+            </div>
+        </article>
+    `).join("");
+}
+
+function editSpecialist(id) {
+    const item = specialists.find(
+        specialist => specialist.id === id
+    );
+
+    if (!item) {
+        return;
+    }
+
+    document.getElementById(
+        "specialist-form-title"
+    ).textContent = "تعديل الوكيل المتخصص";
+
+    document.getElementById(
+        "specialist-id"
+    ).value = item.id;
+
+    const slug = document.getElementById(
+        "specialist-slug"
+    );
+    slug.value = item.slug;
+    slug.disabled = true;
+
+    document.getElementById(
+        "specialist-name"
+    ).value = item.name;
+
+    document.getElementById(
+        "specialist-priority"
+    ).value = item.priority;
+
+    document.getElementById(
+        "specialist-enabled"
+    ).value = String(item.enabled);
+
+    document.getElementById(
+        "specialist-max-rounds"
+    ).value = item.max_rounds;
+
+    document.getElementById(
+        "specialist-max-actions"
+    ).value = item.max_actions;
+
+    document.getElementById(
+        "specialist-description"
+    ).value = item.description || "";
+
+    document.getElementById(
+        "specialist-instructions"
+    ).value = item.instructions || "";
+
+    document.getElementById(
+        "specialist-domains"
+    ).value = item.domains.join(", ");
+
+    document.getElementById(
+        "specialist-trigger-hints"
+    ).value = item.trigger_hints.join(", ");
+
+    document.getElementById(
+        "specialist-knowledge-topics"
+    ).value = item.knowledge_topics.join(", ");
+
+    document.getElementById(
+        "specialist-tool-ids"
+    ).value = item.allowed_tool_ids.join(", ");
+
+    document.getElementById(
+        "cancel-specialist-edit"
+    ).hidden = false;
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+    });
+}
+
+function resetSpecialistForm() {
+    document.getElementById(
+        "specialist-form"
+    ).reset();
+
+    document.getElementById(
+        "specialist-id"
+    ).value = "";
+
+    const slug = document.getElementById(
+        "specialist-slug"
+    );
+    slug.disabled = false;
+
+    document.getElementById(
+        "specialist-form-title"
+    ).textContent = "إنشاء وكيل متخصص";
+
+    document.getElementById(
+        "cancel-specialist-edit"
+    ).hidden = true;
+}
+
+document.getElementById(
+    "specialist-form"
+).addEventListener(
+    "submit",
+    async event => {
+        event.preventDefault();
+
+        const id = document.getElementById(
+            "specialist-id"
+        ).value;
+
+        const common = {
+            name: document.getElementById(
+                "specialist-name"
+            ).value.trim(),
+            description: document.getElementById(
+                "specialist-description"
+            ).value.trim() || null,
+            instructions: document.getElementById(
+                "specialist-instructions"
+            ).value.trim() || null,
+            enabled: document.getElementById(
+                "specialist-enabled"
+            ).value === "true",
+            domains: csvValues(
+                document.getElementById(
+                    "specialist-domains"
+                ).value
+            ),
+            trigger_hints: csvValues(
+                document.getElementById(
+                    "specialist-trigger-hints"
+                ).value
+            ),
+            knowledge_topics: csvValues(
+                document.getElementById(
+                    "specialist-knowledge-topics"
+                ).value
+            ),
+            allowed_tool_ids: csvValues(
+                document.getElementById(
+                    "specialist-tool-ids"
+                ).value
+            ),
+            priority: Number(
+                document.getElementById(
+                    "specialist-priority"
+                ).value
+            ),
+            max_rounds: Number(
+                document.getElementById(
+                    "specialist-max-rounds"
+                ).value
+            ),
+            max_actions: Number(
+                document.getElementById(
+                    "specialist-max-actions"
+                ).value
+            ),
+            metadata: {},
+        };
+
+        try {
+            if (id) {
+                await apiRequest(
+                    `/api/specialists/${id}`,
+                    {
+                        method: "PATCH",
+                        body: JSON.stringify(common),
+                    }
+                );
+                showToast(
+                    "تم تحديث تعريف الوكيل.",
+                    "success"
+                );
+            } else {
+                await apiRequest(
+                    "/api/specialists",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            slug: document.getElementById(
+                                "specialist-slug"
+                            ).value.trim(),
+                            ...common,
+                        }),
+                    }
+                );
+                showToast(
+                    "تم إنشاء الوكيل المتخصص.",
+                    "success"
+                );
+            }
+
+            resetSpecialistForm();
+            await loadSpecialists();
+
+        } catch (error) {
+            showToast(
+                error.message,
+                "error"
+            );
+        }
+    }
+);
+
+document.getElementById(
+    "cancel-specialist-edit"
+).addEventListener(
+    "click",
+    resetSpecialistForm
+);
+
+document.getElementById(
+    "reload-specialists"
+).addEventListener(
+    "click",
+    loadSpecialists
+);
+
+async function toggleSpecialist(
+    id,
+    enabled
+) {
+    try {
+        await apiRequest(
+            `/api/specialists/${id}/enabled`,
+            {
+                method: "PUT",
+                body: JSON.stringify({
+                    enabled,
+                }),
+            }
+        );
+
+        await loadSpecialists();
+    } catch (error) {
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+async function deleteSpecialist(id) {
+    if (!window.confirm(
+        "هل تريد حذف تعريف هذا الوكيل؟"
+    )) {
+        return;
+    }
+
+    try {
+        await apiRequest(
+            `/api/specialists/${id}`,
+            {
+                method: "DELETE",
+            }
+        );
+
+        resetSpecialistForm();
+        await loadSpecialists();
+
+        showToast(
+            "تم حذف تعريف الوكيل.",
+            "success"
+        );
+    } catch (error) {
+        showToast(
+            error.message,
+            "error"
+        );
+    }
+}
+
+loadSpecialists();
+</script>
+{% endblock %}

@@ -62,8 +62,3 @@ def get_report_pdf_service() -> ReportPdfService:
         )
 
     return service
-
-def get_specialist_definition_service(
-) -> SpecialistDefinitionService:
-    return container.specialist_definition_service
-

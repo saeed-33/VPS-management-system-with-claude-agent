@@ -293,6 +293,9 @@ def build_container() -> ApplicationContainer:
 
         report_analyzer = ReportAnalyzer(
             report_query_service=report_query_service,
+        specialist_definition_service=(
+            specialist_definition_service
+        ),
             analysis_repository=analysis_repository,
             llm_client=llm_client,
             max_report_characters=(

@@ -293,6 +293,9 @@ def build_container() -> ApplicationContainer:
 
         report_analyzer = ReportAnalyzer(
             report_query_service=report_query_service,
+        specialist_definition_service=(
+            specialist_definition_service
+        ),
             analysis_repository=analysis_repository,
             llm_client=llm_client,
             max_report_characters=(
@@ -390,9 +393,6 @@ def build_container() -> ApplicationContainer:
             monitoring_profile_service
         ),
         report_query_service=report_query_service,
-        specialist_definition_service=(
-            specialist_definition_service
-        ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,
         scheduler=scheduler,

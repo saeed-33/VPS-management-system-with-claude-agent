@@ -100,17 +100,3 @@ async def report_details_page(
             "report_id": report_id,
         },
     )
-
-@router.get(
-    "/specialists",
-    response_class=HTMLResponse,
-)
-async def specialists_page(
-    request: Request,
-):
-    return templates.TemplateResponse(
-        request=request,
-        name="specialists.html",
-        context={},
-    )
-

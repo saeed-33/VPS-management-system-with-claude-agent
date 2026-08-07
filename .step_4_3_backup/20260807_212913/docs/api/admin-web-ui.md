@@ -60,8 +60,3 @@ Web router يستخدم `include_in_schema=False`، لذلك صفحات HTML ل�
 ## Security
 
 لا توجد Authentication/Authorization ظاهرة حاليًا في routes أو `app.main`. هذا baseline لبيئة موثوقة، وليس توصيف نشر Internet-facing آمن.
-
-## Specialists
-
-`/specialists` manages user-defined specialist definitions. Phase 4.3 supports create, edit, enable/disable and delete. It does not execute agents.
-

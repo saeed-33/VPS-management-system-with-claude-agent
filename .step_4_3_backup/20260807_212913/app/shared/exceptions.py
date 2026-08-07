@@ -96,21 +96,3 @@ class ProfileCommandNotFoundError(
             f"Command {command_id} is not assigned "
             f"to monitoring profile {profile_id}."
         )
-
-class SpecialistDefinitionNotFoundError(
-    EntityNotFoundError
-):
-    def __init__(self, specialist_id: int) -> None:
-        super().__init__(
-            f"Specialist definition with id "
-            f"{specialist_id} was not found."
-        )
-
-
-class DuplicateSpecialistDefinitionError(
-    DuplicateEntityError
-):
-    def __init__(self, slug: str) -> None:
-        super().__init__(
-            f"A specialist with slug '{slug}' already exists."
-        )

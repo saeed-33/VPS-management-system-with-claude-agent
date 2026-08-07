@@ -1,6 +1,3 @@
-from app.admin.api.specialists import (
-    router as specialists_router,
-)
 from app.admin.api.commands import (
     router as commands_router,
 )
@@ -19,5 +16,4 @@ __all__ = [
     "commands_router",
     "reports_router",
     "profiles_router",
-    "specialists_router",
 ]

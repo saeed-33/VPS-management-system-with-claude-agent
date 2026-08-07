@@ -1,9 +1,3 @@
-from app.shared.database.repositories.specialist_definition_repository import (
-    SpecialistDefinitionRepository,
-)
-from app.shared.services.specialist_service import (
-    SpecialistDefinitionService,
-)
 import logging
 from dataclasses import dataclass
 
@@ -97,14 +91,12 @@ class ApplicationContainer:
     report_repository: ReportRepository
     analysis_repository: AnalysisRepository
     analysis_source_repository: AnalysisSourceRepository
-    specialist_definition_repository: SpecialistDefinitionRepository
 
     # Shared services
     server_service: ServerService
     command_service: CommandService
     monitoring_profile_service: MonitoringProfileService
     report_query_service: ReportQueryService
-    specialist_definition_service: SpecialistDefinitionService
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -144,7 +136,6 @@ def build_container() -> ApplicationContainer:
     analysis_repository = AnalysisRepository()
     retrieval_repository = RetrievalRepository()
     analysis_source_repository = AnalysisSourceRepository()
-    specialist_definition_repository = SpecialistDefinitionRepository()
 
     # -------------------------------------------------
     # Shared services
@@ -169,12 +160,6 @@ def build_container() -> ApplicationContainer:
 
     report_query_service = ReportQueryService(
         repository=report_repository,
-    )
-
-    specialist_definition_service = (
-        SpecialistDefinitionService(
-            repository=specialist_definition_repository,
-        )
     )
 
     embedding_client = None
@@ -381,18 +366,12 @@ def build_container() -> ApplicationContainer:
         analysis_source_repository=(
             analysis_source_repository
         ),
-        specialist_definition_repository=(
-            specialist_definition_repository
-        ),
         server_service=server_service,
         command_service=command_service,
         monitoring_profile_service=(
             monitoring_profile_service
         ),
         report_query_service=report_query_service,
-        specialist_definition_service=(
-            specialist_definition_service
-        ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,
         scheduler=scheduler,
