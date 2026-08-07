@@ -71,7 +71,6 @@ class Settings(BaseSettings):
 
     rag_vector_enabled: bool = True
     rag_assisted_enabled: bool = True
-    rag_structured_compatibility_enabled: bool = True
     rag_full_text_enabled: bool = True
     rag_full_text_candidate_limit: int = Field(
         default=20,

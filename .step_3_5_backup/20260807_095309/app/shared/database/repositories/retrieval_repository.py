@@ -58,20 +58,6 @@ class RetrievalRepository:
             session.refresh(existing)
             return existing
 
-    def get_by_analysis_id(
-        self,
-        analysis_id: int,
-    ) -> ReportRetrievalDocumentModel | None:
-        with self._session_factory() as session:
-            return session.scalar(
-                select(
-                    ReportRetrievalDocumentModel
-                ).where(
-                    ReportRetrievalDocumentModel.analysis_id
-                    == analysis_id
-                )
-            )
-
     def find_by_full_text(
         self,
         *,

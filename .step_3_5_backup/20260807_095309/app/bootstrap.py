@@ -34,9 +34,6 @@ from app.agent.analysis.retrieval.full_text_retriever import (
 from app.agent.analysis.retrieval.hybrid_retriever import (
     HybridRetriever,
 )
-from app.agent.analysis.retrieval.structured_compatibility import (
-    StructuredCompatibilityChecker,
-)
 from app.admin.services.report_pdf_service import (
     ReportPdfService,
 )
@@ -161,7 +158,6 @@ def build_container() -> ApplicationContainer:
     retrieval_indexer = None
     vector_retriever = None
     full_text_retriever = None
-    compatibility_checker = None
     rag_retriever = None
     rag_context_builder = None
     report_pdf_service = None
@@ -212,13 +208,8 @@ def build_container() -> ApplicationContainer:
             or full_text_retriever is not None
         )
     ):
-        if settings.rag_structured_compatibility_enabled:
-            compatibility_checker = StructuredCompatibilityChecker()
-
         rag_retriever = HybridRetriever(
             analysis_repository=analysis_repository,
-            retrieval_repository=retrieval_repository,
-            compatibility_checker=compatibility_checker,
             vector_retriever=vector_retriever,
             full_text_retriever=full_text_retriever,
             top_k=settings.rag_context_top_k,

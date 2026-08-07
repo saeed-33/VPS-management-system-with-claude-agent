@@ -13,12 +13,6 @@ from app.agent.analysis.retrieval.rag_retriever import (
 from app.shared.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
-from app.agent.analysis.retrieval.structured_compatibility import (
-    StructuredCompatibilityChecker,
-)
-from app.shared.database.repositories.retrieval_repository import (
-    RetrievalRepository,
-)
 
 
 logger = logging.getLogger(__name__)
@@ -64,8 +58,6 @@ class HybridRetriever:
         self,
         *,
         analysis_repository: AnalysisRepository,
-        retrieval_repository: RetrievalRepository,
-        compatibility_checker: StructuredCompatibilityChecker | None,
         vector_retriever: RagRetriever | None,
         full_text_retriever: FullTextRetriever | None,
         top_k: int = 3,
@@ -78,8 +70,6 @@ class HybridRetriever:
             )
 
         self._analysis_repository = analysis_repository
-        self._retrieval_repository = retrieval_repository
-        self._compatibility_checker = compatibility_checker
         self._vector_retriever = vector_retriever
         self._full_text_retriever = full_text_retriever
         self._top_k = top_k
@@ -176,22 +166,8 @@ class HybridRetriever:
 
         contexts: list[RetrievedAnalysisContext] = []
 
-        accepted_candidates = []
-
-        for candidate in ordered:
-            if not self._is_compatible(
-                current_normalized_report=normalized_report,
-                candidate=candidate,
-            ):
-                continue
-
-            accepted_candidates.append(candidate)
-
-            if len(accepted_candidates) >= self._top_k:
-                break
-
         for final_rank, candidate in enumerate(
-            accepted_candidates,
+            ordered[: self._top_k],
             start=1,
         ):
             context = self._build_context(
@@ -212,51 +188,6 @@ class HybridRetriever:
         )
 
         return contexts
-
-    def _is_compatible(
-        self,
-        *,
-        current_normalized_report: str,
-        candidate: _FusionCandidate,
-    ) -> bool:
-        if self._compatibility_checker is None:
-            return True
-
-        document = (
-            self._retrieval_repository
-            .get_by_analysis_id(candidate.analysis_id)
-        )
-
-        if document is None:
-            logger.warning(
-                "Hybrid candidate rejected because retrieval "
-                "document is missing | analysis_id=%s",
-                candidate.analysis_id,
-            )
-            return False
-
-        result = self._compatibility_checker.check(
-            current_normalized_report=current_normalized_report,
-            historical_normalized_report=document.normalized_text,
-        )
-
-        if not result.compatible:
-            logger.info(
-                "Hybrid candidate rejected by structured "
-                "compatibility | analysis_id=%s | conflicts=%s",
-                candidate.analysis_id,
-                [
-                    {
-                        "field": conflict.field,
-                        "command_id": conflict.command_id,
-                        "current": conflict.current,
-                        "historical": conflict.historical,
-                    }
-                    for conflict in result.conflicts
-                ],
-            )
-
-        return result.compatible
 
     def _build_context(
         self,

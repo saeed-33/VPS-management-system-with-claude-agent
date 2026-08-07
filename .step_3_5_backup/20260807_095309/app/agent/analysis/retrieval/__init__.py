@@ -13,9 +13,3 @@ from app.agent.analysis.retrieval.full_text_retriever import (
 )
 
 from app.agent.analysis.retrieval.hybrid_retriever import HybridRetriever
-
-from app.agent.analysis.retrieval.structured_compatibility import (
-    CompatibilityConflict,
-    CompatibilityResult,
-    StructuredCompatibilityChecker,
-)
