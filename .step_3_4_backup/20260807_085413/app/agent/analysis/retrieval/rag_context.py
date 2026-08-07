@@ -12,8 +12,3 @@ class RetrievedAnalysisContext:
     issues: list[dict]
     positive_findings: list[str]
     recommended_actions: list[str]
-    retrieval_strategy: str = "vector"
-    vector_score: float | None = None
-    text_score: float | None = None
-    vector_rank: int | None = None
-    text_rank: int | None = None

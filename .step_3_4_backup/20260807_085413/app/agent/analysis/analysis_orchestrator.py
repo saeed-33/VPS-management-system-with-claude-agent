@@ -18,9 +18,6 @@ from app.agent.analysis.retrieval.context_builder import (
 from app.agent.analysis.retrieval.rag_retriever import (
     RagRetriever,
 )
-from app.agent.analysis.retrieval.hybrid_retriever import (
-    HybridRetriever,
-)
 from app.agent.analysis.retrieval.reuse_policy import (
     AnalysisDecision,
     AnalysisReusePolicy,
@@ -52,7 +49,7 @@ class AnalysisOrchestrator:
         report_analyzer: ReportAnalyzer,
         exact_reuse_enabled: bool = True,
         retrieval_indexer: RetrievalIndexer | None = None,
-        rag_retriever: RagRetriever | HybridRetriever | None = None,
+        rag_retriever: RagRetriever | None = None,
         rag_context_builder: RagContextBuilder | None = None,
         analysis_source_repository: AnalysisSourceRepository | None = None,
         rag_assisted_enabled: bool = True,
@@ -355,13 +352,9 @@ class AnalysisOrchestrator:
             ),
             reused_from_analysis_id=None,
             retrieval_strategy=(
-                retrieved_contexts[0]
-                .retrieval_strategy
-                if (
-                    analysis_decision.decision
-                    == AnalysisDecision.ASSISTED
-                    and retrieved_contexts
-                )
+                "vector"
+                if analysis_decision.decision
+                == AnalysisDecision.ASSISTED
                 else None
             ),
             retrieval_score=(
@@ -401,9 +394,7 @@ class AnalysisOrchestrator:
                         "source_type": "similar_report",
                         "source_report_id": item.source_report_id,
                         "source_analysis_id": item.source_analysis_id,
-                        "retrieval_strategy": (
-                            item.retrieval_strategy
-                        ),
+                        "retrieval_strategy": "vector",
                         "similarity_score": item.score,
                         "rank": item.rank,
                         "title": (
@@ -412,10 +403,6 @@ class AnalysisOrchestrator:
                         "excerpt": (item.summary or "")[:1000],
                         "source_metadata": {
                             "health_status": item.health_status,
-                            "vector_score": item.vector_score,
-                            "text_score": item.text_score,
-                            "vector_rank": item.vector_rank,
-                            "text_rank": item.text_rank,
                         },
                         "used_in_prompt": True,
                     }

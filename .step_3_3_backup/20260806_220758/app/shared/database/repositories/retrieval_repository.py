@@ -1,4 +1,4 @@
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
 from app.shared.database.models.report_retrieval_document import ReportRetrievalDocumentModel
@@ -57,77 +57,6 @@ class RetrievalRepository:
             session.commit()
             session.refresh(existing)
             return existing
-
-    def find_by_full_text(
-        self,
-        *,
-        query_text: str,
-        server_id: int,
-        monitoring_profile_id: int | None,
-        command_set_hash: str | None,
-        exclude_report_id: int | None = None,
-        minimum_rank: float = 0.0,
-        limit: int = 20,
-    ):
-        cleaned_query = query_text.strip()
-        if not cleaned_query:
-            return []
-
-        query = func.plainto_tsquery(
-            "simple",
-            cleaned_query[:10_000],
-        )
-        rank = func.ts_rank_cd(
-            ReportRetrievalDocumentModel.search_vector,
-            query,
-        ).label("rank")
-
-        statement = (
-            select(
-                ReportRetrievalDocumentModel,
-                rank,
-            )
-            .where(
-                ReportRetrievalDocumentModel.server_id
-                == server_id,
-                ReportRetrievalDocumentModel.search_vector
-                .op("@@")(query),
-            )
-            .order_by(rank.desc())
-            .limit(limit)
-        )
-
-        if monitoring_profile_id is not None:
-            statement = statement.where(
-                ReportRetrievalDocumentModel
-                .monitoring_profile_id
-                == monitoring_profile_id
-            )
-
-        if command_set_hash:
-            statement = statement.where(
-                ReportRetrievalDocumentModel
-                .command_set_hash
-                == command_set_hash
-            )
-
-        if exclude_report_id is not None:
-            statement = statement.where(
-                ReportRetrievalDocumentModel.report_id
-                != exclude_report_id
-            )
-
-        if minimum_rank > 0:
-            statement = statement.where(
-                rank >= minimum_rank
-            )
-
-        with self._session_factory() as session:
-            rows = session.execute(statement).all()
-            return [
-                (document, float(value))
-                for document, value in rows
-            ]
 
     def find_similar(
         self,

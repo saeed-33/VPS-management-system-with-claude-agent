@@ -11,5 +11,3 @@ from app.agent.analysis.retrieval.full_text_retriever import (
     FullTextQueryBuilder,
     FullTextRetriever,
 )
-
-from app.agent.analysis.retrieval.hybrid_retriever import HybridRetriever

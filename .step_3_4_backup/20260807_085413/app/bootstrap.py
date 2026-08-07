@@ -28,12 +28,6 @@ from app.agent.analysis.retrieval.rag_retriever import (
 from app.agent.analysis.retrieval.retrieval_indexer import (
     RetrievalIndexer,
 )
-from app.agent.analysis.retrieval.full_text_retriever import (
-    FullTextRetriever,
-)
-from app.agent.analysis.retrieval.hybrid_retriever import (
-    HybridRetriever,
-)
 from app.admin.services.report_pdf_service import (
     ReportPdfService,
 )
@@ -156,8 +150,6 @@ def build_container() -> ApplicationContainer:
 
     embedding_client = None
     retrieval_indexer = None
-    vector_retriever = None
-    full_text_retriever = None
     rag_retriever = None
     rag_context_builder = None
     report_pdf_service = None
@@ -180,42 +172,18 @@ def build_container() -> ApplicationContainer:
             retrieval_repository=retrieval_repository,
             embedding_client=embedding_client,
         )
-        vector_retriever = RagRetriever(
-            embedding_client=embedding_client,
-            retrieval_repository=retrieval_repository,
-            analysis_repository=analysis_repository,
-            top_k=settings.rag_top_k,
-            minimum_score=(
-                settings.rag_minimum_similarity
-            ),
-        )
 
-    if settings.rag_full_text_enabled:
-        full_text_retriever = FullTextRetriever(
-            retrieval_repository=retrieval_repository,
-            candidate_limit=(
-                settings.rag_full_text_candidate_limit
-            ),
-            minimum_rank=(
-                settings.rag_full_text_minimum_rank
-            ),
-        )
-
-    if (
-        settings.rag_assisted_enabled
-        and (
-            vector_retriever is not None
-            or full_text_retriever is not None
-        )
-    ):
-        rag_retriever = HybridRetriever(
-            analysis_repository=analysis_repository,
-            vector_retriever=vector_retriever,
-            full_text_retriever=full_text_retriever,
-            top_k=settings.rag_context_top_k,
-            rrf_k=settings.rag_rrf_k,
-        )
-        rag_context_builder = RagContextBuilder()
+        if settings.rag_assisted_enabled:
+            rag_retriever = RagRetriever(
+                embedding_client=embedding_client,
+                retrieval_repository=retrieval_repository,
+                analysis_repository=analysis_repository,
+                top_k=settings.rag_context_top_k,
+                minimum_score=(
+                    settings.rag_minimum_similarity
+                ),
+            )
+            rag_context_builder = RagContextBuilder()
 
     # -------------------------------------------------
     # Admin services

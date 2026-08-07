@@ -71,23 +71,12 @@ class Settings(BaseSettings):
 
     rag_vector_enabled: bool = True
     rag_assisted_enabled: bool = True
-    rag_full_text_enabled: bool = True
-    rag_full_text_candidate_limit: int = Field(
-        default=20,
-        ge=1,
-        le=200,
-    )
-    rag_full_text_minimum_rank: float = Field(
-        default=0.0,
-        ge=0.0,
-    )
     rag_minimum_similarity: float = Field(
         default=0.72,
         ge=0.0,
         le=1.0,
     )
     rag_context_top_k: int = Field(default=3, ge=1, le=10)
-    rag_rrf_k: int = Field(default=60, ge=1, le=1000)
     embedding_provider: Literal["ollama"] = "ollama"
     ollama_embedding_model: str = "nomic-embed-text"
     embedding_dimensions: int = Field(default=768, ge=1)

@@ -87,7 +87,6 @@ class Settings(BaseSettings):
         le=1.0,
     )
     rag_context_top_k: int = Field(default=3, ge=1, le=10)
-    rag_rrf_k: int = Field(default=60, ge=1, le=1000)
     embedding_provider: Literal["ollama"] = "ollama"
     ollama_embedding_model: str = "nomic-embed-text"
     embedding_dimensions: int = Field(default=768, ge=1)

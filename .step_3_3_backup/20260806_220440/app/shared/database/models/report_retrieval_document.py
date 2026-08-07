@@ -1,18 +1,7 @@
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (
-    Boolean,
-    Computed,
-    DateTime,
-    ForeignKey,
-    Integer,
-    JSON,
-    String,
-    Text,
-    UniqueConstraint,
-)
-from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.shared.database.base import Base
@@ -64,15 +53,6 @@ class ReportRetrievalDocumentModel(Base):
 
     fingerprint: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     normalized_text: Mapped[str] = mapped_column(Text, nullable=False)
-    search_vector: Mapped[str | None] = mapped_column(
-        TSVECTOR,
-        Computed(
-            "to_tsvector('simple', "
-            "coalesce(normalized_text, ''))",
-            persisted=True,
-        ),
-        nullable=True,
-    )
     structured_features: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     embedding: Mapped[list[float]] = mapped_column(Vector(768), nullable=False)
     embedding_provider: Mapped[str] = mapped_column(String(50), nullable=False)

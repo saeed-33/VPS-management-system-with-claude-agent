@@ -63,13 +63,6 @@ class RagContextBuilder:
                         6,
                     ),
                     "rank": context.rank,
-                    "retrieval_strategy": (
-                        context.retrieval_strategy
-                    ),
-                    "vector_score": context.vector_score,
-                    "text_score": context.text_score,
-                    "vector_rank": context.vector_rank,
-                    "text_rank": context.text_rank,
                     "health_status": context.health_status,
                     "summary": (
                         context.summary or ""
