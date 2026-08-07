@@ -15,5 +15,4 @@ __all__ = [
     "ServerRepository",
     "CommandRepository",
     "ReportRepository",
-    "SpecialistDefinitionRepository",
 ]

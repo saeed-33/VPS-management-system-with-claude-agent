@@ -40,6 +40,5 @@ __all__ = [
     "ReportAnalysisModel",
     "ReportRetrievalDocumentModel",
     "ReportAnalysisSourceModel",
-    "SpecialistDefinitionModel",
     "AnalysisJobStatus",
 ]
