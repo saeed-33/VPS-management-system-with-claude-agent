@@ -1,53 +1,55 @@
 # Current Architecture
 
-## الصورة العامة
+## Current implemented baseline
+
 ```text
-Admin/Web
+Admin / Web
    |
 Shared Services / Repositories
    |
-MonitoringScheduler
-   |
-MonitoringService
-   +--> SSHClient -> SSHCommandExecutor
+MonitoringScheduler -> MonitoringService -> SSH
    |
 Monitoring Report
    |
 AnalysisAgentManager
    |
 AnalysisOrchestrator
-   +--> ReportNormalizer
-   +--> ReportFingerprintService
+   +--> ReportNormalizer / Fingerprint
    +--> AnalysisReusePolicy
    +--> HybridRetriever
-   |      +--> RagRetriever (pgvector)
-   |      +--> FullTextRetriever (PostgreSQL FTS)
-   |      +--> RRF
-   |      +--> semantic threshold
-   |      +--> StructuredCompatibilityChecker
    +--> RagContextBuilder
    +--> ReportAnalyzer / LLM
    +--> RetrievalIndexer
    |
 PostgreSQL + pgvector
+
+Phase 4 Foundation
+   |
+SpecialistDefinitionRepository
+   |
+SpecialistDefinitionService
+   |
+SpecialistRegistry
+   |
+SpecialistRegistrySnapshot
 ```
 
-## المسؤوليات
-- Monitoring يجمع الحالة ولا يشخصها.
-- Analysis يحول التقرير إلى نتيجة تحليل.
-- Retrieval يسترجع حالات تاريخية مساعدة.
-- Reuse Policy يحدد REUSE/ASSISTED/FULL.
-- Repositories تعزل SQL/SQLAlchemy.
-- `app/bootstrap.py` هو composition root.
+## Current responsibilities
 
-## invariants
-1. Exact fingerprint فقط يسمح بـREUSE.
-2. Semantic similarity تستخدم للسياق، لا لإعادة الاستخدام.
-3. Full-Text وحده لا يدخل LLM context.
-4. RRF ranking signal وليس similarity percentage.
-5. Structured conflict يستطيع رفض candidate عالي similarity.
-6. فشل RAG لا يمنع FULL analysis.
-7. فشل analysis queue لا يفشل monitoring report.
+- Monitoring collects server state.
+- Analysis produces REUSE / ASSISTED / FULL analysis.
+- Incident RAG retrieves historical report analyses.
+- `app/bootstrap.py` is the composition root.
+- Specialist definitions are user-managed persisted data.
+- Specialist Registry converts enabled definitions into validated immutable runtime definitions.
+- Registry Snapshot provides one coherent Specialist set for one future routing decision.
 
-## غير منفذ حاليًا
-Specialist agents، autonomous diagnostics، Knowledge RAG للوثائق، وautomatic remediation.
+## Phase 4 Foundation completed
+
+Milestone A (4.0–4.4) is complete. The runtime can create/edit/enable/disable/delete Specialist definitions, persist them, load enabled definitions only, validate them, normalize domains, create a stable snapshot, and perform deterministic domain lookup.
+
+## Not implemented yet
+
+Investigation Router, investigation persistence, Knowledge Sources/RAG, Specialist Context Builder, Specialist LLM reasoning, Tool Registry, Policy Engine, Specialist evidence collection, iterative investigation loops, Server Coordinator, parallel investigation, dynamic secondary specialists, final correlation/diagnosis, and Investigation UI.
+
+LangGraph is not currently part of runtime execution. ADR-010 reserves it for later stateful orchestration only.

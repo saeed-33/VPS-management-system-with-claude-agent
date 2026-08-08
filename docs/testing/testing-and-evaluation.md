@@ -1,46 +1,47 @@
-# Testing and RAG Evaluation
+# Testing and Evaluation
 
-## الاختبارات
+Run:
+
 ```powershell
 uv run python -m pytest
 ```
-Baseline الموثق قبل هذه المرحلة:
+
+## Current automated baseline
+
+After Phase 4.4 acceptance:
+
 ```text
-20 passed
+57 passed
 ```
 
-العقود المختبرة تشمل:
-- weak vector candidate يرفض حتى مع Full-Text قوي.
-- Full-Text-only لا يتجاوز vector threshold.
-- RRF score منفصل عن vector similarity.
-- structural conflict يرفض high-similarity candidate.
-- compatible candidate يقبل.
-- duplicate vector/text candidate يصبح context واحدًا.
-- reuse policy وstructured compatibility.
+Current suite covers RAG invariants plus Phase 4 Foundation contracts, dynamic Specialist persistence, Specialist Management API, effective FastAPI route inventory, and Specialist Registry behavior.
 
-## E2E
-```powershell
-uv run python tools/evaluate_rag.py
-```
+Registry tests cover:
 
-Baseline:
+- disabled Specialists excluded.
+- stable snapshots.
+- deterministic ordering.
+- case-insensitive domain lookup.
+- multi-domain matching.
+- `require_all` filtering.
+- malformed enabled definitions rejected.
+- duplicate domains normalized.
+
+Manual 4.4 acceptance:
+
 ```text
-Completed analyses:             453
-REUSE:                          280
-ASSISTED:                        17
-FULL:                           156
-LLM call rate:                38.19%
-Exact reuse integrity:       100.00%
-Potential reuse miss rate*:    0.00%
-Assisted health agreement*:  100.00%
-Historical sources evaluated:    50
-Current threshold violations:     0
-Current future leakage:           0
-Current scope violations:         0
-Current compatibility failures:   0
-HNSW index present:             True
-Current invariant status:       PASS
-```
-`*` diagnostic/proxy metrics وليست precision/recall.
+Enabled definitions: 9
 
-الأداة تفصل legacy rows عن invariants الحالية.
+--domain cpu
+-> linux-cpu
+
+--domains cpu,process
+-> linux-cpu        100%
+-> linux-memory      50%
+-> systemd-service   50%
+-> linux-process     50%
+```
+
+This validates Registry candidate discovery. Phase 4.5 owns final selection.
+
+The existing RAG E2E baseline remains documented by `tools/evaluate_rag.py`.

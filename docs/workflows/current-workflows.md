@@ -1,50 +1,69 @@
 # Current Workflows
 
 ## Monitoring
+
 ```text
 Load server
  -> validate monitor_enabled/profile
  -> load enabled commands
- -> SSH connection
- -> execute by execution_order
- -> build report
- -> save report
+ -> SSH
+ -> execute commands
+ -> build/save report
  -> enqueue analysis
- -> update server status
 ```
-SSH/OS/timeout errors تنتج failure report. فشل enqueue لا يلغي التقرير.
 
 ## Analysis
+
 ```text
 Report
- -> normalize + command_set_hash + fingerprint
- -> exact completed fingerprint?
-      yes -> REUSE, llm_called=false
-      no  -> Hybrid Retrieval (unless force)
-               -> accepted context? -> ASSISTED
-               -> none?             -> FULL
+ -> normalize + fingerprint
+ -> exact match? -> REUSE
+ -> otherwise Hybrid Retrieval
+ -> accepted context? -> ASSISTED
+ -> none? -> FULL
  -> LLM for ASSISTED/FULL
- -> save metadata/sources
- -> index retrieval document
- -> save performance metrics
+ -> save/index/metrics
 ```
 
-`force=true` يتجاوز reuse وhistorical retrieval ويؤدي إلى FULL.
+## Specialist Management
 
-## Hybrid Retrieval
 ```text
-normalized report
-  +-> embedding -> pgvector candidates
-  +-> FTS query -> lexical candidates
-  -> RRF rank fusion
-  -> minimum vector similarity gate
-  -> structured compatibility
-  -> Top K accepted contexts
+Operator
+ -> /specialists UI or /api/specialists
+ -> SpecialistDefinitionService
+ -> SpecialistDefinitionRepository
+ -> specialist_definitions
 ```
 
-قاعدة حاسمة: `vector_score` هو semantic similarity. `rrf_score` ترتيب فقط.
+## Specialist Registry
 
-## Decisions
-- REUSE: exact fingerprint فقط.
-- ASSISTED: historical contexts مقبولة + assisted enabled.
-- FULL: لا سياق مقبول، assisted disabled، أو force.
+```text
+specialist_definitions
+ -> list_enabled()
+ -> SpecialistRegistry
+ -> validate + normalize
+ -> SpecialistRegistrySnapshot
+ -> domain lookup
+```
+
+A snapshot contains enabled Specialists only, is stable after creation, and supports lookup by slug, one domain, or multiple domains.
+
+Multi-domain matching orders by matched-domain count descending, then priority ascending, then name/slug/id.
+
+This is candidate discovery only. Phase 4.5 will own the actual investigation routing decision.
+
+## Next workflow boundary
+
+```text
+Current report
++
+Initial analysis
++
+SpecialistRegistrySnapshot
+ -> Investigation Router
+ -> Should investigate?
+ -> Detected domains
+ -> Selected Specialists
+```
+
+No Specialist LLM, diagnostic execution, or LangGraph loop exists yet.

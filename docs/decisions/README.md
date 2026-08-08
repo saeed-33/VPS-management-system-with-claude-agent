@@ -34,3 +34,7 @@ Semantic similarity -> context only
 
 ## ADR-009 — Hierarchical bounded read-only investigation
 **Accepted.** Server Coordinator + dynamic Specialists operate within specialist/round/action budgets. Phase 4 permits registered read-only diagnostics only; remediation is deferred to Phase 5. See `ADR-009-hierarchical-investigation.md`.
+
+## ADR-010 — LangGraph orchestration boundary
+**Accepted.** LangGraph is reserved for later stateful investigation orchestration. Registry/RAG/database/policy/tools/SSH remain project-owned Python services. See `ADR-010-langgraph-orchestration-boundary.md`.
+

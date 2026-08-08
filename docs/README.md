@@ -39,3 +39,5 @@
 
 - [4.1 Investigation Contracts](architecture/investigation-contracts.md)
 - [Specialist Registry](architecture/specialist-registry.md)
+- [Milestone A closeout — 4.0–4.4](roadmap/phase-4-foundation-closeout.md)
+- [ADR-010: LangGraph orchestration boundary](decisions/ADR-010-langgraph-orchestration-boundary.md)
