@@ -29,6 +29,7 @@ EXPECTED_TABLES = {
     "specialist_definitions",
     "investigations",
     "investigation_specialist_candidates",
+    "knowledge_sources",
 }
 
 CUSTOM_INDEXES = {

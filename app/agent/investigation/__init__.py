@@ -1,3 +1,8 @@
+from app.agent.investigation.knowledge_source_registry import (
+    KnowledgeSourceRegistry,
+    KnowledgeSourceRegistrySnapshot,
+    KnowledgeSourceRuntimeDefinition,
+)
 from app.agent.investigation.persistence_service import (
     InvestigationPersistenceService,
 )
@@ -52,4 +57,7 @@ __all__ = [
     "RoutingReason",
     "SpecialistRoutingMatch",
     "InvestigationPersistenceService",
+    "KnowledgeSourceRegistry",
+    "KnowledgeSourceRegistrySnapshot",
+    "KnowledgeSourceRuntimeDefinition",
 ]

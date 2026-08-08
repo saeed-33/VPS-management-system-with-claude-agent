@@ -1,3 +1,6 @@
+from app.shared.services.knowledge_source_service import (
+    KnowledgeSourceService,
+)
 from app.shared.services.specialist_service import (
     SpecialistDefinitionService,
 )
@@ -66,4 +69,8 @@ def get_report_pdf_service() -> ReportPdfService:
 def get_specialist_definition_service(
 ) -> SpecialistDefinitionService:
     return container.specialist_definition_service
+
+def get_knowledge_source_service(
+) -> KnowledgeSourceService:
+    return container.knowledge_source_service
 

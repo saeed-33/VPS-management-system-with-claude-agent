@@ -1,3 +1,6 @@
+from app.admin.api.knowledge_sources import (
+    router as knowledge_sources_router,
+)
 from app.admin.api.specialists import (
     router as specialists_router,
 )
@@ -20,4 +23,5 @@ __all__ = [
     "reports_router",
     "profiles_router",
     "specialists_router",
+    "knowledge_sources_router",
 ]

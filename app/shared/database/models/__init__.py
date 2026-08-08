@@ -1,3 +1,6 @@
+from app.shared.database.models.knowledge_source import (
+    KnowledgeSourceModel,
+)
 from app.shared.database.models.investigation import (
     InvestigationModel,
     InvestigationSpecialistCandidateModel,
@@ -48,4 +51,5 @@ __all__ = [
     "AnalysisJobStatus",
     "InvestigationModel",
     "InvestigationSpecialistCandidateModel",
+    "KnowledgeSourceModel",
 ]

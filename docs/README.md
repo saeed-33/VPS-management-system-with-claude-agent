@@ -43,3 +43,4 @@
 - [ADR-010: LangGraph orchestration boundary](decisions/ADR-010-langgraph-orchestration-boundary.md)
 - [Investigation Router](architecture/investigation-router.md)
 - [Investigation Persistence](architecture/investigation-persistence.md)
+- [Knowledge Sources](architecture/knowledge-sources.md)
