@@ -1,3 +1,6 @@
+from app.agent.investigation.investigation_router import (
+    InvestigationRouter,
+)
 from app.agent.investigation.specialist_registry import (
     SpecialistRegistry,
 )
@@ -109,6 +112,7 @@ class ApplicationContainer:
     report_query_service: ReportQueryService
     specialist_definition_service: SpecialistDefinitionService
     specialist_registry: SpecialistRegistry
+    investigation_router: InvestigationRouter
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -183,6 +187,11 @@ def build_container() -> ApplicationContainer:
 
     specialist_registry = SpecialistRegistry(
         repository=specialist_definition_repository,
+    )
+
+    investigation_router = InvestigationRouter(
+        specialist_registry=specialist_registry,
+        max_specialists=4,
     )
 
     embedding_client = None
@@ -403,6 +412,9 @@ def build_container() -> ApplicationContainer:
         ),
         specialist_registry=(
             specialist_registry
+        ),
+        investigation_router=(
+            investigation_router
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,

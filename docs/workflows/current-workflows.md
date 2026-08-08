@@ -67,3 +67,22 @@ SpecialistRegistrySnapshot
 ```
 
 No Specialist LLM, diagnostic execution, or LangGraph loop exists yet.
+
+## Investigation Routing — Phase 4.5
+
+```text
+Monitoring Report
++
+Initial Analysis
++
+SpecialistRegistrySnapshot
+ -> InvestigationRouter
+ -> should_investigate
+ -> detected domains
+ -> selected Specialists
+```
+
+The first Router implementation is deterministic and conservative. It uses
+user-defined `domains` and `trigger_hints`; it does not hard-code CPU,
+Memory, PostgreSQL or other Specialist types and does not invoke another LLM.
+

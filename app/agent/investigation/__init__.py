@@ -1,3 +1,9 @@
+from app.agent.investigation.investigation_router import (
+    InvestigationRouter,
+    InvestigationRoutingDecision,
+    RoutingReason,
+    SpecialistRoutingMatch,
+)
 from app.agent.investigation.specialist_registry import (
     SpecialistDomainMatch,
     SpecialistRegistry,
@@ -38,4 +44,8 @@ __all__ = [
     "SpecialistRegistrySnapshot",
     "SpecialistRegistryValidationError",
     "SpecialistRuntimeDefinition",
+    "InvestigationRouter",
+    "InvestigationRoutingDecision",
+    "RoutingReason",
+    "SpecialistRoutingMatch",
 ]
