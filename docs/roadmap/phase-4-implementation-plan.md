@@ -434,7 +434,7 @@ Remediation belongs to Phase 5 with separate permissions, approval, audit, rollb
 | 4.2 | Completed — migration/schema/tests verified |
 | 4.3 | Completed — API/UI/routes/tests verified |
 | 4.4 | Completed — 57 tests + runtime Registry acceptance verified |
-| 4.5 | Implemented — pending Router acceptance verification |
+| 4.5 | Implemented — regression coverage restored; pending final verification |
 | 4.6–4.20 | Planned |
 
 **Milestone A — Foundation (4.0–4.4): COMPLETED.**

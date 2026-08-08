@@ -42,3 +42,4 @@
 - [Milestone A closeout — 4.0–4.4](roadmap/phase-4-foundation-closeout.md)
 - [ADR-010: LangGraph orchestration boundary](decisions/ADR-010-langgraph-orchestration-boundary.md)
 - [Investigation Router](architecture/investigation-router.md)
+- [Investigation Persistence](architecture/investigation-persistence.md)

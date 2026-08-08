@@ -1,3 +1,6 @@
+from app.agent.investigation.persistence_service import (
+    InvestigationPersistenceService,
+)
 from app.agent.investigation.investigation_router import (
     InvestigationRouter,
     InvestigationRoutingDecision,
@@ -48,4 +51,5 @@ __all__ = [
     "InvestigationRoutingDecision",
     "RoutingReason",
     "SpecialistRoutingMatch",
+    "InvestigationPersistenceService",
 ]

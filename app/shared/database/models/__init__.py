@@ -1,3 +1,7 @@
+from app.shared.database.models.investigation import (
+    InvestigationModel,
+    InvestigationSpecialistCandidateModel,
+)
 from app.shared.database.models.command_execution import (
     CommandExecutionModel,
 )
@@ -42,4 +46,6 @@ __all__ = [
     "ReportAnalysisSourceModel",
     "SpecialistDefinitionModel",
     "AnalysisJobStatus",
+    "InvestigationModel",
+    "InvestigationSpecialistCandidateModel",
 ]
