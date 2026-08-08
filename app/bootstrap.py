@@ -1,3 +1,6 @@
+from app.agent.investigation.specialist_registry import (
+    SpecialistRegistry,
+)
 from app.shared.database.repositories.specialist_definition_repository import (
     SpecialistDefinitionRepository,
 )
@@ -105,6 +108,7 @@ class ApplicationContainer:
     monitoring_profile_service: MonitoringProfileService
     report_query_service: ReportQueryService
     specialist_definition_service: SpecialistDefinitionService
+    specialist_registry: SpecialistRegistry
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -175,6 +179,10 @@ def build_container() -> ApplicationContainer:
         SpecialistDefinitionService(
             repository=specialist_definition_repository,
         )
+    )
+
+    specialist_registry = SpecialistRegistry(
+        repository=specialist_definition_repository,
     )
 
     embedding_client = None
@@ -392,6 +400,9 @@ def build_container() -> ApplicationContainer:
         report_query_service=report_query_service,
         specialist_definition_service=(
             specialist_definition_service
+        ),
+        specialist_registry=(
+            specialist_registry
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,

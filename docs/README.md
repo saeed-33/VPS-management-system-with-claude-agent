@@ -38,3 +38,4 @@
 ## Multi-Agent Investigation
 
 - [4.1 Investigation Contracts](architecture/investigation-contracts.md)
+- [Specialist Registry](architecture/specialist-registry.md)

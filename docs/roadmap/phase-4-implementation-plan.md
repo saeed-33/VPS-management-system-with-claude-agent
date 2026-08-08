@@ -429,8 +429,11 @@ Remediation belongs to Phase 5 with separate permissions, approval, audit, rollb
 
 | Step | Status |
 |---|---|
-| 4.0 | Completed when this documentation baseline is applied and reviewed |
-| 4.1 | Implemented locally/pending verification against current branch |
-| 4.2–4.20 | Planned |
+| 4.0 | Completed |
+| 4.1 | Completed — tests verified |
+| 4.2 | Completed — migration/schema/tests verified |
+| 4.3 | Completed — API/UI/routes/tests verified |
+| 4.4 | Implemented — pending registry acceptance verification |
+| 4.5–4.20 | Planned |
 
 Update this table at the end of every step.

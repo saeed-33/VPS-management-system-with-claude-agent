@@ -1,3 +1,10 @@
+from app.agent.investigation.specialist_registry import (
+    SpecialistDomainMatch,
+    SpecialistRegistry,
+    SpecialistRegistrySnapshot,
+    SpecialistRegistryValidationError,
+    SpecialistRuntimeDefinition,
+)
 from app.agent.investigation.contracts import (
     EvidenceKind,
     EvidenceReference,
@@ -26,4 +33,9 @@ __all__ = [
     "SpecialistResult",
     "SpecialistTask",
     "SpecialistTaskStatus",
+    "SpecialistDomainMatch",
+    "SpecialistRegistry",
+    "SpecialistRegistrySnapshot",
+    "SpecialistRegistryValidationError",
+    "SpecialistRuntimeDefinition",
 ]
