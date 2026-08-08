@@ -1,0 +1,56 @@
+# Knowledge Sources Seed and Acceptance
+
+**Phase:** 4.7.1  
+**Status:** Implemented — pending runtime acceptance
+
+4.7.1 provides an idempotent baseline seed of official documentation for
+the nine current Specialist definitions.
+
+The seed contains official sources for:
+
+```text
+Linux kernel administration
+Linux proc filesystem
+Linux networking
+Linux filesystems
+systemd
+Docker Engine
+NGINX
+PostgreSQL
+```
+
+The seed is intentionally metadata-only. It registers source URLs and their
+scope but does not crawl or index content.
+
+Run:
+
+```powershell
+uv run python tools/seed_knowledge_sources.py
+```
+
+The command is idempotent:
+
+```text
+missing slug  -> create
+existing slug -> update
+```
+
+Then inspect:
+
+```powershell
+uv run python tools/inspect_knowledge_sources.py
+uv run python tools/inspect_knowledge_sources.py --domain cpu
+uv run python tools/inspect_knowledge_sources.py --specialist linux-network
+```
+
+Acceptance:
+
+```powershell
+uv run python tools/check_knowledge_source_acceptance.py
+```
+
+All nine baseline Specialists must resolve to at least one enabled knowledge
+source.
+
+After acceptance, Phase 4.7 is complete. Phase 4.8 begins ingestion,
+parsing, chunking, indexing and retrieval.

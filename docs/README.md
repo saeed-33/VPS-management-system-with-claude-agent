@@ -44,3 +44,4 @@
 - [Investigation Router](architecture/investigation-router.md)
 - [Investigation Persistence](architecture/investigation-persistence.md)
 - [Knowledge Sources](architecture/knowledge-sources.md)
+- [Knowledge Sources Seed](architecture/knowledge-sources-seed.md)
