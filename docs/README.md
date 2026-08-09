@@ -51,3 +51,4 @@
 - [Knowledge Indexing](architecture/knowledge-indexing.md)
 - [Knowledge Retrieval](architecture/knowledge-retrieval.md)
 - [Specialist Context Builder](architecture/specialist-context-builder.md)
+- [Specialist Reasoning Agent](architecture/specialist-reasoning-agent.md)

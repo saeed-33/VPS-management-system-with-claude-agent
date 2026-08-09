@@ -115,6 +115,7 @@ class InvestigationFinding:
     confidence: float
     evidence_ids: tuple[str, ...] = ()
     knowledge_source_ids: tuple[str, ...] = ()
+    missing_evidence: tuple[str, ...] = ()
     metadata: dict[str, Any] = field(
         default_factory=dict
     )
@@ -225,6 +226,7 @@ class SpecialistResult:
     ruled_out: tuple[str, ...] = ()
     evidence_ids: tuple[str, ...] = ()
     knowledge_source_ids: tuple[str, ...] = ()
+    missing_evidence: tuple[str, ...] = ()
     recommended_next_specialists: tuple[
         str,
         ...
