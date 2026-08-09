@@ -49,3 +49,4 @@
 - [Knowledge Ingestion](architecture/knowledge-ingestion.md)
 - [Knowledge Chunking](architecture/knowledge-chunking.md)
 - [Knowledge Indexing](architecture/knowledge-indexing.md)
+- [Knowledge Retrieval](architecture/knowledge-retrieval.md)
