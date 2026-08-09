@@ -156,22 +156,60 @@ class SpecialistReasoningAgent:
                     + ", ".join(sorted(unknown))
                 )
 
-        if allowed_specialist_slugs:
-            normalized, _ = (
-                SpecialistReasoningAgent
-                ._normalize_specialist_recommendations(
-                    recommendations=tuple(
-                        output.recommended_next_specialists
-                    ),
-                    allowed_specialist_slugs=(
-                        allowed_specialist_slugs
-                    ),
-                )
-            )
 
-            output.recommended_next_specialists = list(
-                normalized
-            )
+    @staticmethod
+    def _normalize_specialist_recommendations(
+        *,
+        recommendations: tuple[str, ...],
+        allowed_specialist_slugs: tuple[str, ...],
+    ) -> tuple[tuple[str, ...], tuple[str, ...]]:
+        allowed = {
+            value.strip().casefold()
+            for value in allowed_specialist_slugs
+            if value.strip()
+        }
+
+        aliases = {
+            "systemd": "systemd-service",
+            "service": "systemd-service",
+            "services": "systemd-service",
+            "network": "linux-network",
+            "networking": "linux-network",
+            "cpu": "linux-cpu",
+            "processor": "linux-cpu",
+            "memory": "linux-memory",
+            "ram": "linux-memory",
+            "storage": "linux-storage",
+            "disk": "linux-storage",
+            "filesystem": "linux-storage",
+            "process": "linux-process",
+            "processes": "linux-process",
+            "postgres": "postgresql",
+            "postgresql": "postgresql",
+            "nginx": "nginx",
+            "docker": "docker",
+        }
+
+        accepted: list[str] = []
+        dropped: list[str] = []
+
+        for raw in recommendations:
+            value = raw.strip().casefold()
+            if not value:
+                continue
+
+            candidate = aliases.get(value, value)
+
+            if candidate in allowed:
+                if candidate not in accepted:
+                    accepted.append(candidate)
+            else:
+                dropped.append(value)
+
+        return (
+            tuple(accepted),
+            tuple(dict.fromkeys(dropped)),
+        )
 
     @staticmethod
     def _to_result(
