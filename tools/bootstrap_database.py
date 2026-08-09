@@ -30,6 +30,8 @@ EXPECTED_TABLES = {
     "investigations",
     "investigation_specialist_candidates",
     "knowledge_sources",
+    "knowledge_documents",
+    "knowledge_chunks",
 }
 
 CUSTOM_INDEXES = {

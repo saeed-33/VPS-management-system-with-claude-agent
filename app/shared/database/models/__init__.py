@@ -1,3 +1,7 @@
+from app.shared.database.models.knowledge_document import (
+    KnowledgeChunkModel,
+    KnowledgeDocumentModel,
+)
 from app.shared.database.models.knowledge_source import (
     KnowledgeSourceModel,
 )
@@ -52,4 +56,6 @@ __all__ = [
     "InvestigationModel",
     "InvestigationSpecialistCandidateModel",
     "KnowledgeSourceModel",
+    "KnowledgeDocumentModel",
+    "KnowledgeChunkModel",
 ]
