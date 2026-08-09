@@ -8,6 +8,7 @@ from app.agent.investigation.knowledge_ingestion_contracts import (
     ParsedKnowledgeDocument,
 )
 from app.shared.database.models.knowledge_document import (
+    KnowledgeChunkModel,
     KnowledgeDocumentModel,
 )
 from app.shared.database.session import SessionLocal
@@ -20,6 +21,21 @@ class KnowledgeDocumentRepository:
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         self._session_factory = session_factory
+
+    def get_by_id(
+        self,
+        document_id: int,
+    ) -> KnowledgeDocumentModel | None:
+        with self._session_factory() as session:
+            model = session.get(
+                KnowledgeDocumentModel,
+                document_id,
+            )
+
+            if model is not None:
+                _ = model.chunks
+
+            return model
 
     def get_by_source_uri(
         self,
@@ -111,3 +127,63 @@ class KnowledgeDocumentRepository:
             session.commit()
             session.refresh(model)
             return model
+
+    def replace_chunks(
+        self,
+        *,
+        document_id: int,
+        source_id: int,
+        chunks: list[dict],
+    ) -> KnowledgeDocumentModel:
+        with self._session_factory() as session:
+            document = session.get(
+                KnowledgeDocumentModel,
+                document_id,
+            )
+
+            if document is None:
+                raise LookupError(
+                    "Knowledge document not found."
+                )
+
+            existing = list(
+                session.scalars(
+                    select(KnowledgeChunkModel)
+                    .where(
+                        KnowledgeChunkModel.document_id
+                        == document_id
+                    )
+                ).all()
+            )
+
+            for item in existing:
+                session.delete(item)
+
+            session.flush()
+
+            for item in chunks:
+                session.add(
+                    KnowledgeChunkModel(
+                        document_id=document_id,
+                        source_id=source_id,
+                        chunk_index=item["chunk_index"],
+                        section_title=item.get("section_title"),
+                        page_number=item.get("page_number"),
+                        content=item["content"],
+                        character_count=item["character_count"],
+                        token_count=item.get("token_count"),
+                        content_hash=item["content_hash"],
+                        chunk_metadata=dict(
+                            item.get("metadata") or {}
+                        ),
+                    )
+                )
+
+            document.status = KnowledgeDocumentStatus.CHUNKED.value
+            document.updated_at = utc_now()
+
+            session.commit()
+            session.expire(document, ["chunks"])
+            _ = document.chunks
+
+            return document

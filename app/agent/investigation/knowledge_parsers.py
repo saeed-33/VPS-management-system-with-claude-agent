@@ -19,8 +19,14 @@ _BLANKS_RE = re.compile(r"\n{3,}")
 def normalize_text(value: str) -> str:
     lines = [
         _SPACE_RE.sub(" ", line).strip()
-        for line in value.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+        for line in (
+            value
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+            .split("\n")
+        )
     ]
+
     return _BLANKS_RE.sub(
         "\n\n",
         "\n".join(lines),
@@ -29,15 +35,13 @@ def normalize_text(value: str) -> str:
 
 class _HTMLTextExtractor(HTMLParser):
     BLOCK_TAGS = {
-        "article", "aside", "blockquote", "br", "div", "footer",
-        "h1", "h2", "h3", "h4", "h5", "h6", "header",
-        "li", "main", "nav", "p", "pre", "section", "table",
-        "td", "th", "tr",
+        "article", "aside", "blockquote", "br", "div",
+        "footer", "h1", "h2", "h3", "h4", "h5", "h6",
+        "header", "li", "main", "nav", "p", "pre",
+        "section", "table", "td", "th", "tr",
     }
-
-    SKIP_TAGS = {
-        "script", "style", "noscript", "svg",
-    }
+    HEADING_TAGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
+    SKIP_TAGS = {"script", "style", "noscript", "svg"}
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -46,6 +50,9 @@ class _HTMLTextExtractor(HTMLParser):
         self.title: str | None = None
         self._in_title = False
         self._title_parts: list[str] = []
+        self._active_heading: str | None = None
+        self._heading_parts: list[str] = []
+        self.headings: list[str] = []
 
     def handle_starttag(self, tag, attrs):
         tag = tag.casefold()
@@ -59,6 +66,10 @@ class _HTMLTextExtractor(HTMLParser):
 
         if tag == "title":
             self._in_title = True
+
+        if tag in self.HEADING_TAGS:
+            self._active_heading = tag
+            self._heading_parts = []
 
         if tag in self.BLOCK_TAGS:
             self._parts.append("\n")
@@ -79,6 +90,13 @@ class _HTMLTextExtractor(HTMLParser):
             value = normalize_text(" ".join(self._title_parts))
             self.title = value or None
 
+        if tag in self.HEADING_TAGS and self._active_heading == tag:
+            heading = normalize_text(" ".join(self._heading_parts))
+            if heading:
+                self.headings.append(heading)
+            self._active_heading = None
+            self._heading_parts = []
+
         if tag in self.BLOCK_TAGS:
             self._parts.append("\n")
 
@@ -93,6 +111,9 @@ class _HTMLTextExtractor(HTMLParser):
 
         if self._in_title:
             self._title_parts.append(value)
+
+        if self._active_heading:
+            self._heading_parts.append(value)
 
         self._parts.append(value)
         self._parts.append(" ")
@@ -111,7 +132,10 @@ class KnowledgeContentParser:
         title_hint: str | None = None,
     ) -> ParsedKnowledgeDocument:
         normalized_media_type = (
-            (media_type or "").split(";", 1)[0].strip().casefold()
+            (media_type or "")
+            .split(";", 1)[0]
+            .strip()
+            .casefold()
         )
 
         if normalized_media_type == "application/pdf":
@@ -134,10 +158,7 @@ class KnowledgeContentParser:
 
         if (
             normalized_media_type.startswith("text/")
-            or normalized_media_type in {
-                "",
-                "application/markdown",
-            }
+            or normalized_media_type in {"", "application/markdown"}
         ):
             return self._parse_text(
                 content=content,
@@ -147,7 +168,8 @@ class KnowledgeContentParser:
             )
 
         raise ValueError(
-            f"Unsupported knowledge media type: {normalized_media_type or 'unknown'}"
+            "Unsupported knowledge media type: "
+            f"{normalized_media_type or 'unknown'}"
         )
 
     def parse_file(
@@ -158,7 +180,6 @@ class KnowledgeContentParser:
         title_hint: str | None = None,
     ) -> ParsedKnowledgeDocument:
         suffix = path.suffix.casefold()
-
         media_types = {
             ".pdf": "application/pdf",
             ".html": "text/html",
@@ -167,7 +188,6 @@ class KnowledgeContentParser:
             ".md": "text/markdown",
             ".markdown": "text/markdown",
         }
-
         media_type = media_types.get(suffix)
 
         if media_type is None:
@@ -200,7 +220,7 @@ class KnowledgeContentParser:
             media_type=media_type,
             text=text,
             parser_name="plain-text",
-            parser_version="1",
+            parser_version="2",
         )
 
     def _parse_html(
@@ -211,22 +231,20 @@ class KnowledgeContentParser:
         media_type: str,
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
-        html = content.decode(
-            "utf-8",
-            errors="replace",
-        )
-
+        html = content.decode("utf-8", errors="replace")
         extractor = _HTMLTextExtractor()
         extractor.feed(html)
-        text = extractor.text()
 
         return ParsedKnowledgeDocument(
             canonical_uri=canonical_uri,
             title=extractor.title or title_hint,
             media_type=media_type,
-            text=text,
+            text=extractor.text(),
             parser_name="stdlib-html-parser",
-            parser_version="1",
+            parser_version="2",
+            metadata={
+                "html_headings": extractor.headings,
+            },
         )
 
     def _parse_pdf(
@@ -237,21 +255,22 @@ class KnowledgeContentParser:
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
         reader = PdfReader(BytesIO(content))
+        pages: list[dict] = []
 
-        pages: list[str] = []
-
-        for page in reader.pages:
+        for index, page in enumerate(reader.pages, start=1):
+            page_text = normalize_text(page.extract_text() or "")
             pages.append(
-                normalize_text(
-                    page.extract_text() or ""
-                )
+                {
+                    "page_number": index,
+                    "text": page_text,
+                }
             )
 
         text = normalize_text(
             "\n\n".join(
-                page
-                for page in pages
-                if page
+                item["text"]
+                for item in pages
+                if item["text"]
             )
         )
 
@@ -269,12 +288,13 @@ class KnowledgeContentParser:
             text=text,
             page_count=len(reader.pages),
             parser_name="pypdf",
-            parser_version="1",
+            parser_version="2",
             metadata={
+                "pages": pages,
                 "pdf_metadata": {
                     str(key): str(value)
                     for key, value in metadata.items()
                     if value is not None
-                }
+                },
             },
         )

@@ -1,3 +1,9 @@
+from app.agent.investigation.knowledge_chunker import (
+    StructureAwareKnowledgeChunker,
+)
+from app.agent.investigation.knowledge_chunking_service import (
+    KnowledgeChunkingService,
+)
 from app.agent.investigation.knowledge_ingestion_service import (
     KnowledgeIngestionService,
 )
@@ -147,6 +153,7 @@ class ApplicationContainer:
     knowledge_source_service: KnowledgeSourceService
     knowledge_source_registry: KnowledgeSourceRegistry
     knowledge_ingestion_service: KnowledgeIngestionService
+    knowledge_chunking_service: KnowledgeChunkingService
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -249,6 +256,11 @@ def build_container() -> ApplicationContainer:
         document_repository=knowledge_document_repository,
         loader=KnowledgeSourceLoader(),
         parser=KnowledgeContentParser(),
+    )
+
+    knowledge_chunking_service = KnowledgeChunkingService(
+        document_repository=knowledge_document_repository,
+        chunker=StructureAwareKnowledgeChunker(),
     )
 
     embedding_client = None
@@ -493,6 +505,10 @@ def build_container() -> ApplicationContainer:
         ),
         knowledge_ingestion_service=(
             knowledge_ingestion_service
+        ),
+
+        knowledge_chunking_service=(
+            knowledge_chunking_service
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,
