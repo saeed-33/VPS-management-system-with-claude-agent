@@ -50,3 +50,4 @@
 - [Knowledge Chunking](architecture/knowledge-chunking.md)
 - [Knowledge Indexing](architecture/knowledge-indexing.md)
 - [Knowledge Retrieval](architecture/knowledge-retrieval.md)
+- [Specialist Context Builder](architecture/specialist-context-builder.md)
