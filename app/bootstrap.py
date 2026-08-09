@@ -1,3 +1,15 @@
+from app.agent.investigation.knowledge_ingestion_service import (
+    KnowledgeIngestionService,
+)
+from app.agent.investigation.knowledge_parsers import (
+    KnowledgeContentParser,
+)
+from app.agent.investigation.knowledge_source_loader import (
+    KnowledgeSourceLoader,
+)
+from app.shared.database.repositories.knowledge_document_repository import (
+    KnowledgeDocumentRepository,
+)
 from app.agent.investigation.knowledge_source_registry import (
     KnowledgeSourceRegistry,
 )
@@ -121,6 +133,7 @@ class ApplicationContainer:
     specialist_definition_repository: SpecialistDefinitionRepository
     investigation_repository: InvestigationRepository
     knowledge_source_repository: KnowledgeSourceRepository
+    knowledge_document_repository: KnowledgeDocumentRepository
 
     # Shared services
     server_service: ServerService
@@ -133,6 +146,7 @@ class ApplicationContainer:
     investigation_persistence_service: InvestigationPersistenceService
     knowledge_source_service: KnowledgeSourceService
     knowledge_source_registry: KnowledgeSourceRegistry
+    knowledge_ingestion_service: KnowledgeIngestionService
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -175,6 +189,7 @@ def build_container() -> ApplicationContainer:
     specialist_definition_repository = SpecialistDefinitionRepository()
     investigation_repository = InvestigationRepository()
     knowledge_source_repository = KnowledgeSourceRepository()
+    knowledge_document_repository = KnowledgeDocumentRepository()
 
     # -------------------------------------------------
     # Shared services
@@ -227,6 +242,13 @@ def build_container() -> ApplicationContainer:
 
     knowledge_source_registry = KnowledgeSourceRegistry(
         repository=knowledge_source_repository,
+    )
+
+    knowledge_ingestion_service = KnowledgeIngestionService(
+        source_repository=knowledge_source_repository,
+        document_repository=knowledge_document_repository,
+        loader=KnowledgeSourceLoader(),
+        parser=KnowledgeContentParser(),
     )
 
     embedding_client = None
@@ -442,6 +464,9 @@ def build_container() -> ApplicationContainer:
         knowledge_source_repository=(
             knowledge_source_repository
         ),
+        knowledge_document_repository=(
+            knowledge_document_repository
+        ),
         server_service=server_service,
         command_service=command_service,
         monitoring_profile_service=(
@@ -465,6 +490,9 @@ def build_container() -> ApplicationContainer:
         ),
         knowledge_source_registry=(
             knowledge_source_registry
+        ),
+        knowledge_ingestion_service=(
+            knowledge_ingestion_service
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,

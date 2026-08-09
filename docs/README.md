@@ -46,3 +46,4 @@
 - [Knowledge Sources](architecture/knowledge-sources.md)
 - [Knowledge Sources Seed](architecture/knowledge-sources-seed.md)
 - [Knowledge RAG Schema](architecture/knowledge-rag-schema.md)
+- [Knowledge Ingestion](architecture/knowledge-ingestion.md)
