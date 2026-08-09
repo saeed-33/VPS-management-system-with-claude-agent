@@ -142,16 +142,13 @@ class KnowledgeDocumentRepository:
             )
 
             if document is None:
-                raise LookupError(
-                    "Knowledge document not found."
-                )
+                raise LookupError("Knowledge document not found.")
 
             existing = list(
                 session.scalars(
                     select(KnowledgeChunkModel)
                     .where(
-                        KnowledgeChunkModel.document_id
-                        == document_id
+                        KnowledgeChunkModel.document_id == document_id
                     )
                 ).all()
             )
@@ -173,9 +170,7 @@ class KnowledgeDocumentRepository:
                         character_count=item["character_count"],
                         token_count=item.get("token_count"),
                         content_hash=item["content_hash"],
-                        chunk_metadata=dict(
-                            item.get("metadata") or {}
-                        ),
+                        chunk_metadata=dict(item.get("metadata") or {}),
                     )
                 )
 
@@ -185,5 +180,50 @@ class KnowledgeDocumentRepository:
             session.commit()
             session.expire(document, ["chunks"])
             _ = document.chunks
+            return document
 
+    def update_chunk_embedding(
+        self,
+        *,
+        chunk_id: int,
+        embedding: list[float],
+        provider: str,
+        model: str,
+        dimensions: int,
+    ) -> None:
+        with self._session_factory() as session:
+            chunk = session.get(
+                KnowledgeChunkModel,
+                chunk_id,
+            )
+
+            if chunk is None:
+                raise LookupError("Knowledge chunk not found.")
+
+            chunk.embedding = embedding
+            chunk.embedding_provider = provider
+            chunk.embedding_model = model
+            chunk.embedding_dimensions = dimensions
+
+            session.commit()
+
+    def mark_indexed(
+        self,
+        document_id: int,
+    ) -> KnowledgeDocumentModel:
+        with self._session_factory() as session:
+            document = session.get(
+                KnowledgeDocumentModel,
+                document_id,
+            )
+
+            if document is None:
+                raise LookupError("Knowledge document not found.")
+
+            document.status = KnowledgeDocumentStatus.INDEXED.value
+            document.updated_at = utc_now()
+
+            session.commit()
+            session.refresh(document)
+            _ = document.chunks
             return document

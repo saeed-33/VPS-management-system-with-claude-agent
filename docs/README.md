@@ -48,3 +48,4 @@
 - [Knowledge RAG Schema](architecture/knowledge-rag-schema.md)
 - [Knowledge Ingestion](architecture/knowledge-ingestion.md)
 - [Knowledge Chunking](architecture/knowledge-chunking.md)
+- [Knowledge Indexing](architecture/knowledge-indexing.md)
