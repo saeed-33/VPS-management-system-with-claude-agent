@@ -26,6 +26,11 @@ from app.agent.investigation.specialist_investigation_loop import (
     SpecialistLoopStopReason,
     SpecialistLoopToolDecision,
 )
+from app.agent.investigation.server_coordinator import (
+    ServerCoordinator,
+    ServerCoordinatorResult,
+    ServerCoordinatorSpecialistRun,
+)
 from app.agent.investigation.evidence_collection import (
     DiagnosticExecutionOutcome,
     EvidenceCollectionRequest,
@@ -64,6 +69,9 @@ __all__ = [
     "EvidenceCollectionRequest",
     "EvidenceCollectionService",
     "SSHDiagnosticCommandRunner",
+    "ServerCoordinator",
+    "ServerCoordinatorResult",
+    "ServerCoordinatorSpecialistRun",
     "SpecialistInvestigationLoop",
     "SpecialistInvestigationLoopResult",
     "SpecialistLoopRoundTrace",

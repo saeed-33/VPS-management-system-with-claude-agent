@@ -222,3 +222,17 @@ treating exit status 4 as an orchestration failure.
 
 Phase 4.15 — Server Coordinator will run selected Specialists under one
 server-level Investigation state and global budgets.
+
+## Objective discipline and synthesis fallback
+
+The Specialist Objective is authoritative. The reasoning model must not
+reinterpret it as a different incident category merely because broad Tools are
+available.
+
+If a reasoning round requests only denied or duplicate Tools and therefore
+collects no new Evidence, the loop does not immediately return that procedural
+response as the final diagnosis. When another round remains, the next round is
+forced into synthesis-only mode with no Diagnostic Tool catalog.
+
+This prevents duplicate-request loops from terminating with text such as
+"I will now check..." instead of an evidence-grounded conclusion.

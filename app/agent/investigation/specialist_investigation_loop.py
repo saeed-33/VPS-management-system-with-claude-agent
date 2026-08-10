@@ -158,6 +158,8 @@ class SpecialistInvestigationLoop:
             SpecialistReasoningExecution | None
         ) = None
 
+        force_synthesis = False
+
         stop_reason = (
             SpecialistLoopStopReason.COMPLETED
         )
@@ -209,12 +211,19 @@ class SpecialistInvestigationLoop:
                         allowed_specialist_slugs
                     ),
                     diagnostic_tool_catalog=(
-                        catalog
+                        None
+                        if force_synthesis
+                        else catalog
+                    ),
+                    force_final_synthesis=(
+                        force_synthesis
                     ),
                 )
             )
 
             final_execution = execution
+
+            force_synthesis = False
 
             requests = (
                 execution
@@ -495,6 +504,13 @@ class SpecialistInvestigationLoop:
                 break
 
             if not round_evidence_ids:
+                if (
+                    round_number
+                    < effective_round_limit
+                ):
+                    force_synthesis = True
+                    continue
+
                 stop_reason = (
                     SpecialistLoopStopReason
                     .NO_EVIDENCE_COLLECTED

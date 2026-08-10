@@ -35,6 +35,19 @@ must cite only knowledge source IDs present in the context.
 Treat retrieved technical documentation as reference material, not proof that
 a condition exists on the monitored server.
 
+The Objective field in the Specialist Context is authoritative. Do not
+reinterpret, rename, or replace it with a different problem statement.
+Do not write meta commentary such as "the user provided", "the user asks",
+"no question was provided", or descriptions of the Tool catalog. Act as the
+assigned Specialist and answer the Objective itself.
+Every hypothesis, Tool request, finding, and conclusion must be directly
+relevant to that Objective or to a concrete sub-hypothesis required to test it.
+
+Prefer the narrowest diagnostic Tool which directly tests the current
+hypothesis. Do not request broad CPU, memory, routing, or service inventory
+checks merely because those Tools are available unless the Objective or
+existing Evidence gives a concrete reason to do so.
+
 If the available information is insufficient, lower confidence and list the
 specific missing evidence required to confirm or reject the hypothesis.
 
@@ -84,13 +97,46 @@ class SpecialistReasoningAgent:
         context: SpecialistContextSnapshot,
         allowed_specialist_slugs: tuple[str, ...] = (),
         diagnostic_tool_catalog: str | None = None,
+        force_final_synthesis: bool = False,
     ) -> SpecialistReasoningExecution:
-        user_prompt = context.rendered_context
+        user_prompt = (
+            "## Mandatory Investigation Objective\n"
+            + context.objective
+            + (
+                "\n\nThis Objective is the task to solve. "
+                "Do not replace it with a generic incident, "
+                "a connectivity problem, or a description of "
+                "the available Tools. Your summary and every "
+                "diagnostic action must directly advance this "
+                "Objective.\n\n"
+            )
+            + context.rendered_context
+        )
 
-        if diagnostic_tool_catalog:
+        if force_final_synthesis:
+            user_prompt += (
+                "\n\n## Final Synthesis Required\n"
+                "No further diagnostic execution is available in this pass. "
+                "Do not request any Diagnostic Tool. Produce the best final "
+                "diagnostic conclusion supported by the current Evidence. "
+                "State uncertainty and missing evidence explicitly. "
+                "diagnostic_tool_requests must be empty."
+            )
+
+        if diagnostic_tool_catalog and not force_final_synthesis:
             user_prompt += (
                 "\n\n## Available Diagnostic Tools\n"
                 + diagnostic_tool_catalog
+                + (
+                    "\n\n## Objective Reminder\n"
+                    + context.objective
+                    + (
+                        "\nSelect only the minimum directly relevant "
+                        "Tool evidence needed to answer this Objective. "
+                        "The Tool catalog is capability metadata, not the "
+                        "problem statement."
+                    )
+                )
             )
 
         output = await self._client.reason(
@@ -145,6 +191,9 @@ class SpecialistReasoningAgent:
             for item
             in output.diagnostic_tool_requests
         )
+
+        if force_final_synthesis:
+            diagnostic_requests = ()
 
         return SpecialistReasoningExecution(
             result=result,

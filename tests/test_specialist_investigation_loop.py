@@ -100,6 +100,7 @@ class ReasoningAgent:
         context,
         allowed_specialist_slugs=(),
         diagnostic_tool_catalog=None,
+        force_final_synthesis=False,
     ):
         self.catalogs.append(
             diagnostic_tool_catalog
@@ -307,7 +308,7 @@ def test_loop_collects_evidence_then_reasons_again():
     )
 
 
-def test_denied_request_stops_without_execution():
+def test_denied_request_forces_synthesis_without_execution():
     first = execution(
         summary="Need an unassigned tool.",
         confidence=0.1,
@@ -319,8 +320,17 @@ def test_denied_request_stops_without_execution():
         ),
     )
 
+    second = execution(
+        summary=(
+            "Final conclusion from existing evidence; "
+            "the requested Tool was unavailable."
+        ),
+        confidence=0.3,
+        requests=(),
+    )
+
     loop, _, _, collector = (
-        make_loop([first])
+        make_loop([first, second])
     )
 
     output = asyncio.run(
@@ -338,9 +348,9 @@ def test_denied_request_stops_without_execution():
     )
 
     assert output.stop_reason == (
-        SpecialistLoopStopReason
-        .NO_EVIDENCE_COLLECTED
+        SpecialistLoopStopReason.COMPLETED
     )
+    assert output.rounds_completed == 2
     assert output.actions_executed == 0
     assert collector.calls == []
     assert (
@@ -349,6 +359,10 @@ def test_denied_request_stops_without_execution():
         .tool_decisions[0]
         .decision
         == "denied"
+    )
+    assert output.final_result.summary == (
+        "Final conclusion from existing evidence; "
+        "the requested Tool was unavailable."
     )
 
 
@@ -456,9 +470,15 @@ def test_duplicate_request_is_not_executed_twice():
         ),
     )
 
+    third = execution(
+        summary="Final conclusion from existing evidence.",
+        confidence=0.8,
+        requests=(),
+    )
+
     loop, _, _, collector = (
         make_loop(
-            [first, second]
+            [first, second, third]
         )
     )
 
@@ -473,9 +493,9 @@ def test_duplicate_request_is_not_executed_twice():
     )
 
     assert output.stop_reason == (
-        SpecialistLoopStopReason
-        .NO_EVIDENCE_COLLECTED
+        SpecialistLoopStopReason.COMPLETED
     )
+    assert output.rounds_completed == 3
     assert output.actions_executed == 1
     assert len(collector.calls) == 1
     assert (
@@ -484,4 +504,7 @@ def test_duplicate_request_is_not_executed_twice():
         .tool_decisions[0]
         .reasons
         == ("duplicate_request",)
+    )
+    assert output.final_result.summary == (
+        "Final conclusion from existing evidence."
     )

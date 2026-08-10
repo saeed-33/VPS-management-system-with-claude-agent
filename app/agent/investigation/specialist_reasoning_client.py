@@ -7,6 +7,7 @@ from typing import Any
 
 import httpx
 from openai import AsyncOpenAI
+from pydantic import ValidationError
 
 from app.shared.config import Settings
 from app.shared.dto.specialist_reasoning import (
@@ -74,73 +75,156 @@ class OllamaSpecialistReasoningClient(
     ) -> SpecialistReasoningOutput:
         schema = SpecialistReasoningOutput.model_json_schema()
 
+        compact_schema = json.dumps(
+            schema,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+
         effective_prompt = (
             user_prompt
             + "\n\nReturn exactly one JSON object matching this schema:\n"
-            + json.dumps(schema, ensure_ascii=False, indent=2)
-            + "\n\nReturn JSON only. Do not use Markdown fences."
+            + compact_schema
+            + (
+                "\n\nReturn JSON only. Do not use Markdown fences. "
+                "Keep all prose concise. Do not restate the supplied context."
+            )
         )
 
-        response = await self._client.post(
-            "/api/chat",
-            json={
-                "model": self._model,
-                "stream": False,
-                "think": False,
-                "keep_alive": "15m",
-                "format": "json",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": system_prompt,
+        use_schema_format = True
+        schema_rejection: str | None = None
+        last_error: Exception | None = None
+        last_content = ""
+        last_done_reason = None
+        generation_attempt = 0
+
+        while generation_attempt < 2:
+            request_format = (
+                schema
+                if use_schema_format
+                else "json"
+            )
+
+            response = await self._client.post(
+                "/api/chat",
+                json={
+                    "model": self._model,
+                    "stream": False,
+                    "think": False,
+                    "keep_alive": "15m",
+                    "format": request_format,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": system_prompt,
+                        },
+                        {
+                            "role": "user",
+                            "content": (
+                                effective_prompt
+                                if generation_attempt == 0
+                                else (
+                                    effective_prompt
+                                    + (
+                                        "\n\nThe previous generated "
+                                        "response was invalid or incomplete. "
+                                        "Return a complete and concise JSON "
+                                        "object. Close every quote, bracket, "
+                                        "and brace."
+                                    )
+                                )
+                            ),
+                        },
+                    ],
+                    "options": {
+                        "temperature": 0,
+                        "num_predict": (
+                            6144
+                            if generation_attempt == 0
+                            else 8192
+                        ),
                     },
-                    {
-                        "role": "user",
-                        "content": effective_prompt,
-                    },
-                ],
-                "options": {
-                    "temperature": 0,
-                    "num_predict": 4096,
                 },
-            },
+            )
+
+            try:
+                response.raise_for_status()
+
+            except httpx.HTTPStatusError as exc:
+                if (
+                    use_schema_format
+                    and exc.response.status_code == 400
+                ):
+                    schema_rejection = exc.response.text[:2000]
+                    use_schema_format = False
+                    continue
+
+                detail = (
+                    exc.response.text[:2000]
+                    if exc.response is not None
+                    else ""
+                )
+
+                raise RuntimeError(
+                    "Ollama specialist request failed "
+                    f"with HTTP {exc.response.status_code}: {detail}"
+                ) from exc
+
+            body = response.json()
+            last_done_reason = body.get("done_reason")
+
+            message = body.get("message")
+            if not isinstance(message, dict):
+                raise RuntimeError(
+                    "Ollama specialist response has no valid message."
+                )
+
+            content = message.get("content")
+            if not isinstance(content, str):
+                raise RuntimeError(
+                    "Ollama specialist response has no text content."
+                )
+
+            last_content = content
+            cleaned = content.strip()
+
+            if cleaned.startswith("```"):
+                lines = cleaned.splitlines()
+                if (
+                    lines
+                    and lines[0].strip().lower()
+                    in {"```json", "```"}
+                ):
+                    lines = lines[1:]
+                if lines and lines[-1].strip() == "```":
+                    lines = lines[:-1]
+                cleaned = "\n".join(lines).strip()
+
+            try:
+                return SpecialistReasoningOutput.model_validate_json(cleaned)
+
+            except ValidationError as exc:
+                last_error = exc
+                generation_attempt += 1
+                use_schema_format = False
+
+        compatibility = (
+            (
+                " Schema format was rejected by the Ollama server: "
+                + schema_rejection
+            )
+            if schema_rejection
+            else ""
         )
-        response.raise_for_status()
 
-        body = response.json()
-        message = body.get("message")
-
-        if not isinstance(message, dict):
-            raise RuntimeError(
-                "Ollama specialist response has no valid message."
-            )
-
-        content = message.get("content")
-
-        if not isinstance(content, str):
-            raise RuntimeError(
-                "Ollama specialist response has no text content."
-            )
-
-        cleaned = content.strip()
-
-        if cleaned.startswith("```"):
-            lines = cleaned.splitlines()
-            if lines and lines[0].strip().lower() in {"```json", "```"}:
-                lines = lines[1:]
-            if lines and lines[-1].strip() == "```":
-                lines = lines[:-1]
-            cleaned = "\n".join(lines).strip()
-
-        try:
-            decoded = json.loads(cleaned)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(
-                "Ollama returned invalid specialist JSON: "
-                f"{content[:2000]}"
-            ) from exc
-
-        return SpecialistReasoningOutput.model_validate(decoded)
+        raise RuntimeError(
+            "Ollama returned invalid specialist structured output "
+            "after 2 generated attempts "
+            f"(done_reason={last_done_reason!r})."
+            + compatibility
+            + " Last content: "
+            + last_content[:2000]
+        ) from last_error
 
     async def close(self) -> None:
         await self._client.aclose()

@@ -1,6 +1,9 @@
 from app.agent.investigation.specialist_investigation_loop import (
     SpecialistInvestigationLoop,
 )
+from app.agent.investigation.server_coordinator import (
+    ServerCoordinator,
+)
 from app.agent.investigation.specialist_context import (
     SpecialistContextBuilder,
 )
@@ -186,6 +189,7 @@ class ApplicationContainer:
     diagnostic_policy_engine: DiagnosticPolicyEngine
     evidence_collection_service: EvidenceCollectionService
     specialist_investigation_loop: SpecialistInvestigationLoop | None
+    server_coordinator: ServerCoordinator | None
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -325,6 +329,7 @@ def build_container() -> ApplicationContainer:
     rag_context_builder = None
     report_pdf_service = None
     specialist_investigation_loop = None
+    server_coordinator = None
 
     try:
         report_pdf_service = ReportPdfService(
@@ -468,6 +473,13 @@ def build_container() -> ApplicationContainer:
             ),
             evidence_collection_service=(
                 evidence_collection_service
+            ),
+        )
+
+        server_coordinator = ServerCoordinator(
+            specialist_registry=specialist_registry,
+            specialist_loop=(
+                specialist_investigation_loop
             ),
         )
 
@@ -615,6 +627,9 @@ def build_container() -> ApplicationContainer:
         ),
         specialist_investigation_loop=(
             specialist_investigation_loop
+        ),
+        server_coordinator=(
+            server_coordinator
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,
