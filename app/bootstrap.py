@@ -62,6 +62,9 @@ from app.shared.database.repositories.knowledge_source_repository import (
 from app.shared.services.knowledge_source_service import (
     KnowledgeSourceService,
 )
+from app.shared.services.investigation_read_service import (
+    InvestigationReadService,
+)
 from app.agent.investigation.persistence_service import (
     InvestigationPersistenceService,
 )
@@ -187,6 +190,7 @@ class ApplicationContainer:
     specialist_registry: SpecialistRegistry
     investigation_router: InvestigationRouter
     investigation_persistence_service: InvestigationPersistenceService
+    investigation_read_service: InvestigationReadService
     knowledge_source_service: KnowledgeSourceService
     knowledge_source_registry: KnowledgeSourceRegistry
     knowledge_ingestion_service: KnowledgeIngestionService
@@ -284,6 +288,10 @@ def build_container() -> ApplicationContainer:
     )
 
     investigation_persistence_service = InvestigationPersistenceService(
+        repository=investigation_repository,
+    )
+
+    investigation_read_service = InvestigationReadService(
         repository=investigation_repository,
     )
 
@@ -628,6 +636,7 @@ def build_container() -> ApplicationContainer:
         investigation_persistence_service=(
             investigation_persistence_service
         ),
+        investigation_read_service=investigation_read_service,
         knowledge_source_service=(
             knowledge_source_service
         ),

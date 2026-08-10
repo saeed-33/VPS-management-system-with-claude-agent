@@ -73,6 +73,37 @@ class InvestigationRepository:
                 _ = model.candidates
             return model
 
+    def list_recent(
+        self,
+        *,
+        limit: int = 100,
+        server_id: int | None = None,
+    ) -> list[InvestigationModel]:
+        if limit < 1:
+            raise ValueError("limit must be >= 1.")
+
+        statement = (
+            select(InvestigationModel)
+            .order_by(
+                InvestigationModel.created_at.desc(),
+                InvestigationModel.id.desc(),
+            )
+            .limit(limit)
+        )
+
+        if server_id is not None:
+            statement = statement.where(
+                InvestigationModel.server_id == server_id
+            )
+
+        with self._session_factory() as session:
+            models = list(
+                session.scalars(statement).all()
+            )
+            for model in models:
+                _ = model.candidates
+            return models
+
     def list_by_report_id(self, report_id: int) -> list[InvestigationModel]:
         with self._session_factory() as session:
             models = list(
