@@ -60,7 +60,8 @@ def test_final_synthesis_uses_minimal_json_mode():
     assert output.summary == "NGINX is not confirmed running."
     assert len(calls) == 1
     assert calls[0]["format"] == "json"
-    assert calls[0]["options"]["num_predict"] == 2048
+    assert calls[0]["options"]["num_predict"] == 6144
+    assert calls[0]["options"]["num_ctx"] == 32768
 
     prompt = calls[0]["messages"][1]["content"]
 
@@ -121,5 +122,4 @@ def test_normal_reasoning_keeps_existing_generation_limits():
     )
 
     assert calls[0]["options"]["num_predict"] == 6144
-
     asyncio.run(client.close())

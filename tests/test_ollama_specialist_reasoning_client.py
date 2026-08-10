@@ -204,6 +204,7 @@ def test_final_synthesis_enables_provider_compact_mode():
     assert "no more than 2 findings" in prompt
     assert "knowledge_source_ids empty" in prompt
     assert calls[0]["options"]["num_predict"] == 6144
+    assert calls[0]["options"]["num_ctx"] == 32768
 
     asyncio.run(client.close())
 

@@ -209,18 +209,11 @@ class OllamaSpecialistReasoningClient(
                     ],
                     "options": {
                         "temperature": 0,
+                        "num_ctx": 32768,
                         "num_predict": (
-                            (
-                                2048
-                                if generation_attempt == 0
-                                else 3072
-                            )
-                            if is_final_synthesis
-                            else (
-                                6144
-                                if generation_attempt == 0
-                                else 8192
-                            )
+                            6144
+                            if generation_attempt == 0
+                            else 8192
                         ),
                     },
                 },
