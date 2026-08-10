@@ -63,3 +63,4 @@
 - [Evidence Collection](architecture/evidence-collection.md)
 - [Specialist Investigation Loop](architecture/specialist-investigation-loop.md)
 - [LangGraph Investigation Orchestration](architecture/langgraph-investigation-orchestration.md)
+- [Dynamic Secondary Specialist Routing](architecture/dynamic-secondary-specialist-routing.md)

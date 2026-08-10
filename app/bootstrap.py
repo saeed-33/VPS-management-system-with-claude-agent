@@ -1,6 +1,9 @@
 from app.agent.investigation.specialist_investigation_loop import (
     SpecialistInvestigationLoop,
 )
+from app.agent.investigation.langgraph_secondary_orchestrator import (
+    DynamicSecondaryLangGraphCoordinator,
+)
 from app.agent.investigation.langgraph_orchestrator import (
     LangGraphServerCoordinator,
 )
@@ -194,6 +197,7 @@ class ApplicationContainer:
     specialist_investigation_loop: SpecialistInvestigationLoop | None
     server_coordinator: ServerCoordinator | None
     langgraph_server_coordinator: LangGraphServerCoordinator | None
+    dynamic_secondary_coordinator: DynamicSecondaryLangGraphCoordinator | None
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -335,6 +339,7 @@ def build_container() -> ApplicationContainer:
     specialist_investigation_loop = None
     server_coordinator = None
     langgraph_server_coordinator = None
+    dynamic_secondary_coordinator = None
 
     try:
         report_pdf_service = ReportPdfService(
@@ -496,6 +501,13 @@ def build_container() -> ApplicationContainer:
             max_concurrency=4,
         )
 
+        dynamic_secondary_coordinator = DynamicSecondaryLangGraphCoordinator(
+            specialist_registry=specialist_registry,
+            parallel_coordinator=(
+                langgraph_server_coordinator
+            ),
+        )
+
         report_analyzer = ReportAnalyzer(
             report_query_service=report_query_service,
             analysis_repository=analysis_repository,
@@ -646,6 +658,9 @@ def build_container() -> ApplicationContainer:
         ),
         langgraph_server_coordinator=(
             langgraph_server_coordinator
+        ),
+        dynamic_secondary_coordinator=(
+            dynamic_secondary_coordinator
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,

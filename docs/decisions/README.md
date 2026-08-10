@@ -57,3 +57,4 @@ not proof of server state, and missing evidence is first-class output. See
 arbitrary shell. SSH execution remains behind later policy/evidence stages.
 See `ADR-013-registered-read-only-diagnostic-tools.md`.
 - [ADR-014: LangGraph Investigation Orchestration](ADR-014-langgraph-investigation-orchestration.md)
+- [ADR-015: Dynamic Secondary Specialist Routing](ADR-015-dynamic-secondary-specialist-routing.md)

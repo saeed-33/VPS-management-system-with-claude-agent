@@ -26,6 +26,10 @@ from app.agent.investigation.specialist_investigation_loop import (
     SpecialistLoopStopReason,
     SpecialistLoopToolDecision,
 )
+from app.agent.investigation.langgraph_secondary_orchestrator import (
+    DynamicSecondaryLangGraphCoordinator,
+    SecondaryRecommendationDecision,
+)
 from app.agent.investigation.langgraph_orchestrator import (
     LangGraphServerCoordinator,
     SpecialistWorkerAssignment,
@@ -73,6 +77,8 @@ __all__ = [
     "EvidenceCollectionRequest",
     "EvidenceCollectionService",
     "SSHDiagnosticCommandRunner",
+    "DynamicSecondaryLangGraphCoordinator",
+    "SecondaryRecommendationDecision",
     "LangGraphServerCoordinator",
     "SpecialistWorkerAssignment",
     "ServerCoordinator",
