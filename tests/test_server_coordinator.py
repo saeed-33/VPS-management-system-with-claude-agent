@@ -10,7 +10,7 @@ from app.agent.investigation.investigation_router import (
     InvestigationRoutingDecision,
     SpecialistRoutingMatch,
 )
-from payload.app.agent.investigation.server_coordinator import ServerCoordinator
+from app.agent.investigation.server_coordinator import ServerCoordinator
 from app.agent.investigation.specialist_registry import (
     SpecialistRegistrySnapshot,
     SpecialistRuntimeDefinition,
