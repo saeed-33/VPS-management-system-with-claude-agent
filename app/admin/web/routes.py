@@ -62,6 +62,20 @@ async def commands_page(
 
 
 @router.get(
+    "/investigations",
+    response_class=HTMLResponse,
+)
+async def investigations_page(
+    request: Request,
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="investigations.html",
+        context={},
+    )
+
+
+@router.get(
     "/reports",
     response_class=HTMLResponse,
 )
@@ -85,6 +99,23 @@ async def monitoring_profiles_page(
         name="monitoring_profiles.html",
         context={},
     )
+@router.get(
+    "/investigations/{investigation_id}",
+    response_class=HTMLResponse,
+)
+async def investigation_details_page(
+    request: Request,
+    investigation_id: str,
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="investigation_details.html",
+        context={
+            "investigation_id": investigation_id,
+        },
+    )
+
+
 @router.get(
     "/reports/{report_id}",
     response_class=HTMLResponse,

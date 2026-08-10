@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}التحقيقات - VPS Agent{% endblock %}
+{% block content %}
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h1>التحقيقات</h1>
+      <p class="muted-text">عرض التحقيقات المحفوظة ونتائج التنفيذ المتاحة.</p>
+    </div>
+    <button id="reload-investigations" class="button button-secondary" type="button">تحديث</button>
+  </div>
+
+  <div class="card">
+    <div class="toolbar-row">
+      <label>
+        <span>Server ID</span>
+        <input id="server-filter" class="input" type="number" min="1" placeholder="الكل">
+      </label>
+      <label>
+        <span>الحد</span>
+        <select id="limit-filter" class="input">
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100" selected>100</option>
+          <option value="250">250</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div id="investigations-state" class="card muted-text">جاري تحميل التحقيقات...</div>
+
+  <div id="investigations-table-card" class="card" hidden>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Investigation</th>
+            <th>Server</th>
+            <th>Report</th>
+            <th>الحالة</th>
+            <th>الاختصاصيون</th>
+            <th>Runtime</th>
+            <th>Final Diagnosis</th>
+            <th>آخر تحديث</th>
+          </tr>
+        </thead>
+        <tbody id="investigations-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const stateBox = document.getElementById("investigations-state");
+  const tableCard = document.getElementById("investigations-table-card");
+  const body = document.getElementById("investigations-body");
+  const serverFilter = document.getElementById("server-filter");
+  const limitFilter = document.getElementById("limit-filter");
+
+  const asText = (value, fallback = "—") =>
+    value === null || value === undefined || value === "" ? fallback : String(value);
+
+  function badge(label) {
+    const span = document.createElement("span");
+    span.className = "status-badge";
+    span.textContent = label;
+    return span;
+  }
+
+  function td(value) {
+    const node = document.createElement("td");
+    if (value instanceof Node) node.appendChild(value);
+    else node.textContent = asText(value);
+    return node;
+  }
+
+  function fmtDate(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? asText(value) : date.toLocaleString("ar");
+  }
+
+  function render(rows) {
+    body.replaceChildren();
+
+    if (!rows.length) {
+      stateBox.hidden = false;
+      stateBox.textContent = "لا توجد تحقيقات.";
+      tableCard.hidden = true;
+      return;
+    }
+
+    stateBox.hidden = true;
+    tableCard.hidden = false;
+
+    for (const item of rows) {
+      const tr = document.createElement("tr");
+
+      const investigationLink = document.createElement("a");
+      investigationLink.href = "/investigations/" + encodeURIComponent(item.investigation_id);
+      investigationLink.textContent = item.investigation_id;
+      investigationLink.className = "table-link";
+      tr.appendChild(td(investigationLink));
+
+      tr.appendChild(td(item.server_id));
+
+      const reportLink = document.createElement("a");
+      reportLink.href = "/reports/" + encodeURIComponent(item.report_id);
+      reportLink.textContent = asText(item.report_id);
+      reportLink.className = "table-link";
+      tr.appendChild(td(reportLink));
+
+      tr.appendChild(td(badge(asText(item.status))));
+      tr.appendChild(td((item.selected_specialists || []).join(", ") || "—"));
+      tr.appendChild(td(badge(item.runtime_available ? "متاح" : "غير محفوظ")));
+      tr.appendChild(td(badge(item.final_diagnosis_available ? "متاح" : "غير متاح")));
+      tr.appendChild(td(fmtDate(item.updated_at)));
+
+      body.appendChild(tr);
+    }
+  }
+
+  async function load() {
+    stateBox.hidden = false;
+    stateBox.textContent = "جاري تحميل التحقيقات...";
+    tableCard.hidden = true;
+
+    const params = new URLSearchParams();
+    params.set("limit", limitFilter.value);
+
+    const serverId = serverFilter.value.trim();
+    if (serverId) params.set("server_id", serverId);
+
+    try {
+      const response = await fetch("/api/investigations?" + params.toString(), {
+        headers: {"Accept": "application/json"}
+      });
+
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      render(await response.json());
+    } catch (error) {
+      stateBox.hidden = false;
+      stateBox.textContent = "تعذر تحميل التحقيقات: " + error.message;
+      tableCard.hidden = true;
+    }
+  }
+
+  document.getElementById("reload-investigations").addEventListener("click", load);
+  limitFilter.addEventListener("change", load);
+  serverFilter.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") load();
+  });
+
+  load();
+})();
+</script>
+{% endblock %}

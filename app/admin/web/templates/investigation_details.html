@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block title %}تفاصيل التحقيق - VPS Agent{% endblock %}
+{% block content %}
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <a class="table-link" href="/investigations">← التحقيقات</a>
+      <h1>تفاصيل التحقيق</h1>
+      <p class="muted-text">{{ investigation_id }}</p>
+    </div>
+    <button id="reload-investigation" class="button button-secondary" type="button">تحديث</button>
+  </div>
+
+  <div id="investigation-state" class="card muted-text">جاري تحميل التحقيق...</div>
+
+  <div id="investigation-content" hidden>
+    <div id="investigation-summary" class="summary-grid"></div>
+
+    <div class="card">
+      <h2>قرار التوجيه</h2>
+      <div id="routing-summary" class="detail-grid"></div>
+    </div>
+
+    <div class="card">
+      <h2>الاختصاصيون المرشحون</h2>
+      <div id="candidate-list" class="stack-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Runtime Investigation</h2>
+      <div id="runtime-content"></div>
+    </div>
+
+    <div class="card">
+      <h2>Final Diagnosis</h2>
+      <div id="diagnosis-content"></div>
+    </div>
+
+    <div class="card">
+      <h2>Correlated Claims</h2>
+      <div id="claims-content" class="stack-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Conflicts</h2>
+      <div id="conflicts-content" class="stack-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Specialist Runs</h2>
+      <div id="specialists-content" class="stack-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Evidence</h2>
+      <div id="evidence-content" class="stack-list"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const investigationId = {{ investigation_id | tojson }};
+  const stateBox = document.getElementById("investigation-state");
+  const content = document.getElementById("investigation-content");
+
+  const asText = (value, fallback = "—") =>
+    value === null || value === undefined || value === "" ? fallback : String(value);
+
+  function valueRow(label, value) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "detail-item";
+
+    const labelNode = document.createElement("span");
+    labelNode.className = "muted-text";
+    labelNode.textContent = label;
+
+    const valueNode = document.createElement("strong");
+    valueNode.textContent = asText(value);
+
+    wrapper.append(labelNode, valueNode);
+    return wrapper;
+  }
+
+  function card(title, lines) {
+    const item = document.createElement("div");
+    item.className = "sub-card";
+
+    const heading = document.createElement("strong");
+    heading.textContent = asText(title);
+    item.appendChild(heading);
+
+    for (const [label, value] of lines) {
+      const row = document.createElement("div");
+      row.className = "detail-line";
+
+      const name = document.createElement("span");
+      name.className = "muted-text";
+      name.textContent = label;
+
+      const val = document.createElement("span");
+      val.textContent = asText(value);
+
+      row.append(name, val);
+      item.appendChild(row);
+    }
+
+    return item;
+  }
+
+  function renderSummary(item) {
+    document.getElementById("investigation-summary").replaceChildren(
+      valueRow("Status", item.status),
+      valueRow("Server", item.server_id),
+      valueRow("Report", item.report_id),
+      valueRow("Analysis", item.analysis_id),
+      valueRow("Runtime", item.runtime_available ? "متاح" : "غير محفوظ"),
+      valueRow("Final Diagnosis", item.final_diagnosis_available ? "متاح" : "غير متاح")
+    );
+
+    document.getElementById("routing-summary").replaceChildren(
+      valueRow("Should investigate", item.should_investigate),
+      valueRow("Detected domains", (item.detected_domains || []).join(", ") || "—"),
+      valueRow("Reasons", (item.routing_reasons || []).join(", ") || "—"),
+      valueRow(
+        "Budget",
+        item.max_specialists + " specialists / "
+        + item.max_rounds + " rounds / "
+        + item.max_actions + " actions"
+      )
+    );
+
+    const candidates = document.getElementById("candidate-list");
+    candidates.replaceChildren();
+
+    for (const candidate of item.candidates || []) {
+      candidates.appendChild(
+        card(candidate.specialist_name, [
+          ["Slug", candidate.specialist_slug],
+          ["Score", candidate.score],
+          ["Selected", candidate.is_selected],
+          ["Domains", (candidate.matched_domains || []).join(", ")]
+        ])
+      );
+    }
+
+    if (!candidates.children.length) {
+      candidates.textContent = "لا يوجد مرشحون.";
+    }
+  }
+
+  function renderRuntime(runtime) {
+    const runtimeNode = document.getElementById("runtime-content");
+
+    if (!runtime) {
+      runtimeNode.textContent = "لا توجد Runtime Snapshot محفوظة لهذا التحقيق.";
+      document.getElementById("diagnosis-content").textContent = "غير متاح.";
+      document.getElementById("claims-content").textContent = "غير متاح.";
+      document.getElementById("conflicts-content").textContent = "غير متاح.";
+      document.getElementById("specialists-content").textContent = "غير متاح.";
+      document.getElementById("evidence-content").textContent = "غير متاح.";
+      return;
+    }
+
+    runtimeNode.replaceChildren(
+      valueRow("Status", runtime.status),
+      valueRow("Orchestrator", runtime.orchestrator),
+      valueRow("Execution mode", runtime.execution_mode),
+      valueRow("Waves", runtime.waves_completed),
+      valueRow("Actions", runtime.actions_used),
+      valueRow("Evidence count", runtime.evidence_count)
+    );
+
+    const diagnosisNode = document.getElementById("diagnosis-content");
+    diagnosisNode.replaceChildren();
+
+    if (runtime.final_diagnosis) {
+      const d = runtime.final_diagnosis;
+      diagnosisNode.appendChild(card("Deterministic Diagnosis", [
+        ["Summary", d.summary],
+        ["Confirmed", d.confirmed_count],
+        ["Probable", d.probable_count],
+        ["Unknown", d.unknown_count],
+        ["Conflicts", d.conflict_count]
+      ]));
+    } else {
+      diagnosisNode.textContent = "لا يوجد Final Diagnosis محفوظ.";
+    }
+
+    if (runtime.narrative) {
+      const n = runtime.narrative;
+      diagnosisNode.appendChild(card("Narrative", [
+        ["Summary", n.summary],
+        ["Provider", n.provider_name],
+        ["Model", n.model_name],
+        ["Fallback", n.used_fallback],
+        ["Operator notes", (n.operator_notes || []).join(" | ")]
+      ]));
+    }
+
+    renderList("claims-content", runtime.correlated_claims || [], (item) => card(
+      item.title || item.claim_id,
+      [
+        ["Claim ID", item.claim_id],
+        ["Certainty", item.certainty],
+        ["Confidence", item.confidence],
+        ["Specialists", (item.specialist_slugs || []).join(", ")],
+        ["Evidence", (item.evidence_ids || []).join(", ")],
+        ["Description", item.description]
+      ]
+    ), "لا توجد Claims محفوظة.");
+
+    renderList("conflicts-content", runtime.conflicts || [], (item) => card(
+      item.title || item.conflict_id,
+      [
+        ["Conflict ID", item.conflict_id],
+        ["States", (item.diagnostic_states || []).join(" ↔ ")],
+        ["Specialists", (item.specialist_slugs || []).join(", ")],
+        ["Evidence", (item.evidence_ids || []).join(", ")],
+        ["Description", item.description]
+      ]
+    ), "لا توجد تعارضات.");
+
+    renderList("specialists-content", runtime.specialist_runs || [], (item) => card(
+      item.specialist_slug,
+      [
+        ["Status", item.status],
+        ["Confidence", item.confidence],
+        ["Rounds", item.rounds_completed],
+        ["Actions", item.actions_executed],
+        ["Stop reason", item.stop_reason],
+        ["Summary", item.summary],
+        ["Evidence", (item.evidence_ids || []).join(", ")]
+      ]
+    ), "لا توجد Specialist runs محفوظة.");
+
+    renderList("evidence-content", runtime.evidence || [], (item) => card(
+      item.title || item.evidence_id,
+      [
+        ["Evidence ID", item.evidence_id],
+        ["Kind", item.kind],
+        ["Source", item.source_id],
+        ["Excerpt", item.excerpt]
+      ]
+    ), "لا توجد Evidence محفوظة.");
+  }
+
+  function renderList(id, items, builder, emptyText) {
+    const node = document.getElementById(id);
+    node.replaceChildren();
+    for (const item of items) node.appendChild(builder(item));
+    if (!node.children.length) node.textContent = emptyText;
+  }
+
+  async function load() {
+    stateBox.hidden = false;
+    stateBox.textContent = "جاري تحميل التحقيق...";
+    content.hidden = true;
+
+    try {
+      const response = await fetch(
+        "/api/investigations/" + encodeURIComponent(investigationId),
+        {headers: {"Accept": "application/json"}}
+      );
+
+      if (response.status === 404) {
+        stateBox.textContent = "التحقيق غير موجود.";
+        return;
+      }
+
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
+      const item = await response.json();
+      renderSummary(item);
+      renderRuntime(item.runtime);
+
+      stateBox.hidden = true;
+      content.hidden = false;
+    } catch (error) {
+      stateBox.hidden = false;
+      stateBox.textContent = "تعذر تحميل التحقيق: " + error.message;
+    }
+  }
+
+  document.getElementById("reload-investigation").addEventListener("click", load);
+  load();
+})();
+</script>
+{% endblock %}
