@@ -19,6 +19,13 @@ VALID = {
     "diagnostic_tool_requests": [],
 }
 
+FINAL_SYNTHESIS_VALID = {
+    "summary": "Concise result.",
+    "confidence": 0.5,
+    "missing_evidence": [],
+    "recommended_next_specialists": [],
+}
+
 
 def run_request(user_prompt):
     calls = []
@@ -31,7 +38,14 @@ def run_request(user_prompt):
             json={
                 "done_reason": "stop",
                 "message": {
-                    "content": json.dumps(VALID)
+                    "content": json.dumps(
+                        (
+                            FINAL_SYNTHESIS_VALID
+                            if "## Final Synthesis Required"
+                            in user_prompt
+                            else VALID
+                        )
+                    )
                 },
             },
             request=request,

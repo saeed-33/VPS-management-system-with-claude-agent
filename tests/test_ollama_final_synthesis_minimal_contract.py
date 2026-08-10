@@ -24,7 +24,6 @@ def test_final_synthesis_uses_minimal_json_mode():
                         {
                             "summary": "NGINX is not confirmed running.",
                             "confidence": 0.7,
-                            "findings": [],
                             "missing_evidence": [
                                 "Direct process evidence."
                             ],

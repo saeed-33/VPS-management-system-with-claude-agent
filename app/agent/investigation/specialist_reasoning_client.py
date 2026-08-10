@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from app.shared.config import Settings
 from app.shared.dto.specialist_reasoning import (
+    SpecialistFinalSynthesisOutput,
     SpecialistReasoningOutput,
 )
 
@@ -101,7 +102,6 @@ class OllamaSpecialistReasoningClient(
             compact_contract = (
                 '{"summary":"short conclusion",'
                 '"confidence":0.0,'
-                '"findings":[],'
                 '"missing_evidence":[],'
                 '"recommended_next_specialists":[]}'
             )
@@ -128,16 +128,11 @@ class OllamaSpecialistReasoningClient(
             + (
                 (
                     "\n\n## Provider Final-Synthesis Compact Mode"
-                    "\nReturn the smallest valid object that answers the "
-                    "objective."
-                    "\nUse no more than 2 findings and 1 hypothesis."
-                    "\nDo not include a hypothesis when findings already "
-                    "state the conclusion."
-                    "\nKeep knowledge_source_ids empty unless an exact "
-                    "knowledge_source_id value from context is essential."
-                    "\nNever use NGINX module names or directive names as "
-                    "knowledge_source_ids."
-                    "\ndiagnostic_tool_requests must be []."
+                    "\nReturn exactly the minimal Final Synthesis object."
+                    "\nAllowed keys are only: summary, confidence, "
+                    "missing_evidence, recommended_next_specialists."
+                    "\nDo not output findings, hypotheses, ruled_out, "
+                    "knowledge_source_ids, or diagnostic_tool_requests."
                 )
                 if is_final_synthesis
                 else ""
@@ -176,11 +171,10 @@ class OllamaSpecialistReasoningClient(
                     "Prefer fewer findings over a truncated response."
                     + (
                         " For Final Synthesis return only summary, "
-                        "confidence, at most one finding, at most two "
-                        "missing_evidence items, and at most one "
-                        "recommended_next_specialists slug. Omit hypotheses, "
-                        "ruled_out, knowledge citations, and Tool requests "
-                        "unless absolutely required by the schema."
+                        "confidence, missing_evidence, and "
+                        "recommended_next_specialists. Do not output findings, "
+                        "hypotheses, ruled_out, knowledge_source_ids, or "
+                        "diagnostic_tool_requests."
                         if is_final_synthesis
                         else ""
                     )
@@ -282,6 +276,13 @@ class OllamaSpecialistReasoningClient(
                 cleaned = "\n".join(lines).strip()
 
             try:
+                if is_final_synthesis:
+                    final_output = (
+                        SpecialistFinalSynthesisOutput
+                        .model_validate_json(cleaned)
+                    )
+                    return final_output.to_reasoning_output()
+
                 return (
                     SpecialistReasoningOutput
                     .model_validate_json(cleaned)

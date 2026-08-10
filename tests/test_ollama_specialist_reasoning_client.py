@@ -19,6 +19,13 @@ VALID_OUTPUT = {
     "diagnostic_tool_requests": [],
 }
 
+FINAL_SYNTHESIS_OUTPUT = {
+    "summary": "Concise result.",
+    "confidence": 0.7,
+    "missing_evidence": [],
+    "recommended_next_specialists": [],
+}
+
 
 def make_response(status_code, payload, request):
     return httpx.Response(
@@ -170,7 +177,7 @@ def test_final_synthesis_enables_provider_compact_mode():
             {
                 "done_reason": "stop",
                 "message": {
-                    "content": json.dumps(VALID_OUTPUT)
+                    "content": json.dumps(FINAL_SYNTHESIS_OUTPUT)
                 },
             },
             request,
@@ -201,8 +208,8 @@ def test_final_synthesis_enables_provider_compact_mode():
     prompt = calls[0]["messages"][1]["content"]
 
     assert "Provider Final-Synthesis Compact Mode" in prompt
-    assert "no more than 2 findings" in prompt
-    assert "knowledge_source_ids empty" in prompt
+    assert "Allowed keys are only: summary, confidence" in prompt
+    assert "Do not output findings, hypotheses, ruled_out" in prompt
     assert calls[0]["options"]["num_predict"] == 6144
     assert calls[0]["options"]["num_ctx"] == 32768
 
