@@ -1,6 +1,9 @@
 from app.agent.investigation.specialist_investigation_loop import (
     SpecialistInvestigationLoop,
 )
+from app.agent.investigation.langgraph_orchestrator import (
+    LangGraphServerCoordinator,
+)
 from app.agent.investigation.server_coordinator import (
     ServerCoordinator,
 )
@@ -190,6 +193,7 @@ class ApplicationContainer:
     evidence_collection_service: EvidenceCollectionService
     specialist_investigation_loop: SpecialistInvestigationLoop | None
     server_coordinator: ServerCoordinator | None
+    langgraph_server_coordinator: LangGraphServerCoordinator | None
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -330,6 +334,7 @@ def build_container() -> ApplicationContainer:
     report_pdf_service = None
     specialist_investigation_loop = None
     server_coordinator = None
+    langgraph_server_coordinator = None
 
     try:
         report_pdf_service = ReportPdfService(
@@ -483,6 +488,14 @@ def build_container() -> ApplicationContainer:
             ),
         )
 
+        langgraph_server_coordinator = LangGraphServerCoordinator(
+            specialist_registry=specialist_registry,
+            specialist_loop=(
+                specialist_investigation_loop
+            ),
+            max_concurrency=4,
+        )
+
         report_analyzer = ReportAnalyzer(
             report_query_service=report_query_service,
             analysis_repository=analysis_repository,
@@ -630,6 +643,9 @@ def build_container() -> ApplicationContainer:
         ),
         server_coordinator=(
             server_coordinator
+        ),
+        langgraph_server_coordinator=(
+            langgraph_server_coordinator
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,

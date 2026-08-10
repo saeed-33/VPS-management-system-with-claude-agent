@@ -26,6 +26,10 @@ from app.agent.investigation.specialist_investigation_loop import (
     SpecialistLoopStopReason,
     SpecialistLoopToolDecision,
 )
+from app.agent.investigation.langgraph_orchestrator import (
+    LangGraphServerCoordinator,
+    SpecialistWorkerAssignment,
+)
 from app.agent.investigation.server_coordinator import (
     ServerCoordinator,
     ServerCoordinatorResult,
@@ -69,6 +73,8 @@ __all__ = [
     "EvidenceCollectionRequest",
     "EvidenceCollectionService",
     "SSHDiagnosticCommandRunner",
+    "LangGraphServerCoordinator",
+    "SpecialistWorkerAssignment",
     "ServerCoordinator",
     "ServerCoordinatorResult",
     "ServerCoordinatorSpecialistRun",
