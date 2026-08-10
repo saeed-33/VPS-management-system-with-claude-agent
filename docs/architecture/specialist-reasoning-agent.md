@@ -1,11 +1,9 @@
 # Specialist Reasoning Agent
 
-**Phase:** 4.10  
-**Status:** Implemented — pending runtime acceptance
+**Phase:** 4.10+  
+**Status:** Implemented and integrated into the bounded Investigation runtime.
 
-Phase 4.10 is the first Specialist phase that invokes an LLM.
-
-It is reasoning-only:
+The Specialist Reasoning Agent is the LLM reasoning boundary. It does not authorize commands and does not own orchestration.
 
 ```text
 SpecialistContextSnapshot
@@ -14,20 +12,17 @@ SpecialistContextSnapshot
 SpecialistReasoningAgent
         |
         v
-strict SpecialistReasoningOutput (Pydantic)
+structured output
         |
-reference validation
+reference/provenance validation
         |
         v
 SpecialistResult
 ```
 
-No diagnostic tool, SSH command, shell command, service restart, configuration
-change, or remediation operation exists in the Phase 4.10 output schema.
+## Normal reasoning contract
 
-## Output contract
-
-The model returns:
+Normal investigation reasoning may return:
 
 ```text
 summary
@@ -37,67 +32,62 @@ hypotheses[]
 ruled_out[]
 missing_evidence[]
 recommended_next_specialists[]
+diagnostic_tool_requests[]
 ```
 
-Findings contain explicit `evidence_ids` and `knowledge_source_ids`.
+Findings may cite Evidence and Knowledge source IDs.
 
-## Attribution gate
+Diagnostic Tool requests contain registered Tool IDs plus typed arguments; they never contain arbitrary shell commands.
 
-The LLM is not trusted to invent source IDs.
+## Provenance gate
 
-Before a result can become `SpecialistResult`, every citation is checked
-against the actual `SpecialistContextSnapshot`.
+The LLM is not trusted to invent IDs.
 
-Unknown evidence IDs or Knowledge IDs fail validation.
+Every referenced Evidence ID must exist in the actual Specialist context. Every Knowledge ID must correspond to an actual retrieved Knowledge source/chunk exposed to the model.
 
-Recommended Specialists may also be checked against the enabled Specialist
-Registry. Phase 4.10 only recommends them; it does not spawn them.
+Unknown references fail validation.
 
-## Documentation is not server evidence
+Technical documentation is not live server Evidence.
 
-The system prompt explicitly separates technical documentation from evidence
-about the monitored server. A documentation statement can support how a
-component works, but cannot prove that a configuration or fault exists on the
-server.
+## Secondary Specialist recommendations
 
-## Missing evidence
+`recommended_next_specialists` is advisory output.
 
-`SpecialistResult` now includes `missing_evidence`. This is required for the
-next diagnostic phases because a Specialist must be able to say what it needs
-to confirm or reject a hypothesis without executing anything yet.
+The reasoning model does not spawn Specialists. Phase 4.17 LangGraph routing validates recommendations against the enabled Specialist Registry, duplicate-execution state, remaining Specialist slots, and remaining action budget.
 
-## Provider support
+## Final Synthesis contract
 
-The Phase 4.10 client supports the same configured providers as current report
-analysis:
+The Investigation Loop can force a synthesis-only pass when no more useful Tool execution should occur.
+
+For the Ollama provider, Final Synthesis intentionally uses a smaller output shape:
 
 ```text
-ollama
-openai
+summary
+confidence
+missing_evidence
+recommended_next_specialists
 ```
 
-Both paths enforce structured Pydantic output.
+The purpose is provider reliability: final output must remain complete JSON rather than being truncated while producing verbose findings/hypotheses structures.
 
-## Acceptance
+Normal reasoning keeps the richer schema.
 
-With the current NGINX Knowledge context:
+## Ollama runtime
 
-```powershell
-uv run python tools/reason_specialist_context.py `
-  nginx `
-  "Determine what can be concluded about the NGINX failure from the supplied context." `
-  --domains nginx,http,proxy
-```
+The accepted Gemma runtime uses an explicit Ollama context window of 32768 tokens.
 
-A good acceptance result should have:
+Context capacity and output generation budget are separate controls. The project keeps a large enough generation allowance for structured output rather than solving truncation by globally reducing output tokens.
+
+## Safety boundary
+
+The reasoning agent cannot execute SSH or raw shell.
 
 ```text
-Status: completed
-Confidence: appropriately conservative
-Missing evidence: usually > 0 when no live server evidence was supplied
+LLM Tool request
+ -> Diagnostic Tool Registry
+ -> Diagnostic Policy
+ -> approved execution envelope
+ -> Evidence Collection
 ```
 
-The result must not claim that it executed a command or changed the server.
-
-Phase 4.11 introduces the Diagnostic Tool Registry. It still does not grant
-arbitrary shell access.
+The Policy Engine remains authoritative.

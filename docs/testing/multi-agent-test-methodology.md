@@ -1,135 +1,53 @@
 # منهجية الاختبارات — Multi-Agent Investigation
 
-**الحالة:** المنهجية الرسمية الحالية حتى Phase 4.11  
+**الحالة:** المنهجية الرسمية الحالية حتى إغلاق Phase 4.17  
 **بيئة الاختبار المرجعية:** Ubuntu Server 22.04.2 amd64 على VMware
 
-نجاح `pytest` وحده لا يكفي لإغلاق أي خطوة كبيرة في Phase 4. يجب التمييز بين صحة الكود، وصحة قاعدة البيانات، وصحة الاسترجاع، وسلوك الـLLM، وصحة التشخيص على VM حقيقي.
+نجاح `pytest` وحده لا يكفي لإغلاق خطوة runtime في Phase 4. يجب فصل صحة العقود، وقاعدة البيانات، والاسترجاع، والـLLM، والسياسة الأمنية، وSSH، وLangGraph orchestration.
 
-## 1. Unit / Contract Tests
-
-الأمر الأساسي:
+## 1. Automated regression
 
 ```powershell
 uv run python -m pytest
 ```
 
-الـbaseline الحالي بعد Phase 4.11:
+Reference baseline after the latest accepted Phase 4.17 work:
 
 ```text
-124 passed
+184 passed, 1 warning
 ```
 
-تشمل هذه الطبقة عقود Investigation، Router rules، parsing/chunking، RRF، context budgets، citation validation، Specialist recommendation normalization، Diagnostic Tool validation، وTool allow-list enforcement.
+The remaining warning is the existing Starlette/TestClient deprecation warning.
 
-قاعدة regression: لا ينبغي أن يقل baseline السابق إلا إذا استُبدلت اختبارات بشكل مقصود ومُوثق.
+قاعدة regression: لا ينخفض baseline إلا بتغيير اختبارات مقصود ومُوثق.
 
-## 2. Database / Schema Verification
+## 2. Database verification
+
+بعد أي schema/index/vector change:
 
 ```powershell
 uv run python tools/bootstrap_database.py --verify-only
 ```
 
-يجب تشغيله بعد أي تغيير في tables أو columns أو indexes أو vector dimensions أو generated search_vector أو constraints. نجاح migration وحده لا يكفي.
+Phase 4.16/4.17 orchestration acceptance did not require a new database schema.
 
-## 3. Runtime Acceptance Tests
+## 3. Retrieval verification
 
-تُجرى ضد التطبيق الحقيقي وPostgreSQL وOllama وRegistry وRepositories الفعلية.
+Incident RAG and Knowledge RAG are tested independently from the LLM.
 
-أمثلة:
+Historical incidents are context, not proof of current server state.
 
-```text
-inspect_specialist_registry.py
-inspect_investigation_routing.py
-persist_investigation_routing.py
-inspect_investigation.py
-inspect_knowledge_sources.py
-ingest_knowledge_source.py
-chunk_knowledge_document.py
-index_knowledge_document.py
-inspect_knowledge_index.py
-search_knowledge.py
-inspect_specialist_context.py
-reason_specialist_context.py
-inspect_diagnostic_tools.py
-```
+Knowledge sources explain technology behavior but do not prove a live server condition.
 
-كل خطوة Runtime-dependent يجب أن يكون لها أمر قبول واضح ونتيجة متوقعة.
+## 4. Provenance tests
 
-## 4. Retrieval Tests
+Any Evidence/Knowledge ID emitted by reasoning must exist in the context actually supplied to that Specialist.
 
-يجب اختبار Retrieval بصورة مستقلة عن الـLLM.
+Unknown IDs fail validation.
 
-### Incident RAG
+## 5. Diagnostic safety
 
-نقيّم semantic similarity، vector ranking، full-text ranking، compatibility gates، semantic thresholds، RRF fusion، وsource report/analysis provenance.
-
-الحادث التاريخي Context وليس Proof لحالة السيرفر الحالية.
-
-### Knowledge RAG
-
-نقيّم source enabled state، document indexed state، specialist/domain scope، vector rank، full-text rank، RRF fusion، deterministic reranking، Top-K budget، chunk attribution، وsource/document provenance.
-
-مثال:
-
-```powershell
-uv run python tools/search_knowledge.py `
-  "nginx modules configuration" `
-  --specialist nginx `
-  --domains nginx,http,proxy
-```
-
-قاعدة أساسية:
-
-```text
-retrieval correctness != corpus quality
-```
-
-قد يعمل المحرك بصورة صحيحة بينما المصدر المفهرس ضعيف.
-
-## 5. Large Document / Chunking Tests
-
-ملف PDF من 100 صفحة لا يُرسل كاملًا للـLLM:
-
-```text
-Parser
-→ Structure-aware Chunker
-→ Index
-→ Retrieval
-→ Top-K relevant chunks
-```
-
-نقيّم chunk sizes، section boundaries، page numbers، overlap، duplicate chunks، irrelevant chunk rate، وrelevant chunk recall.
-
-السؤال الحقيقي: هل يمكن استرجاع نصف الصفحة المفيدة من ملف كبير؟
-
-## 6. LLM Contract Tests
-
-### Mocked LLM
-
-نختبر Pydantic output، unknown evidence/knowledge IDs، confidence bounds، missing_evidence، recommendation normalization، وreasoning-only boundary.
-
-### Real LLM Acceptance
-
-مثال:
-
-```powershell
-uv run python tools/reason_specialist_context.py `
-  nginx `
-  "Determine what can be concluded about the NGINX failure from the supplied context." `
-  --domains nginx,http,proxy
-```
-
-نقيّم السلوك لا النص الحرفي: confidence، دعم findings، source IDs، missing evidence، عدم اختلاق facts، وعدم ادعاء تنفيذ commands.
-
-## 7. Citation / Provenance Tests
-
-أي Finding يعتمد على Evidence يجب أن يشير إلى `evidence_id`، وأي Finding يعتمد على Knowledge يجب أن يشير إلى `knowledge_source_id`.
-
-أي ID غير موجود في Context يجب أن يفشل validation.
-
-## 8. Diagnostic Tool Safety Tests
-
-من Phase 4.11 فما بعد:
+Required negative cases include:
 
 ```text
 unknown Tool rejected
@@ -137,28 +55,132 @@ Tool not assigned rejected
 unknown argument rejected
 invalid service/path/port rejected
 shell injection rejected
+Policy DENY never reaches SSH
 ```
 
-مثال:
+No arbitrary shell is permitted.
+
+## 6. Specialist Investigation Loop acceptance
+
+Example:
+
+```powershell
+uv run python tools/run_specialist_investigation.py 2 nginx `
+  "Determine whether NGINX is installed/running and what live evidence supports the conclusion." `
+  --domains nginx,http,network `
+  --max-rounds 3 `
+  --max-actions 5
+```
+
+Validate:
 
 ```text
-nginx; rm -rf /
+bounded rounds
+bounded actions
+duplicate suppression
+Evidence propagation
+objective discipline
+final synthesis
+provenance validation
 ```
 
-يجب رفضه قبل command rendering.
+## 7. LangGraph parallel acceptance — Phase 4.16
 
-وعند إضافة Policy/Execution لاحقًا يجب إثبات أن SSH executor لم يُستدعَ أصلًا عند الرفض.
+Controlled acceptance may override only initial routing to guarantee two workers while keeping real LangGraph, Specialist loops, Policy, SSH, and Tool execution.
 
-## 9. Controlled VM Ground-Truth Tests
+Example:
 
-البيئة المرجعية:
+```powershell
+uv run python tools/run_langgraph_parallel_acceptance.py 1076 `
+  --specialists linux-cpu,linux-memory `
+  --max-specialists 2 `
+  --max-rounds 2 `
+  --max-actions 8
+```
+
+Required invariants:
 
 ```text
-Ubuntu Server 22.04.2 amd64
-VMware
+two_or_more_workers
+requested_workers_preserved
+langgraph_orchestrator
+parallel_mode
+global_budget_safe
+worker_action_sum_safe
+quota_budget_safe
+each_worker_within_quota
 ```
 
-السيناريوهات:
+## 8. Dynamic secondary acceptance — Phase 4.17
+
+There are two distinct acceptance questions.
+
+### A. Natural recommendation acceptance
+
+```powershell
+uv run python tools/run_langgraph_secondary_acceptance.py 1076 `
+  --initial-specialist nginx `
+  --max-specialists 3 `
+  --max-rounds 3 `
+  --max-actions 10 `
+  --require-secondary
+```
+
+This tests whether the real model naturally recommends another Specialist.
+
+Failure to recommend does not necessarily prove orchestration failure; it can be recommendation-quality behavior.
+
+### B. Controlled recommendation acceptance
+
+```powershell
+uv run python tools/run_langgraph_controlled_secondary_acceptance.py 1076 `
+  --initial-specialist nginx `
+  --secondary-specialist systemd-service `
+  --max-rounds 3 `
+  --max-actions 10
+```
+
+Only the recommendation value is controlled. Primary/secondary Specialist executions and Phase 4.17 Registry/budget validation remain real.
+
+Accepted reference result:
+
+```text
+Status:                  completed
+Execution mode:          dynamic-secondary
+Waves completed:         2
+Actions used:            3/10
+Executed Specialists:    nginx, systemd-service
+Secondary requested:     systemd-service
+Secondary accepted:      systemd-service
+```
+
+All Phase 4.17 orchestration acceptance checks passed.
+
+## 9. Ollama structured-output reliability
+
+The deployed model advertises a large context capacity, but the runtime must explicitly configure context.
+
+Reference accepted runtime:
+
+```text
+ollama ps
+CONTEXT 32768
+```
+
+Final Synthesis uses a smaller structured output contract than normal reasoning to reduce truncation and malformed JSON risk.
+
+Test both:
+
+```text
+normal reasoning -> rich contract
+final synthesis  -> compact contract
+```
+
+Do not globally reduce generation limits as a substitute for adequate context.
+
+## 10. Controlled VM ground truth
+
+Required scenarios include:
 
 ```text
 baseline
@@ -172,139 +194,54 @@ failed-systemd-service
 mixed
 ```
 
-السيناريو هو Ground Truth ثم نقارن Routing وEvidence وReasoning بما حدث فعليًا.
+Record false positives and false negatives.
 
-### Baseline
+## 11. Budget tests
 
-المتوقع: healthy report، لا Investigation غير ضروري، ولا false critical finding.
-
-### CPU
-
-المتوقع: CPU metrics تتغير، `linux-cpu` مفضل، process evidence مناسب.
-
-### Memory
-
-المتوقع: memory metrics تتغير و`linux-memory` يصبح مناسبًا.
-
-### Failed systemd service
-
-المتوقع: `systemctl --failed` يكتشف الخدمة، `systemd-service` يصبح مناسبًا، وjournal يدعم التشخيص.
-
-### Network / HTTP
-
-المتوقع: listener وconnections وHTTP errors تظهر في الأدلة.
-
-### Mixed
-
-نختبر تعدد الإشارات، candidate ranking، evidence separation، وcontext budgets.
-
-## 10. Test Matrix
-
-لكل سيناريو نسجل:
+Test:
 
 ```text
-Scenario ID
-Ground Truth
-Server ID
-Report ID
-Analysis ID
-Investigation ID
-Detected Domains
-Candidate Specialists
-Selected Specialists
-Tools Requested
-Evidence Collected
-Findings
-Hypotheses
-Confidence
-Expected Diagnosis
-Actual Diagnosis
-Pass/Fail
-Notes
+max specialists
+max rounds
+max actions
+per-worker parallel quota
+context budget
+Tool timeout
+Tool output limit
+duplicate requests
+dynamic secondary loops
 ```
 
-## 11. False Positives / False Negatives
+Every limit must stop safely and visibly.
 
-False Positive: النظام يدعي مشكلة غير موجودة.
+## 12. Step completion gate
 
-False Negative: المشكلة موجودة لكن النظام لا يكتشفها.
-
-يجب تسجيل النوعين.
-
-## 12. Regression Cases
-
-حالات ثابتة حالية:
-
-```text
-Report 825
-Expected: should investigate = false
-```
-
-```text
-Report 807
-Expected:
-domains = connectivity, network
-selected = linux-network
-```
-
-## 13. Performance / Cost
-
-عند إضافة Investigation Loop نسجل:
-
-```text
-latency
-LLM calls
-embedding calls
-retrieval calls
-Tool actions
-rounds
-context size
-tokens/cost when available
-```
-
-## 14. Budget Tests
-
-نختبر حدود max specialists، max rounds، max actions، max context chars، max knowledge chunks، max incident contexts، Tool timeout، وTool output limit.
-
-عند بلوغ الحد يجب التوقف بشكل واضح وآمن.
-
-## 15. Step Completion Gate
-
-أي خطوة Phase 4 تعتبر مكتملة فقط إذا تحقق ما ينطبق عليها من التالي:
+A Phase 4 step closes only when all applicable items pass:
 
 ```text
 1. capability implemented
 2. automated tests added
 3. full pytest passes
-4. previous regression cases pass
-5. DB verification if schema/index changed
-6. runtime acceptance if runtime-dependent
-7. real LLM acceptance if LLM behavior changed
-8. retrieval acceptance if search changed
-9. safety negative tests if permissions/execution changed
-10. controlled VM test if real evidence/execution changed
+4. previous regressions pass
+5. DB verification when schema/index changes
+6. runtime acceptance
+7. real LLM acceptance when LLM behavior changes
+8. retrieval acceptance when retrieval changes
+9. safety negative tests when execution changes
+10. controlled VM test when live evidence changes
 11. documentation updated
-12. Admin UI updated only if capability is operator-managed
+12. UI updated only for operator-managed capabilities
 ```
 
-## 16. ما نسجله عند إغلاق كل خطوة
+## 13. Phase 4.18 testing target
+
+Correlation + Final Diagnosis must test:
 
 ```text
-Step number
-Files changed
-Migration required?
-pytest result
-DB verification result
-Runtime acceptance command/result
-LLM provider/model
-Reference IDs
-Known limitations
-Safety result
-Next step
+common-process correlation
+conflicting Specialist conclusions
+insufficient Evidence
+confirmed/probable/unknown classification
+claim-to-Evidence traceability
+no unsupported global diagnosis
 ```
-
-## 17. Phase 4.20 Final Evaluation
-
-نقيس routing correctness، Specialist selection correctness، diagnostic accuracy، false positive/negative rates، unsupported claim rate، citation accuracy، Knowledge attribution، missing-evidence usefulness، Tool selection/denial correctness، average rounds/actions، latency، LLM calls، token/cost profile، وsafety violations.
-
-لا يمكن إغلاق Phase 4 فقط لأن pytest أخضر؛ يجب أن يثبت النظام على VM الحقيقي أنه يكتشف المشكلة الصحيحة، يختار الوكيل المناسب، يجمع الأدلة الصحيحة، لا يختلق facts، ولا يتجاوز الصلاحيات.

@@ -441,13 +441,13 @@ Remediation belongs to Phase 5 with separate permissions, approval, audit, rollb
 | 4.9 | Completed — bounded Specialist Context runtime acceptance |
 | 4.10 | Completed — structured conservative LLM reasoning acceptance |
 | 4.11 | Completed — 18 read-only Tools + safety/allow-list tests |
-| 4.12 | Next — Diagnostic Policy Engine |
-| 4.13 | Planned — Evidence Collection |
-| 4.14 | Planned — Specialist Investigation Loop |
-| 4.15 | Planned — Server Coordinator |
-| 4.16 | Planned — Parallel Investigation |
-| 4.17 | Planned — Dynamic Secondary Specialists |
-| 4.18 | Planned — Correlation + Final Diagnosis |
+| 4.12 | Completed — Diagnostic Policy Engine runtime accepted |
+| 4.13 | Completed — Evidence Collection runtime accepted |
+| 4.14 | Completed — Specialist Investigation Loop runtime accepted |
+| 4.15 | Completed — Server Coordinator runtime accepted |
+| 4.16 | Completed — LangGraph bounded parallel runtime accepted |
+| 4.17 | Completed — Dynamic Secondary Specialist Routing runtime accepted |
+| 4.18 | Next — Correlation + Final Diagnosis |
 | 4.19 | Planned — Investigation API/UI |
 | 4.20 | Planned — Evaluation & Safety Gate |
 
@@ -455,14 +455,18 @@ Remediation belongs to Phase 5 with separate permissions, approval, audit, rollb
 
 **Milestone B — Routing + Knowledge (4.5–4.9): COMPLETED.**
 
-Milestone C is active.
+Milestone C is completed. Milestone D is active.
 
-Current: **4.12 — Diagnostic Policy Engine**.
+Current: **4.18 — Correlation + Final Diagnosis**.
 
-Reference automated baseline after 4.11:
+Reference automated baseline after the latest accepted 4.17 work:
 
 ```text
-124 passed
+184 passed, 1 warning
 ```
 
 Update this table at the end of every step.
+
+## Phase 4.17 closeout
+
+See [Phase 4.17 Closeout](phase-4-17-closeout.md) for the accepted LangGraph dynamic-secondary runtime evidence, Ollama context decision, and the Phase 4.18 entry boundary.

@@ -1,7 +1,8 @@
 # Dynamic Secondary Specialist Routing — Phase 4.17
 
-Phase 4.17 adds bounded, conditional follow-up Specialist routing above the
-accepted 4.16 parallel LangGraph coordinator.
+**Status:** Implemented and runtime accepted.
+
+Phase 4.17 adds bounded, conditional follow-up Specialist routing above the accepted Phase 4.16 LangGraph parallel coordinator.
 
 ```text
 initial routing
@@ -26,47 +27,121 @@ inspect recommendations again
     +-- bounded loop --> ...
 ```
 
-## Design constraints
+## Decision boundary
 
-Recommendations are advisory. A model cannot create a Specialist.
+`recommended_next_specialists` is advisory model output. It is never an execution command.
 
 A recommendation is accepted only when:
 
 1. its slug exists in the enabled Specialist Registry snapshot;
 2. it has not already executed in the Investigation;
 3. an Investigation Specialist slot remains;
-4. action budget remains.
+4. global action budget remains.
 
-The graph may execute more than one follow-up wave, but the loop is bounded by
-`InvestigationBudget.max_specialists` and `InvestigationBudget.max_actions`.
+The model cannot fabricate an executable Specialist identity.
 
-## Budget behavior
+## LangGraph composition
 
-Wave 1 receives the original budget.
-
-After a wave finishes, actual action usage is subtracted from the global
-budget. The next wave receives only the remaining action budget.
-
-This is safe because waves are sequential relative to one another even though
-Specialists inside each wave can execute in parallel using Phase 4.16.
-
-## Evidence behavior
-
-Every later wave receives the accumulated Evidence from all previous waves.
-Evidence remains deduplicated by `evidence_id`.
-
-## Why a graph above the 4.16 graph
-
-Phase 4.16 already has accepted parallel fan-out/fan-in behavior. 4.17 composes
-that stable graph instead of rewriting its worker execution path.
-
-This gives two clear orchestration levels:
+Phase 4.17 deliberately composes the accepted 4.16 graph rather than replacing it.
 
 ```text
 outer graph: dynamic follow-up waves
 inner graph: bounded parallel Specialists within one wave
 ```
 
-## Out of scope
+Specialists inside one wave may run concurrently. Waves themselves are sequential because a later wave depends on recommendations and Evidence produced by an earlier wave.
 
-Cross-Specialist correlation and final diagnosis remain Phase 4.18.
+## Budget semantics
+
+Wave 1 receives the available Investigation budget.
+
+After each wave, actual action usage is deducted from the global action budget. A later wave receives only the remaining budget.
+
+Invariants:
+
+```text
+total actual actions <= InvestigationBudget.max_actions
+executed specialists <= InvestigationBudget.max_specialists
+no Specialist slug executes twice
+```
+
+Phase 4.16 per-worker quota safety remains in force inside each parallel wave.
+
+## Evidence propagation
+
+Later waves receive accumulated Evidence from previous waves.
+
+Evidence remains provenance-bearing and deduplicated by `evidence_id`. Specialist reasoning may cite only IDs actually present in its bounded context.
+
+## Final synthesis behavior
+
+A Specialist Investigation Loop may enter synthesis-only mode when no useful additional Tool execution is possible or when the final reasoning pass is required.
+
+For Ollama, the runtime uses a deliberately small Final Synthesis output contract to reduce structured-output truncation risk:
+
+```text
+summary
+confidence
+missing_evidence
+recommended_next_specialists
+```
+
+Normal reasoning retains the richer contract containing findings, hypotheses, ruled-out conclusions, provenance references, missing evidence, recommendations, and diagnostic Tool requests.
+
+This provider-level compact synthesis contract does not weaken Evidence provenance validation during normal investigation rounds.
+
+## Ollama context window
+
+The deployed Gemma model advertises a much larger model context capacity, but Ollama runtime context must be configured explicitly.
+
+The accepted local runtime was verified with:
+
+```text
+CONTEXT = 32768
+```
+
+Generation limits remain separate from context capacity. Increasing context is not treated as a reason to reduce the Final Synthesis generation budget.
+
+## Runtime acceptance
+
+Controlled Secondary Runtime Acceptance proved the complete two-wave execution path:
+
+```text
+Initial Specialist:       nginx
+Controlled Secondary:     systemd-service
+Execution mode:           dynamic-secondary
+Waves completed:          2
+Actions used:             3/10
+Executed Specialists:     nginx, systemd-service
+Secondary requested:      systemd-service
+Secondary accepted:       systemd-service
+```
+
+Acceptance checks passed:
+
+```text
+primary_completed
+controlled_recommendation_injected
+two_waves_completed
+secondary_requested
+secondary_accepted_by_real_4_17
+secondary_executed
+secondary_completed
+global_action_budget_safe
+specialist_budget_safe
+no_duplicate_specialists
+```
+
+Only the recommendation value was controlled in that acceptance tool. Both Specialist executions and all Registry/budget validation after the recommendation used the real runtime.
+
+## Important limitation
+
+Controlled acceptance proves that the orchestration correctly validates and executes a secondary recommendation.
+
+It does not by itself prove that the LLM will always decide to recommend a secondary Specialist in every scenario where a human expects one. Recommendation quality is an evaluation concern and must be measured separately from orchestration correctness.
+
+## Next boundary
+
+Phase 4.18 owns cross-Specialist correlation and final server-level diagnosis.
+
+It must distinguish confirmed, probable, and unknown conclusions and preserve an Evidence chain for every material claim.

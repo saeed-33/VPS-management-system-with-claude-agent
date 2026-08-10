@@ -1,161 +1,132 @@
 # Current Workflows
 
-## Monitoring
+## Monitoring and initial analysis
 
 ```text
 Load server
- -> validate monitor_enabled/profile
- -> load enabled commands
- -> SSH
- -> execute commands
+ -> validate monitoring configuration
+ -> SSH monitoring commands
  -> build/save report
  -> enqueue analysis
-```
-
-## Initial Report Analysis
-
-```text
-Report
  -> normalize + fingerprint
- -> exact match? -> REUSE
- -> otherwise Incident Hybrid Retrieval
- -> accepted context? -> ASSISTED
- -> none? -> FULL
- -> LLM for ASSISTED/FULL
- -> save/index/metrics
+ -> Incident Hybrid Retrieval
+ -> LLM when required
+ -> save/index analysis
 ```
 
-Exact fingerprint reuse and semantic retrieval remain different mechanisms.
+Exact fingerprint reuse and semantic retrieval remain distinct mechanisms.
 
-## Investigation Routing
+## Investigation routing
 
 ```text
 Monitoring Report
-+
-Initial Analysis
-+
-SpecialistRegistrySnapshot
++ Initial Analysis
++ SpecialistRegistrySnapshot
  -> actionable signal?
  -> detect domains
- -> candidate Specialists
- -> ranked baseline selection
+ -> rank enabled Specialists
  -> InvestigationRoutingDecision
 ```
 
 Healthy reports do not open investigations merely because Specialists exist.
 
-Connection failures are classified toward network/connectivity rather than
-generic process routing.
-
-## Investigation Persistence
-
-```text
-Routing Decision
- -> Investigation
- -> Candidate Specialist records
- -> Selected Specialist records
- -> database
- -> reload/inspect
-```
-
-## Knowledge Source Lifecycle
-
-```text
-Operator-defined Knowledge Source
- -> enabled/disabled metadata
- -> loader
- -> parser
- -> KnowledgeDocument(parsed)
- -> structure-aware chunker
- -> KnowledgeChunk
- -> embeddings + FTS
- -> KnowledgeDocument(indexed)
-```
-
-## Knowledge Search
-
-```text
-Specialist problem/query
-   +--> Vector Search / HNSW
-   +--> Full-Text Search / GIN
-                |
-                v
-             RRF fusion
-                |
-                v
-    Specialist/domain scope reranking
-                |
-                v
-        attributed Top-K chunks
-```
-
-Search is restricted to enabled sources and indexed documents.
-
-The current baseline uses deterministic reranking; no LLM reranker is required.
-
-## Specialist Context
+## Specialist context
 
 ```text
 SpecialistTask
 + Specialist Instructions
 + Initial Analysis
-+ selected current Evidence
++ current Evidence
 + Incident RAG
 + Knowledge RAG
  -> SpecialistContextBuilder
- -> context budgets
- -> provenance markers
- -> SpecialistContextSnapshot
+ -> bounded provenance-bearing context
 ```
 
-Markers include:
+## Single-Specialist investigation
 
 ```text
-[evidence:<id>]
-[incident:report-<id>/analysis-<id>]
-[knowledge:chunk-<id>]
+reason
+ -> optional registered Tool requests
+ -> Diagnostic Policy
+ -> ALLOW/DENY
+ -> Evidence Collection over bounded SSH
+ -> rebuild context
+ -> reason again
+ -> final synthesis
 ```
 
-## Specialist Reasoning
+Only actual approved SSH executions consume action budget.
+
+Duplicate Tool requests do not consume another action.
+
+## Multi-Specialist orchestration
 
 ```text
-SpecialistContextSnapshot
- -> SpecialistReasoningClient
- -> strict Pydantic output
- -> evidence/knowledge ID validation
- -> SpecialistResult
+Investigation Router
+ -> selected Specialists
+ -> LangGraph parallel wave
+ -> SpecialistInvestigationLoop per worker
+ -> deterministic aggregation
 ```
 
-Current reasoning is read-only and has no Tool Request schema.
+Parallel workers receive deterministic action quotas whose sum never exceeds the global Investigation budget.
 
-When evidence is insufficient, the expected output is low confidence plus
-`missing_evidence`, not fabricated operational facts.
-
-## Diagnostic Tool Definition
+## Dynamic secondary routing
 
 ```text
-Specialist allowed_tool_ids
- -> DiagnosticToolRegistry
- -> tool exists?
- -> typed parameters valid?
- -> fixed safe command rendering
+wave 1 results
+ -> collect recommended_next_specialists
+ -> validate against enabled Registry
+ -> remove already executed Specialists
+ -> enforce remaining specialist/action budget
+ -> optional next parallel wave
+ -> repeat while bounded
 ```
 
-At Phase 4.11 this workflow stops before SSH execution.
+Recommendations are advisory. The model cannot create an executable Specialist.
 
-No arbitrary shell path exists.
+Later waves receive accumulated Evidence from previous waves.
 
-## Next workflow boundary — 4.12/4.13
+## Final synthesis
+
+Normal reasoning uses the rich Specialist reasoning contract.
+
+When the loop enters Final Synthesis mode, the Ollama provider uses a compact structured result:
 
 ```text
-Specialist requests Tool
- -> Diagnostic Policy Engine
- -> allow / deny
- -> approved registered Tool
- -> existing bounded SSH implementation
- -> execution result
- -> Evidence
- -> next Specialist reasoning round
+summary
+confidence
+missing_evidence
+recommended_next_specialists
 ```
 
-Policy and Evidence Collection remain separate responsibilities.
+This keeps the final JSON bounded while preserving secondary-routing information.
+
+## Accepted runtime configuration
+
+Reference local Ollama runtime:
+
+```text
+model: gemma4:e4b-it-q4_K_M
+context: 32768
+```
+
+The model advertises a larger maximum context, but runtime context is explicitly configured rather than relying on Ollama's smaller default.
+
+## Current boundary
+
+Phase 4.17 is accepted.
+
+The next workflow is Phase 4.18:
+
+```text
+Specialist Results
++ Evidence
++ provenance
+ -> cross-Specialist correlation
+ -> confirmed/probable/unknown claims
+ -> server-level Final Diagnosis
+```
+
+Phase 4 remains read-only. Autonomous remediation is still out of scope.

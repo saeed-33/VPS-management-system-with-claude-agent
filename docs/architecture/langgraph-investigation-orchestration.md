@@ -1,26 +1,26 @@
 # LangGraph Investigation Orchestration
 
-**Phase:** 4.16  
-**Decision:** LangGraph is the orchestration runtime for the multi-Specialist
-Investigation workflow.
+**Phase:** 4.16–4.17  
+**Status:** Implemented and runtime accepted.
 
-## Why LangGraph
+LangGraph is the orchestration runtime for multi-Specialist Investigation. The project continues to own all domain and safety logic.
 
-The project already owns its domain logic:
+LangGraph does not replace:
 
 - Investigation Router
 - dynamic Specialist Registry
 - Specialist reasoning loop
-- RAG
+- Incident RAG
+- Knowledge RAG
 - Diagnostic Tool Registry
-- Policy Engine
+- Diagnostic Policy Engine
+- Evidence Collection
 - SSH execution
-- Evidence contracts
+- Investigation contracts
 
-LangGraph is used only for stateful orchestration. It does not replace those
-services and does not require LangChain agents.
+No LangChain agent abstraction is required.
 
-The graph introduced in 4.16 is:
+## Phase 4.16 inner graph
 
 ```text
 START
@@ -35,71 +35,63 @@ prepare
        Send(worker N) ---+
 ```
 
-`Send` provides dynamic fan-out because Specialist count and identity are
-runtime Registry data.
+`Send` performs dynamic fan-out because Specialist identities come from runtime Registry data.
 
-## State ownership
+## Parallel state ownership
 
-Parallel workers share immutable baseline input:
+Workers share immutable baseline input and emit reducer-backed Specialist runs.
 
-- Investigation identity
-- report/server/analysis identifiers
-- routing decision
-- baseline Evidence
-- allowed Specialist slugs
+They do not mutate one shared Python action counter.
 
-Workers do not mutate a shared Python action counter.
+Aggregation restores deterministic output ordering from routing selection order even if workers finish in a different order.
 
-Each worker emits one `ServerCoordinatorSpecialistRun` into a reducer-backed
-list. Aggregation sorts those runs using routing selection order, making final
-ordering deterministic even when completion order is not.
+## Parallel action budget
 
-## Global action budget under parallelism
-
-A sequential mutable counter cannot safely control independent parallel
-branches.
-
-Phase 4.16 therefore uses deterministic pre-allocation:
+The global action budget is pre-allocated conservatively across workers.
 
 ```text
-Investigation max_actions = 5
-Selected workers = 2
+max_actions = 8
+workers = 2
 
-worker 1 quota = 3
-worker 2 quota = 2
-
-sum quotas = 5
+worker A quota = 4
+worker B quota = 4
 ```
 
-The allocation invariant is:
+Invariant:
 
 ```text
 sum(worker.action_quota) <= InvestigationBudget.max_actions
 ```
 
-Each worker receives its own `InvestigationBudget(max_actions=quota)` and
-starts its local action counter at zero.
-
-This is intentionally conservative. Unused quota from one worker is not
-borrowed by another during the same fan-out superstep. Dynamic redistribution
-can be considered later only if it can preserve deterministic budget safety.
+Unused quota is not borrowed by a sibling during the same parallel superstep.
 
 ## Failure isolation
 
-A worker catches its own Specialist-loop exception and converts it to a failed
-`SpecialistResult`.
+A worker failure is converted into a failed Specialist result. It does not automatically abort successful sibling workers.
 
-Therefore one failed branch does not abort successful sibling branches.
+## Phase 4.17 outer graph
 
-This is important because an uncaught exception in a parallel LangGraph
-superstep can fail that superstep.
+Phase 4.17 adds sequential dynamic waves around the accepted parallel graph:
 
-## What remains unchanged
+```text
+wave 1
+ -> inspect recommendations
+ -> validate Registry/budgets/duplicates
+ -> optional wave 2
+ -> ...
+ -> finalize
+```
 
-LangGraph does not execute shell commands, authorize Tools, retrieve RAG
-documents, or invoke SSH directly.
+This creates two orchestration levels:
 
-The execution boundary remains:
+```text
+outer graph = conditional secondary routing
+inner graph = bounded parallel Specialist execution
+```
+
+## Execution boundary
+
+LangGraph never executes shell commands directly.
 
 ```text
 LangGraph worker
@@ -109,23 +101,21 @@ LangGraph worker
  -> existing SSH stack
 ```
 
+## Runtime acceptance
+
+Phase 4.16 controlled parallel acceptance proved two real Specialist loops can run through the LangGraph runtime while preserving quota and global-budget invariants.
+
+Phase 4.17 controlled secondary acceptance then proved two sequential waves with real Registry/budget validation and real secondary Specialist execution.
+
 ## Persistence boundary
 
-4.16 compiles the graph without a production checkpointer.
+The graph remains compiled without a production LangGraph checkpointer.
 
-This is deliberate: the first acceptance target is orchestration equivalence
-plus safe parallelism.
+Investigation persistence remains a project-owned concern. A Postgres LangGraph checkpointer may be added later only if required by resumability semantics; it is not required for the accepted 4.16/4.17 orchestration behavior.
 
-A Postgres LangGraph checkpointer should be introduced as a separate persistence
-step after graph state has stabilized. The project already uses PostgreSQL, so
-that later step does not require adopting a second database technology.
+## Roadmap
 
-## Roadmap alignment
-
-- 4.15: sequential Server Coordinator — complete
-- 4.16: LangGraph foundation + bounded parallel fan-out — this phase
-- 4.17: conditional secondary Specialist routing
-- 4.18: cross-Specialist correlation and final diagnosis
-
-The existing `ServerCoordinator` is retained as the sequential reference
-implementation and compatibility boundary while 4.16 is accepted.
+- 4.15 sequential Server Coordinator: complete
+- 4.16 LangGraph parallel orchestration: complete
+- 4.17 dynamic secondary routing: complete
+- 4.18 cross-Specialist correlation and final diagnosis: next
