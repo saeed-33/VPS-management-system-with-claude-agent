@@ -8,6 +8,9 @@ from app.agent.investigation.contracts import (
     SpecialistResult,
     SpecialistTaskStatus,
 )
+from app.agent.investigation.diagnostic_tools import (
+    DiagnosticToolCall,
+)
 from app.agent.investigation.specialist_context import (
     SpecialistContextSnapshot,
 )
@@ -35,9 +38,25 @@ a condition exists on the monitored server.
 If the available information is insufficient, lower confidence and list the
 specific missing evidence required to confirm or reject the hypothesis.
 
+When an Available Diagnostic Tools catalog is supplied, you may request live
+evidence through diagnostic_tool_requests. Request only tool IDs from that
+catalog. Never put shell commands, shell operators, pipelines, redirections,
+or executable text in arguments. Use only the typed arguments defined by the
+catalog.
+
+Request the minimum evidence needed. Do not request a Tool when the existing
+evidence is already sufficient. If no additional diagnostic execution is
+needed, diagnostic_tool_requests must be empty.
+
 recommended_next_specialists may suggest enabled specialist slugs, but this
 response does not create or execute any additional specialist.
 """
+
+
+@dataclass(slots=True, frozen=True)
+class SpecialistDiagnosticToolRequest:
+    call: DiagnosticToolCall
+    rationale: str
 
 
 @dataclass(slots=True, frozen=True)
@@ -45,6 +64,10 @@ class SpecialistReasoningExecution:
     result: SpecialistResult
     provider: str
     model: str
+    diagnostic_tool_requests: tuple[
+        SpecialistDiagnosticToolRequest,
+        ...
+    ] = ()
 
 
 class SpecialistReasoningAgent:
@@ -60,10 +83,19 @@ class SpecialistReasoningAgent:
         *,
         context: SpecialistContextSnapshot,
         allowed_specialist_slugs: tuple[str, ...] = (),
+        diagnostic_tool_catalog: str | None = None,
     ) -> SpecialistReasoningExecution:
+        user_prompt = context.rendered_context
+
+        if diagnostic_tool_catalog:
+            user_prompt += (
+                "\n\n## Available Diagnostic Tools\n"
+                + diagnostic_tool_catalog
+            )
+
         output = await self._client.reason(
             system_prompt=SYSTEM_PROMPT,
-            user_prompt=context.rendered_context,
+            user_prompt=user_prompt,
         )
 
         self._validate_references(
@@ -100,10 +132,27 @@ class SpecialistReasoningAgent:
             ),
         )
 
+        diagnostic_requests = tuple(
+            SpecialistDiagnosticToolRequest(
+                call=DiagnosticToolCall(
+                    tool_id=item.tool_id,
+                    arguments=dict(
+                        item.arguments
+                    ),
+                ),
+                rationale=item.rationale,
+            )
+            for item
+            in output.diagnostic_tool_requests
+        )
+
         return SpecialistReasoningExecution(
             result=result,
             provider=self._client.provider_name,
             model=self._client.model_name,
+            diagnostic_tool_requests=(
+                diagnostic_requests
+            ),
         )
 
     @staticmethod
@@ -155,7 +204,6 @@ class SpecialistReasoningAgent:
                     "Specialist hypothesis referenced unknown evidence IDs: "
                     + ", ".join(sorted(unknown))
                 )
-
 
     @staticmethod
     def _normalize_specialist_recommendations(
@@ -290,6 +338,9 @@ class SpecialistReasoningAgent:
             metadata={
                 "reasoning_only": True,
                 "context_characters": context.character_count,
+                "diagnostic_tool_request_count": len(
+                    output.diagnostic_tool_requests
+                ),
                 "dropped_specialist_recommendations": list(
                     dropped_specialist_recommendations
                 ),

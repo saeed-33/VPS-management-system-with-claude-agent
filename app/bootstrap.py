@@ -1,3 +1,21 @@
+from app.agent.investigation.specialist_investigation_loop import (
+    SpecialistInvestigationLoop,
+)
+from app.agent.investigation.specialist_context import (
+    SpecialistContextBuilder,
+)
+from app.agent.investigation.specialist_reasoning_agent import (
+    SpecialistReasoningAgent,
+)
+from app.agent.investigation.specialist_reasoning_client import (
+    create_specialist_reasoning_client,
+)
+from app.agent.investigation.knowledge_retrieval import (
+    KnowledgeHybridRetriever,
+)
+from app.shared.database.repositories.knowledge_retrieval_repository import (
+    KnowledgeRetrievalRepository,
+)
 from app.agent.investigation.evidence_collection import (
     EvidenceCollectionService,
 )
@@ -167,6 +185,7 @@ class ApplicationContainer:
     diagnostic_tool_registry: DiagnosticToolRegistry
     diagnostic_policy_engine: DiagnosticPolicyEngine
     evidence_collection_service: EvidenceCollectionService
+    specialist_investigation_loop: SpecialistInvestigationLoop | None
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -305,6 +324,7 @@ def build_container() -> ApplicationContainer:
     rag_retriever = None
     rag_context_builder = None
     report_pdf_service = None
+    specialist_investigation_loop = None
 
     try:
         report_pdf_service = ReportPdfService(
@@ -409,6 +429,46 @@ def build_container() -> ApplicationContainer:
     if settings.llm_enabled:
         llm_client = create_llm_analysis_client(
             settings
+        )
+
+        specialist_knowledge_retriever = KnowledgeHybridRetriever(
+            repository=KnowledgeRetrievalRepository(),
+            embedding_client=create_embedding_client(
+                settings
+            ),
+            hnsw_ef_search=(
+                settings.rag_hnsw_ef_search
+            ),
+        )
+
+        specialist_context_builder = SpecialistContextBuilder(
+            knowledge_retriever=(
+                specialist_knowledge_retriever
+            )
+        )
+
+        specialist_reasoning_agent = SpecialistReasoningAgent(
+            client=create_specialist_reasoning_client(
+                settings
+            )
+        )
+
+        specialist_investigation_loop = SpecialistInvestigationLoop(
+            context_builder=(
+                specialist_context_builder
+            ),
+            reasoning_agent=(
+                specialist_reasoning_agent
+            ),
+            diagnostic_tool_registry=(
+                diagnostic_tool_registry
+            ),
+            diagnostic_policy_engine=(
+                diagnostic_policy_engine
+            ),
+            evidence_collection_service=(
+                evidence_collection_service
+            ),
         )
 
         report_analyzer = ReportAnalyzer(
@@ -552,6 +612,9 @@ def build_container() -> ApplicationContainer:
         ),
         evidence_collection_service=(
             evidence_collection_service
+        ),
+        specialist_investigation_loop=(
+            specialist_investigation_loop
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,

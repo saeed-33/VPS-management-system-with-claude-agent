@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -22,6 +24,14 @@ class SpecialistHypothesisOutput(BaseModel):
     contradicting_evidence_ids: list[str] = Field(default_factory=list)
 
 
+class SpecialistDiagnosticToolRequestOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    tool_id: str = Field(min_length=1, max_length=120)
+    arguments: dict[str, Any] = Field(default_factory=dict)
+    rationale: str = Field(min_length=1, max_length=1000)
+
+
 class SpecialistReasoningOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -32,3 +42,6 @@ class SpecialistReasoningOutput(BaseModel):
     ruled_out: list[str] = Field(default_factory=list)
     missing_evidence: list[str] = Field(default_factory=list)
     recommended_next_specialists: list[str] = Field(default_factory=list)
+    diagnostic_tool_requests: list[
+        SpecialistDiagnosticToolRequestOutput
+    ] = Field(default_factory=list)

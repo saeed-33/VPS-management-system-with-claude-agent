@@ -61,3 +61,4 @@
 - [Admin Management Coverage](api/admin-management.md)
 - [Diagnostic Policy Engine](architecture/diagnostic-policy.md)
 - [Evidence Collection](architecture/evidence-collection.md)
+- [Specialist Investigation Loop](architecture/specialist-investigation-loop.md)

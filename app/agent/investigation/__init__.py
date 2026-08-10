@@ -19,6 +19,13 @@ from app.agent.investigation.specialist_registry import (
     SpecialistRegistryValidationError,
     SpecialistRuntimeDefinition,
 )
+from app.agent.investigation.specialist_investigation_loop import (
+    SpecialistInvestigationLoop,
+    SpecialistInvestigationLoopResult,
+    SpecialistLoopRoundTrace,
+    SpecialistLoopStopReason,
+    SpecialistLoopToolDecision,
+)
 from app.agent.investigation.evidence_collection import (
     DiagnosticExecutionOutcome,
     EvidenceCollectionRequest,
@@ -57,6 +64,11 @@ __all__ = [
     "EvidenceCollectionRequest",
     "EvidenceCollectionService",
     "SSHDiagnosticCommandRunner",
+    "SpecialistInvestigationLoop",
+    "SpecialistInvestigationLoopResult",
+    "SpecialistLoopRoundTrace",
+    "SpecialistLoopStopReason",
+    "SpecialistLoopToolDecision",
     "EvidenceKind",
     "EvidenceReference",
     "InvestigationBudget",
