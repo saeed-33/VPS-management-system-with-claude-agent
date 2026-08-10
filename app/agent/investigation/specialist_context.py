@@ -598,8 +598,8 @@ class SpecialistContextBuilder:
 
             for item in evidence:
                 evidence_parts.append(
-                    "[evidence:"
-                    f"{item.evidence_id}]\n"
+                    "[evidence]\n"
+                    f"evidence_id: {item.evidence_id}\n"
                     f"title: {item.title}\n"
                     f"kind: {item.kind.value}\n"
                     f"excerpt: "
@@ -644,9 +644,13 @@ class SpecialistContextBuilder:
             knowledge_parts = []
 
             for item in knowledge:
+                canonical_source_id = (
+                    f"knowledge-chunk:{item.chunk_id}"
+                )
+
                 citation = (
-                    "[knowledge:"
-                    f"chunk-{item.chunk_id}]"
+                    "[knowledge]\n"
+                    f"knowledge_source_id: {canonical_source_id}"
                 )
 
                 location = []

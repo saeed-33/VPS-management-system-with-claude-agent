@@ -219,6 +219,39 @@ async def run(args) -> int:
             specialist_result.summary
         )
 
+        if specialist_result.status.value == "failed":
+            print()
+            print("Failure diagnostics:")
+
+            failure_type = (
+                specialist_result.metadata.get(
+                    "coordinator_failure"
+                )
+            )
+
+            error_text = (
+                specialist_result.metadata.get(
+                    "error"
+                )
+            )
+
+            print(
+                f"- Type:  "
+                f"{failure_type or '—'}"
+            )
+            print(
+                f"- Error: "
+                f"{error_text or '—'}"
+            )
+
+            if specialist_result.metadata:
+                print(
+                    "- Metadata: "
+                    + repr(
+                        specialist_result.metadata
+                    )
+                )
+
         if specialist_result.findings:
             print()
             print("Findings:")

@@ -4,6 +4,8 @@ from dataclasses import dataclass, replace
 from uuid import uuid4
 
 from app.agent.investigation.contracts import (
+    EvidenceKind,
+    EvidenceReference,
     InvestigationBudget,
     InvestigationStatus,
     ServerInvestigationState,
@@ -80,8 +82,20 @@ class ServerCoordinator:
             detected_domains=list(routing_decision.detected_domains),
         )
 
-        for item in initial_evidence:
+        for item in self._analysis_evidence(
+            report_id=report_id,
+            analysis_id=analysis_id,
+            summary=initial_analysis_summary,
+            issues=initial_analysis_issues,
+        ):
             state.add_evidence(item)
+
+        for item in initial_evidence:
+            if not any(
+                existing.evidence_id == item.evidence_id
+                for existing in state.evidence
+            ):
+                state.add_evidence(item)
 
         if (
             not routing_decision.should_investigate
@@ -238,6 +252,101 @@ class ServerCoordinator:
             runs=tuple(runs),
             investigation_actions_used=global_actions_used,
         )
+
+    @staticmethod
+    def _analysis_evidence(
+        *,
+        report_id: int,
+        analysis_id: int | None,
+        summary: str | None,
+        issues: tuple[dict, ...],
+    ) -> tuple[EvidenceReference, ...]:
+        source_id = (
+            analysis_id
+            if analysis_id is not None
+            else report_id
+        )
+
+        prefix = (
+            f"analysis:{analysis_id}"
+            if analysis_id is not None
+            else f"report:{report_id}:analysis"
+        )
+
+        evidence: list[EvidenceReference] = []
+
+        normalized_summary = (
+            (summary or "").strip()
+        )
+
+        if normalized_summary:
+            evidence.append(
+                EvidenceReference(
+                    evidence_id=(
+                        f"{prefix}:summary"
+                    ),
+                    kind=EvidenceKind.ANALYSIS,
+                    title="Initial analysis summary",
+                    source_id=source_id,
+                    excerpt=normalized_summary,
+                    metadata={
+                        "report_id": report_id,
+                        "analysis_id": analysis_id,
+                        "provenance": "initial_analysis",
+                    },
+                )
+            )
+
+        for index, issue in enumerate(
+            issues,
+            start=1,
+        ):
+            title = str(
+                issue.get("title")
+                or issue.get("type")
+                or f"Initial analysis issue {index}"
+            ).strip()
+
+            parts = []
+
+            for key in (
+                "description",
+                "message",
+                "error",
+                "details",
+            ):
+                value = issue.get(key)
+
+                if value is not None:
+                    rendered = str(value).strip()
+
+                    if rendered:
+                        parts.append(rendered)
+
+            if not parts:
+                parts.append(
+                    str(issue)
+                )
+
+            evidence.append(
+                EvidenceReference(
+                    evidence_id=(
+                        f"{prefix}:issue:{index}"
+                    ),
+                    kind=EvidenceKind.ANALYSIS,
+                    title=title,
+                    source_id=source_id,
+                    excerpt="\\n".join(parts)[:4000],
+                    metadata={
+                        "report_id": report_id,
+                        "analysis_id": analysis_id,
+                        "issue_index": index - 1,
+                        "provenance": "initial_analysis_issue",
+                    },
+                )
+            )
+
+        return tuple(evidence)
 
     @staticmethod
     def _build_objective(

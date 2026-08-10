@@ -146,8 +146,10 @@ def test_context_preserves_knowledge_source_ids():
         == 12
     )
 
-    assert "[knowledge:chunk-12]" in (
-        snapshot.rendered_context
+    assert (
+        "knowledge_source_id: "
+        "knowledge-chunk:12"
+        in snapshot.rendered_context
     )
 
 

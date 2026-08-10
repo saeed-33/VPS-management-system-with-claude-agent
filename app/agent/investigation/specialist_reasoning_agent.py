@@ -32,6 +32,15 @@ Every finding that depends on current evidence must cite only evidence IDs
 present in the context. Every finding that depends on technical knowledge
 must cite only knowledge source IDs present in the context.
 
+Current Evidence blocks contain an explicit `evidence_id:` field. Only the
+exact value after `evidence_id:` is a valid Evidence ID. Do not prepend
+`evidence:` or any other namespace to it. Error messages, hostnames, command
+output, Initial Analysis text, and Initial Issues text are never Evidence IDs
+by themselves. Never copy evidence text into an evidence_ids field.
+
+Technical Knowledge blocks contain an explicit `knowledge_source_id:` field.
+Only that exact value is a valid knowledge source ID.
+
 Treat retrieved technical documentation as reference material, not proof that
 a condition exists on the monitored server.
 
@@ -220,7 +229,45 @@ class SpecialistReasoningAgent:
             for item in context.knowledge_sources
         }
 
+        def normalize_reference(
+            value: str,
+            *,
+            namespace: str,
+            allowed: set[str],
+        ) -> str:
+            candidate = value.strip()
+
+            prefix = namespace + ":"
+
+            if candidate.startswith(prefix):
+                suffix = candidate[len(prefix):]
+
+                # Compatibility normalization is permitted only
+                # when the stripped value is already a real ID
+                # present in the supplied context.
+                if suffix in allowed:
+                    return suffix
+
+            return candidate
+
         for finding in output.findings:
+            finding.evidence_ids = [
+                normalize_reference(
+                    value,
+                    namespace="evidence",
+                    allowed=evidence_ids,
+                )
+                for value in finding.evidence_ids
+            ]
+
+            finding.knowledge_source_ids = [
+                normalize_reference(
+                    value,
+                    namespace="knowledge",
+                    allowed=knowledge_ids,
+                )
+                for value in finding.knowledge_source_ids
+            ]
             unknown_evidence = (
                 set(finding.evidence_ids)
                 - evidence_ids
@@ -243,6 +290,24 @@ class SpecialistReasoningAgent:
                 )
 
         for hypothesis in output.hypotheses:
+            hypothesis.supporting_evidence_ids = [
+                normalize_reference(
+                    value,
+                    namespace="evidence",
+                    allowed=evidence_ids,
+                )
+                for value in hypothesis.supporting_evidence_ids
+            ]
+
+            hypothesis.contradicting_evidence_ids = [
+                normalize_reference(
+                    value,
+                    namespace="evidence",
+                    allowed=evidence_ids,
+                )
+                for value in hypothesis.contradicting_evidence_ids
+            ]
+
             unknown = (
                 set(hypothesis.supporting_evidence_ids)
                 | set(hypothesis.contradicting_evidence_ids)
