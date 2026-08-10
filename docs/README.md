@@ -71,3 +71,5 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Investigation Runtime Snapshot](architecture/investigation-runtime-snapshot.md)
 - [Investigation Read API](api/investigations.md)
 - [Investigation Administration UI](ui/investigations.md)
+- [Production Readiness Gate](architecture/production-readiness-gate.md)
+- [Phase 4.20 Implementation](roadmap/phase-4-20-implementation.md)
