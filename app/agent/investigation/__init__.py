@@ -19,6 +19,12 @@ from app.agent.investigation.specialist_registry import (
     SpecialistRegistryValidationError,
     SpecialistRuntimeDefinition,
 )
+from app.agent.investigation.evidence_collection import (
+    DiagnosticExecutionOutcome,
+    EvidenceCollectionRequest,
+    EvidenceCollectionService,
+    SSHDiagnosticCommandRunner,
+)
 from app.agent.investigation.diagnostic_policy import (
     DiagnosticPolicyDecision,
     DiagnosticPolicyEngine,
@@ -47,6 +53,10 @@ __all__ = [
     "DiagnosticPolicyReason",
     "DiagnosticPolicyRequest",
     "DiagnosticPolicyResult",
+    "DiagnosticExecutionOutcome",
+    "EvidenceCollectionRequest",
+    "EvidenceCollectionService",
+    "SSHDiagnosticCommandRunner",
     "EvidenceKind",
     "EvidenceReference",
     "InvestigationBudget",

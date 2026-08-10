@@ -1,3 +1,13 @@
+from app.agent.investigation.evidence_collection import (
+    EvidenceCollectionService,
+)
+from app.agent.investigation.diagnostic_policy import (
+    DiagnosticPolicyEngine,
+)
+from app.agent.investigation.diagnostic_tools import (
+    DiagnosticToolRegistry,
+    build_default_diagnostic_tool_registry,
+)
 from app.agent.investigation.knowledge_chunker import (
     StructureAwareKnowledgeChunker,
 )
@@ -154,6 +164,9 @@ class ApplicationContainer:
     knowledge_source_registry: KnowledgeSourceRegistry
     knowledge_ingestion_service: KnowledgeIngestionService
     knowledge_chunking_service: KnowledgeChunkingService
+    diagnostic_tool_registry: DiagnosticToolRegistry
+    diagnostic_policy_engine: DiagnosticPolicyEngine
+    evidence_collection_service: EvidenceCollectionService
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -261,6 +274,27 @@ def build_container() -> ApplicationContainer:
     knowledge_chunking_service = KnowledgeChunkingService(
         document_repository=knowledge_document_repository,
         chunker=StructureAwareKnowledgeChunker(),
+    )
+
+    diagnostic_tool_registry = (
+        build_default_diagnostic_tool_registry()
+    )
+
+    diagnostic_policy_engine = DiagnosticPolicyEngine(
+        registry=diagnostic_tool_registry,
+    )
+
+    evidence_collection_service = EvidenceCollectionService(
+        server_repository=server_repository,
+        default_private_key_path=str(
+            settings.default_ssh_private_key_path
+        ),
+        known_hosts_path=str(
+            settings.ssh_known_hosts_path
+        ),
+        connection_timeout_seconds=(
+            settings.ssh_connect_timeout_seconds
+        ),
     )
 
     embedding_client = None
@@ -509,6 +543,15 @@ def build_container() -> ApplicationContainer:
 
         knowledge_chunking_service=(
             knowledge_chunking_service
+        ),
+        diagnostic_tool_registry=(
+            diagnostic_tool_registry
+        ),
+        diagnostic_policy_engine=(
+            diagnostic_policy_engine
+        ),
+        evidence_collection_service=(
+            evidence_collection_service
         ),
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,
