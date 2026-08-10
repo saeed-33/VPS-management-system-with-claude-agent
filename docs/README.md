@@ -66,3 +66,4 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Phase 4.17 Closeout](roadmap/phase-4-17-closeout.md)
 
 قاعدة التوثيق: كل ملف خارج `roadmap/` يجب أن يصف التنفيذ الحالي الفعلي، لا التصميم المستقبلي المفترض.
+- [Cross-Specialist Correlation](architecture/cross-specialist-correlation.md)

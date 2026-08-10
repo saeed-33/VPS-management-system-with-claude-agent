@@ -52,6 +52,22 @@ from app.agent.investigation.diagnostic_policy import (
     DiagnosticPolicyRequest,
     DiagnosticPolicyResult,
 )
+from app.agent.investigation.correlation import (
+    CorrelatedDiagnosisClaim,
+    CrossSpecialistCorrelator,
+    DiagnosisCertainty,
+    DiagnosisConflict,
+    FinalDiagnosis,
+)
+from app.agent.investigation.final_diagnosis_synthesizer import (
+    FinalDiagnosisNarrative,
+    FinalDiagnosisNarrativeClient,
+    FinalDiagnosisNarrativeOutput,
+    FinalDiagnosisSynthesizer,
+    OllamaFinalDiagnosisNarrativeClient,
+    OpenAIFinalDiagnosisNarrativeClient,
+    create_final_diagnosis_narrative_client,
+)
 from app.agent.investigation.contracts import (
     EvidenceKind,
     EvidenceReference,
@@ -68,6 +84,18 @@ from app.agent.investigation.contracts import (
 )
 
 __all__ = [
+    "create_final_diagnosis_narrative_client",
+    "OpenAIFinalDiagnosisNarrativeClient",
+    "OllamaFinalDiagnosisNarrativeClient",
+    "FinalDiagnosisSynthesizer",
+    "FinalDiagnosisNarrativeOutput",
+    "FinalDiagnosisNarrativeClient",
+    "FinalDiagnosisNarrative",
+    "DiagnosisConflict",
+    "FinalDiagnosis",
+    "DiagnosisCertainty",
+    "CrossSpecialistCorrelator",
+    "CorrelatedDiagnosisClaim",
     "DiagnosticPolicyDecision",
     "DiagnosticPolicyEngine",
     "DiagnosticPolicyReason",
