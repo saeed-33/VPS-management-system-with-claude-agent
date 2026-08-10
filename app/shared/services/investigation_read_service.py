@@ -3,7 +3,7 @@ from __future__ import annotations
 from app.shared.database.repositories.investigation_repository import (
     InvestigationRepository,
 )
-from payload.app.shared.dto.investigation_read_models import (
+from app.shared.dto.investigation_read_models import (
     InvestigationCandidateReadModel,
     InvestigationDetailReadModel,
     InvestigationRuntimeReadModel,

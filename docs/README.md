@@ -68,3 +68,4 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 قاعدة التوثيق: كل ملف خارج `roadmap/` يجب أن يصف التنفيذ الحالي الفعلي، لا التصميم المستقبلي المفترض.
 - [Cross-Specialist Correlation](architecture/cross-specialist-correlation.md)
 - [Investigation Read Models](architecture/investigation-read-models.md)
+- [Investigation Runtime Snapshot](architecture/investigation-runtime-snapshot.md)

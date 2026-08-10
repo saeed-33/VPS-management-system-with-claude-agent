@@ -59,6 +59,50 @@ class InvestigationRepository:
             _ = model.candidates
             return model
 
+    def update_runtime_snapshot(
+        self,
+        *,
+        investigation_id: str,
+        status: str,
+        metadata: dict,
+    ) -> InvestigationModel:
+        with self._session_factory() as session:
+            model = session.scalar(
+                select(
+                    InvestigationModel
+                ).where(
+                    InvestigationModel
+                    .investigation_id
+                    == investigation_id
+                )
+            )
+
+            if model is None:
+                raise ValueError(
+                    "Investigation not found: "
+                    f"{investigation_id}"
+                )
+
+            model.status = status
+
+            model.investigation_metadata = (
+                dict(metadata)
+            )
+
+            session.add(
+                model
+            )
+
+            session.commit()
+
+            session.refresh(
+                model
+            )
+
+            _ = model.candidates
+
+            return model
+
     def get_by_investigation_id(
         self,
         investigation_id: str,

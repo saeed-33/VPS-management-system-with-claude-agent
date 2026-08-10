@@ -68,6 +68,9 @@ from app.agent.investigation.final_diagnosis_synthesizer import (
     OpenAIFinalDiagnosisNarrativeClient,
     create_final_diagnosis_narrative_client,
 )
+from app.agent.investigation.runtime_snapshot_service import (
+    InvestigationRuntimeSnapshotService,
+)
 from app.agent.investigation.contracts import (
     EvidenceKind,
     EvidenceReference,
@@ -84,6 +87,7 @@ from app.agent.investigation.contracts import (
 )
 
 __all__ = [
+    "InvestigationRuntimeSnapshotService",
     "create_final_diagnosis_narrative_client",
     "OpenAIFinalDiagnosisNarrativeClient",
     "OllamaFinalDiagnosisNarrativeClient",
