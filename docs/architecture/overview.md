@@ -1,6 +1,6 @@
 # Current Architecture
 
-## Implemented baseline through Phase 4.11
+## Implemented baseline through Phase 4.17
 
 ```text
 Admin / Web
@@ -35,7 +35,7 @@ Investigation Persistence
    |
 SpecialistRegistry
    |
-Selected Dynamic Specialist
+Selected Dynamic Specialists
    |
 SpecialistContextBuilder
    +--> Initial Analysis
@@ -46,15 +46,30 @@ SpecialistContextBuilder
    |
 SpecialistReasoningAgent
    |
-Structured SpecialistResult
+Diagnostic Tool Requests
    |
 DiagnosticToolRegistry
+   |
+DiagnosticPolicyEngine
+   |
+EvidenceCollectionService
+   |
+Known read-only SSH implementations
+   |
+SpecialistInvestigationLoop
+   |
+Server Coordinator
+   |
+LangGraph parallel Specialist wave
+   |
+Dynamic secondary Specialist routing
+   |
+Accumulated SpecialistResults + Evidence
 ```
 
 ## Dynamic Specialists
 
-Specialists are persisted operator-managed data, not hard-coded Python agent
-classes.
+Specialists are persisted operator-managed data, not hard-coded Python agent classes.
 
 Runtime definitions include:
 
@@ -70,8 +85,7 @@ max rounds
 max actions
 ```
 
-The Specialist Registry exposes enabled validated definitions and stable
-snapshots for routing.
+The Specialist Registry exposes enabled validated definitions and stable snapshots for routing.
 
 ## Investigation routing
 
@@ -87,9 +101,7 @@ selected Specialists
 unmatched issues
 ```
 
-The candidate pool is intentionally larger than the final selection pool so a
-later ranking/selection mechanism has enough options without invoking every
-Specialist.
+Healthy reports do not open investigations merely because Specialists exist.
 
 ## Two RAG systems
 
@@ -101,7 +113,7 @@ Purpose:
 retrieve similar historical monitoring incidents/analyses
 ```
 
-It is used as historical context, not exact truth for the current server.
+Historical incidents are context, not proof of current server state.
 
 ### Knowledge RAG
 
@@ -125,9 +137,7 @@ Knowledge Sources
  -> Top-K attributed chunks
 ```
 
-Incident RAG and Knowledge RAG are deliberately separate.
-
-See ADR-011.
+Incident RAG and Knowledge RAG remain separate by design.
 
 ## Specialist Context Builder
 
@@ -142,19 +152,11 @@ Incident RAG
 Knowledge RAG
 ```
 
-Current default total context limit:
-
-```text
-18000 characters
-```
-
-Every source retains a stable provenance ID.
+Every Evidence/Knowledge source retains a stable provenance ID.
 
 ## Specialist Reasoning
 
-Phase 4.10 is LLM reasoning-only.
-
-Output is strict structured data:
+Normal reasoning returns strict structured data:
 
 ```text
 summary
@@ -164,69 +166,126 @@ hypotheses
 ruled_out
 missing_evidence
 recommended_next_specialists
+diagnostic_tool_requests
 ```
 
-Evidence/Knowledge IDs returned by the model are validated against the actual
-context before conversion to `SpecialistResult`.
+Evidence/Knowledge IDs emitted by the model are validated against the actual context. Technical documentation is not accepted as proof of live server state.
 
-Technical documentation is not accepted as proof of live server state.
-
-See ADR-012.
-
-## Diagnostic Tool Registry
-
-Phase 4.11 defines a finite set of registered read-only diagnostic
-capabilities.
-
-The LLM is never given arbitrary shell.
-
-A Tool owns:
+Final Synthesis uses a smaller provider-level contract:
 
 ```text
-typed parameters
-fixed command template
-timeout
-output limit
-risk metadata
+summary
+confidence
+missing_evidence
+recommended_next_specialists
 ```
 
-Specialist definitions own the permission list through `allowed_tool_ids`.
+This reduces malformed/truncated JSON risk after Tool execution has ended.
 
-4.11 defines Tools only; it does not execute them yet.
+## Diagnostic execution boundary
 
-See ADR-013.
+The LLM never receives arbitrary shell capability.
 
-## Composition and orchestration boundary
+```text
+LLM structured Tool request
+ -> Diagnostic Tool Registry
+ -> Diagnostic Policy Engine
+ -> typed parameter validation
+ -> approved execution envelope
+ -> Evidence Collection
+ -> known read-only SSH command
+ -> EvidenceReference
+```
 
-`app/bootstrap.py` remains the composition root.
+Only approved executions consume action budget.
 
-LangGraph is still not required for the implemented services. ADR-010 reserves
-it for later stateful orchestration when the investigation loop/coordinator
-benefits from graph execution.
+## Specialist Investigation Loop
 
-Project-owned services remain responsible for:
+Each Specialist operates inside bounded rounds/actions.
+
+```text
+reason
+ -> optional Tool request
+ -> policy
+ -> evidence
+ -> rebuild context
+ -> reason again
+ -> final synthesis
+```
+
+Duplicate Tool requests are suppressed and do not consume another action.
+
+## Server Coordinator and LangGraph
+
+Phase 4.15 introduced the server-level Coordinator.
+
+Phase 4.16 moved independent Specialist execution to a bounded LangGraph parallel wave with deterministic per-worker action quotas.
+
+Phase 4.17 adds sequential follow-up waves based on `recommended_next_specialists`.
+
+A secondary recommendation is executable only when:
+
+```text
+slug exists in enabled Registry
+not already executed
+specialist budget remains
+global action budget remains
+```
+
+Recommendations are advisory; the model cannot fabricate an executable Specialist.
+
+LangGraph owns workflow orchestration only. Project-owned services remain responsible for:
 
 ```text
 database/repositories
-RAG
-registry
-policy
-diagnostic tools
-SSH
+Incident RAG
+Knowledge RAG
+Specialist Registry
+Diagnostic Tool Registry
+Diagnostic Policy
+Evidence Collection
+SSH execution
+domain contracts
 ```
 
-## Not implemented yet
+## Runtime acceptance baseline
+
+Phase 4.17 controlled runtime acceptance proved:
 
 ```text
-4.12 Diagnostic Policy Engine
-4.13 Evidence Collection
-4.14 Specialist Investigation Loop
-4.15 Server Coordinator
-4.16 Parallel Investigation
-4.17 Dynamic Secondary Specialists
+Initial Specialist:    nginx
+Secondary Specialist:  systemd-service
+Waves completed:       2
+Actions used:          3/10
+Execution mode:        dynamic-secondary
+```
+
+Reference automated regression baseline:
+
+```text
+184 passed, 1 warning
+```
+
+## Current boundary
+
+Implemented through **Phase 4.17**.
+
+Not implemented yet:
+
+```text
 4.18 Correlation + Final Diagnosis
 4.19 Investigation API/UI
 4.20 Evaluation & Safety Gate
 ```
+
+Phase 4.18 must correlate multiple Specialist results and Evidence into server-level claims classified as:
+
+```text
+confirmed
+probable
+unknown
+```
+
+Every material diagnosis claim must remain traceable to Evidence and/or explicitly attributed technical Knowledge. Conflicting Specialist conclusions must remain visible.
 
 Autonomous remediation remains explicitly outside Phase 4.

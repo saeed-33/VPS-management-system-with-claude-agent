@@ -1,10 +1,9 @@
 # Evidence Collection
 
 **Phase:** 4.13  
-**Status:** Implemented — pending runtime acceptance
+**Status:** Implemented and runtime accepted
 
-Phase 4.13 is the first investigation step that performs a real diagnostic
-action on a target server.
+Phase 4.13 is the investigation boundary that performs a real diagnostic action on a target server.
 
 ```text
 DiagnosticToolCall
@@ -17,16 +16,13 @@ DiagnosticToolCall
     -> EvidenceReference(kind=command_result)
 ```
 
-`EvidenceCollectionService` does not accept raw command text. The command,
-timeout and output limit must come from an ALLOW `DiagnosticPolicyResult`.
+`EvidenceCollectionService` does not accept raw command text. Command, timeout, output limit, and risk metadata come from an ALLOW `DiagnosticPolicyResult`.
 
 A denied policy result fails before server lookup or SSH execution.
 
-The default runner reuses the existing project SSH stack. Server-specific
-private keys override the default key, and `known_hosts` remains enforced.
+## Evidence semantics
 
-Failed commands and expected connection failures are still represented as
-Evidence because they can be diagnostically useful:
+Failed commands and expected connection failures are still diagnostically useful Evidence:
 
 ```text
 exit 0      -> success=true
@@ -35,34 +31,46 @@ timeout     -> success=false
 SSH failure -> success=false
 ```
 
-Tool output is bounded by `output_limit_chars`. Combined stdout/stderr/error
-text is truncated deterministically, while metadata records original character
-counts and whether truncation occurred.
+Tool output is bounded by `output_limit_chars`. Combined stdout/stderr/error text is truncated deterministically while metadata records original size and truncation state.
 
-Evidence provenance includes server ID, Specialist slug, Tool ID, approved
-command, exit status, duration, timeout, output limit, risk and timestamps.
-Credentials/private-key paths are not copied into Evidence metadata.
+## Provenance
 
-Phase 4.13 returns an in-memory EvidenceReference and introduces no new
-database schema.
-
-Runtime acceptance:
-
-```powershell
-uv run python tools/collect_diagnostic_evidence.py `
-  <SERVER_ID> `
-  nginx `
-  systemd-status `
-  --arguments-json '{"service":"nginx"}'
-```
-
-Expected:
+Evidence metadata includes:
 
 ```text
-Policy: ALLOW
-Kind: command_result
-SSH executed: YES
+server ID
+Specialist slug
+Tool ID
+approved command
+exit status
+duration
+timeout
+output limit
+risk
+timestamps
 ```
 
-Phase 4.14 will connect reasoning -> Tool request -> policy -> evidence
-collection -> rebuilt context -> next reasoning round under budgets.
+Credentials and private-key paths are not copied into Evidence metadata.
+
+## Runtime integration through Phase 4.17
+
+Evidence Collection is consumed by the Specialist Investigation Loop after Policy ALLOW.
+
+Collected Evidence is then:
+
+```text
+fed into the next Specialist reasoning round
+aggregated by Server Coordinator
+propagated across LangGraph waves
+made available to later dynamic secondary Specialists
+```
+
+Evidence remains deduplicated by `evidence_id`.
+
+The 4.17 orchestration path preserves this boundary: secondary Specialists receive accumulated Evidence but cannot bypass Tool Registry, Policy, or Evidence Collection.
+
+## Persistence boundary
+
+Phase 4.13 itself introduced no new schema. Investigation persistence and later orchestration own lifecycle persistence as documented elsewhere.
+
+Phase 4.13 is closed and runtime accepted.

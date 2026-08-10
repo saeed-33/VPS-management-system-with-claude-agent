@@ -24,21 +24,7 @@ Authorization
 Network restrictions
 ```
 
-يمكن تنفيذ ذلك أولًا عبر reverse proxy/VPN، ثم لاحقًا داخل التطبيق.
-
-### API documentation
-
-FastAPI يعرض افتراضيًا:
-
-```text
-/docs
-/redoc
-/openapi.json
-```
-
-في شبكة موثوقة هذا مفيد. في نشر عام يجب تحديد هل ستبقى متاحة ومن يملك الوصول إليها.
-
-## Secrets
+### Secrets
 
 أسرار يجب ألا تدخل Git:
 
@@ -49,24 +35,108 @@ FastAPI يعرض افتراضيًا:
 
 استخدم `.env` محليًا فقط أو secret manager في بيئة الإنتاج.
 
-`.env.example` يجب أن يحتوي أسماء الإعدادات وقيمًا غير سرية فقط.
-
 ## SSH trust boundary
 
-المشروع يستطيع الاتصال بخوادم عبر SSH وتنفيذ Monitor Commands، لذلك SSH هو trust boundary حساس.
+المشروع يستطيع الاتصال بخوادم عبر SSH، لذلك SSH هو trust boundary حساس.
 
-القواعد المقترحة:
+قواعد التشغيل الأساسية:
 
 1. dedicated monitoring account.
 2. least privilege.
 3. لا root افتراضيًا.
 4. مفتاح منفصل لهذا التطبيق.
-5. حماية الملف من مستخدمين آخرين.
-6. Known Hosts verification.
-7. مراجعة Monitor Commands قبل تفعيلها.
-8. لا تسمح للمستخدم غير الموثوق بإنشاء أو تعديل command text.
+5. Known Hosts verification.
+6. مراجعة Monitor Commands.
+7. حماية credentials وprivate keys.
 
-هذه النقطة ستصبح أهم عند بناء Specialist Agents.
+## Multi-Agent diagnostic boundary — implemented
+
+Phase 4.12–4.17 تطبق مسار diagnostics مقيدًا:
+
+```text
+LLM structured Tool request
+       |
+Diagnostic Tool Registry
+       |
+typed parameter validation
+       |
+Diagnostic Policy Engine
+       |
+approved execution envelope
+       |
+Evidence Collection
+       |
+known read-only SSH implementation
+```
+
+الـLLM لا يرسل shell command خامًا إلى SSH executor.
+
+### Tool permissions
+
+كل Specialist يملك `allowed_tool_ids` محددة.
+
+الـPolicy يرفض:
+
+```text
+unknown Tool
+unassigned Tool
+unsupported risk
+invalid arguments
+round budget overflow
+action budget overflow
+```
+
+### Read-only boundary
+
+Phase 4 تسمح فقط بأدوات `read_only`.
+
+```text
+NO automatic restart
+NO kill process
+NO config modification
+NO package installation
+NO reboot
+NO firewall changes
+NO arbitrary shell
+```
+
+Remediation تبقى Phase 5 منفصلة بصلاحيات وموافقة وتدقيق وrollback مختلف.
+
+### Evidence provenance
+
+Evidence الناتجة عن diagnostic execution تحفظ metadata تشخيصية مثل:
+
+```text
+server
+Specialist
+Tool
+approved command
+exit status
+duration
+timeout/output limits
+timestamps
+```
+
+لا تُنسخ credentials أو private-key paths إلى Evidence metadata.
+
+### Dynamic Specialists
+
+تعريف Specialist بيانات يديرها operator، لكنه لا يمنح نفسه صلاحية تنفيذ Tool غير مسجلة.
+
+توصيات `recommended_next_specialists` advisory فقط. الـLLM لا يستطيع إنشاء Specialist executable؛ أي secondary Specialist يجب أن يكون موجودًا ومفعّلًا في Registry وأن يمر بقيود الميزانية ومنع التكرار.
+
+### LangGraph
+
+LangGraph ينظم workflow فقط. لا يملك سلطة تجاوز:
+
+```text
+Registry
+Tool allow-list
+Policy Engine
+Evidence provenance
+SSH implementation
+Investigation budgets
+```
 
 ## Database
 
@@ -79,7 +149,7 @@ FastAPI يعرض افتراضيًا:
 
 ## LLM data boundary
 
-Monitoring reports قد تحتوي:
+Monitoring reports وEvidence قد تحتوي:
 
 - hostnames.
 - process names.
@@ -88,45 +158,28 @@ Monitoring reports قد تحتوي:
 - internal IPs.
 - command output.
 
-عند استخدام provider خارجي يجب اعتبار إرسال prompt انتقالًا للبيانات خارج البنية المحلية، وتحديد policy مناسبة للبيئة.
+عند استخدام provider خارجي يجب اعتبار إرسال prompt انتقالًا للبيانات خارج البنية المحلية وتحديد policy مناسبة للبيئة.
 
 ## Web layer
 
-الحالة الحالية لا تظهر طبقة:
+الحالة الحالية لا تظهر طبقة مكتملة لـ:
 
-- CSRF policy مخصصة.
 - session authentication.
 - RBAC.
 - rate limiting.
+- CSRF policy مخصصة.
 
 إلى أن تضاف هذه الطبقات، أبق التطبيق خلف network control/reverse proxy موثوق.
 
-## Debug mode
-
-في الإنتاج:
+## Production reminders
 
 ```env
 DEBUG=false
 ```
 
-ولا تستخدم Uvicorn reload.
+لا تستخدم Uvicorn reload في الإنتاج.
 
-## Error exposure
-
-تجنب مستقبلاً إعادة stack traces أو secrets إلى HTTP clients. API الحالي يستخدم `HTTPException` برسائل محددة، لكن يجب مراجعة أي endpoints جديدة.
-
-## Logging
-
-لا تسجل:
-
-- private key contents.
-- DB passwords.
-- API keys.
-- Authorization headers.
-
-Command stdout/stderr المحفوظ في قاعدة البيانات جزء من بيانات النظام ويحتاج access control وretention.
-
-## Dependency security
+لا تسجل private keys أو DB passwords أو API keys أو Authorization headers.
 
 قبل release production:
 
@@ -135,24 +188,4 @@ uv sync --frozen
 uv run python -m pytest
 ```
 
-ويفضل إضافة dependency vulnerability scanning إلى CI مستقبلًا.
-
-## Multi-Agent future security
-
-قبل السماح للوكلاء بأي diagnostics:
-
-```text
-LLM proposes action
-       |
-Tool Registry
-       |
-Parameter validation
-       |
-Policy Engine
-       |
-Read-only execution
-```
-
-لا يجب أن يكون الـLLM قادرًا على إرسال arbitrary shell مباشرة إلى SSH executor.
-
-Remediation يجب أن تبقى مرحلة منفصلة عن diagnostics.
+ويفضل إضافة dependency vulnerability scanning إلى CI.

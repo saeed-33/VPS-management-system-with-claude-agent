@@ -1,15 +1,13 @@
 # Diagnostic Policy Engine
 
 **Phase:** 4.12  
-**Status:** Implemented — pending acceptance
+**Status:** Implemented and runtime accepted
 
-The Diagnostic Tool Registry defines which capabilities exist. The Diagnostic
-Policy Engine decides whether one Tool Request may proceed.
+The Diagnostic Tool Registry defines which capabilities exist. The Diagnostic Policy Engine decides whether one Tool Request may proceed.
 
 ```text
 Specialist Tool Request
         |
-        v
 Diagnostic Policy Engine
         |
         +-- registered?
@@ -26,7 +24,7 @@ Diagnostic Policy Engine
         `--> ALLOW + approved execution envelope
 ```
 
-Phase 4.12 does not execute SSH.
+The Policy Engine itself does not execute SSH.
 
 ## Inputs
 
@@ -38,8 +36,6 @@ specialist_actions_used
 investigation_actions_used
 InvestigationBudget
 ```
-
-The Specialist supplies `allowed_tool_ids`, `max_rounds`, and `max_actions`.
 
 ## Explicit denial reasons
 
@@ -62,13 +58,13 @@ Only an ALLOW result exposes:
 rendered_command
 timeout_seconds
 output_limit_chars
-risk / requires_sudo metadata
+risk
+requires_sudo metadata
 ```
 
 A DENY result never exposes command text.
 
-Phase 4.13 must consume this approved envelope rather than reconstructing
-commands from LLM output.
+Phase 4.13 Evidence Collection consumes this approved envelope rather than reconstructing commands from LLM output.
 
 ## Budget semantics
 
@@ -79,50 +75,39 @@ used < max_actions   -> a new action may proceed
 used >= max_actions  -> deny
 ```
 
-The current round must fit both Specialist and Investigation round limits.
+Only actual approved SSH executions later consume action budget.
 
 ## Risk boundary
 
-The default policy admits only:
+The current Phase 4 policy admits only:
 
 ```text
 read_only
 ```
 
-No remediation/write risk class is admitted in Phase 4.
+No remediation/write risk class is admitted.
+
+## Runtime role through Phase 4.17
+
+The Policy Engine remains mandatory inside every Specialist Investigation Loop, including:
+
+```text
+single-Specialist execution
+Server Coordinator execution
+LangGraph parallel workers
+dynamic secondary Specialist waves
+```
+
+Neither LangGraph nor the Coordinator may bypass Policy.
 
 ## Security properties
 
 ```text
-no SSH execution
-no investigation mutation
 no arbitrary shell input
 no unassigned Tool capability
 no argument rendering for unauthorized Tools
+no SSH execution on DENY
+bounded round/action execution
 ```
 
-## Acceptance
-
-After assigning `systemd-status` to the nginx Specialist:
-
-```powershell
-uv run python tools/inspect_diagnostic_policy.py `
-  nginx `
-  systemd-status `
-  --arguments-json '{"service":"nginx"}'
-```
-
-Expected:
-
-```text
-Decision: ALLOW
-SSH executed: NO
-```
-
-For an unassigned Tool, expect `DENY` with `tool_not_allowed`.
-
-## Next
-
-Phase 4.13 — Evidence Collection will execute only approved envelopes using the
-existing bounded SSH implementation and convert results into attributed
-Evidence.
+Phase 4.12 is closed; later phases build on this accepted boundary.

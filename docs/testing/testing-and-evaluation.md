@@ -8,14 +8,13 @@ uv run python -m pytest
 
 ## Current automated baseline
 
-After Phase 4.11 acceptance:
+After accepted Phase 4.17 work:
 
 ```text
-124 passed
+184 passed, 1 warning
 ```
 
-One Starlette/httpx deprecation warning remains and is not a functional test
-failure.
+The remaining warning is the existing Starlette/TestClient deprecation warning and is not a Phase 4.17 functional failure.
 
 ## Covered Phase 4 areas
 
@@ -34,128 +33,120 @@ Knowledge indexing
 Knowledge hybrid retrieval/scope
 Specialist Context Builder
 Specialist Reasoning Agent
-Reasoning citation validation
+Reasoning citation/provenance validation
 Specialist recommendation normalization
 Diagnostic Tool Registry
 Tool parameter safety
 Specialist Tool allow-list enforcement
+Diagnostic Policy Engine
+Evidence Collection
+Specialist Investigation Loop
+Server Coordinator
+LangGraph parallel orchestration
+Dynamic secondary Specialist routing
+global specialist/action budget invariants
+duplicate Specialist suppression
+compact Final Synthesis output
 ```
 
 ## Runtime acceptance checkpoints
 
 ### Router
 
-Healthy report:
+Healthy reports must not open investigations simply because Specialists exist.
 
-```text
-report 825
-should investigate false
-selected specialists 0
-```
+Failure reports must detect relevant domains and select only enabled matching Specialists.
 
-Connection failure:
+### Knowledge RAG
 
-```text
-report 807
-domains connectivity, network
-selected linux-network
-```
+Knowledge retrieval validates mechanics, metadata scope, and source attribution separately from corpus quality.
 
-### Knowledge Sources
-
-```text
-enabled sources       8
-covered specialists   9/9
-acceptance             PASS
-```
-
-### Knowledge ingestion/chunking/indexing
-
-NGINX source:
-
-```text
-document ID           1
-characters            3731
-chunks                3
-status                indexed
-embedded chunks       3
-missing embeddings    0
-embedding dimensions  768
-search indexes        2/2
-acceptance             PASS
-```
-
-### Knowledge Hybrid Retrieval
-
-Query:
-
-```text
-nginx modules configuration
-specialist nginx
-domains nginx,http,proxy
-```
-
-Result:
-
-```text
-3 chunks
-rank 1 strategy hybrid
-ranks 2-3 strategy vector
-source nginx-docs
-```
-
-This validates retrieval mechanics.
-
-It does **not** prove corpus quality. The current source is the NGINX index
-page, so some retrieved content is navigation/module-list material.
-
-### Specialist Context Builder
-
-NGINX preview:
-
-```text
-knowledge chunks 3
-source refs      3
-context chars    4923
-```
-
-The rendered context preserved Specialist instructions and Knowledge chunk
-provenance.
+Technical documentation explains technology behavior but does not prove a live server condition.
 
 ### Specialist Reasoning
 
-No operational NGINX evidence was supplied.
+Reasoning must remain conservative when live operational Evidence is absent.
 
-Expected conservative behavior was observed:
+Unknown Evidence/Knowledge IDs fail provenance validation.
 
-```text
-status           completed
-confidence       0.10
-findings         0
-hypotheses       1
-missing evidence 5
-```
+### Diagnostic safety
 
-The model requested service/log/listener/upstream evidence instead of claiming
-those facts were known.
-
-### Diagnostic Tool Registry
+Required negative cases include:
 
 ```text
-tools   18
-risk    read_only
+unknown Tool rejected
+Tool not assigned rejected
+unknown argument rejected
+invalid service/path/port rejected
+shell injection rejected
+Policy DENY never reaches SSH
 ```
 
-Injection/path/port/unknown-argument tests validate command rendering safety.
+No arbitrary shell is permitted.
 
-The current NGINX Specialist has:
+### Evidence Collection
+
+Only an approved execution envelope may reach the SSH execution layer.
+
+Command output is bounded and provenance metadata is retained.
+
+### Specialist Investigation Loop
+
+Validate:
 
 ```text
-Allowed IDs: —
-Tools: 0
+bounded rounds
+bounded actions
+duplicate request suppression
+Evidence propagation
+objective discipline
+final synthesis
+no-progress termination
+failure handling
 ```
 
-This is correct until explicit Tool permissions are assigned.
+### LangGraph Parallel — Phase 4.16
+
+Validate:
+
+```text
+multiple workers
+deterministic worker quotas
+sum(worker quotas) <= global max_actions
+no state/evidence leakage
+deterministic aggregation
+partial failure isolation
+```
+
+### Dynamic Secondary — Phase 4.17
+
+Controlled acceptance reference:
+
+```text
+Status:                  completed
+Execution mode:          dynamic-secondary
+Waves completed:         2
+Actions used:            3/10
+Executed Specialists:    nginx, systemd-service
+Secondary requested:     systemd-service
+Secondary accepted:      systemd-service
+```
+
+The controlled acceptance changes only the recommendation value needed to guarantee the secondary path. Primary/secondary Specialist execution and Registry/budget validation remain real.
+
+This proves orchestration correctness, not universal LLM recommendation quality.
+
+## Ollama structured-output reliability
+
+Reference accepted runtime:
+
+```text
+CONTEXT = 32768
+```
+
+Normal reasoning uses the rich output contract. Final Synthesis uses the compact output contract.
+
+Context capacity and generation capacity are separate settings.
 
 ## Controlled real-server evaluation environment
 
@@ -166,8 +157,7 @@ Ubuntu Server 22.04.2 amd64
 VMware
 ```
 
-A workload simulator is used to create repeatable ground-truth scenarios such
-as:
+Ground-truth scenarios include:
 
 ```text
 baseline
@@ -181,24 +171,34 @@ failed systemd unit
 mixed workload
 ```
 
-This environment should be used for integration/evaluation beginning with Tool
-execution and the Specialist investigation loop.
-
 ## Evaluation principle
 
-Automated unit tests answer:
+Automated tests answer:
 
 ```text
-"Does the implementation obey its contracts?"
+Does the implementation obey its contracts?
 ```
 
 Controlled VM scenarios answer:
 
 ```text
-"Does the investigation reach the correct diagnosis from real evidence?"
+Does the investigation reach the correct diagnosis from real evidence?
 ```
 
 Both are required before Phase 4 closes.
+
+## Phase 4.18 target
+
+Correlation + Final Diagnosis must test:
+
+```text
+common-process correlation
+conflicting Specialist conclusions
+insufficient Evidence
+confirmed/probable/unknown classification
+claim-to-Evidence traceability
+no unsupported global diagnosis
+```
 
 ## Phase 4.20 target evaluation dimensions
 

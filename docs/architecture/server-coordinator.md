@@ -1,23 +1,61 @@
 # Server Coordinator — Phase 4.15
 
+**Status:** Implemented and runtime accepted
+
+Phase 4.15 introduced the server-level composition boundary:
+
 ```text
 Routing Decision
  -> Server Coordinator
  -> selected dynamic Specialists
- -> Specialist Investigation Loop (sequential in 4.15)
- -> shared investigation action budget
+ -> Specialist Investigation Loop
+ -> shared Investigation budgets
  -> SpecialistResults + Evidence
  -> ServerInvestigationState
 ```
 
-4.15 is deliberately sequential; parallel execution belongs to 4.16.
-The Coordinator composes existing Registry, Specialist Loop, Policy, Evidence,
-RAG and SSH boundaries rather than duplicating them. Specialists remain
-operator-defined registry data. A global investigation action budget is carried
-between Specialist loops. Partial Specialist failure is isolated and successful
-sibling results remain available.
+The Coordinator composes existing Registry, Specialist Loop, Policy, Evidence, RAG, and SSH boundaries rather than duplicating them.
 
-Dynamic secondary Specialist spawning remains 4.17. Cross-Specialist
-correlation/final diagnosis remains 4.18. Remediation remains outside Phase 4.
+Specialists remain operator-defined Registry data.
 
-This boundary follows ADR-010 and the accepted Phase 4 roadmap.
+Partial Specialist failure is isolated so successful sibling results remain available.
+
+## Evolution after 4.15
+
+Phase 4.15 established the sequential Coordinator baseline.
+
+Phase 4.16 retained the same domain responsibilities but replaced sequential independent Specialist execution with bounded LangGraph parallel fan-out/fan-in.
+
+Phase 4.17 added an outer dynamic-secondary routing loop:
+
+```text
+initial Specialist wave
+ -> aggregate results/evidence
+ -> inspect recommended_next_specialists
+ -> Registry validation
+ -> duplicate suppression
+ -> remaining budget validation
+ -> optional next Specialist wave
+```
+
+Thus the current runtime uses the Server Coordinator concept as a hierarchical investigation boundary while LangGraph manages stateful parallel/dynamic orchestration.
+
+## Global budget invariants
+
+```text
+executed Specialists <= InvestigationBudget.max_specialists
+actual actions <= InvestigationBudget.max_actions
+no Specialist slug executes twice
+```
+
+Parallel workers receive deterministic quotas whose sum does not exceed the available global action budget.
+
+Later waves receive only remaining budget.
+
+## Current boundary
+
+Cross-Specialist correlation and final server-level diagnosis remain **Phase 4.18**.
+
+Phase 4.18 must consume multiple Specialist results and accumulated Evidence without weakening existing provenance or safety boundaries.
+
+Remediation remains outside Phase 4.
