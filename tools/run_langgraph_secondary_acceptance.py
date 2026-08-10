@@ -268,6 +268,34 @@ async def run(args) -> int:
             item.result.summary
         )
 
+        if item.result.status.value == "failed":
+            print()
+            print("Failure diagnostics:")
+            print(
+                "- Type:  "
+                + str(
+                    item.result.metadata.get(
+                        "coordinator_failure"
+                    )
+                    or "—"
+                )
+            )
+            print(
+                "- Error: "
+                + str(
+                    item.result.metadata.get(
+                        "error"
+                    )
+                    or "—"
+                )
+            )
+            print(
+                "- Metadata: "
+                + repr(
+                    item.result.metadata
+                )
+            )
+
     checks = {
         "langgraph_orchestrator": (
             state.metadata.get(

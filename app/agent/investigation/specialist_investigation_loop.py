@@ -522,6 +522,65 @@ class SpecialistInvestigationLoop:
                 "Specialist loop produced no reasoning result."
             )
 
+        # Hard loop boundaries must not return a result whose remaining
+        # intent is still to request more diagnostic Tools. Produce one
+        # final read-only synthesis from all accumulated Evidence. This
+        # synthesis is not another diagnostic round, cannot execute Tools,
+        # and preserves the original boundary stop_reason.
+        if stop_reason in (
+            SpecialistLoopStopReason.MAX_ROUNDS,
+            SpecialistLoopStopReason.MAX_ACTIONS,
+        ):
+            synthesis_evidence_ids = tuple(
+                dict.fromkeys(
+                    task.evidence_ids
+                    + tuple(
+                        item.evidence_id
+                        for item in evidence
+                    )
+                )
+            )
+
+            synthesis_task = replace(
+                task,
+                evidence_ids=synthesis_evidence_ids,
+                round_number=max(
+                    1,
+                    effective_round_limit,
+                ),
+            )
+
+            synthesis_context = await (
+                self._context_builder.build(
+                    task=synthesis_task,
+                    specialist=specialist,
+                    detected_domains=(
+                        detected_domains
+                    ),
+                    evidence=tuple(evidence),
+                    initial_analysis_summary=(
+                        initial_analysis_summary
+                    ),
+                    initial_analysis_issues=(
+                        initial_analysis_issues
+                    ),
+                    incident_contexts=(
+                        incident_contexts
+                    ),
+                )
+            )
+
+            final_execution = await (
+                self._reasoning_agent.reason(
+                    context=synthesis_context,
+                    allowed_specialist_slugs=(
+                        allowed_specialist_slugs
+                    ),
+                    diagnostic_tool_catalog=None,
+                    force_final_synthesis=True,
+                )
+            )
+
         return SpecialistInvestigationLoopResult(
             final_result=(
                 final_execution.result

@@ -378,8 +378,16 @@ def test_last_round_requests_are_not_executed():
         ),
     )
 
-    loop, _, _, collector = (
-        make_loop([first])
+    synthesis = execution(
+        summary=(
+            "Final synthesis at the round boundary."
+        ),
+        confidence=0.4,
+        requests=(),
+    )
+
+    loop, context_builder, agent, collector = (
+        make_loop([first, synthesis])
     )
 
     output = asyncio.run(
@@ -400,8 +408,15 @@ def test_last_round_requests_are_not_executed():
         SpecialistLoopStopReason
         .MAX_ROUNDS
     )
+    assert output.rounds_completed == 1
     assert output.actions_executed == 0
     assert collector.calls == []
+    assert output.final_result.summary == (
+        "Final synthesis at the round boundary."
+    )
+    assert context_builder.calls == [(), ()]
+    assert agent.catalogs[0] is not None
+    assert agent.catalogs[1] is None
 
 
 def test_action_budget_stops_additional_execution():
@@ -420,8 +435,17 @@ def test_action_budget_stops_additional_execution():
         ),
     )
 
-    loop, _, _, collector = (
-        make_loop([first])
+    synthesis = execution(
+        summary=(
+            "Final synthesis from evidence collected "
+            "before the action budget was exhausted."
+        ),
+        confidence=0.6,
+        requests=(),
+    )
+
+    loop, context_builder, agent, collector = (
+        make_loop([first, synthesis])
     )
 
     output = asyncio.run(
@@ -443,8 +467,23 @@ def test_action_budget_stops_additional_execution():
         SpecialistLoopStopReason
         .MAX_ACTIONS
     )
+    assert output.rounds_completed == 1
     assert output.actions_executed == 1
     assert len(collector.calls) == 1
+    assert len(output.evidence) == 1
+    assert output.final_result.summary == (
+        "Final synthesis from evidence collected "
+        "before the action budget was exhausted."
+    )
+    assert context_builder.calls == [
+        (),
+        (
+            "task-1:r1:a1:"
+            "network-listeners",
+        ),
+    ]
+    assert agent.catalogs[0] is not None
+    assert agent.catalogs[1] is None
 
 
 def test_duplicate_request_is_not_executed_twice():

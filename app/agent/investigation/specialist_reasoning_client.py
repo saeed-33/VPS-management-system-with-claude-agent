@@ -59,6 +59,8 @@ class OllamaSpecialistReasoningClient(
             ),
         )
 
+        self._schema_format_supported: bool | None = None
+
     @property
     def provider_name(self) -> str:
         return "ollama"
@@ -75,23 +77,81 @@ class OllamaSpecialistReasoningClient(
     ) -> SpecialistReasoningOutput:
         schema = SpecialistReasoningOutput.model_json_schema()
 
-        compact_schema = json.dumps(
-            schema,
-            ensure_ascii=False,
-            separators=(",", ":"),
+        compact_contract = (
+            '{"summary":"brief conclusion","confidence":0.0,'
+            '"findings":[{"title":"brief title",'
+            '"description":"brief evidence-based description",'
+            '"confidence":0.0,"evidence_ids":[],'
+            '"knowledge_source_ids":[]}],'
+            '"hypotheses":[{"statement":"brief hypothesis",'
+            '"confidence":0.0,"supporting_evidence_ids":[],'
+            '"contradicting_evidence_ids":[]}],'
+            '"ruled_out":[],"missing_evidence":[],'
+            '"recommended_next_specialists":[],'
+            '"diagnostic_tool_requests":[{"tool_id":"tool-id",'
+            '"arguments":{},"rationale":"brief rationale"}]}'
         )
 
-        effective_prompt = (
+        is_final_synthesis = (
+            "## Final Synthesis Required"
+            in user_prompt
+        )
+
+        if is_final_synthesis:
+            compact_contract = (
+                '{"summary":"short conclusion",'
+                '"confidence":0.0,'
+                '"findings":[],'
+                '"missing_evidence":[],'
+                '"recommended_next_specialists":[]}'
+            )
+
+        base_prompt = (
             user_prompt
-            + "\n\nReturn exactly one JSON object matching this schema:\n"
-            + compact_schema
+            + "\n\n## Structured Output Contract\n"
+            + "Return exactly one JSON object with this shape:\n"
+            + compact_contract
             + (
-                "\n\nReturn JSON only. Do not use Markdown fences. "
-                "Keep all prose concise. Do not restate the supplied context."
+                "\n\nJSON rules:"
+                "\n- Return JSON only; never Markdown fences."
+                "\n- Keep summary under 800 characters."
+                "\n- Use at most 4 findings and 3 hypotheses."
+                "\n- Keep each finding description under 500 characters."
+                "\n- Use at most 5 missing_evidence items."
+                "\n- Use only exact Evidence IDs and Knowledge Source IDs "
+                "from the supplied context."
+                "\n- diagnostic_tool_requests must contain only the minimum "
+                "needed Tools."
+                "\n- Do not restate the supplied context."
+                "\n- Do not repeat command output inside prose."
+            )
+            + (
+                (
+                    "\n\n## Provider Final-Synthesis Compact Mode"
+                    "\nReturn the smallest valid object that answers the "
+                    "objective."
+                    "\nUse no more than 2 findings and 1 hypothesis."
+                    "\nDo not include a hypothesis when findings already "
+                    "state the conclusion."
+                    "\nKeep knowledge_source_ids empty unless an exact "
+                    "knowledge_source_id value from context is essential."
+                    "\nNever use NGINX module names or directive names as "
+                    "knowledge_source_ids."
+                    "\ndiagnostic_tool_requests must be []."
+                )
+                if is_final_synthesis
+                else ""
             )
         )
 
-        use_schema_format = True
+        use_schema_format = (
+            False
+            if is_final_synthesis
+            else (
+                self._schema_format_supported
+                is not False
+            )
+        )
         schema_rejection: str | None = None
         last_error: Exception | None = None
         last_content = ""
@@ -104,6 +164,27 @@ class OllamaSpecialistReasoningClient(
                 if use_schema_format
                 else "json"
             )
+
+            retry_suffix = ""
+            if generation_attempt > 0:
+                retry_suffix = (
+                    "\n\n## Retry Requirement\n"
+                    "The previous response was invalid or incomplete. "
+                    "Return a much shorter complete JSON object now. "
+                    "Do not explain. Do not repeat evidence text. "
+                    "Close every quote, bracket, and brace. "
+                    "Prefer fewer findings over a truncated response."
+                    + (
+                        " For Final Synthesis return only summary, "
+                        "confidence, at most one finding, at most two "
+                        "missing_evidence items, and at most one "
+                        "recommended_next_specialists slug. Omit hypotheses, "
+                        "ruled_out, knowledge citations, and Tool requests "
+                        "unless absolutely required by the schema."
+                        if is_final_synthesis
+                        else ""
+                    )
+                )
 
             response = await self._client.post(
                 "/api/chat",
@@ -121,27 +202,25 @@ class OllamaSpecialistReasoningClient(
                         {
                             "role": "user",
                             "content": (
-                                effective_prompt
-                                if generation_attempt == 0
-                                else (
-                                    effective_prompt
-                                    + (
-                                        "\n\nThe previous generated "
-                                        "response was invalid or incomplete. "
-                                        "Return a complete and concise JSON "
-                                        "object. Close every quote, bracket, "
-                                        "and brace."
-                                    )
-                                )
+                                base_prompt
+                                + retry_suffix
                             ),
                         },
                     ],
                     "options": {
                         "temperature": 0,
                         "num_predict": (
-                            6144
-                            if generation_attempt == 0
-                            else 8192
+                            (
+                                2048
+                                if generation_attempt == 0
+                                else 3072
+                            )
+                            if is_final_synthesis
+                            else (
+                                6144
+                                if generation_attempt == 0
+                                else 8192
+                            )
                         ),
                     },
                 },
@@ -155,7 +234,10 @@ class OllamaSpecialistReasoningClient(
                     use_schema_format
                     and exc.response.status_code == 400
                 ):
-                    schema_rejection = exc.response.text[:2000]
+                    schema_rejection = (
+                        exc.response.text[:2000]
+                    )
+                    self._schema_format_supported = False
                     use_schema_format = False
                     continue
 
@@ -169,6 +251,9 @@ class OllamaSpecialistReasoningClient(
                     "Ollama specialist request failed "
                     f"with HTTP {exc.response.status_code}: {detail}"
                 ) from exc
+
+            if use_schema_format:
+                self._schema_format_supported = True
 
             body = response.json()
             last_done_reason = body.get("done_reason")
@@ -196,12 +281,18 @@ class OllamaSpecialistReasoningClient(
                     in {"```json", "```"}
                 ):
                     lines = lines[1:]
-                if lines and lines[-1].strip() == "```":
+                if (
+                    lines
+                    and lines[-1].strip() == "```"
+                ):
                     lines = lines[:-1]
                 cleaned = "\n".join(lines).strip()
 
             try:
-                return SpecialistReasoningOutput.model_validate_json(cleaned)
+                return (
+                    SpecialistReasoningOutput
+                    .model_validate_json(cleaned)
+                )
 
             except ValidationError as exc:
                 last_error = exc
