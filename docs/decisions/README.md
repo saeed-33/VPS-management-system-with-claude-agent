@@ -38,3 +38,21 @@ Semantic similarity -> context only
 ## ADR-010 — LangGraph orchestration boundary
 **Accepted.** LangGraph is reserved for later stateful investigation orchestration. Registry/RAG/database/policy/tools/SSH remain project-owned Python services. See `ADR-010-langgraph-orchestration-boundary.md`.
 
+## ADR-011 — Separate Incident RAG and Knowledge RAG with Hybrid Retrieval
+**Accepted.** Incident history and technical documentation remain separate
+retrieval systems. Knowledge RAG uses structure-aware chunks, PostgreSQL FTS,
+pgvector/HNSW, RRF fusion, Specialist/domain scope, deterministic reranking,
+and preserved source attribution. See
+`ADR-011-dual-rag-and-knowledge-retrieval.md`.
+
+## ADR-012 — Specialist reasoning and provenance boundary
+**Accepted.** Specialist LLM reasoning is structured and read-only; Evidence
+and Knowledge IDs are validated against the actual context, documentation is
+not proof of server state, and missing evidence is first-class output. See
+`ADR-012-specialist-reasoning-and-provenance-boundary.md`.
+
+## ADR-013 — Registered read-only diagnostic tools
+**Accepted.** Specialists choose from finite registered capabilities through
+`allowed_tool_ids`; typed parameters and fixed command templates prevent
+arbitrary shell. SSH execution remains behind later policy/evidence stages.
+See `ADR-013-registered-read-only-diagnostic-tools.md`.

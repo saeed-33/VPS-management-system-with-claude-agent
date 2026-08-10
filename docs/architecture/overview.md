@@ -1,13 +1,17 @@
 # Current Architecture
 
-## Current implemented baseline
+## Implemented baseline through Phase 4.11
 
 ```text
 Admin / Web
    |
 Shared Services / Repositories
    |
-MonitoringScheduler -> MonitoringService -> SSH
+MonitoringScheduler
+   |
+MonitoringService
+   |
+SSH
    |
 Monitoring Report
    |
@@ -16,40 +20,213 @@ AnalysisAgentManager
 AnalysisOrchestrator
    +--> ReportNormalizer / Fingerprint
    +--> AnalysisReusePolicy
-   +--> HybridRetriever
+   +--> Incident HybridRetriever
    +--> RagContextBuilder
    +--> ReportAnalyzer / LLM
    +--> RetrievalIndexer
    |
 PostgreSQL + pgvector
 
-Phase 4 Foundation
+Phase 4 Investigation
    |
-SpecialistDefinitionRepository
+InvestigationRouter
    |
-SpecialistDefinitionService
+Investigation Persistence
    |
 SpecialistRegistry
    |
-SpecialistRegistrySnapshot
+Selected Dynamic Specialist
+   |
+SpecialistContextBuilder
+   +--> Initial Analysis
+   +--> Current Evidence
+   +--> Incident RAG
+   +--> Knowledge RAG
+   +--> Specialist Instructions
+   |
+SpecialistReasoningAgent
+   |
+Structured SpecialistResult
+   |
+DiagnosticToolRegistry
 ```
 
-## Current responsibilities
+## Dynamic Specialists
 
-- Monitoring collects server state.
-- Analysis produces REUSE / ASSISTED / FULL analysis.
-- Incident RAG retrieves historical report analyses.
-- `app/bootstrap.py` is the composition root.
-- Specialist definitions are user-managed persisted data.
-- Specialist Registry converts enabled definitions into validated immutable runtime definitions.
-- Registry Snapshot provides one coherent Specialist set for one future routing decision.
+Specialists are persisted operator-managed data, not hard-coded Python agent
+classes.
 
-## Phase 4 Foundation completed
+Runtime definitions include:
 
-Milestone A (4.0–4.4) is complete. The runtime can create/edit/enable/disable/delete Specialist definitions, persist them, load enabled definitions only, validate them, normalize domains, create a stable snapshot, and perform deterministic domain lookup.
+```text
+slug/name
+instructions
+domains
+trigger hints
+knowledge topics
+allowed_tool_ids
+priority
+max rounds
+max actions
+```
+
+The Specialist Registry exposes enabled validated definitions and stable
+snapshots for routing.
+
+## Investigation routing
+
+The Router is deterministic and conservative before LLM reasoning.
+
+It decides:
+
+```text
+should investigate?
+detected domains
+candidate Specialists
+selected Specialists
+unmatched issues
+```
+
+The candidate pool is intentionally larger than the final selection pool so a
+later ranking/selection mechanism has enough options without invoking every
+Specialist.
+
+## Two RAG systems
+
+### Incident RAG
+
+Purpose:
+
+```text
+retrieve similar historical monitoring incidents/analyses
+```
+
+It is used as historical context, not exact truth for the current server.
+
+### Knowledge RAG
+
+Purpose:
+
+```text
+retrieve small relevant technical-documentation chunks
+```
+
+Pipeline:
+
+```text
+Knowledge Sources
+ -> load/parse
+ -> structure-aware chunking
+ -> PostgreSQL search_vector + GIN
+ -> embeddings vector(768) + HNSW
+ -> vector + full-text retrieval
+ -> RRF
+ -> Specialist/domain reranking
+ -> Top-K attributed chunks
+```
+
+Incident RAG and Knowledge RAG are deliberately separate.
+
+See ADR-011.
+
+## Specialist Context Builder
+
+The Context Builder creates a bounded Specialist-specific snapshot from:
+
+```text
+SpecialistTask
+Specialist instructions
+initial analysis
+selected current evidence
+Incident RAG
+Knowledge RAG
+```
+
+Current default total context limit:
+
+```text
+18000 characters
+```
+
+Every source retains a stable provenance ID.
+
+## Specialist Reasoning
+
+Phase 4.10 is LLM reasoning-only.
+
+Output is strict structured data:
+
+```text
+summary
+confidence
+findings
+hypotheses
+ruled_out
+missing_evidence
+recommended_next_specialists
+```
+
+Evidence/Knowledge IDs returned by the model are validated against the actual
+context before conversion to `SpecialistResult`.
+
+Technical documentation is not accepted as proof of live server state.
+
+See ADR-012.
+
+## Diagnostic Tool Registry
+
+Phase 4.11 defines a finite set of registered read-only diagnostic
+capabilities.
+
+The LLM is never given arbitrary shell.
+
+A Tool owns:
+
+```text
+typed parameters
+fixed command template
+timeout
+output limit
+risk metadata
+```
+
+Specialist definitions own the permission list through `allowed_tool_ids`.
+
+4.11 defines Tools only; it does not execute them yet.
+
+See ADR-013.
+
+## Composition and orchestration boundary
+
+`app/bootstrap.py` remains the composition root.
+
+LangGraph is still not required for the implemented services. ADR-010 reserves
+it for later stateful orchestration when the investigation loop/coordinator
+benefits from graph execution.
+
+Project-owned services remain responsible for:
+
+```text
+database/repositories
+RAG
+registry
+policy
+diagnostic tools
+SSH
+```
 
 ## Not implemented yet
 
-Investigation Router, investigation persistence, Knowledge Sources/RAG, Specialist Context Builder, Specialist LLM reasoning, Tool Registry, Policy Engine, Specialist evidence collection, iterative investigation loops, Server Coordinator, parallel investigation, dynamic secondary specialists, final correlation/diagnosis, and Investigation UI.
+```text
+4.12 Diagnostic Policy Engine
+4.13 Evidence Collection
+4.14 Specialist Investigation Loop
+4.15 Server Coordinator
+4.16 Parallel Investigation
+4.17 Dynamic Secondary Specialists
+4.18 Correlation + Final Diagnosis
+4.19 Investigation API/UI
+4.20 Evaluation & Safety Gate
+```
 
-LangGraph is not currently part of runtime execution. ADR-010 reserves it for later stateful orchestration only.
+Autonomous remediation remains explicitly outside Phase 4.

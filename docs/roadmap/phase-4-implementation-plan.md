@@ -430,15 +430,39 @@ Remediation belongs to Phase 5 with separate permissions, approval, audit, rollb
 | Step | Status |
 |---|---|
 | 4.0 | Completed |
-| 4.1 | Completed — tests verified |
-| 4.2 | Completed — migration/schema/tests verified |
-| 4.3 | Completed — API/UI/routes/tests verified |
-| 4.4 | Completed — 57 tests + runtime Registry acceptance verified |
-| 4.5 | Implemented — regression coverage restored; pending final verification |
-| 4.6–4.20 | Planned |
+| 4.1 | Completed — contracts/tests verified |
+| 4.2 | Completed — dynamic Specialist persistence/schema verified |
+| 4.3 | Completed — Specialist API/UI/routes verified |
+| 4.4 | Completed — Specialist Registry runtime acceptance |
+| 4.5 | Completed — routing + healthy/failure runtime acceptance |
+| 4.6 | Completed — investigation persistence runtime acceptance |
+| 4.7 | Completed — Knowledge Sources + 9/9 Specialist coverage |
+| 4.8 | Completed — ingestion/chunking/indexing/hybrid retrieval acceptance |
+| 4.9 | Completed — bounded Specialist Context runtime acceptance |
+| 4.10 | Completed — structured conservative LLM reasoning acceptance |
+| 4.11 | Completed — 18 read-only Tools + safety/allow-list tests |
+| 4.12 | Next — Diagnostic Policy Engine |
+| 4.13 | Planned — Evidence Collection |
+| 4.14 | Planned — Specialist Investigation Loop |
+| 4.15 | Planned — Server Coordinator |
+| 4.16 | Planned — Parallel Investigation |
+| 4.17 | Planned — Dynamic Secondary Specialists |
+| 4.18 | Planned — Correlation + Final Diagnosis |
+| 4.19 | Planned — Investigation API/UI |
+| 4.20 | Planned — Evaluation & Safety Gate |
 
 **Milestone A — Foundation (4.0–4.4): COMPLETED.**
 
-Current: **4.5 — Investigation Router**.
+**Milestone B — Routing + Knowledge (4.5–4.9): COMPLETED.**
+
+Milestone C is active.
+
+Current: **4.12 — Diagnostic Policy Engine**.
+
+Reference automated baseline after 4.11:
+
+```text
+124 passed
+```
 
 Update this table at the end of every step.

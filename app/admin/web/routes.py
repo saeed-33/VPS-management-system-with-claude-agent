@@ -114,3 +114,16 @@ async def specialists_page(
         context={},
     )
 
+@router.get(
+    "/knowledge-sources",
+    response_class=HTMLResponse,
+)
+async def knowledge_sources_page(
+    request: Request,
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="knowledge_sources.html",
+        context={},
+    )
+

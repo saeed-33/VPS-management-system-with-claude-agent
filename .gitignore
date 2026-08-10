@@ -5,4 +5,4 @@ __pycache__/
 .pytest_cache/
 reports/
 apply**.py
-.step**backup
+.**backup

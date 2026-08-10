@@ -13,6 +13,7 @@ from app.admin.api import (
     servers_router,
     specialists_router,
     knowledge_sources_router,
+    diagnostic_tools_router,
 )
 from app.admin.web import router as web_router
 from app.bootstrap import container
@@ -162,6 +163,7 @@ app.include_router(profiles_router)
 app.include_router(reports_router)
 app.include_router(specialists_router)
 app.include_router(knowledge_sources_router)
+app.include_router(diagnostic_tools_router)
 
 
 @app.get(

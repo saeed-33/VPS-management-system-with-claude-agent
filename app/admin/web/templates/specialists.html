@@ -209,18 +209,16 @@
                 >
             </div>
 
-            <div class="form-group">
-                <label
-                    for="specialist-tool-ids"
-                    class="form-label"
-                >
-                    Allowed Tool IDs
-                </label>
-                <input
-                    id="specialist-tool-ids"
-                    class="form-control"
-                    placeholder="يترك فارغًا حاليًا"
-                >
+            <div class="form-group full-width">
+                <label class="form-label">Diagnostic Tools المسموحة</label>
+                <p class="panel-subtitle">
+                    اختر من الأدوات Read-Only المسجلة فعليًا في Registry.
+                </p>
+                <div id="specialist-tools-selector">
+                    <div class="empty-state">
+                        <span class="loading-spinner"></span>
+                    </div>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -278,6 +276,7 @@
 {% block scripts %}
 <script>
 let specialists = [];
+let diagnosticTools = [];
 
 function csvValues(value) {
     return value
@@ -290,6 +289,71 @@ function escapeText(value) {
     const div = document.createElement("div");
     div.textContent = value ?? "";
     return div.innerHTML;
+}
+
+function selectedDiagnosticToolIds() {
+    return Array.from(
+        document.querySelectorAll(
+            'input[name="specialist-tool"]:checked'
+        )
+    ).map(item => item.value);
+}
+
+function setSelectedDiagnosticToolIds(ids) {
+    const selected = new Set(ids || []);
+    document.querySelectorAll(
+        'input[name="specialist-tool"]'
+    ).forEach(item => {
+        item.checked = selected.has(item.value);
+    });
+}
+
+function renderDiagnosticTools() {
+    const container = document.getElementById(
+        "specialist-tools-selector"
+    );
+
+    if (!diagnosticTools.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>لا توجد Diagnostic Tools مسجلة.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = diagnosticTools.map(tool => `
+        <label style="display:flex;gap:.75rem;align-items:flex-start;border:1px solid var(--border-color,#dfe3e8);border-radius:.75rem;padding:.8rem;margin:.5rem 0;cursor:pointer">
+            <input type="checkbox" name="specialist-tool" value="${escapeText(tool.tool_id)}" style="margin-top:.25rem">
+            <span>
+                <strong>${escapeText(tool.name)}</strong>
+                <span class="table-secondary-text" style="display:block">
+                    ${escapeText(tool.tool_id)} · ${escapeText(tool.risk)} · ${tool.timeout_seconds}s
+                </span>
+                <span style="display:block;margin-top:.3rem">${escapeText(tool.description)}</span>
+                <small>${escapeText((tool.domains || []).join(", "))}</small>
+            </span>
+        </label>
+    `).join("");
+}
+
+async function loadDiagnosticTools() {
+    try {
+        diagnosticTools = await apiRequest(
+            "/api/diagnostic-tools"
+        );
+        renderDiagnosticTools();
+    } catch (error) {
+        diagnosticTools = [];
+        document.getElementById(
+            "specialist-tools-selector"
+        ).innerHTML = `
+            <div class="empty-state">
+                <p>تعذر تحميل Diagnostic Tool Registry.</p>
+            </div>
+        `;
+        showToast(error.message, "error");
+    }
 }
 
 async function loadSpecialists() {
@@ -388,6 +452,11 @@ function renderSpecialists() {
                 </p>
 
                 <p>
+                    <strong>الأدوات:</strong>
+                    ${escapeText(item.allowed_tool_ids.join(", ") || "—")}
+                </p>
+
+                <p>
                     <strong>الحدود:</strong>
                     ${item.max_rounds} جولات /
                     ${item.max_actions} إجراءات
@@ -460,9 +529,9 @@ function editSpecialist(id) {
         "specialist-knowledge-topics"
     ).value = item.knowledge_topics.join(", ");
 
-    document.getElementById(
-        "specialist-tool-ids"
-    ).value = item.allowed_tool_ids.join(", ");
+    setSelectedDiagnosticToolIds(
+        item.allowed_tool_ids
+    );
 
     document.getElementById(
         "cancel-specialist-edit"
@@ -495,6 +564,8 @@ function resetSpecialistForm() {
     document.getElementById(
         "cancel-specialist-edit"
     ).hidden = true;
+
+    setSelectedDiagnosticToolIds([]);
 }
 
 document.getElementById(
@@ -536,11 +607,7 @@ document.getElementById(
                     "specialist-knowledge-topics"
                 ).value
             ),
-            allowed_tool_ids: csvValues(
-                document.getElementById(
-                    "specialist-tool-ids"
-                ).value
-            ),
+            allowed_tool_ids: selectedDiagnosticToolIds(),
             priority: Number(
                 document.getElementById(
                     "specialist-priority"
@@ -671,6 +738,7 @@ async function deleteSpecialist(id) {
     }
 }
 
+loadDiagnosticTools();
 loadSpecialists();
 </script>
 {% endblock %}
