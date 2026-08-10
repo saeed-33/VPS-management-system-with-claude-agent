@@ -19,6 +19,13 @@ from app.agent.investigation.specialist_registry import (
     SpecialistRegistryValidationError,
     SpecialistRuntimeDefinition,
 )
+from app.agent.investigation.diagnostic_policy import (
+    DiagnosticPolicyDecision,
+    DiagnosticPolicyEngine,
+    DiagnosticPolicyReason,
+    DiagnosticPolicyRequest,
+    DiagnosticPolicyResult,
+)
 from app.agent.investigation.contracts import (
     EvidenceKind,
     EvidenceReference,
@@ -35,6 +42,11 @@ from app.agent.investigation.contracts import (
 )
 
 __all__ = [
+    "DiagnosticPolicyDecision",
+    "DiagnosticPolicyEngine",
+    "DiagnosticPolicyReason",
+    "DiagnosticPolicyRequest",
+    "DiagnosticPolicyResult",
     "EvidenceKind",
     "EvidenceReference",
     "InvestigationBudget",

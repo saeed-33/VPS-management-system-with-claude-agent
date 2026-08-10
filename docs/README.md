@@ -59,3 +59,4 @@
 - [Phase 4 closeout — 4.5–4.11](roadmap/phase-4-4-5-to-4-11-closeout.md)
 - [Multi-Agent Test Methodology](testing/multi-agent-test-methodology.md)
 - [Admin Management Coverage](api/admin-management.md)
+- [Diagnostic Policy Engine](architecture/diagnostic-policy.md)
