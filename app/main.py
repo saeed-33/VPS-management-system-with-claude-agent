@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.admin.api import (
+    investigations_router,
     commands_router,
     profiles_router,
     reports_router,
@@ -164,6 +165,7 @@ app.include_router(reports_router)
 app.include_router(specialists_router)
 app.include_router(knowledge_sources_router)
 app.include_router(diagnostic_tools_router)
+app.include_router(investigations_router)
 
 
 @app.get(

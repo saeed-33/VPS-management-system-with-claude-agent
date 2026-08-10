@@ -1,3 +1,6 @@
+from app.admin.api.investigations import (
+    router as investigations_router,
+)
 from app.admin.api.knowledge_sources import (
     router as knowledge_sources_router,
 )
@@ -21,6 +24,7 @@ from app.admin.api.profiles import (
 )
 
 __all__ = [
+    "investigations_router",
     "servers_router",
     "commands_router",
     "reports_router",

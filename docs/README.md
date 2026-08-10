@@ -69,3 +69,4 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Cross-Specialist Correlation](architecture/cross-specialist-correlation.md)
 - [Investigation Read Models](architecture/investigation-read-models.md)
 - [Investigation Runtime Snapshot](architecture/investigation-runtime-snapshot.md)
+- [Investigation Read API](api/investigations.md)

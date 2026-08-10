@@ -1,3 +1,6 @@
+from app.shared.services.investigation_read_service import (
+    InvestigationReadService,
+)
 from app.shared.services.knowledge_source_service import (
     KnowledgeSourceService,
 )
@@ -74,3 +77,7 @@ def get_knowledge_source_service(
 ) -> KnowledgeSourceService:
     return container.knowledge_source_service
 
+
+def get_investigation_read_service(
+) -> InvestigationReadService:
+    return container.investigation_read_service
