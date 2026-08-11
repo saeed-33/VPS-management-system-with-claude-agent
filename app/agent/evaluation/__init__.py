@@ -21,7 +21,13 @@ from app.agent.evaluation.runner import (
     expected_behavior_executor,
 )
 
+from app.agent.evaluation.persisted_runtime import (
+    PersistedRuntimeEvaluation,
+    PersistedRuntimeEvaluator,
+)
+
 __all__ = [
+
     "DEFAULT_THRESHOLDS",
     "DeterministicEvaluationRunner",
     "EvaluationCase",
@@ -36,4 +42,6 @@ __all__ = [
     "ReadinessStatus",
     "default_evaluation_cases",
     "expected_behavior_executor",
+    "PersistedRuntimeEvaluation",
+    "PersistedRuntimeEvaluator",
 ]
