@@ -104,3 +104,31 @@ uv run python tools/report_rag_performance.py
 - `docs/roadmap/phase-4-17-closeout.md`
 
 ابدأ من `docs/README.md` لفهرس الوثائق الكامل.
+
+## Phase 4 Production Readiness
+
+Phase 4 autonomous diagnosis has completed the Phase 4.20 evaluation and safety gate.
+
+Current operational state:
+
+```text
+ready_for_supervised_operations
+automatic_remediation_allowed = false
+```
+
+Testing and architecture documentation:
+
+- `docs/testing/TESTING_STRATEGY.md`
+- `docs/testing/TEST_CATALOG.md`
+- `docs/testing/RUNTIME_SCENARIOS.md`
+- `docs/PROJECT_STRUCTURE.md`
+- `docs/roadmap/phase-4-20-closeout.md`
+
+Convenience commands:
+
+```powershell
+uv run python tools/run_all_tests.py --mode full
+uv run python tools/run_all_tests.py --mode readiness --limit 500
+uv run python tools/generate_test_catalog.py
+uv run python tools/generate_project_structure.py
+```
