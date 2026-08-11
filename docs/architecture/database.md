@@ -32,3 +32,19 @@ Baseline يعتمد على GIN للـFTS، HNSW للـvector، وscope index ي�
 `server_id + monitoring_profile_id + command_set_hash`.
 
 تغيير `EMBEDDING_DIMENSIONS` في البيئة لا يغير `Vector(768)` تلقائيًا؛ تغيير الأبعاد يحتاج migration وإعادة فهرسة.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

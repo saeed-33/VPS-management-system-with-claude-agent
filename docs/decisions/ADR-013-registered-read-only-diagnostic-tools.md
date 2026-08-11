@@ -162,3 +162,19 @@ fall back to arbitrary shell.
 - Execution timeouts/output budgets are enforceable.
 - Phase 5 remediation can later use a separate risk/approval model rather than
   silently expanding Phase 4 privileges.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **DECISION**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

@@ -51,3 +51,19 @@ This does not authorize autonomous repair, service restart, package changes, con
 ## Next phase
 
 Phase 5 should begin with supervised-remediation contracts and approval semantics before any write-capable diagnostic/remediation action is introduced.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

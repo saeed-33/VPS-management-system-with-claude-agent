@@ -1,6 +1,10 @@
-# Investigation Read API — Phase 4.19.3
+# Investigation API
 
-Read-only endpoints:
+<!-- DOC-STATUS: CURRENT -->
+
+The Investigation API is read-only.
+
+## Endpoints
 
 ```text
 GET /api/investigations
@@ -8,11 +12,58 @@ GET /api/investigations/{investigation_id}
 GET /api/reports/{report_id}/investigations
 ```
 
-The API exposes only persisted Investigation state through
-`InvestigationReadService`.
+## List semantics
 
-It does not execute Specialists, SSH, tools, correlation, or LLM synthesis.
+The list endpoint returns persisted Investigation summaries and runtime/final-diagnosis availability flags where supported by the read model.
 
-When no runtime snapshot exists, `runtime_available=false` and `runtime=null`.
+## Detail semantics
 
-Next: Phase 4.19.4 — Investigation Administration UI.
+The detail endpoint may expose:
+
+```text
+identity
+server/report/analysis IDs
+routing decision
+budgets
+status
+runtime availability
+Specialist runs
+Evidence
+correlated claims
+conflicts
+Final Diagnosis
+narrative
+metadata
+timestamps
+```
+
+The API does not execute Specialists or remediation.
+
+## Provenance
+
+Persisted Claim/Conflict/Narrative references must remain valid against the runtime snapshot.
+
+## UI
+
+Read-only administration pages consume the Investigation read model:
+
+```text
+GET /investigations
+GET /investigations/{investigation_id}
+```
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

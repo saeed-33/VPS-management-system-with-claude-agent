@@ -145,3 +145,19 @@ It does not by itself prove that the LLM will always decide to recommend a secon
 Phase 4.18 owns cross-Specialist correlation and final server-level diagnosis.
 
 It must distinguish confirmed, probable, and unknown conclusions and preserve an Evidence chain for every material claim.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

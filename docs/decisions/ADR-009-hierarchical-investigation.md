@@ -75,3 +75,19 @@ Retrieved material must preserve provenance/source identifiers.
 - Partial failures must not invalidate unrelated specialist work.
 - Budget exhaustion is a valid terminal condition.
 - Remediation requires a separate Phase 5 architecture with stronger permissions, approvals, audit, rollback, and safety controls.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **DECISION**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

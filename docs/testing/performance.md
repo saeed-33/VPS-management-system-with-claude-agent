@@ -32,3 +32,28 @@ reuse_index_ms     p50 ~ 9.2 ms
 
 ## الاستنتاج
 عنق الزجاجة في ASSISTED هو LLM، لا PostgreSQL vector/FTS أو compatibility. لا يوجد قرار حالي بضغط السياق قبل إثبات الحفاظ على جودة التحليل.
+
+## Current Phase 4.20 Boundary
+
+```text
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For canonical current state see `docs/PROJECT_STATUS.md`; for test execution see `docs/testing/TESTING_STRATEGY.md`.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **REFERENCE**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

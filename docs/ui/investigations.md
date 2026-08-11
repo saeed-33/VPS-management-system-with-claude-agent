@@ -1,27 +1,54 @@
-# Investigation Administration UI — Phase 4.19.4
+# Investigation Administration UI
 
-Phase 4.19.4 adds read-only Administration UI pages backed by the Phase 4.19.3 API.
+<!-- DOC-STATUS: CURRENT -->
 
-Pages:
+The Investigation UI is read-only.
+
+## Pages
 
 ```text
-GET /investigations
-GET /investigations/{investigation_id}
+/investigations
+/investigations/{investigation_id}
 ```
 
-The list page shows status, server/report references, selected Specialists, runtime availability, and Final Diagnosis availability.
+The pages expose persisted Investigation state through the same read model used by the API.
 
-The detail page may show persisted runtime data:
+Expected detail information includes, when available:
 
 ```text
+Investigation identity/status
+server/report/analysis identity
+routing/budgets
 Specialist runs
 Evidence
-Correlated claims
-Conflicts
-Deterministic Final Diagnosis
-LLM narrative and fallback state
+correlated claims
+conflicts
+Final Diagnosis
+narrative
+runtime/final-diagnosis availability
 ```
 
-The UI is read-only and does not execute Specialists, SSH, tools, correlation, or LLM synthesis.
+The UI must preserve Evidence/Claim/Conflict provenance and must not provide remediation controls during Phase 4.
 
-Next: Phase 4.19.5 — Web/API Acceptance.
+Current operational state:
+
+```text
+ready_for_supervised_operations
+automatic_remediation_allowed = false
+```
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

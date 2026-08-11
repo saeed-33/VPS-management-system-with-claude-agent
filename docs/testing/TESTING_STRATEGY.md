@@ -215,3 +215,19 @@ The random Linux scenario tools in `tools/linux_scenarios/`:
 - clean up their own resources.
 
 Do not run workload generators on production servers unless the operator has explicitly accepted the resource impact.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

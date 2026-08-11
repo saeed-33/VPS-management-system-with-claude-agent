@@ -56,3 +56,19 @@ The admin page is:
 It supports create, edit, enable/disable, delete and reload.
 
 Tool IDs can be stored now, but no Tool Registry exists yet. Phase 4.11 will make tool selection capability-aware.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

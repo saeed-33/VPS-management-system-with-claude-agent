@@ -59,3 +59,19 @@ Cross-Specialist correlation and final server-level diagnosis remain **Phase 4.1
 Phase 4.18 must consume multiple Specialist results and accumulated Evidence without weakening existing provenance or safety boundaries.
 
 Remediation remains outside Phase 4.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

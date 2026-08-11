@@ -1,66 +1,90 @@
-# Production Checklist
+# Production / Supervised Operations Checklist
 
-استخدم هذه القائمة قبل أي نشر production-like.
+<!-- DOC-STATUS: CURRENT -->
+
+This checklist applies to the current Phase 4 system, which is approved only for supervised diagnostic operations.
+
+## Required state
+
+```text
+Production Readiness Gate = PASS
+readiness = ready_for_supervised_operations
+automatic_remediation_allowed = false
+```
 
 ## Application
 
-- [ ] `DEBUG=false`
-- [ ] لا يوجد `--reload`
-- [ ] Uvicorn worker واحد فقط في البنية الحالية
-- [ ] `/health` يعمل
-- [ ] الاختبارات تمر
-- [ ] Route inventory تمت مراجعته
+- Environment variables validated.
+- Database reachable.
+- Required migrations applied.
+- FastAPI health endpoint succeeds.
+- Route inventory matches expected API/web surface.
+- Scheduler configuration reviewed.
+- Secrets are not committed.
 
-## Database
+## Ollama / LLM
 
-- [ ] PostgreSQL متاح
-- [ ] pgvector extension موجود
-- [ ] `bootstrap_database.py --verify-only` يعيد PASS
-- [ ] GIN index موجود
-- [ ] HNSW index موجود
-- [ ] retrieval scope index موجود
-- [ ] backup حديث
-- [ ] restore procedure معروف
-- [ ] DB user ليس superuser دون حاجة
+- Configured provider reachable when LLM is enabled.
+- Model name verified.
+- Runtime context explicitly configured.
+- Structured-output compatibility/retry path tested.
+- Provider failure is fail-safe.
 
-## SSH
+Reference accepted local model family during Phase 4 testing:
 
-- [ ] private key موجود
-- [ ] permissions مناسبة
-- [ ] known_hosts موجود
-- [ ] حساب SSH محدود
-- [ ] أوامر المراقبة تمت مراجعتها
-- [ ] SSH test يعمل لكل server
+```text
+gemma4:e4b-it-q4_K_M
+context 32768
+```
 
-## LLM/RAG
+This is a reference, not a hard requirement for every deployment.
 
-- [ ] provider مضبوط
-- [ ] analysis model متاح
-- [ ] embedding model متاح
-- [ ] RAG evaluation baseline معروف
-- [ ] لا توجد current invariant failures
+## Linux / SSH
 
-## Security
+- Test connection succeeds for monitored servers.
+- Monitoring user privileges are least-privilege.
+- No arbitrary shell capability is exposed to the model.
+- Diagnostic Tool Registry contains only reviewed tools.
+- Policy DENY cannot reach SSH execution.
 
-- [ ] التطبيق غير مكشوف للعامة بدون TLS/Auth
-- [ ] secrets غير موجودة في Git
-- [ ] `.env` غير منشور
-- [ ] PostgreSQL غير مكشوف دون حاجة
-- [ ] Ollama غير مكشوف للعامة
-- [ ] access إلى Admin UI مقيد شبكيًا أو عبر proxy
-- [ ] log retention محدد
+## Evaluation
 
-## Deployment
+Run:
 
-- [ ] `git status` نظيف أو التغييرات معروفة
-- [ ] migrations طبقت عند الحاجة
-- [ ] process restart graceful
-- [ ] أول monitoring cycle نجح
-- [ ] analysis queue تعمل
-- [ ] logs راجعت بعد deploy
+```powershell
+uv run python -m pytest
+uv run python tools/run_evaluation_dataset.py
+uv run python tools/run_safety_runtime_evaluation.py
+uv run python tools/run_persisted_runtime_evaluation.py --limit 500
+uv run python tools/run_production_readiness_evaluation.py --limit 500
+```
 
-## Rollback
+The final command must report:
 
-- [ ] commit السابق معروف
-- [ ] database rollback/restore plan موجود
-- [ ] لا توجد migration غير قابلة للرجوع بدون backup
+```text
+Production Readiness Gate: PASS
+```
+
+## Operational restrictions
+
+The Phase 4 system is read-only diagnostic automation.
+
+Do not enable or manually wire in write-capable actions such as restart, kill, package changes, configuration writes, firewall changes, or reboot.
+
+Such capabilities belong to Phase 5 supervised remediation with separate approval and rollback design.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

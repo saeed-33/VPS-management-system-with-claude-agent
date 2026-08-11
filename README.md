@@ -132,3 +132,22 @@ uv run python tools/run_all_tests.py --mode readiness --limit 500
 uv run python tools/generate_test_catalog.py
 uv run python tools/generate_project_structure.py
 ```
+
+## Current Production Readiness
+
+Phase 4.20 is complete.
+
+```text
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+Canonical documentation:
+
+- `docs/PROJECT_STATUS.md`
+- `docs/architecture/overview.md`
+- `docs/testing/TESTING_STRATEGY.md`
+- `docs/testing/TEST_CATALOG.md`
+- `docs/testing/RUNTIME_SCENARIOS.md`
+- `docs/PROJECT_STRUCTURE.md`
+- `docs/DOCUMENTATION_INVENTORY.md`

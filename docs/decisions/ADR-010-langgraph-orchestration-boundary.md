@@ -82,3 +82,19 @@ The model cannot create an executable Specialist. A recommended slug must exist 
 LangGraph remains an orchestration runtime, not the source of truth for Specialists, security policy, RAG, persistence, SSH, or Evidence.
 
 This boundary allows new operator-defined Specialists to be added without modifying the graph structure.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **DECISION**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

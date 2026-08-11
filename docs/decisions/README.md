@@ -58,3 +58,19 @@ arbitrary shell. SSH execution remains behind later policy/evidence stages.
 See `ADR-013-registered-read-only-diagnostic-tools.md`.
 - [ADR-014: LangGraph Investigation Orchestration](ADR-014-langgraph-investigation-orchestration.md)
 - [ADR-015: Dynamic Secondary Specialist Routing](ADR-015-dynamic-secondary-specialist-routing.md)
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **REFERENCE**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

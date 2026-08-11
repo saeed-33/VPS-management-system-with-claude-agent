@@ -185,3 +185,28 @@ uv run python tools/list_routes.py
 - backup.
 - rollback SQL أو restore strategy.
 - توافق النسخة السابقة مع schema الجديدة.
+
+## Current Phase 4.20 Boundary
+
+```text
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For canonical current state see `docs/PROJECT_STATUS.md`; for test execution see `docs/testing/TESTING_STRATEGY.md`.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

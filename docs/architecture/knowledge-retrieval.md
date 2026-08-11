@@ -42,3 +42,19 @@ The current NGINX seed contains only the documentation index page. Detailed
 directive retrieval will improve when multi-page website crawling is added.
 
 Phase 4.8.5 injects retrieved chunks into Specialist context.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

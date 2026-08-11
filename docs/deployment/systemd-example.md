@@ -36,3 +36,19 @@ WantedBy=multi-user.target
 - راجع hardening options قبل تفعيل قيود filesystem إضافية لأنها قد تمنع قراءة مفاتيح SSH أو ملفات التطبيق.
 
 Logs ستذهب إلى journald افتراضيًا ويمكن إدارتها عبر systemd/journald policy.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

@@ -1,216 +1,193 @@
 # Testing and Evaluation
 
-Run the automated suite:
+<!-- DOC-STATUS: CURRENT -->
+
+## Current accepted state
+
+Phase 4.20 is complete.
+
+```text
+Production Readiness Gate: PASS
+Readiness: ready_for_supervised_operations
+Automatic remediation: False
+```
+
+Reference regression baseline immediately before documentation closeout:
+
+```text
+237 passed, 1 warning
+```
+
+## Testing model
+
+The project uses six complementary test layers.
+
+```text
+1. unit / contract
+2. API / web / persistence integration
+3. deterministic evaluation
+4. controlled failure injection
+5. real runtime acceptance
+6. aggregate production-readiness evaluation
+```
+
+Passing `pytest` alone is necessary but not sufficient for Investigation/LLM/SSH changes.
+
+## Unit and contract suite
 
 ```powershell
 uv run python -m pytest
 ```
 
-## Current automated baseline
-
-After accepted Phase 4.17 work:
-
-```text
-184 passed, 1 warning
-```
-
-The remaining warning is the existing Starlette/TestClient deprecation warning and is not a Phase 4.17 functional failure.
-
-## Covered Phase 4 areas
-
-The suite now includes coverage for:
+The suite covers, among other areas:
 
 ```text
 Investigation contracts
-Dynamic Specialist persistence/API/registry
-FastAPI route inventory
-Investigation routing
-Investigation persistence
-Knowledge Sources
-Knowledge ingestion/parsing
-Structure-aware chunking
-Knowledge indexing
-Knowledge hybrid retrieval/scope
-Specialist Context Builder
-Specialist Reasoning Agent
-Reasoning citation/provenance validation
-Specialist recommendation normalization
+routing
+Specialist registry
+Specialist context
+reasoning contracts
+Ollama compatibility
+Knowledge ingestion/chunking/indexing/retrieval
 Diagnostic Tool Registry
-Tool parameter safety
-Specialist Tool allow-list enforcement
-Diagnostic Policy Engine
-Evidence Collection
-Specialist Investigation Loop
+Policy
+Evidence collection
+Specialist loop
 Server Coordinator
 LangGraph parallel orchestration
-Dynamic secondary Specialist routing
-global specialist/action budget invariants
-duplicate Specialist suppression
-compact Final Synthesis output
+dynamic secondary routing
+correlation/conflicts
+Final Diagnosis
+runtime snapshot persistence
+Investigation API/UI
+evaluation dataset
+persisted runtime evaluation
+safety runtime evaluation
+readiness gate
+aggregate readiness
 ```
 
-## Runtime acceptance checkpoints
+## Deterministic evaluation
 
-### Router
+Dataset coverage:
 
-Healthy reports must not open investigations simply because Specialists exist.
+```powershell
+uv run python tools/run_evaluation_dataset.py
+```
 
-Failure reports must detect relevant domains and select only enabled matching Specialists.
+This verifies dataset/gate wiring only.
 
-### Knowledge RAG
+Safety/runtime controlled evaluation:
 
-Knowledge retrieval validates mechanics, metadata scope, and source attribution separately from corpus quality.
+```powershell
+uv run python tools/run_safety_runtime_evaluation.py
+```
 
-Technical documentation explains technology behavior but does not prove a live server condition.
+This executes real routing and Policy logic and real Ollama-client parsing/retry/failure behavior through controlled HTTP transport.
 
-### Specialist Reasoning
+## Real runtime acceptance
 
-Reasoning must remain conservative when live operational Evidence is absent.
+Real runtime tests may contact Ollama and Linux hosts over SSH.
 
-Unknown Evidence/Knowledge IDs fail provenance validation.
+Examples:
 
-### Diagnostic safety
+```powershell
+uv run python tools/run_server_coordinator_acceptance.py <report_id> --max-specialists 4 --max-rounds 3 --max-actions 12
+uv run python tools/run_langgraph_parallel_acceptance.py <report_id> --specialists linux-cpu,linux-memory --max-specialists 2 --max-rounds 2 --max-actions 8
+uv run python tools/run_langgraph_secondary_acceptance.py <report_id> --initial-specialist nginx --max-specialists 3 --max-rounds 3 --max-actions 10
+uv run python tools/run_correlation_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
+uv run python tools/run_final_diagnosis_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
+uv run python tools/run_persisted_runtime_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
+```
 
-Required negative cases include:
+Use `docs/testing/TEST_CATALOG.md` for the exact tools/tests available in the current checkout.
+
+## Persisted runtime measurement
+
+```powershell
+uv run python tools/run_persisted_runtime_evaluation.py --limit 500
+```
+
+Measured from persisted real snapshots:
 
 ```text
-unknown Tool rejected
-Tool not assigned rejected
-unknown argument rejected
-invalid service/path/port rejected
-shell injection rejected
-Policy DENY never reaches SSH
+specialist_completion
+evidence_grounding
+budget_compliance
+conflict_preservation
+final_diagnosis_grounding
 ```
 
-No arbitrary shell is permitted.
+## Production readiness
 
-### Evidence Collection
+```powershell
+uv run python tools/run_production_readiness_evaluation.py --limit 500
+```
 
-Only an approved execution envelope may reach the SSH execution layer.
-
-Command output is bounded and provenance metadata is retained.
-
-### Specialist Investigation Loop
-
-Validate:
+Current accepted result:
 
 ```text
-bounded rounds
-bounded actions
-duplicate request suppression
-Evidence propagation
-objective discipline
-final synthesis
-no-progress termination
-failure handling
+routing_recall                 PASS
+specialist_completion          PASS
+evidence_grounding             PASS
+budget_compliance              PASS
+conflict_preservation          PASS
+final_diagnosis_grounding      PASS
+provider_resilience            PASS
+policy_safety                  PASS
 ```
 
-### LangGraph Parallel — Phase 4.16
+## Random Linux scenarios
 
-Validate:
+See `RUNTIME_SCENARIOS.md`.
+
+Use seeded workloads on disposable Linux test servers:
+
+```bash
+python3 tools/linux_scenarios/random_linux_workload.py \
+  --scenario random \
+  --seed 20260811 \
+  --duration 20
+```
+
+Always retain seed, scenario, report ID, Investigation ID, commit, and model/context.
+
+## Required merge discipline
+
+Ordinary changes:
 
 ```text
-multiple workers
-deterministic worker quotas
-sum(worker quotas) <= global max_actions
-no state/evidence leakage
-deterministic aggregation
-partial failure isolation
+focused tests
+full pytest
+relevant acceptance
+route inventory if API/web changed
 ```
 
-### Dynamic Secondary — Phase 4.17
-
-Controlled acceptance reference:
+Investigation/LLM/SSH/Policy changes:
 
 ```text
-Status:                  completed
-Execution mode:          dynamic-secondary
-Waves completed:         2
-Actions used:            3/10
-Executed Specialists:    nginx, systemd-service
-Secondary requested:     systemd-service
-Secondary accepted:      systemd-service
+focused tests
+full pytest
+controlled safety tests
+real runtime acceptance
+persisted runtime evaluation
+aggregate readiness evaluation
 ```
 
-The controlled acceptance changes only the recommendation value needed to guarantee the secondary path. Primary/secondary Specialist execution and Registry/budget validation remain real.
+Write-capable Phase 5 work must add separate approval/rollback tests before implementation is considered safe.
 
-This proves orchestration correctness, not universal LLM recommendation quality.
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
 
-## Ollama structured-output reliability
+Documentation synchronized: **2026-08-11**
 
-Reference accepted runtime:
+Canonical project state:
 
 ```text
-CONTEXT = 32768
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
 ```
 
-Normal reasoning uses the rich output contract. Final Synthesis uses the compact output contract.
-
-Context capacity and generation capacity are separate settings.
-
-## Controlled real-server evaluation environment
-
-Reference target:
-
-```text
-Ubuntu Server 22.04.2 amd64
-VMware
-```
-
-Ground-truth scenarios include:
-
-```text
-baseline
-CPU load
-memory load
-disk I/O
-HTTP/network activity
-process churn
-application errors
-failed systemd unit
-mixed workload
-```
-
-## Evaluation principle
-
-Automated tests answer:
-
-```text
-Does the implementation obey its contracts?
-```
-
-Controlled VM scenarios answer:
-
-```text
-Does the investigation reach the correct diagnosis from real evidence?
-```
-
-Both are required before Phase 4 closes.
-
-## Phase 4.18 target
-
-Correlation + Final Diagnosis must test:
-
-```text
-common-process correlation
-conflicting Specialist conclusions
-insufficient Evidence
-confirmed/probable/unknown classification
-claim-to-Evidence traceability
-no unsupported global diagnosis
-```
-
-## Phase 4.20 target evaluation dimensions
-
-```text
-routing correctness
-specialist usefulness
-diagnostic accuracy
-source attribution
-unsupported claims
-actions/rounds
-LLM calls
-latency
-token/cost profile
-safety violations
-```
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

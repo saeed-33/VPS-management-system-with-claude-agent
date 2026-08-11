@@ -85,3 +85,32 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Complete Test Catalog](testing/TEST_CATALOG.md)
 - [Linux Random Runtime Scenarios](testing/RUNTIME_SCENARIOS.md)
 - [Project Structure and File Responsibilities](PROJECT_STRUCTURE.md)
+
+## Canonical Current Status
+
+- [Project Status](PROJECT_STATUS.md)
+- [Current Architecture](architecture/overview.md)
+- [Phase 4.20 Closeout](roadmap/phase-4-20-closeout.md)
+- [Testing Strategy](testing/TESTING_STRATEGY.md)
+- [Complete Test Catalog](testing/TEST_CATALOG.md)
+- [Runtime Scenarios](testing/RUNTIME_SCENARIOS.md)
+- [Project Structure](PROJECT_STRUCTURE.md)
+- [Documentation Inventory](DOCUMENTATION_INVENTORY.md)
+- [Documentation Maintenance](DOCUMENTATION_MAINTENANCE.md)
+- [ADR-016 Production Readiness / Remediation Boundary](decisions/ADR-016-production-readiness-and-remediation-boundary.md)
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

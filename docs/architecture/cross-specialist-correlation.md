@@ -116,3 +116,19 @@ OpenAI uses parsed structured output with the same narrative schema.
 ## Next
 
 Phase 4.18.5 performs runtime acceptance using a real Final Diagnosis and the configured LLM provider, including deterministic fallback validation.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

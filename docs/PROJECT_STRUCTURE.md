@@ -42,6 +42,24 @@ Evaluation / Production Readiness Gate
 
 ### Repository root / configuration
 
+- `.documentation_full_sync_v2_backup/20260811_100116/README.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/README.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/api/http-api.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/api/investigations.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/architecture/overview.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/deployment/production-checklist.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/deployment/production-deployment.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/operations/configuration.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/operations/running-project.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/rag_configuration.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/roadmap/next-phase-multi-agent.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/roadmap/phase-4-implementation-plan.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/security/security-baseline.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/testing/multi-agent-test-methodology.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/testing/performance.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/testing/testing-and-evaluation.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/ui/investigations.md` — Project documentation.
+- `.documentation_full_sync_v2_backup/20260811_100116/docs/workflows/current-workflows.md` — Project documentation.
 - `.env` — Project asset.
 - `.env.example` — Example environment variables for local/runtime configuration.
 - `.gitignore` — Project asset.
@@ -49,17 +67,24 @@ Evaluation / Production Readiness Gate
 - `.phase_4_20_docs_closeout_backup/20260811_095025/docs/README.md` — Project documentation.
 - `.python-version` — Project asset.
 - `README.md` — Top-level project overview and startup guidance.
-- `apply_phase_4_20_docs_closeout.py` — Python module containing `backup()`, `copy_payload()`, `append_section()`, `validate_python()`, `run_generator()`.
+- `apply_full_documentation_sync_v2.py` — Python module containing `backup()`, `copy_payload()`, `append_current_status()`, `run()`, `validate_python()`.
 - `assets/fonts/NotoNaskhArabic-Regular.ttf` — Project asset.
-- `payload/docs/roadmap/phase-4-20-closeout.md` — Project documentation.
-- `payload/docs/testing/RUNTIME_SCENARIOS.md` — Project documentation.
-- `payload/docs/testing/TESTING_STRATEGY.md` — Project documentation.
-- `payload/docs/testing/TEST_CATALOG.md` — Project documentation.
-- `payload/tools/generate_project_structure.py` — Python module containing `should_skip()`, `python_summary()`, `describe()`, `group()`, `main()`.
-- `payload/tools/generate_test_catalog.py` — Python module containing `first_docstring()`, `test_functions()`, `main()`.
-- `payload/tools/linux_scenarios/random_linux_workload.py` — Python module containing `now()`, `busy_worker()`, `cpu_scenario()`, `memory_scenario()`, `disk_io_scenario()`.
-- `payload/tools/linux_scenarios/run_linux_scenario_matrix.py` — Python module containing `main()`.
-- `payload/tools/run_all_tests.py` — Python module containing `run()`, `tool_exists()`, `main()`.
+- `payload/docs/DOCUMENTATION_MAINTENANCE.md` — Project documentation.
+- `payload/docs/PROJECT_STATUS.md` — Project documentation.
+- `payload/docs/api/investigations.md` — Project documentation.
+- `payload/docs/architecture/overview.md` — Project documentation.
+- `payload/docs/decisions/ADR-016-production-readiness-and-remediation-boundary.md` — Project documentation.
+- `payload/docs/deployment/production-checklist.md` — Project documentation.
+- `payload/docs/operations/running-project.md` — Project documentation.
+- `payload/docs/roadmap/next-phase-multi-agent.md` — Project documentation.
+- `payload/docs/roadmap/phase-4-implementation-plan.md` — Project documentation.
+- `payload/docs/security/security-baseline.md` — Project documentation.
+- `payload/docs/testing/testing-and-evaluation.md` — Project documentation.
+- `payload/docs/ui/investigations.md` — Project documentation.
+- `payload/docs/workflows/current-workflows.md` — Project documentation.
+- `payload/tools/audit_documentation.py` — Python module containing `rel()`, `local_markdown_links()`, `main()`.
+- `payload/tools/sync_documentation.py` — Python module containing `rel()`, `classify()`, `title()`, `remove_managed_block()`, `metadata_block()`.
+- `phase_4_20_documentation_full_sync_v2.zip` — Project asset.
 - `pyproject.toml` — Python project metadata and dependency configuration.
 - `pytest.ini` — Pytest configuration.
 - `reports/20260805T142639_b4b15481.json` — Structured configuration or generated data.
@@ -278,6 +303,7 @@ Evaluation / Production Readiness Gate
 
 ### Tools and acceptance scripts
 
+- `tools/audit_documentation.py` — Operator/developer tool exposing `rel()`, `local_markdown_links()`, `main()`.
 - `tools/bootstrap_database.py` — Operator/developer tool exposing `connection_kwargs()`, `database_exists()`, `create_database_if_missing()`, `ensure_vector_extension()`.
 - `tools/check_knowledge_source_acceptance.py` — Operator/developer tool exposing `main()`.
 - `tools/chunk_knowledge_document.py` — Operator/developer tool exposing `main()`.
@@ -321,6 +347,7 @@ Evaluation / Production Readiness Gate
 - `tools/search_knowledge.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/seed_knowledge_sources.py` — Operator/developer tool exposing class `SeedKnowledgeSource`, `create_dto()`, `update_dto()`, `main()`.
 - `tools/seed_specialists.py` — Operator/developer tool exposing `build_create_dto()`, `build_update_dto()`, `main()`.
+- `tools/sync_documentation.py` — Operator/developer tool exposing `rel()`, `classify()`, `title()`, `remove_managed_block()`.
 
 ### Tests
 
@@ -382,6 +409,8 @@ Evaluation / Production Readiness Gate
 
 ### Documentation
 
+- `docs/DOCUMENTATION_MAINTENANCE.md` — Project documentation.
+- `docs/PROJECT_STATUS.md` — Project documentation.
 - `docs/README.md` — Project documentation.
 - `docs/api/admin-management.md` — Project documentation.
 - `docs/api/admin-web-ui.md` — Project documentation.
@@ -428,6 +457,7 @@ Evaluation / Production Readiness Gate
 - `docs/decisions/ADR-013-registered-read-only-diagnostic-tools.md` — Project documentation.
 - `docs/decisions/ADR-014-langgraph-investigation-orchestration.md` — Project documentation.
 - `docs/decisions/ADR-015-dynamic-secondary-specialist-routing.md` — Project documentation.
+- `docs/decisions/ADR-016-production-readiness-and-remediation-boundary.md` — Project documentation.
 - `docs/decisions/README.md` — Project documentation.
 - `docs/deployment/production-checklist.md` — Project documentation.
 - `docs/deployment/production-deployment.md` — Project documentation.
@@ -459,3 +489,19 @@ Evaluation / Production Readiness Gate
 ## Maintenance rule
 
 Regenerate this document whenever files are added, removed, or substantially repurposed. Descriptions are derived from path conventions, module docstrings, and public classes/functions; core files have explicit descriptions in the generator.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT**
+
+Documentation synchronized: **2026-08-11**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->
