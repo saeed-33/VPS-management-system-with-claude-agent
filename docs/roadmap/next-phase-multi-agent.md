@@ -1,8 +1,13 @@
-# Next Phase — Supervised Remediation
+# Future Phase 5 - Supervised Remediation
 
-<!-- DOC-STATUS: CURRENT -->
+<!-- DOC-STATUS: REFERENCE -->
 
-Phase 4 autonomous diagnosis is complete and has passed the Production Readiness Gate.
+Phase 4 autonomous diagnosis is complete and has passed the Production
+Readiness Gate.
+
+ADR-017 inserts **Phase C - Claude Code Supervisory Runtime Transition** before
+Phase 5. This document remains the future Phase 5 remediation reference, not
+the immediate next implementation phase.
 
 Current state:
 
@@ -15,7 +20,8 @@ automatic_remediation_allowed = false
 
 Introduce **supervised remediation**, not unrestricted autonomous repair.
 
-The first deliverable should define contracts and approval semantics before adding any write-capable action.
+The first deliverable should define contracts and approval semantics before
+adding any write-capable action.
 
 Recommended sequence:
 
@@ -47,7 +53,7 @@ NO arbitrary shell
 ```
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **REFERENCE**
 
 Documentation synchronized: **2026-08-11**
 
@@ -57,6 +63,7 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
+next: Phase C - Claude Code Supervisory Runtime Transition
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

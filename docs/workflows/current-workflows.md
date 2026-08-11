@@ -16,6 +16,32 @@ Load Server
  -> save/index Analysis
 ```
 
+## Accepted Claude-supervised workflow
+
+The Phase C transition must preserve this fixed workflow:
+
+```text
+periodic monitoring
+ -> per-server subordinate agent
+ -> monitoring completion
+ -> exact/similar historical report lookup
+ -> exact match: reuse previous analysis
+ -> similar match: pass top 3 similar reports to the LLM
+ -> initial LLM analysis and potential issue discovery
+ -> if issues exist: select and run specialist agents
+ -> specialist deep analysis
+ -> subordinate agent aggregates results
+ -> final diagnosis
+ -> if a problem exists: propose remediation
+ -> test remediation in an isolated environment
+ -> apply automatically only when policy allows, otherwise ask the user
+```
+
+Claude Code owns high-level coordination only after the transition gate passes.
+The project services remain authoritative for monitoring, RAG retrieval,
+Ollama-backed LLM calls, Specialist definitions, evidence, policy, persistence,
+sandbox validation, and user approval gates.
+
 ## Investigation routing and persistence
 
 ```text
@@ -133,11 +159,13 @@ See `../testing/RUNTIME_SCENARIOS.md`.
 
 ## Phase 5 boundary
 
-The next workflow must be supervised remediation:
+Phase 5 follows the Claude Code supervisory transition. Its remediation workflow
+must remain policy-gated:
 
 ```text
 diagnosis
  -> proposed RemediationPlan
+ -> isolated-environment test
  -> risk classification
  -> human/operator approval
  -> bounded write-capable action

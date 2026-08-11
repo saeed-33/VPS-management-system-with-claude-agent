@@ -58,6 +58,7 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/decisions/ADR-014-langgraph-investigation-orchestration.md`](decisions/ADR-014-langgraph-investigation-orchestration.md) | DECISION | ADR-014: LangGraph for Investigation Orchestration |
 | [`docs/decisions/ADR-015-dynamic-secondary-specialist-routing.md`](decisions/ADR-015-dynamic-secondary-specialist-routing.md) | DECISION | ADR-015: Dynamic Secondary Specialist Routing |
 | [`docs/decisions/ADR-016-production-readiness-and-remediation-boundary.md`](decisions/ADR-016-production-readiness-and-remediation-boundary.md) | DECISION | ADR-016 — Production Readiness Gate and Remediation Boundary |
+| [`docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md`](decisions/ADR-017-claude-code-supervisory-agent-runtime.md) | DECISION | ADR-017 - Claude Code as Supervisory Agent Runtime |
 | [`docs/decisions/README.md`](decisions/README.md) | REFERENCE | Architecture Decision Records |
 | [`docs/deployment/production-checklist.md`](deployment/production-checklist.md) | CURRENT | Production / Supervised Operations Checklist |
 | [`docs/deployment/production-deployment.md`](deployment/production-deployment.md) | CURRENT | Production Deployment Baseline |
@@ -67,7 +68,8 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/operations/migrations-and-troubleshooting.md`](operations/migrations-and-troubleshooting.md) | CURRENT | Migrations and Troubleshooting |
 | [`docs/operations/running-project.md`](operations/running-project.md) | CURRENT | Running the Project |
 | [`docs/rag_configuration.md`](rag_configuration.md) | REFERENCE | RAG Configuration Policy |
-| [`docs/roadmap/next-phase-multi-agent.md`](roadmap/next-phase-multi-agent.md) | CURRENT | Next Phase — Supervised Remediation |
+| [`docs/roadmap/claude-code-supervisory-transition-plan.md`](roadmap/claude-code-supervisory-transition-plan.md) | CURRENT | Claude Code Supervisory Transition Plan |
+| [`docs/roadmap/next-phase-multi-agent.md`](roadmap/next-phase-multi-agent.md) | REFERENCE | Future Phase 5 - Supervised Remediation |
 | [`docs/roadmap/phase-4-17-closeout.md`](roadmap/phase-4-17-closeout.md) | HISTORICAL | Phase 4.17 Closeout — Dynamic Secondary Specialist Routing |
 | [`docs/roadmap/phase-4-18-implementation.md`](roadmap/phase-4-18-implementation.md) | HISTORICAL | Phase 4.18 Implementation Notes |
 | [`docs/roadmap/phase-4-19-implementation.md`](roadmap/phase-4-19-implementation.md) | HISTORICAL | Phase 4.19 Implementation Notes |
@@ -104,6 +106,7 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
+next: Phase C - Claude Code Supervisory Runtime Transition
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

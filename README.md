@@ -142,6 +142,38 @@ readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
 ```
 
+## Current Transition
+
+The accepted next phase is **Phase C - Claude Code Supervisory Runtime
+Transition**.
+
+Decision summary:
+
+```text
+Claude Code = primary supervisory orchestration runtime
+Python services = execution, persistence, policy, evidence, RAG, SSH, Admin/API
+Ollama = operational LLM provider for analysis and specialist reasoning
+```
+
+The fixed workflow is:
+
+```text
+periodic monitoring
+ -> per-server subordinate agent
+ -> exact/similar historical report lookup
+ -> exact match: reuse previous analysis
+ -> similar match: pass top 3 similar reports to the LLM
+ -> Ollama-backed initial analysis
+ -> Specialist execution when issues exist
+ -> final diagnosis
+ -> remediation proposal
+ -> isolated-environment validation
+ -> policy/user-gated production application
+```
+
+See `docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md` and
+`docs/roadmap/claude-code-supervisory-transition-plan.md`.
+
 Canonical documentation:
 
 - `docs/PROJECT_STATUS.md`
@@ -151,3 +183,5 @@ Canonical documentation:
 - `docs/testing/RUNTIME_SCENARIOS.md`
 - `docs/PROJECT_STRUCTURE.md`
 - `docs/DOCUMENTATION_INVENTORY.md`
+- `docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md`
+- `docs/roadmap/claude-code-supervisory-transition-plan.md`

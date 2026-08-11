@@ -74,12 +74,14 @@ remain authoritative for monitoring, analysis, Incident RAG, Knowledge RAG,
 dynamic Specialists, SSH execution, persistence, policy, evidence, and the
 Admin/API control plane.
 
+Ollama is the operational LLM provider for project analysis and specialist
+reasoning. Claude Code supervises orchestration and must invoke project tools
+that use the configured Ollama clients instead of bypassing them.
+
 The transition is additive first: the existing Python/LangGraph path remains
 available until Claude-supervised execution passes equivalence and safety gates.
 
 ## Fixed operational workflow
-
-The Claude Code transition must preserve this workflow order:
 
 ```text
 periodic monitoring
@@ -98,16 +100,6 @@ periodic monitoring
  -> apply automatically only when policy allows, otherwise ask the user
 ```
 
-The workflow is fixed. Claude Code may coordinate decisions inside this path,
-but must not skip or replace the project-owned retrieval, policy, evidence,
-persistence, or sandbox validation boundaries.
-
-## LLM provider
-
-Ollama is the operational LLM provider for project analysis and specialist
-reasoning. Claude Code supervises orchestration and must invoke project tools
-that use the configured Ollama clients instead of bypassing them.
-
 ## Next phase
 
 **Phase C - Claude Code Supervisory Runtime Transition.**
@@ -117,7 +109,7 @@ Implementation plan:
 `docs/roadmap/claude-code-supervisory-transition-plan.md`
 
 Phase 5 - Supervised Remediation follows after Phase C unless a later ADR
-changes this ordering.
+changes the ordering.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**

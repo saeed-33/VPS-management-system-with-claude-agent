@@ -299,6 +299,46 @@ automatic remediation
 
 Phase 5 must introduce a separate Remediation Plan, approval model, risk classification, audit trail, before/after Evidence, and rollback semantics before any write-capable action is allowed.
 
+## Accepted Claude Code transition
+
+ADR-017 accepts Claude Code as the next primary supervisory orchestration
+runtime. The transition is additive first: the existing Python/LangGraph path
+remains available until Claude-supervised execution passes equivalence and
+safety gates.
+
+The target responsibility split is:
+
+```text
+Claude Code
+  = high-level supervisory orchestration
+
+Python services
+  = execution, persistence, policy, evidence, RAG, SSH, Admin/API
+
+Ollama
+  = operational LLM provider for report analysis, specialist reasoning,
+    assisted RAG analysis, and final synthesis
+```
+
+The fixed workflow for the transition is:
+
+```text
+periodic monitoring
+ -> per-server subordinate agent
+ -> exact/similar historical report lookup
+ -> exact match: reuse previous analysis
+ -> similar match: pass top 3 similar reports to the LLM
+ -> Ollama-backed initial analysis
+ -> Specialist selection and deeper analysis when issues exist
+ -> final diagnosis
+ -> remediation proposal
+ -> isolated-environment validation
+ -> policy/user-gated production application
+```
+
+Claude Code must not bypass project-owned retrieval, Ollama clients, policy,
+evidence, persistence, budget enforcement, or sandbox validation.
+
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 

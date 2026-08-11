@@ -59,11 +59,14 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [ADR-013: Registered Read-Only Diagnostic Tools](decisions/ADR-013-registered-read-only-diagnostic-tools.md)
 - [ADR-014: LangGraph Investigation Orchestration](decisions/ADR-014-langgraph-investigation-orchestration.md)
 - [ADR-015: Dynamic Secondary Specialist Routing](decisions/ADR-015-dynamic-secondary-specialist-routing.md)
+- [ADR-016: Production Readiness / Remediation Boundary](decisions/ADR-016-production-readiness-and-remediation-boundary.md)
+- [ADR-017: Claude Code as Supervisory Agent Runtime](decisions/ADR-017-claude-code-supervisory-agent-runtime.md)
 
 ## Roadmap
 
 - [Phase 4 Implementation Plan](roadmap/phase-4-implementation-plan.md)
 - [Phase 4.17 Closeout](roadmap/phase-4-17-closeout.md)
+- [Claude Code Supervisory Transition Plan](roadmap/claude-code-supervisory-transition-plan.md)
 
 قاعدة التوثيق: كل ملف خارج `roadmap/` يجب أن يصف التنفيذ الحالي الفعلي، لا التصميم المستقبلي المفترض.
 - [Cross-Specialist Correlation](architecture/cross-specialist-correlation.md)
@@ -98,6 +101,8 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Documentation Inventory](DOCUMENTATION_INVENTORY.md)
 - [Documentation Maintenance](DOCUMENTATION_MAINTENANCE.md)
 - [ADR-016 Production Readiness / Remediation Boundary](decisions/ADR-016-production-readiness-and-remediation-boundary.md)
+- [ADR-017 Claude Code Supervisory Agent Runtime](decisions/ADR-017-claude-code-supervisory-agent-runtime.md)
+- [Claude Code Supervisory Transition Plan](roadmap/claude-code-supervisory-transition-plan.md)
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**

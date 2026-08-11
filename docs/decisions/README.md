@@ -58,6 +58,18 @@ arbitrary shell. SSH execution remains behind later policy/evidence stages.
 See `ADR-013-registered-read-only-diagnostic-tools.md`.
 - [ADR-014: LangGraph Investigation Orchestration](ADR-014-langgraph-investigation-orchestration.md)
 - [ADR-015: Dynamic Secondary Specialist Routing](ADR-015-dynamic-secondary-specialist-routing.md)
+- [ADR-016: Production Readiness and Remediation Boundary](ADR-016-production-readiness-and-remediation-boundary.md)
+- [ADR-017: Claude Code as Supervisory Agent Runtime](ADR-017-claude-code-supervisory-agent-runtime.md)
+
+## Current transition decision
+
+ADR-017 accepts Claude Code as the primary supervisory orchestration runtime.
+The fixed workflow remains periodic monitoring, per-server subordinate agent,
+historical report reuse/similarity lookup, Ollama-backed LLM analysis,
+dynamic Specialist execution, final diagnosis, remediation proposal, sandbox
+validation, and policy/user-gated production application. Existing Python
+services remain authoritative for execution, persistence, policy, evidence,
+RAG, SSH, and Ollama client usage.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **REFERENCE**
