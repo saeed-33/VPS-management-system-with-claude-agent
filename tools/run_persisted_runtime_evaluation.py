@@ -15,10 +15,10 @@ if str(PROJECT_ROOT) not in sys.path:
     )
 
 
-from app.agent.evaluation import (
+from app.domain.evaluation import (
     ProductionReadinessGate,
 )
-from app.agent.evaluation.persisted_runtime import (
+from app.domain.evaluation.persisted_runtime import (
     PersistedRuntimeEvaluator,
 )
 from app.bootstrap import container

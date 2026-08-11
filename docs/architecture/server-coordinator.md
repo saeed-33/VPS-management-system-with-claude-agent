@@ -24,7 +24,7 @@ Partial Specialist failure is isolated so successful sibling results remain avai
 
 Phase 4.15 established the sequential Coordinator baseline.
 
-Phase 4.16 retained the same domain responsibilities but replaced sequential independent Specialist execution with bounded LangGraph parallel fan-out/fan-in.
+Phase 4.16 retained the same domain responsibilities but replaced sequential independent Specialist execution with bounded Claude-supervised parallel fan-out/fan-in.
 
 Phase 4.17 added an outer dynamic-secondary routing loop:
 
@@ -38,7 +38,7 @@ initial Specialist wave
  -> optional next Specialist wave
 ```
 
-Thus the current runtime uses the Server Coordinator concept as a hierarchical investigation boundary while LangGraph manages stateful parallel/dynamic orchestration.
+Thus the Claude-supervised runtime uses the Server Coordinator concept as a hierarchical investigation boundary while Claude manages stateful parallel/dynamic orchestration.
 
 ## Global budget invariants
 
@@ -63,7 +63,7 @@ Remediation remains outside Phase 4.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

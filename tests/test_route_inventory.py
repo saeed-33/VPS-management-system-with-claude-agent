@@ -21,12 +21,14 @@ def test_route_inventory_contains_application_routes(
         "/reports/{report_id}",
         "/specialists",
         "/knowledge-sources",
+        "/system",
         "/api/servers",
         "/api/commands",
         "/api/monitoring-profiles",
         "/api/reports",
         "/api/specialists",
         "/api/diagnostic-tools",
+        "/api/system/runtime",
         "/health",
     }
 
@@ -53,6 +55,7 @@ def test_web_routes_are_excluded_from_openapi(
         "/reports",
         "/reports/{report_id}",
         "/specialists",
+        "/system",
     }
 
     found = {

@@ -20,7 +20,7 @@ The accepted Phase 4.20 readiness run measured:
 all 8 readiness metrics passed
 ```
 
-Reference automated regression baseline immediately before documentation closeout:
+Reference automated regression reference immediately before documentation closeout:
 
 ```text
 237 passed, 1 warning
@@ -62,7 +62,7 @@ Investigation Persistence
       |
 SpecialistRegistry
       |
-LangGraph Investigation Coordinator
+Claude Investigation Coordinator
       |
 Selected Dynamic Specialists
       |
@@ -132,6 +132,33 @@ max_actions
 
 Only enabled validated definitions appear in the Specialist Registry.
 
+Claude reads and runs Specialists through controlled MCP tools:
+
+```text
+get_available_specialists
+get_specialist_definition
+run_specialist
+```
+
+These tools still use the DB-backed `SpecialistRegistry` as the source of truth.
+`run_specialist` accepts only Specialists selected by the persisted
+Investigation routing decision, then passes the runtime definition to the
+existing Specialist loop. The loop remains responsible for enforcing
+`allowed_tool_ids`, Specialist budgets, Investigation budgets, diagnostic
+policy, Evidence collection, and Ollama-backed Specialist reasoning.
+
+`.claude/agents/generic-specialist.md` is a generic role description only. It is
+not a domain Specialist registry and must not duplicate Admin-managed
+Specialist definitions.
+
+`ClaudeMultiSpecialistSupervisor` coordinates multiple selected Specialists
+sequentially through the same MCP boundary. It records an `agent_jobs` entry,
+applies supervisor-level limits for max Specialists, max turns, max tool calls,
+and timeout, then collects structured run summaries. It does not pass one
+Specialist's private runtime state directly into another Specialist; shared
+state must flow through persisted Investigation/Evidence read models and
+project tools.
+
 ## Routing
 
 `InvestigationRouter` is deterministic and conservative.
@@ -141,7 +168,7 @@ It decides:
 ```text
 should_investigate
 detected_domains
-candidate_specialists
+runtime_specialists
 selected_specialists
 unmatched_issue_indexes
 ```
@@ -190,14 +217,14 @@ DENY results never produce an executable command.
 
 Budgets exist at Specialist and Investigation scope.
 
-## LangGraph orchestration
+## Claude-Supervised Orchestration
 
-LangGraph owns orchestration, not domain authority.
+Claude owns high-level supervisory orchestration, not domain authority.
 
 It coordinates:
 
 ```text
-parallel Specialist execution
+Specialist execution
 worker quotas
 aggregation
 secondary Specialist waves
@@ -297,14 +324,56 @@ arbitrary shell
 automatic remediation
 ```
 
-Phase 5 must introduce a separate Remediation Plan, approval model, risk classification, audit trail, before/after Evidence, and rollback semantics before any write-capable action is allowed.
+Phase C.10 introduces supervised Remediation Plan, approval request, sandbox
+result, risk classification, audit trail, before/after Evidence IDs, and
+rollback expectation records. It does not grant write-capable production
+authority.
 
-## Accepted Claude Code transition
+Claude may use these controlled remediation MCP tools:
 
-ADR-017 accepts Claude Code as the next primary supervisory orchestration
-runtime. The transition is additive first: the existing Python/LangGraph path
-remains available until Claude-supervised execution passes equivalence and
-safety gates.
+```text
+propose_remediation
+create_remediation_plan
+test_remediation_in_sandbox
+get_sandbox_result
+request_user_approval
+apply_approved_remediation
+```
+
+`apply_approved_remediation` remains policy-gated. Failed sandbox validation,
+missing sandbox validation, missing required approval, or
+`automatic_remediation_allowed = false` blocks production application.
+
+## Orchestration readiness Gate
+
+`RuntimeReadinessGate` validates Claude-supervised orchestration against
+the required Phase C acceptance matrix.
+
+The required matrix covers operational diagnosis, Specialist coordination,
+provider/runtime failures, policy denial, and remediation sandbox/approval
+cases. Any critical failure in safety, grounding, policy, fixed workflow order,
+budget behavior, conflict preservation, final diagnosis grounding, or sandbox
+validation blocks Claude orchestration until the failure is resolved.
+
+Latency, tool-call count, and cost are recorded for review. They are not allowed
+to override a safety or policy failure.
+
+## Claude Supervisor
+
+`ClaudeSupervisor` is the C.12 scheduler-facing runtime boundary. The scheduler
+submits server monitoring work to the Claude monitoring cycle through this
+boundary.
+
+Scheduler iterations delegate to `ClaudeSupervisedMonitoringCycle`; that cycle
+invokes project-owned MCP tools and existing services for monitoring, analysis,
+investigation, Specialists, remediation planning, persistence, policy, and
+Ollama-backed LLM reasoning.
+
+The `/health` endpoint exposes the active Claude supervisor status.
+
+## Claude Code Runtime
+
+ADR-017 defines Claude Code as the supervisory orchestration runtime.
 
 The target responsibility split is:
 
@@ -320,7 +389,7 @@ Ollama
     assisted RAG analysis, and final synthesis
 ```
 
-The fixed workflow for the transition is:
+The fixed workflow is:
 
 ```text
 periodic monitoring
@@ -339,10 +408,233 @@ periodic monitoring
 Claude Code must not bypass project-owned retrieval, Ollama clients, policy,
 evidence, persistence, budget enforcement, or sandbox validation.
 
+## Claude Runtime Adapter
+
+Phase C.2 adds a project-owned runtime adapter under `app/runtime/claude/`.
+
+Its current responsibility is bounded Claude session execution:
+
+```text
+ClaudeRuntimeRequest
+ -> ClaudeSessionRunner
+ -> timeout boundary
+ -> structured JSON result parser
+ -> ClaudeRuntimeResult
+```
+
+The adapter captures:
+
+```text
+session_id
+status
+structured_output
+error_code / error_message
+turn_count
+tool_call_count
+usage_metadata
+```
+
+C.2 does not expose operational MCP tools. Requests that include operational
+tools are rejected while tool access remains disabled. Persistence of agent jobs
+starts in C.3.
+
+## Claude Agent Job Persistence
+
+Phase C.3 adds `agent_jobs` as the audit and recovery record for Claude
+supervisory runtime work.
+
+The persisted record tracks:
+
+```text
+job_id
+job_type
+server_id
+status
+claude_session_id
+started_at / completed_at
+error_code / error_message
+turn_count
+tool_call_count
+usage_metadata
+metadata
+```
+
+`ClaudeAgentJobService` maps `ClaudeRuntimeRequest` and `ClaudeRuntimeResult`
+objects into `AgentJobModel` records through `AgentJobRepository`.
+
+On application restart, queued or running jobs are recoverable into a
+deterministic failed state:
+
+```text
+error_code = interrupted_after_restart
+status = failed
+```
+
+C.3 does not expose MCP tools and does not change production monitoring
+behavior.
+
+## Project Tool Boundary
+
+The controlled project-tool execution boundary lives under `app/tools/`.
+`app/mcp/` provides schemas, serializers, and compatibility exports for Claude
+tool calls.
+
+The initial tool set is deliberately small:
+
+```text
+get_server_context
+get_monitoring_profile
+run_monitoring
+get_report
+get_latest_report
+```
+
+The boundary calls existing services:
+
+```text
+ProjectToolCall
+ -> ProjectMcpToolBoundary
+ -> app/tools project boundary
+ -> ServerService / MonitoringProfileService / MonitoringService / ReportQueryService
+ -> ProjectToolResult
+```
+
+It provides:
+
+```text
+tool inventory
+input schemas
+input validation
+structured success results
+normalized error results
+unknown-tool rejection
+```
+
+It does not expose:
+
+```text
+raw SSH
+raw SQL
+arbitrary shell
+filesystem write
+remediation tools
+external MCP server
+```
+
+The external MCP serving layer is intentionally deferred. C.4 only establishes
+and tests the internal contract boundary that later runtime integration will
+use.
+
+## Claude-Supervised Monitoring Cycle
+
+Phase C.5 adds `ClaudeSupervisedMonitoringCycle`:
+
+```text
+ClaudeSupervisedMonitoringCycle
+ -> create agent job
+ -> mark job running
+ -> get_server_context
+ -> get_monitoring_profile
+ -> run_monitoring
+ -> get_latest_report
+ -> complete agent job
+```
+
+The service uses only the controlled `ProjectMcpToolBoundary`; it does not use
+raw SSH, raw SQL, arbitrary shell, or remediation tools.
+
+Failure behavior is fail-closed:
+
+```text
+any required tool failure
+ -> stop cycle
+ -> persist ClaudeRuntimeResult(status=failed)
+ -> return ClaudeMonitoringCycleResult(status=failed)
+```
+
+C.5 does not add an external Claude CLI runner or external MCP server. It
+establishes the first project-owned execution path that later Claude runtime
+integration can drive.
+
+## Analysis and Retrieval Tool Boundary
+
+Phase C.6 extends `ProjectMcpToolBoundary` with analysis and retrieval tools:
+
+```text
+find_exact_report_match
+search_similar_incidents
+get_top_similar_reports
+analyze_report
+get_analysis
+search_knowledge
+```
+
+These tools preserve the fixed workflow:
+
+```text
+monitoring report
+ -> exact historical report match lookup
+ -> exact match: reusable analysis
+ -> otherwise top 3 similar incident reports
+ -> AnalysisOrchestrator
+ -> Ollama-backed analysis through project clients when LLM is enabled
+```
+
+Implementation boundaries:
+
+```text
+ReportNormalizer and ReportFingerprintService compute exact-match keys
+AnalysisRepository owns exact match and persisted analysis reads
+HybridRetriever/RagRetriever owns similar incident retrieval
+KnowledgeHybridRetriever owns Knowledge RAG
+AnalysisOrchestrator owns report analysis and LLM provider behavior
+```
+
+Claude Code does not receive embeddings, pgvector, FTS, raw retrieval tables, or
+direct Ollama access. It receives structured tool results from project-owned
+services.
+
+## Investigation Tool Boundary
+
+Phase C.7 extends `ProjectMcpToolBoundary` with high-level investigation tools:
+
+```text
+start_investigation
+get_investigation
+get_investigation_status
+get_evidence
+```
+
+The write boundary is intentionally narrow:
+
+```text
+start_investigation
+ -> get persisted report
+ -> get persisted analysis
+ -> InvestigationRouter.route()
+ -> InvestigationPersistenceService.persist_routing_decision()
+ -> InvestigationReadService.get()
+```
+
+Runtime execution is not moved into Claude at this step. C.7 only proves that
+Claude-facing tooling can start and inspect the existing investigation state
+machine through project services.
+
+Evidence access is read-only:
+
+```text
+get_evidence
+ -> InvestigationReadService
+ -> persisted runtime_snapshot.evidence
+```
+
+Claude Code cannot fabricate investigation state or Evidence IDs through these
+tools.
+
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

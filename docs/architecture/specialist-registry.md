@@ -64,13 +64,13 @@ uv run python tools/inspect_specialist_registry.py
 uv run python tools/inspect_specialist_registry.py --domain cpu
 ```
 
-No database migration, LLM, LangGraph, SSH or investigation execution is
+No database migration, LLM, Claude-supervised, SSH or investigation execution is
 introduced in 4.4.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

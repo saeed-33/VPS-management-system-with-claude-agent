@@ -71,7 +71,7 @@ Phase 4.20.2 creates the deterministic evaluation case dataset and runner that e
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

@@ -7,6 +7,9 @@ from app.admin.api.knowledge_sources import (
 from app.admin.api.diagnostic_tools import (
     router as diagnostic_tools_router,
 )
+from app.admin.api.system import (
+    router as system_router,
+)
 from app.admin.api.specialists import (
     router as specialists_router,
 )
@@ -32,4 +35,5 @@ __all__ = [
     "specialists_router",
     "knowledge_sources_router",
     "diagnostic_tools_router",
+    "system_router",
 ]

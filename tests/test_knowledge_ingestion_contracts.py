@@ -1,5 +1,5 @@
 import pytest
-from app.agent.investigation.knowledge_ingestion_contracts import (
+from app.domain.knowledge.ingestion_contracts import (
     KnowledgeChunkDraft, KnowledgeDocumentStatus, ParsedKnowledgeDocument,
 )
 

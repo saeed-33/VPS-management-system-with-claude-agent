@@ -14,7 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     )
 
 
-from app.agent.evaluation import (
+from app.domain.evaluation import (
     DeterministicEvaluationRunner,
     default_evaluation_cases,
     expected_behavior_executor,

@@ -43,7 +43,7 @@ Phase 4.20.4 adds controlled runtime/failure injection for routing, provider res
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

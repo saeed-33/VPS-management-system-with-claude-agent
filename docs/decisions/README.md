@@ -35,10 +35,7 @@ Semantic similarity -> context only
 ## ADR-009 — Hierarchical bounded read-only investigation
 **Accepted.** Server Coordinator + dynamic Specialists operate within specialist/round/action budgets. Phase 4 permits registered read-only diagnostics only; remediation is deferred to Phase 5. See `ADR-009-hierarchical-investigation.md`.
 
-## ADR-010 — LangGraph orchestration boundary
-**Accepted.** LangGraph is reserved for later stateful investigation orchestration. Registry/RAG/database/policy/tools/SSH remain project-owned Python services. See `ADR-010-langgraph-orchestration-boundary.md`.
-
-## ADR-011 — Separate Incident RAG and Knowledge RAG with Hybrid Retrieval
+## ADR-010 - Superseded orchestration boundary`r`n**Superseded for future phases by ADR-017.** Registry/RAG/database/policy/tools/SSH remain project-owned Python services, while Claude Code owns high-level supervisory orchestration going forward.`r`n`r`n## ADR-011 — Separate Incident RAG and Knowledge RAG with Hybrid Retrieval
 **Accepted.** Incident history and technical documentation remain separate
 retrieval systems. Knowledge RAG uses structure-aware chunks, PostgreSQL FTS,
 pgvector/HNSW, RRF fusion, Specialist/domain scope, deterministic reranking,
@@ -56,14 +53,13 @@ not proof of server state, and missing evidence is first-class output. See
 `allowed_tool_ids`; typed parameters and fixed command templates prevent
 arbitrary shell. SSH execution remains behind later policy/evidence stages.
 See `ADR-013-registered-read-only-diagnostic-tools.md`.
-- [ADR-014: LangGraph Investigation Orchestration](ADR-014-langgraph-investigation-orchestration.md)
 - [ADR-015: Dynamic Secondary Specialist Routing](ADR-015-dynamic-secondary-specialist-routing.md)
 - [ADR-016: Production Readiness and Remediation Boundary](ADR-016-production-readiness-and-remediation-boundary.md)
 - [ADR-017: Claude Code as Supervisory Agent Runtime](ADR-017-claude-code-supervisory-agent-runtime.md)
 
-## Current transition decision
+## Claude runtime decision
 
-ADR-017 accepts Claude Code as the primary supervisory orchestration runtime.
+ADR-017 accepts Claude Code as the supervisory orchestration runtime.
 The fixed workflow remains periodic monitoring, per-server subordinate agent,
 historical report reuse/similarity lookup, Ollama-backed LLM analysis,
 dynamic Specialist execution, final diagnosis, remediation proposal, sandbox
@@ -74,7 +70,7 @@ RAG, SSH, and Ollama client usage.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **REFERENCE**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

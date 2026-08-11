@@ -54,7 +54,7 @@ Policy
 Evidence collection
 Specialist loop
 Server Coordinator
-LangGraph parallel orchestration
+Claude-supervised parallel orchestration
 dynamic secondary routing
 correlation/conflicts
 Final Diagnosis
@@ -93,8 +93,8 @@ Examples:
 
 ```powershell
 uv run python tools/run_server_coordinator_acceptance.py <report_id> --max-specialists 4 --max-rounds 3 --max-actions 12
-uv run python tools/run_langgraph_parallel_acceptance.py <report_id> --specialists linux-cpu,linux-memory --max-specialists 2 --max-rounds 2 --max-actions 8
-uv run python tools/run_langgraph_secondary_acceptance.py <report_id> --initial-specialist nginx --max-specialists 3 --max-rounds 3 --max-actions 10
+uv run python tools/run_Claude-supervised_parallel_acceptance.py <report_id> --specialists linux-cpu,linux-memory --max-specialists 2 --max-rounds 2 --max-actions 8
+uv run python tools/run_Claude-supervised_secondary_acceptance.py <report_id> --initial-specialist nginx --max-specialists 3 --max-rounds 3 --max-actions 10
 uv run python tools/run_correlation_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
 uv run python tools/run_final_diagnosis_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
 uv run python tools/run_persisted_runtime_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
@@ -179,7 +179,7 @@ Write-capable Phase 5 work must add separate approval/rollback tests before impl
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

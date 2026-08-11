@@ -1,9 +1,9 @@
 import asyncio
 
-from app.agent.investigation.specialist_context import (
+from app.domain.investigation.specialist_context import (
     SpecialistContextSnapshot,
 )
-from app.agent.investigation.specialist_reasoning_agent import (
+from app.domain.investigation.specialist_reasoning_agent import (
     SpecialistReasoningAgent,
 )
 from app.shared.dto.specialist_reasoning import (

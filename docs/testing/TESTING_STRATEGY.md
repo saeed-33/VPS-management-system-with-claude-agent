@@ -7,7 +7,7 @@ This project treats testing as a layered engineering system rather than a single
 The test strategy protects five different properties:
 
 1. **Correctness** — deterministic code produces the expected result.
-2. **Integration integrity** — repositories, services, API, web routes, LangGraph nodes, and persistence remain compatible.
+2. **Integration integrity** — repositories, services, API, web routes, Claude-supervised orchestration, and persistence remain compatible.
 3. **Runtime validity** — real Ollama, SSH, diagnostic tools, Evidence, correlation, Final Diagnosis, and persistence work together.
 4. **Safety** — Policy, budgets, grounding rules, provider failure handling, and conflict preservation fail closed.
 5. **Operational readiness** — measured observations satisfy the Production Readiness Gate.
@@ -84,8 +84,8 @@ Examples already present in the project may include:
 
 ```powershell
 uv run python tools/run_server_coordinator_acceptance.py <report_id> --max-specialists 4 --max-rounds 3 --max-actions 12
-uv run python tools/run_langgraph_parallel_acceptance.py <report_id> --specialists linux-cpu,linux-memory --max-specialists 2 --max-rounds 2 --max-actions 8
-uv run python tools/run_langgraph_secondary_acceptance.py <report_id> --initial-specialist nginx --max-specialists 3 --max-rounds 3 --max-actions 10
+uv run python tools/run_Claude-supervised_parallel_acceptance.py <report_id> --specialists linux-cpu,linux-memory --max-specialists 2 --max-rounds 2 --max-actions 8
+uv run python tools/run_Claude-supervised_secondary_acceptance.py <report_id> --initial-specialist nginx --max-specialists 3 --max-rounds 3 --max-actions 10
 uv run python tools/run_correlation_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
 uv run python tools/run_final_diagnosis_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
 uv run python tools/run_persisted_runtime_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
@@ -144,7 +144,7 @@ For ordinary code changes:
 4. route inventory when API/web wiring changed
 ```
 
-For Investigation/LLM/SSH/LangGraph changes:
+For Investigation/LLM/SSH/Claude-supervised orchestration changes:
 
 ```text
 1. focused unit tests
@@ -219,7 +219,7 @@ Do not run workload generators on production servers unless the operator has exp
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

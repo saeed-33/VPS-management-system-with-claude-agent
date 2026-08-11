@@ -35,14 +35,14 @@ Operator
  -> Phase 4.5 Investigation Router
 ```
 
-Not yet implemented: real report routing to Specialists, Specialist LLM reasoning, diagnostic tool execution, investigation persistence, LangGraph runtime orchestration, or remediation.
+Not yet implemented: real report routing to Specialists, Specialist LLM reasoning, diagnostic tool execution, investigation persistence, Claude-supervised runtime orchestration, or remediation.
 
 Next milestone starts with **4.5 — Investigation Router**.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **HISTORICAL**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

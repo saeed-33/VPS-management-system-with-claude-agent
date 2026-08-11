@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app.agent.investigation.knowledge_ingestion_contracts import (
+from app.domain.knowledge.ingestion_contracts import (
     KnowledgeDocumentStatus,
     ParsedKnowledgeDocument,
 )

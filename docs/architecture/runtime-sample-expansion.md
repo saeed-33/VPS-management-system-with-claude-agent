@@ -29,7 +29,7 @@ The gate requires 10 runtime samples for most of these metrics and 5 conflict-pr
 Every new sample executes:
 
 ```text
-real LangGraph parallel coordinator
+real Claude-supervised parallel coordinator
 real Specialist loops
 real Ollama reasoning
 real Policy
@@ -74,7 +74,7 @@ The aggregate gate will then decide whether Phase 4.20 can close as `ready_for_s
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

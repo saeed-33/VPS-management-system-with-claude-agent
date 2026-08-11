@@ -24,6 +24,79 @@ EXCLUDED_PREFIXES = (
 )
 
 SPECIAL = {
+    "CLAUDE.md": (
+        "Claude project instruction entrypoint loaded at session start; "
+        "defines architecture, workflow, and coding rules."
+    ),
+    ".mcp.json": (
+        "Claude MCP configuration exposing project tool servers."
+    ),
+    ".claude/settings.json": (
+        "Claude project settings for permissions, tools, and hooks."
+    ),
+    ".claude/hooks/README.md": (
+        "Documents Claude hook responsibilities and safety checks."
+    ),
+    ".claude/agents/monitoring-supervisor.md": (
+        "Claude subagent role definition for scheduled monitoring supervision."
+    ),
+    ".claude/agents/investigation-coordinator.md": (
+        "Claude subagent role definition for server-level investigation coordination."
+    ),
+    ".claude/agents/generic-specialist.md": (
+        "Generic Claude specialist role; uses project tools and DB-managed specialist definitions."
+    ),
+    ".claude/commands/monitor.md": (
+        "Claude slash command for executing the fixed monitoring workflow."
+    ),
+    ".claude/commands/analyze.md": (
+        "Claude slash command for report analysis and historical retrieval workflow."
+    ),
+    ".claude/commands/investigate.md": (
+        "Claude slash command for starting and coordinating investigations."
+    ),
+    ".claude/commands/diagnose.md": (
+        "Claude slash command for diagnosis synthesis from persisted evidence."
+    ),
+    ".claude/rules/monitoring.md": (
+        "Claude rule file for monitoring workflow constraints."
+    ),
+    ".claude/rules/rag.md": (
+        "Claude rule file for exact reuse, top-3 similarity context, and retrieval grounding."
+    ),
+    ".claude/rules/investigation.md": (
+        "Claude rule file for the fixed investigation workflow."
+    ),
+    ".claude/rules/specialists.md": (
+        "Claude rule file for specialist selection, execution, and aggregation."
+    ),
+    ".claude/rules/remediation.md": (
+        "Claude rule file for remediation proposal, sandbox validation, and approval."
+    ),
+    ".claude/rules/safety.md": (
+        "Claude rule file for tool safety, policy boundaries, and prohibited bypasses."
+    ),
+    ".claude/skills/server-monitoring/SKILL.md": (
+        "Claude skill instructions for server monitoring tasks."
+    ),
+    ".claude/skills/incident-analysis/SKILL.md": (
+        "Claude skill instructions for incident report analysis."
+    ),
+    ".claude/skills/specialist-investigation/SKILL.md": (
+        "Claude skill instructions for specialist investigation workflows."
+    ),
+    ".claude/skills/remediation-planning/SKILL.md": (
+        "Claude skill instructions for remediation planning and validation."
+    ),
+    "docs/architecture/target-project-structure.md": (
+        "Target architecture map for Claude runtime, project tools, domain services, shared layer, MCP, and admin UI."
+    ),
+    "docs/operations/claude-runtime.md": (
+        "Operational guide for running the API, Ollama, and Claude Code runtime."
+    ),
+    "docs/roadmap/claude-runtime-implementation-plan.md": (
+        "Implementation plan for Claude runtime, tool boundaries, package layout, documentation, and tests."
+    ),
     "app/main.py": (
         "FastAPI application entry point; "
         "registers API/web routers and startup/shutdown behavior."
@@ -32,6 +105,16 @@ SPECIAL = {
         "Application composition root / dependency container. "
         "Builds repositories, services, LLM clients, registries, "
         "Policy, coordinators, and shared runtime dependencies."
+    ),
+    "app/tools/project_boundary.py": (
+        "Project tool execution boundary used by Claude through MCP; "
+        "validates calls, invokes deterministic services, and returns structured results."
+    ),
+    "app/tools/catalog.py": (
+        "Categorizes project tools into monitoring, reports, retrieval, investigation, specialists, and remediation groups."
+    ),
+    "app/mcp/project_tools.py": (
+        "Thin MCP compatibility export for the project tool boundary implemented under app/tools."
     ),
     "app/shared/config.py": (
         "Environment-backed application configuration."
@@ -202,7 +285,7 @@ def python_summary(path: Path) -> str:
 
     if "/evaluation/" in rel:
         return (
-            "Phase 4.20 evaluation/readiness component"
+            "Runtime evaluation/readiness component"
             + (
                 " containing "
                 + ", ".join(
@@ -216,7 +299,77 @@ def python_summary(path: Path) -> str:
 
     if "/investigation/" in rel:
         return (
-            "Autonomous Investigation subsystem module"
+            "Investigation domain module"
+            + (
+                " containing "
+                + ", ".join(
+                    names[:5]
+                )
+                if names
+                else ""
+            )
+            + "."
+        )
+
+    if "/analysis/" in rel:
+        return (
+            "Analysis domain module"
+            + (
+                " containing "
+                + ", ".join(
+                    names[:5]
+                )
+                if names
+                else ""
+            )
+            + "."
+        )
+
+    if "/knowledge/" in rel:
+        return (
+            "Knowledge domain module"
+            + (
+                " containing "
+                + ", ".join(
+                    names[:5]
+                )
+                if names
+                else ""
+            )
+            + "."
+        )
+
+    if "/runtime/claude/" in rel:
+        return (
+            "Claude runtime module"
+            + (
+                " containing "
+                + ", ".join(
+                    names[:5]
+                )
+                if names
+                else ""
+            )
+            + "."
+        )
+
+    if "/tools/monitoring/" in rel:
+        return (
+            "Monitoring tool module"
+            + (
+                " containing "
+                + ", ".join(
+                    names[:5]
+                )
+                if names
+                else ""
+            )
+            + "."
+        )
+
+    if "/tools/ssh/" in rel:
+        return (
+            "SSH tool module"
             + (
                 " containing "
                 + ", ".join(
@@ -302,15 +455,25 @@ def group(rel: str) -> str:
     if rel.startswith("app/admin/"):
         return "Administration API and Web UI"
     if rel.startswith(
-        "app/agent/evaluation/"
+        "app/domain/evaluation/"
     ):
         return "Evaluation and Production Readiness"
     if rel.startswith(
-        "app/agent/investigation/"
+        "app/domain/investigation/"
     ):
-        return "Autonomous Investigation"
-    if rel.startswith("app/agent/"):
-        return "Agent / Analysis"
+        return "Investigation Domain"
+    if rel.startswith("app/domain/knowledge/"):
+        return "Knowledge Domain"
+    if rel.startswith("app/domain/analysis/"):
+        return "Analysis Domain"
+    if rel.startswith("app/tools/monitoring/"):
+        return "Monitoring Tools"
+    if rel.startswith("app/tools/ssh/"):
+        return "SSH Tools"
+    if rel.startswith("app/tools/"):
+        return "Project Tools"
+    if rel.startswith("app/runtime/claude/"):
+        return "Claude Runtime"
     if rel.startswith("app/shared/"):
         return "Shared application layer"
     if rel.startswith("app/"):
@@ -385,7 +548,7 @@ def main() -> int:
         "        ↓",
         "Investigation Router",
         "        ↓",
-        "LangGraph Coordinator",
+        "Claude Supervisor",
         "        ↓",
         "Specialist loops + Policy + SSH diagnostic tools",
         "        ↓",
@@ -409,10 +572,15 @@ def main() -> int:
     preferred_order = (
         "Repository root / configuration",
         "Application core",
-        "Administration API and Web UI",
-        "Agent / Analysis",
-        "Autonomous Investigation",
+        "Claude Runtime",
+        "Project Tools",
+        "Monitoring Tools",
+        "SSH Tools",
+        "Analysis Domain",
+        "Investigation Domain",
+        "Knowledge Domain",
         "Evaluation and Production Readiness",
+        "Administration API and Web UI",
         "Shared application layer",
         "Tools and acceptance scripts",
         "Tests",

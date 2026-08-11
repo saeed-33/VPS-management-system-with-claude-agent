@@ -61,7 +61,7 @@ Collected Evidence is then:
 ```text
 fed into the next Specialist reasoning round
 aggregated by Server Coordinator
-propagated across LangGraph waves
+propagated across Claude-supervised waves
 made available to later dynamic secondary Specialists
 ```
 
@@ -78,7 +78,7 @@ Phase 4.13 is closed and runtime accepted.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

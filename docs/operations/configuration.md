@@ -54,8 +54,8 @@ Ollama is the project LLM provider for report analysis, assisted RAG analysis,
 specialist reasoning, and final synthesis.
 ```
 
-Claude Code supervises orchestration during Phase C, but must invoke project
-tools that use the configured Ollama clients instead of bypassing them.
+Claude Code supervises orchestration and must invoke project tools that use the
+configured Ollama clients instead of bypassing them.
 
 ## Monitoring/SSH
 
@@ -83,7 +83,7 @@ automatic_remediation_allowed: false
 ## Next Phase
 
 ```text
-Phase C - Claude Code Supervisory Runtime Transition
+Phase C - Claude Code Supervisory Runtime
 ```
 
 For canonical current state see `docs/PROJECT_STATUS.md`; for test execution
@@ -92,7 +92,7 @@ see `docs/testing/TESTING_STRATEGY.md`.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 
@@ -100,7 +100,6 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
-next: Phase C - Claude Code Supervisory Runtime Transition
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

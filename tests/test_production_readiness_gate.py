@@ -1,4 +1,4 @@
-from app.agent.evaluation import (
+from app.domain.evaluation import (
     DEFAULT_THRESHOLDS,
     EvaluationMetric,
     EvaluationObservation,

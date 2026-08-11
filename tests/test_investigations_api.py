@@ -71,7 +71,7 @@ def detail():
         final_diagnosis_available=True,
         runtime=InvestigationRuntimeReadModel(
             status="completed",
-            orchestrator="langgraph",
+            orchestrator="claude",
             execution_mode="dynamic-secondary",
             waves_completed=2,
             actions_used=4,
@@ -149,7 +149,7 @@ def test_get_investigation_includes_runtime():
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["runtime"]["orchestrator"] == "langgraph"
+    assert payload["runtime"]["orchestrator"] == "claude"
     assert (
         payload["runtime"]["final_diagnosis"]["summary"]
         == "One conflict."

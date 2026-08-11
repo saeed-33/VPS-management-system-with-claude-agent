@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from app.agent.ssh.client import (
+from app.tools.ssh.client import (
     SSHClient,
     SSHConnectionConfig,
 )
-from app.agent.ssh.command_executor import (
+from app.tools.ssh.command_executor import (
     SSHCommandExecutor,
 )
 from app.shared.database.repositories.server_repository import (

@@ -1,4 +1,4 @@
-from app.agent.investigation.knowledge_chunker import (
+from app.domain.knowledge.chunker import (
     KnowledgeChunkerConfig,
     StructureAwareKnowledgeChunker,
 )

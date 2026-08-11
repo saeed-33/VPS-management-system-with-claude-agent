@@ -195,6 +195,7 @@ function initializeNavigation() {
         "/commands": "أوامر المراقبة",
         "/reports": "تقارير المراقبة",
         "/monitoring-profiles": "ملفات المراقبة",
+        "/system": "System Runtime",
     };
 
     document

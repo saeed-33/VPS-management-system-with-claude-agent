@@ -18,7 +18,7 @@ if str(PROJECT_ROOT) not in sys.path:
         str(PROJECT_ROOT),
     )
 
-from app.agent.investigation.contracts import (
+from app.domain.investigation.contracts import (
     InvestigationBudget,
     SpecialistTask,
 )

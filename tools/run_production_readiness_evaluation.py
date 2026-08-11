@@ -17,13 +17,13 @@ if str(PROJECT_ROOT) not in sys.path:
     )
 
 
-from app.agent.evaluation.aggregate_readiness import (
+from app.domain.evaluation.aggregate_readiness import (
     AggregateReadinessEvaluator,
 )
-from app.agent.evaluation.persisted_runtime import (
+from app.domain.evaluation.persisted_runtime import (
     PersistedRuntimeEvaluator,
 )
-from app.agent.evaluation.safety_runtime import (
+from app.domain.evaluation.safety_runtime import (
     evaluate_safety_runtime,
 )
 from app.bootstrap import container

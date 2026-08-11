@@ -2,7 +2,7 @@
 
 **Status:** Implemented and runtime accepted.
 
-Phase 4.17 adds bounded, conditional follow-up Specialist routing above the accepted Phase 4.16 LangGraph parallel coordinator.
+Phase 4.17 adds bounded, conditional follow-up Specialist routing above the accepted Phase 4.16 Claude-supervised parallel coordinator.
 
 ```text
 initial routing
@@ -40,7 +40,7 @@ A recommendation is accepted only when:
 
 The model cannot fabricate an executable Specialist identity.
 
-## LangGraph composition
+## Claude-supervised composition
 
 Phase 4.17 deliberately composes the accepted 4.16 graph rather than replacing it.
 
@@ -149,7 +149,7 @@ It must distinguish confirmed, probable, and unknown conclusions and preserve an
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

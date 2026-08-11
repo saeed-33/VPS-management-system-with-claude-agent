@@ -5,7 +5,7 @@
 
 ## Capability accepted
 
-Phase 4.17 adds bounded dynamic follow-up Specialist waves on top of the Phase 4.16 LangGraph parallel coordinator.
+Phase 4.17 adds bounded dynamic follow-up Specialist waves on top of the Phase 4.16 Claude-supervised parallel coordinator.
 
 The runtime now supports:
 
@@ -99,7 +99,7 @@ Conflicting Specialist conclusions must remain visible rather than being silentl
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **HISTORICAL**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

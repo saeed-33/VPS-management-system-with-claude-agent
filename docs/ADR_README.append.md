@@ -1,7 +1,7 @@
 
 ## ADR-017 - Claude Code as Supervisory Agent Runtime
 
-**Accepted.** Claude Code becomes the primary supervisory orchestration runtime
+**Accepted.** Claude Code is the supervisory orchestration runtime
 for the fixed operational workflow: periodic monitoring, per-server subordinate
 agent, exact/similar historical report lookup, Ollama-backed analysis,
 dynamic Specialist execution, final diagnosis, remediation proposal,
@@ -14,6 +14,21 @@ operational LLM provider for project analysis and specialist reasoning. The
 integration boundary is controlled project tools/MCP; no unrestricted shell,
 raw SSH, raw SQL, Ollama-client bypass, or policy bypass is authorized.
 
-Migration is additive first, with the current orchestration path retained until
-equivalence and safety gates pass. See
+Claude Code performs supervisory orchestration through project tools. See
 `ADR-017-claude-code-supervisory-agent-runtime.md`.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **REFERENCE**
+
+Documentation synchronized: **2026-08-12**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

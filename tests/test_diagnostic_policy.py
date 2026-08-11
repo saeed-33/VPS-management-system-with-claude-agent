@@ -2,18 +2,18 @@ from types import MappingProxyType
 
 import pytest
 
-from app.agent.investigation.contracts import InvestigationBudget
-from app.agent.investigation.diagnostic_policy import (
+from app.domain.investigation.contracts import InvestigationBudget
+from app.domain.investigation.diagnostic_policy import (
     DiagnosticPolicyDecision,
     DiagnosticPolicyEngine,
     DiagnosticPolicyReason,
     DiagnosticPolicyRequest,
 )
-from app.agent.investigation.diagnostic_tools import (
+from app.domain.investigation.diagnostic_tools import (
     DiagnosticToolCall,
     build_default_diagnostic_tool_registry,
 )
-from app.agent.investigation.specialist_registry import (
+from app.domain.investigation.specialist_registry import (
     SpecialistRuntimeDefinition,
 )
 

@@ -9,7 +9,7 @@
 - Milestone C — Single Specialist Investigation (4.10–4.14): COMPLETED
 - Milestone D:
   - 4.15 Server Coordinator: COMPLETED
-  - 4.16 LangGraph Parallel Investigation: COMPLETED
+  - 4.16 Claude-supervised Parallel Investigation: COMPLETED
   - 4.17 Dynamic Secondary Specialist Routing: COMPLETED
   - 4.18 Correlation + Final Diagnosis: NEXT
 - Milestone E — Productization (4.19–4.20): PLANNED
@@ -25,6 +25,7 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 ## Architecture
 
 - [Architecture Overview](architecture/overview.md)
+- [Target Project Structure](architecture/target-project-structure.md)
 - [Investigation Contracts](architecture/investigation-contracts.md)
 - [Investigation Router](architecture/investigation-router.md)
 - [Investigation Persistence](architecture/investigation-persistence.md)
@@ -36,7 +37,7 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Evidence Collection](architecture/evidence-collection.md)
 - [Specialist Investigation Loop](architecture/specialist-investigation-loop.md)
 - [Server Coordinator](architecture/server-coordinator.md)
-- [LangGraph Investigation Orchestration](architecture/langgraph-investigation-orchestration.md)
+- [Claude-supervised Investigation Orchestration](architecture/Claude-supervised-investigation-orchestration.md)
 - [Dynamic Secondary Specialist Routing](architecture/dynamic-secondary-specialist-routing.md)
 - [Knowledge Sources](architecture/knowledge-sources.md)
 - [Knowledge Retrieval](architecture/knowledge-retrieval.md)
@@ -53,11 +54,11 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Architecture Decisions](decisions/README.md)
 - [ADR-008: Dynamic Specialists](decisions/ADR-008-dynamic-specialists.md)
 - [ADR-009: Hierarchical Investigation](decisions/ADR-009-hierarchical-investigation.md)
-- [ADR-010: LangGraph Orchestration Boundary](decisions/ADR-010-langgraph-orchestration-boundary.md)
+- [ADR-010: Claude-supervised Orchestration Boundary](decisions/ADR-010-Claude-supervised-orchestration-boundary.md)
 - [ADR-011: Dual RAG and Knowledge Retrieval](decisions/ADR-011-dual-rag-and-knowledge-retrieval.md)
 - [ADR-012: Specialist Reasoning and Provenance](decisions/ADR-012-specialist-reasoning-and-provenance-boundary.md)
 - [ADR-013: Registered Read-Only Diagnostic Tools](decisions/ADR-013-registered-read-only-diagnostic-tools.md)
-- [ADR-014: LangGraph Investigation Orchestration](decisions/ADR-014-langgraph-investigation-orchestration.md)
+- [ADR-014: Claude-supervised Investigation Orchestration](decisions/ADR-014-Claude-supervised-investigation-orchestration.md)
 - [ADR-015: Dynamic Secondary Specialist Routing](decisions/ADR-015-dynamic-secondary-specialist-routing.md)
 - [ADR-016: Production Readiness / Remediation Boundary](decisions/ADR-016-production-readiness-and-remediation-boundary.md)
 - [ADR-017: Claude Code as Supervisory Agent Runtime](decisions/ADR-017-claude-code-supervisory-agent-runtime.md)
@@ -66,7 +67,7 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 
 - [Phase 4 Implementation Plan](roadmap/phase-4-implementation-plan.md)
 - [Phase 4.17 Closeout](roadmap/phase-4-17-closeout.md)
-- [Claude Code Supervisory Transition Plan](roadmap/claude-code-supervisory-transition-plan.md)
+- [Claude Runtime Implementation Plan](roadmap/claude-runtime-implementation-plan.md)
 
 قاعدة التوثيق: كل ملف خارج `roadmap/` يجب أن يصف التنفيذ الحالي الفعلي، لا التصميم المستقبلي المفترض.
 - [Cross-Specialist Correlation](architecture/cross-specialist-correlation.md)
@@ -102,12 +103,13 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Documentation Maintenance](DOCUMENTATION_MAINTENANCE.md)
 - [ADR-016 Production Readiness / Remediation Boundary](decisions/ADR-016-production-readiness-and-remediation-boundary.md)
 - [ADR-017 Claude Code Supervisory Agent Runtime](decisions/ADR-017-claude-code-supervisory-agent-runtime.md)
-- [Claude Code Supervisory Transition Plan](roadmap/claude-code-supervisory-transition-plan.md)
+- [Claude Runtime Implementation Plan](roadmap/claude-runtime-implementation-plan.md)
+- [Running with Claude](operations/claude-runtime.md)
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

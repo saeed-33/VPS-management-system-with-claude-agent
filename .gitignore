@@ -6,3 +6,4 @@ __pycache__/
 reports/
 apply**.py
 .**backup
+.claude/settings.local.json

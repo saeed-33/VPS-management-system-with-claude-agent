@@ -2,12 +2,13 @@
 
 <!-- DOC-STATUS: CURRENT -->
 
-Generated: **2026-08-11**
+Generated: **2026-08-12**
 
 Every Markdown document in `docs/` is classified below.
 
 | Document | Classification | Title |
 |---|---|---|
+| [`docs/ADR_README.append.md`](ADR_README.append.md) | REFERENCE | ADR_README.append |
 | [`docs/DOCUMENTATION_MAINTENANCE.md`](DOCUMENTATION_MAINTENANCE.md) | CURRENT | Documentation Maintenance |
 | [`docs/PROJECT_STATUS.md`](PROJECT_STATUS.md) | CURRENT | Project Status |
 | [`docs/PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md) | CURRENT | Project Structure and File Responsibilities |
@@ -37,7 +38,6 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/architecture/knowledge-retrieval.md`](architecture/knowledge-retrieval.md) | CURRENT | Knowledge Hybrid Retrieval and Reranking |
 | [`docs/architecture/knowledge-sources-seed.md`](architecture/knowledge-sources-seed.md) | CURRENT | Knowledge Sources Seed and Acceptance |
 | [`docs/architecture/knowledge-sources.md`](architecture/knowledge-sources.md) | CURRENT | Knowledge Sources Foundation |
-| [`docs/architecture/langgraph-investigation-orchestration.md`](architecture/langgraph-investigation-orchestration.md) | CURRENT | LangGraph Investigation Orchestration |
 | [`docs/architecture/overview.md`](architecture/overview.md) | CURRENT | Current Architecture |
 | [`docs/architecture/persisted-runtime-evaluation.md`](architecture/persisted-runtime-evaluation.md) | CURRENT | Persisted Runtime Evaluation — Phase 4.20.3 |
 | [`docs/architecture/production-readiness-gate.md`](architecture/production-readiness-gate.md) | CURRENT | Evaluation & Production Readiness Gate — Phase 4.20.1 |
@@ -49,13 +49,12 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/architecture/specialist-investigation-loop.md`](architecture/specialist-investigation-loop.md) | CURRENT | Specialist Investigation Loop |
 | [`docs/architecture/specialist-reasoning-agent.md`](architecture/specialist-reasoning-agent.md) | CURRENT | Specialist Reasoning Agent |
 | [`docs/architecture/specialist-registry.md`](architecture/specialist-registry.md) | CURRENT | Specialist Registry Service |
+| [`docs/architecture/target-project-structure.md`](architecture/target-project-structure.md) | CURRENT | Target Project Structure |
 | [`docs/decisions/ADR-008-dynamic-specialists.md`](decisions/ADR-008-dynamic-specialists.md) | DECISION | ADR-008 — Specialists Are User-Defined Runtime Data |
 | [`docs/decisions/ADR-009-hierarchical-investigation.md`](decisions/ADR-009-hierarchical-investigation.md) | DECISION | ADR-009 — Hierarchical, Bounded, Read-Only Investigation |
-| [`docs/decisions/ADR-010-langgraph-orchestration-boundary.md`](decisions/ADR-010-langgraph-orchestration-boundary.md) | DECISION | ADR-010 — LangGraph Orchestration Boundary |
 | [`docs/decisions/ADR-011-dual-rag-and-knowledge-retrieval.md`](decisions/ADR-011-dual-rag-and-knowledge-retrieval.md) | DECISION | ADR-011 — Separate Incident RAG and Knowledge RAG with Hybrid Retrieval |
 | [`docs/decisions/ADR-012-specialist-reasoning-and-provenance-boundary.md`](decisions/ADR-012-specialist-reasoning-and-provenance-boundary.md) | DECISION | ADR-012 — Specialist Reasoning Is Structured, Read-Only, and Provenance-Gated |
 | [`docs/decisions/ADR-013-registered-read-only-diagnostic-tools.md`](decisions/ADR-013-registered-read-only-diagnostic-tools.md) | DECISION | ADR-013 — Specialists Use Registered Read-Only Diagnostic Tools, Never Arbitrary Shell |
-| [`docs/decisions/ADR-014-langgraph-investigation-orchestration.md`](decisions/ADR-014-langgraph-investigation-orchestration.md) | DECISION | ADR-014: LangGraph for Investigation Orchestration |
 | [`docs/decisions/ADR-015-dynamic-secondary-specialist-routing.md`](decisions/ADR-015-dynamic-secondary-specialist-routing.md) | DECISION | ADR-015: Dynamic Secondary Specialist Routing |
 | [`docs/decisions/ADR-016-production-readiness-and-remediation-boundary.md`](decisions/ADR-016-production-readiness-and-remediation-boundary.md) | DECISION | ADR-016 — Production Readiness Gate and Remediation Boundary |
 | [`docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md`](decisions/ADR-017-claude-code-supervisory-agent-runtime.md) | DECISION | ADR-017 - Claude Code as Supervisory Agent Runtime |
@@ -63,13 +62,14 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/deployment/production-checklist.md`](deployment/production-checklist.md) | CURRENT | Production / Supervised Operations Checklist |
 | [`docs/deployment/production-deployment.md`](deployment/production-deployment.md) | CURRENT | Production Deployment Baseline |
 | [`docs/deployment/systemd-example.md`](deployment/systemd-example.md) | CURRENT | systemd Example |
+| [`docs/operations/claude-runtime.md`](operations/claude-runtime.md) | CURRENT | Running the Project with Claude |
 | [`docs/operations/configuration.md`](operations/configuration.md) | CURRENT | Configuration Reference |
 | [`docs/operations/database-bootstrap.md`](operations/database-bootstrap.md) | CURRENT | Database Bootstrap |
 | [`docs/operations/migrations-and-troubleshooting.md`](operations/migrations-and-troubleshooting.md) | CURRENT | Migrations and Troubleshooting |
 | [`docs/operations/running-project.md`](operations/running-project.md) | CURRENT | Running the Project |
 | [`docs/rag_configuration.md`](rag_configuration.md) | REFERENCE | RAG Configuration Policy |
-| [`docs/roadmap/claude-code-supervisory-transition-plan.md`](roadmap/claude-code-supervisory-transition-plan.md) | CURRENT | Claude Code Supervisory Transition Plan |
-| [`docs/roadmap/next-phase-multi-agent.md`](roadmap/next-phase-multi-agent.md) | REFERENCE | Future Phase 5 - Supervised Remediation |
+| [`docs/roadmap/claude-runtime-implementation-plan.md`](roadmap/claude-runtime-implementation-plan.md) | CURRENT | Claude Runtime Implementation Plan |
+| [`docs/roadmap/next-phase-multi-agent.md`](roadmap/next-phase-multi-agent.md) | CURRENT | Phase 5 - Supervised Remediation |
 | [`docs/roadmap/phase-4-17-closeout.md`](roadmap/phase-4-17-closeout.md) | HISTORICAL | Phase 4.17 Closeout — Dynamic Secondary Specialist Routing |
 | [`docs/roadmap/phase-4-18-implementation.md`](roadmap/phase-4-18-implementation.md) | HISTORICAL | Phase 4.18 Implementation Notes |
 | [`docs/roadmap/phase-4-19-implementation.md`](roadmap/phase-4-19-implementation.md) | HISTORICAL | Phase 4.19 Implementation Notes |
@@ -98,7 +98,7 @@ Every Markdown document in `docs/` is classified below.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **REFERENCE**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 
@@ -106,7 +106,6 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
-next: Phase C - Claude Code Supervisory Runtime Transition
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

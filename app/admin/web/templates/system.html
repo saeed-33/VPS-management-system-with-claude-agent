@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}
+System Runtime
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1 class="page-heading">
+            System Runtime
+        </h1>
+
+        <p class="page-description">
+            Runtime status and project tools exposed to the
+            supervisory runtime.
+        </p>
+    </div>
+</header>
+
+<section class="content-grid">
+    <article class="panel">
+        <header class="panel-header">
+            <div>
+                <h2 class="panel-title">
+                    Supervisor
+                </h2>
+
+                <p class="panel-subtitle">
+                    Active runtime state.
+                </p>
+            </div>
+        </header>
+
+        <div class="panel-body">
+            <div class="agent-status">
+                <span class="status-indicator"></span>
+
+                <div>
+                    <strong id="runtime-name">
+                        -
+                    </strong>
+                    <small id="runtime-state">
+                        Loading
+                    </small>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="panel">
+        <header class="panel-header">
+            <div>
+                <h2 class="panel-title">
+                    Tool Groups
+                </h2>
+
+                <p class="panel-subtitle">
+                    Tools available through the project boundary.
+                </p>
+            </div>
+        </header>
+
+        <div class="panel-body">
+            <strong
+                id="tool-count"
+                class="metric-value"
+            >
+                -
+            </strong>
+            <div class="metric-footer">
+                Registered tools
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <header class="panel-header">
+        <div>
+            <h2 class="panel-title">
+                Project Tool Catalog
+            </h2>
+
+            <p class="panel-subtitle">
+                Grouped capabilities exposed by the system.
+            </p>
+        </div>
+    </header>
+
+    <div class="panel-body flush">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Group</th>
+                    <th>Tool</th>
+                    <th>Mode</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+
+                <tbody id="runtime-tools-table">
+                <tr>
+                    <td
+                        colspan="4"
+                        class="loading-row"
+                    >
+                        <span class="loading-spinner"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadRuntimeOverview() {
+    const payload =
+        await apiRequest("/api/system/runtime");
+
+    document.getElementById(
+        "runtime-name"
+    ).textContent =
+        payload.supervisor.runtime;
+
+    document.getElementById(
+        "runtime-state"
+    ).textContent =
+        payload.supervisor.state;
+
+    document.getElementById(
+        "tool-count"
+    ).textContent =
+        payload.tool_count;
+
+    const rows = [];
+
+    for (const group of payload.tool_groups) {
+        for (const tool of group.tools) {
+            rows.push(`
+                <tr>
+                    <td>
+                        ${escapeHtml(group.name)}
+                    </td>
+                    <td>
+                        <span class="table-primary-text">
+                            ${escapeHtml(tool.tool_id)}
+                        </span>
+                    </td>
+                    <td>
+                        ${
+                            tool.read_only
+                                ? statusBadge("success")
+                                : statusBadge("degraded")
+                        }
+                    </td>
+                    <td>
+                        ${escapeHtml(tool.description)}
+                    </td>
+                </tr>
+            `);
+        }
+    }
+
+    document.getElementById(
+        "runtime-tools-table"
+    ).innerHTML =
+        rows.join("");
+}
+
+loadRuntimeOverview().catch(error => {
+    showToast(
+        error.message,
+        "error"
+    );
+});
+</script>
+{% endblock %}

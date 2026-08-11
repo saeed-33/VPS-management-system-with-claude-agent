@@ -3,10 +3,10 @@ from datetime import (
     timezone,
 )
 
-from app.agent.evaluation import (
+from app.domain.evaluation import (
     EvaluationMetric,
 )
-from app.agent.evaluation.persisted_runtime import (
+from app.domain.evaluation.persisted_runtime import (
     PersistedRuntimeEvaluator,
 )
 from app.shared.dto.investigation_read_models import (
@@ -47,7 +47,7 @@ def make_detail(
     runtime = (
         InvestigationRuntimeReadModel(
             status="completed",
-            orchestrator="langgraph",
+            orchestrator="claude",
             execution_mode="parallel",
             waves_completed=1,
             actions_used=(

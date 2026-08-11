@@ -1,7 +1,7 @@
 import asyncio
 from types import SimpleNamespace
 
-from app.agent.investigation.knowledge_indexer import (
+from app.domain.knowledge.indexer import (
     KnowledgeIndexer,
 )
 

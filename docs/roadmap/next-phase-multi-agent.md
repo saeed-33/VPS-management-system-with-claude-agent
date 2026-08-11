@@ -1,13 +1,13 @@
-# Future Phase 5 - Supervised Remediation
+# Phase 5 - Supervised Remediation
 
 <!-- DOC-STATUS: REFERENCE -->
 
 Phase 4 autonomous diagnosis is complete and has passed the Production
 Readiness Gate.
 
-ADR-017 inserts **Phase C - Claude Code Supervisory Runtime Transition** before
-Phase 5. This document remains the future Phase 5 remediation reference, not
-the immediate next implementation phase.
+ADR-017 defines Claude Code as the supervisory runtime. Phase 5 must expose
+remediation capabilities as controlled project tools and let Claude coordinate
+the fixed remediation workflow through those tools.
 
 Current state:
 
@@ -38,6 +38,15 @@ Recommended sequence:
 5.10 remediation readiness gate
 ```
 
+Claude-native rule for every Phase 5 step:
+
+```text
+If Claude can plan, sequence, classify, compare evidence, or synthesize the
+operator-facing recommendation, do not rebuild that coordination in Python.
+Python provides the tool contract, deterministic validation, policy enforcement,
+persistence, sandbox execution, and audit trail.
+```
+
 ## Required boundary
 
 Until Phase 5 explicitly grants a capability:
@@ -53,9 +62,9 @@ NO arbitrary shell
 ```
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **REFERENCE**
+Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 
@@ -63,7 +72,6 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
-next: Phase C - Claude Code Supervisory Runtime Transition
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

@@ -8,7 +8,7 @@ Rules:
 
 ```text
 API/UI do not consume SQLAlchemy models directly
-API/UI do not consume LangGraph state directly
+API/UI do not consume Claude-supervised state directly
 missing runtime data is explicit
 no fabricated Specialist/Evidence/Diagnosis fields
 ```
@@ -42,7 +42,7 @@ Then add list/detail pages based only on the read/API contracts.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **HISTORICAL**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

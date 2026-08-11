@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.agent.investigation.specialist_registry import (
+from app.domain.investigation.specialist_registry import (
     SpecialistRegistry,
     SpecialistRegistryValidationError,
 )

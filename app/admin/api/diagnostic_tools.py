@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.agent.investigation.diagnostic_tools import (
+from app.domain.investigation.diagnostic_tools import (
     build_default_diagnostic_tool_registry,
 )
 

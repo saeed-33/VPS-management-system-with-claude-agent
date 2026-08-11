@@ -10,12 +10,65 @@ uv run python tools/generate_test_catalog.py
 
 ## Pytest files
 
+### `tests/test_admin_system_api.py`
+
+- `test_system_runtime_api_exposes_supervisor_and_tools`
+
+### `tests/test_admin_system_web.py`
+
+- `test_system_runtime_page_is_available`
+
 ### `tests/test_aggregate_readiness.py`
 
 - `test_aggregate_combines_sources`
 - `test_sample_deficits_are_reported`
 - `test_one_real_runtime_sample_is_not_ready`
 - `test_hard_failure_blocks_when_samples_sufficient`
+
+### `tests/test_claude_agent_job_persistence.py`
+
+- `test_job_is_created_from_runtime_request`
+- `test_job_completion_preserves_result_observability`
+- `test_job_survives_repository_recreation`
+- `test_interrupted_jobs_are_recovered_as_failed`
+- `test_recent_jobs_can_be_filtered_by_status`
+
+### `tests/test_claude_multi_specialist_supervision.py`
+
+- `test_multi_specialist_supervision_runs_selected_specialists_sequentially`
+- `test_multi_specialist_supervision_respects_max_specialists`
+- `test_multi_specialist_supervision_fails_when_tool_budget_is_exceeded`
+- `test_multi_specialist_supervision_stops_on_tool_failure`
+- `test_multi_specialist_supervision_completes_when_none_selected`
+
+### `tests/test_claude_runtime_adapter.py`
+
+- `test_bounded_claude_invocation_succeeds`
+- `test_timeout_is_returned_as_controlled_result`
+- `test_runtime_failure_is_returned_as_controlled_result`
+- `test_invalid_structured_output_is_rejected`
+- `test_operational_tool_access_is_disabled_in_c2`
+- `test_claude_reported_failure_remains_failed`
+
+### `tests/test_claude_runtime_documentation.py`
+
+- `test_project_structure_documents_runtime_files`
+- `test_runtime_operations_doc_matches_configured_ollama_defaults`
+- `test_runtime_documentation_has_current_verification_commands`
+- `test_r5_status_and_test_catalog_are_documented`
+
+### `tests/test_claude_supervised_monitoring_cycle.py`
+
+- `test_cycle_executes_fixed_tool_sequence`
+- `test_cycle_persists_successful_job_observability`
+- `test_cycle_stops_and_persists_failure_when_tool_fails`
+- `test_cycle_fails_when_server_has_no_profile`
+- `test_cycle_rejects_invalid_server_id`
+
+### `tests/test_claude_supervisor.py`
+
+- `test_supervisor_delegates_monitoring_cycle`
+- `test_supervisor_reports_runtime_status`
 
 ### `tests/test_cross_specialist_conflicts.py`
 
@@ -60,6 +113,10 @@ uv run python tools/generate_test_catalog.py
 ### `tests/test_diagnostic_tools_api.py`
 
 - `test_diagnostic_tools_api_lists_registry`
+
+### `tests/test_domain_boundaries.py`
+
+- `test_domain_does_not_import_runtime_or_mcp_boundaries`
 
 ### `tests/test_evaluation_dataset_runner.py`
 
@@ -228,24 +285,6 @@ uv run python tools/generate_test_catalog.py
 - `test_seed_covers_all_baseline_specialists`
 - `test_each_seed_has_routing_scope`
 
-### `tests/test_langgraph_orchestrator.py`
-
-- `test_workers_execute_in_parallel`
-- `test_global_budget_is_partitioned_safely`
-- `test_aggregation_order_follows_routing_order`
-- `test_parallel_failure_is_isolated`
-- `test_no_investigation_routes_directly_to_aggregate`
-- `test_allocator_never_exceeds_total`
-
-### `tests/test_langgraph_secondary_orchestrator.py`
-
-- `test_recommendation_creates_secondary_wave`
-- `test_already_run_recommendation_is_not_repeated`
-- `test_unknown_recommendation_is_dropped`
-- `test_max_specialists_blocks_extra_followups`
-- `test_remaining_action_budget_is_passed_to_next_wave`
-- `test_secondary_can_recommend_tertiary_within_limits`
-
 ### `tests/test_ollama_context_window.py`
 
 - `test_normal_reasoning_uses_32k_context_and_6144_output`
@@ -282,6 +321,57 @@ uv run python tools/generate_test_catalog.py
 - `test_soft_metric_can_fail_rate_threshold`
 - `test_duplicate_thresholds_rejected`
 
+### `tests/test_project_mcp_analysis_tools.py`
+
+- `test_find_exact_report_match_returns_reusable_analysis`
+- `test_get_top_similar_reports_is_capped_at_three`
+- `test_analyze_report_uses_existing_orchestrator`
+- `test_get_analysis_by_report_id`
+- `test_search_knowledge_uses_project_retriever`
+- `test_missing_dependency_is_controlled_error`
+
+### `tests/test_project_mcp_investigation_tools.py`
+
+- `test_start_investigation_routes_and_persists_decision`
+- `test_start_investigation_requires_analysis`
+- `test_get_investigation_reads_detail`
+- `test_get_investigation_status_returns_compact_state`
+- `test_get_evidence_reads_runtime_evidence`
+- `test_missing_investigation_is_controlled_error`
+
+### `tests/test_project_mcp_remediation_tools.py`
+
+- `test_propose_remediation_requires_diagnosis_and_evidence_links`
+- `test_create_plan_and_sandbox_result_are_persisted`
+- `test_failed_sandbox_blocks_production_application`
+- `test_high_risk_action_requests_user_approval`
+- `test_policy_denied_action_cannot_be_applied_even_after_sandbox`
+
+### `tests/test_project_mcp_specialist_tools.py`
+
+- `test_get_available_specialists_reads_enabled_runtime_registry`
+- `test_get_specialist_definition_reads_latest_registry_snapshot`
+- `test_run_specialist_uses_selected_db_definition_and_budget`
+- `test_run_specialist_rejects_unselected_specialist`
+- `test_run_specialist_requires_configured_loop`
+
+### `tests/test_project_mcp_tool_boundary.py`
+
+- `test_tool_inventory_is_deliberately_small`
+- `test_get_server_context_uses_project_service`
+- `test_get_monitoring_profile_includes_commands`
+- `test_run_monitoring_invokes_existing_service_and_reads_report`
+- `test_get_report_reads_persisted_report`
+- `test_get_latest_report_returns_controlled_not_found`
+- `test_invalid_input_is_normalized`
+- `test_unknown_tool_is_rejected`
+
+### `tests/test_project_tool_catalog.py`
+
+- `test_every_project_tool_belongs_to_one_group`
+- `test_boundary_exposes_grouped_tool_definitions`
+- `test_tool_group_lookup_rejects_unknown_tools`
+
 ### `tests/test_rag_evaluation_contract.py`
 
 - `test_hybrid_does_not_use_rrf_as_vector_similarity`
@@ -302,6 +392,15 @@ uv run python tools/generate_test_catalog.py
 - `test_web_routes_are_excluded_from_openapi`
 - `test_specialists_api_is_in_openapi_inventory`
 - `test_health_route_remains_visible`
+
+### `tests/test_runtime_readiness_gate.py`
+
+- `test_runtime_readiness_gate_passes_full_non_regressing_matrix`
+- `test_runtime_readiness_gate_blocks_missing_runtime_case`
+- `test_runtime_readiness_gate_blocks_critical_regression`
+- `test_runtime_readiness_gate_blocks_critical_score_regression`
+- `test_non_critical_regression_is_recorded_but_does_not_block`
+- `test_duplicate_observations_are_rejected`
 
 ### `tests/test_safety_runtime_evaluation.py`
 
@@ -413,18 +512,10 @@ uv run python tools/generate_test_catalog.py
 
 - `tools/list_routes.py`
 - `tools/run_all_tests.py`
-- `tools/run_correlation_acceptance.py`
 - `tools/run_evaluation_dataset.py`
-- `tools/run_final_diagnosis_acceptance.py`
 - `tools/run_investigation_web_api_acceptance.py`
-- `tools/run_langgraph_controlled_secondary_acceptance.py`
-- `tools/run_langgraph_coordinator_acceptance.py`
-- `tools/run_langgraph_parallel_acceptance.py`
-- `tools/run_langgraph_secondary_acceptance.py`
-- `tools/run_persisted_runtime_acceptance.py`
 - `tools/run_persisted_runtime_evaluation.py`
 - `tools/run_production_readiness_evaluation.py`
-- `tools/run_runtime_sample_expansion.py`
 - `tools/run_safety_runtime_evaluation.py`
 - `tools/run_server_coordinator_acceptance.py`
 - `tools/run_specialist_investigation.py`
@@ -445,7 +536,7 @@ See `TESTING_STRATEGY.md` for when each layer is required.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

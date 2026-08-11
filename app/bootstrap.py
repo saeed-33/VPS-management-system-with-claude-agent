@@ -1,59 +1,77 @@
-from app.agent.investigation.specialist_investigation_loop import (
+from app.domain.investigation.specialist_investigation_loop import (
     SpecialistInvestigationLoop,
 )
-from app.agent.investigation.langgraph_secondary_orchestrator import (
-    DynamicSecondaryLangGraphCoordinator,
+from app.runtime.claude.job_service import (
+    ClaudeAgentJobService,
 )
-from app.agent.investigation.langgraph_orchestrator import (
-    LangGraphServerCoordinator,
+from app.runtime.claude.monitoring_cycle import (
+    ClaudeSupervisedMonitoringCycle,
 )
-from app.agent.investigation.server_coordinator import (
+from app.runtime.claude.multi_specialist_supervision import (
+    ClaudeMultiSpecialistSupervisor,
+)
+from app.runtime.claude.supervisor import (
+    ClaudeSupervisor,
+)
+from app.tools.project_boundary import (
+    ProjectMcpToolBoundary,
+)
+from app.shared.database.repositories.agent_job_repository import (
+    AgentJobRepository,
+)
+from app.shared.database.repositories.remediation_repository import (
+    RemediationRepository,
+)
+from app.shared.services.remediation_service import (
+    RemediationService,
+)
+from app.domain.investigation.server_coordinator import (
     ServerCoordinator,
 )
-from app.agent.investigation.specialist_context import (
+from app.domain.investigation.specialist_context import (
     SpecialistContextBuilder,
 )
-from app.agent.investigation.specialist_reasoning_agent import (
+from app.domain.investigation.specialist_reasoning_agent import (
     SpecialistReasoningAgent,
 )
-from app.agent.investigation.specialist_reasoning_client import (
+from app.domain.investigation.specialist_reasoning_client import (
     create_specialist_reasoning_client,
 )
-from app.agent.investigation.knowledge_retrieval import (
+from app.domain.knowledge.retrieval import (
     KnowledgeHybridRetriever,
 )
 from app.shared.database.repositories.knowledge_retrieval_repository import (
     KnowledgeRetrievalRepository,
 )
-from app.agent.investigation.evidence_collection import (
+from app.domain.investigation.evidence_collection import (
     EvidenceCollectionService,
 )
-from app.agent.investigation.diagnostic_policy import (
+from app.domain.investigation.diagnostic_policy import (
     DiagnosticPolicyEngine,
 )
-from app.agent.investigation.diagnostic_tools import (
+from app.domain.investigation.diagnostic_tools import (
     DiagnosticToolRegistry,
     build_default_diagnostic_tool_registry,
 )
-from app.agent.investigation.knowledge_chunker import (
+from app.domain.knowledge.chunker import (
     StructureAwareKnowledgeChunker,
 )
-from app.agent.investigation.knowledge_chunking_service import (
+from app.domain.knowledge.chunking_service import (
     KnowledgeChunkingService,
 )
-from app.agent.investigation.knowledge_ingestion_service import (
+from app.domain.knowledge.ingestion_service import (
     KnowledgeIngestionService,
 )
-from app.agent.investigation.knowledge_parsers import (
+from app.domain.knowledge.parsers import (
     KnowledgeContentParser,
 )
-from app.agent.investigation.knowledge_source_loader import (
+from app.domain.knowledge.source_loader import (
     KnowledgeSourceLoader,
 )
 from app.shared.database.repositories.knowledge_document_repository import (
     KnowledgeDocumentRepository,
 )
-from app.agent.investigation.knowledge_source_registry import (
+from app.domain.knowledge.source_registry import (
     KnowledgeSourceRegistry,
 )
 from app.shared.database.repositories.knowledge_source_repository import (
@@ -65,19 +83,19 @@ from app.shared.services.knowledge_source_service import (
 from app.shared.services.investigation_read_service import (
     InvestigationReadService,
 )
-from app.agent.investigation.runtime_snapshot_service import (
+from app.domain.investigation.runtime_snapshot_service import (
     InvestigationRuntimeSnapshotService,
 )
-from app.agent.investigation.persistence_service import (
+from app.domain.investigation.persistence_service import (
     InvestigationPersistenceService,
 )
 from app.shared.database.repositories.investigation_repository import (
     InvestigationRepository,
 )
-from app.agent.investigation.investigation_router import (
+from app.domain.investigation.investigation_router import (
     InvestigationRouter,
 )
-from app.agent.investigation.specialist_registry import (
+from app.domain.investigation.specialist_registry import (
     SpecialistRegistry,
 )
 from app.shared.database.repositories.specialist_definition_repository import (
@@ -92,37 +110,37 @@ from dataclasses import dataclass
 from app.admin.services.ssh_test_service import (
     SSHTestService,
 )
-from app.agent.analysis.analysis_agent_manager import (
+from app.domain.analysis.analysis_agent_manager import (
     AnalysisAgentManager,
 )
-from app.agent.analysis.client_factory import (
+from app.domain.analysis.client_factory import (
     create_llm_analysis_client,
 )
-from app.agent.analysis.report_analyzer import (
+from app.domain.analysis.report_analyzer import (
     ReportAnalyzer,
 )
-from app.agent.analysis.analysis_orchestrator import (
+from app.domain.analysis.analysis_orchestrator import (
     AnalysisOrchestrator,
 )
-from app.agent.analysis.retrieval.embedding_factory import (
+from app.domain.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.agent.analysis.retrieval.context_builder import (
+from app.domain.analysis.retrieval.context_builder import (
     RagContextBuilder,
 )
-from app.agent.analysis.retrieval.rag_retriever import (
+from app.domain.analysis.retrieval.rag_retriever import (
     RagRetriever,
 )
-from app.agent.analysis.retrieval.retrieval_indexer import (
+from app.domain.analysis.retrieval.retrieval_indexer import (
     RetrievalIndexer,
 )
-from app.agent.analysis.retrieval.full_text_retriever import (
+from app.domain.analysis.retrieval.full_text_retriever import (
     FullTextRetriever,
 )
-from app.agent.analysis.retrieval.hybrid_retriever import (
+from app.domain.analysis.retrieval.hybrid_retriever import (
     HybridRetriever,
 )
-from app.agent.analysis.retrieval.structured_compatibility import (
+from app.domain.analysis.retrieval.structured_compatibility import (
     StructuredCompatibilityChecker,
 )
 from app.admin.services.report_pdf_service import (
@@ -134,10 +152,10 @@ from app.shared.database.repositories.analysis_source_repository import (
 from app.shared.database.repositories.retrieval_repository import (
     RetrievalRepository,
 )
-from app.agent.monitoring_service import (
+from app.tools.monitoring.service import (
     MonitoringService,
 )
-from app.agent.scheduler import MonitoringScheduler
+from app.tools.monitoring.scheduler import MonitoringScheduler
 from app.shared.config import settings
 from app.shared.database.repositories.analysis_repository import (
     AnalysisRepository,
@@ -183,6 +201,8 @@ class ApplicationContainer:
     investigation_repository: InvestigationRepository
     knowledge_source_repository: KnowledgeSourceRepository
     knowledge_document_repository: KnowledgeDocumentRepository
+    agent_job_repository: AgentJobRepository
+    remediation_repository: RemediationRepository
 
     # Shared services
     server_service: ServerService
@@ -202,10 +222,14 @@ class ApplicationContainer:
     diagnostic_tool_registry: DiagnosticToolRegistry
     diagnostic_policy_engine: DiagnosticPolicyEngine
     evidence_collection_service: EvidenceCollectionService
+    remediation_service: RemediationService
     specialist_investigation_loop: SpecialistInvestigationLoop | None
     server_coordinator: ServerCoordinator | None
-    langgraph_server_coordinator: LangGraphServerCoordinator | None
-    dynamic_secondary_coordinator: DynamicSecondaryLangGraphCoordinator | None
+    claude_agent_job_service: ClaudeAgentJobService
+    project_mcp_tool_boundary: ProjectMcpToolBoundary
+    claude_supervised_monitoring_cycle: ClaudeSupervisedMonitoringCycle
+    claude_multi_specialist_supervisor: ClaudeMultiSpecialistSupervisor
+    claude_supervisor: ClaudeSupervisor
 
     # Admin services
     ssh_test_service: SSHTestService
@@ -249,6 +273,8 @@ def build_container() -> ApplicationContainer:
     investigation_repository = InvestigationRepository()
     knowledge_source_repository = KnowledgeSourceRepository()
     knowledge_document_repository = KnowledgeDocumentRepository()
+    agent_job_repository = AgentJobRepository()
+    remediation_repository = RemediationRepository()
 
     # -------------------------------------------------
     # Shared services
@@ -346,6 +372,15 @@ def build_container() -> ApplicationContainer:
         ),
     )
 
+    claude_agent_job_service = ClaudeAgentJobService(
+        repository=agent_job_repository,
+    )
+
+    remediation_service = RemediationService(
+        repository=remediation_repository,
+        automatic_remediation_allowed=False,
+    )
+
     embedding_client = None
     retrieval_indexer = None
     vector_retriever = None
@@ -356,8 +391,6 @@ def build_container() -> ApplicationContainer:
     report_pdf_service = None
     specialist_investigation_loop = None
     server_coordinator = None
-    langgraph_server_coordinator = None
-    dynamic_secondary_coordinator = None
 
     try:
         report_pdf_service = ReportPdfService(
@@ -511,21 +544,6 @@ def build_container() -> ApplicationContainer:
             ),
         )
 
-        langgraph_server_coordinator = LangGraphServerCoordinator(
-            specialist_registry=specialist_registry,
-            specialist_loop=(
-                specialist_investigation_loop
-            ),
-            max_concurrency=4,
-        )
-
-        dynamic_secondary_coordinator = DynamicSecondaryLangGraphCoordinator(
-            specialist_registry=specialist_registry,
-            parallel_coordinator=(
-                langgraph_server_coordinator
-            ),
-        )
-
         report_analyzer = ReportAnalyzer(
             report_query_service=report_query_service,
             analysis_repository=analysis_repository,
@@ -596,9 +614,60 @@ def build_container() -> ApplicationContainer:
         ),
     )
 
+    project_mcp_tool_boundary = ProjectMcpToolBoundary(
+        server_service=server_service,
+        monitoring_profile_service=(
+            monitoring_profile_service
+        ),
+        monitoring_service=monitoring_service,
+        report_query_service=report_query_service,
+        analysis_orchestrator=analysis_orchestrator,
+        analysis_repository=analysis_repository,
+        incident_retriever=rag_retriever,
+        knowledge_retriever=(
+            specialist_knowledge_retriever
+            if settings.llm_enabled
+            else None
+        ),
+        investigation_router=investigation_router,
+        investigation_persistence_service=(
+            investigation_persistence_service
+        ),
+        investigation_read_service=(
+            investigation_read_service
+        ),
+        specialist_registry=specialist_registry,
+        specialist_investigation_loop=(
+            specialist_investigation_loop
+        ),
+        remediation_service=remediation_service,
+    )
+
+    claude_supervised_monitoring_cycle = (
+        ClaudeSupervisedMonitoringCycle(
+            tool_boundary=project_mcp_tool_boundary,
+            agent_job_service=(
+                claude_agent_job_service
+            ),
+        )
+    )
+
+    claude_multi_specialist_supervisor = (
+        ClaudeMultiSpecialistSupervisor(
+            tool_boundary=project_mcp_tool_boundary,
+            agent_job_service=(
+                claude_agent_job_service
+            ),
+        )
+    )
+
+    claude_supervisor = ClaudeSupervisor(
+        runner=claude_supervised_monitoring_cycle,
+    )
+
     scheduler = MonitoringScheduler(
         server_repository=server_repository,
-        monitoring_service=monitoring_service,
+        monitoring_service=claude_supervisor,
         polling_interval_seconds=(
             settings.monitor_polling_interval_seconds
         ),
@@ -628,6 +697,8 @@ def build_container() -> ApplicationContainer:
         knowledge_document_repository=(
             knowledge_document_repository
         ),
+        agent_job_repository=agent_job_repository,
+        remediation_repository=remediation_repository,
         server_service=server_service,
         command_service=command_service,
         monitoring_profile_service=(
@@ -670,18 +741,26 @@ def build_container() -> ApplicationContainer:
         evidence_collection_service=(
             evidence_collection_service
         ),
+        remediation_service=remediation_service,
         specialist_investigation_loop=(
             specialist_investigation_loop
         ),
         server_coordinator=(
             server_coordinator
         ),
-        langgraph_server_coordinator=(
-            langgraph_server_coordinator
+        claude_agent_job_service=(
+            claude_agent_job_service
         ),
-        dynamic_secondary_coordinator=(
-            dynamic_secondary_coordinator
+        project_mcp_tool_boundary=(
+            project_mcp_tool_boundary
         ),
+        claude_supervised_monitoring_cycle=(
+            claude_supervised_monitoring_cycle
+        ),
+        claude_multi_specialist_supervisor=(
+            claude_multi_specialist_supervisor
+        ),
+        claude_supervisor=claude_supervisor,
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,
         scheduler=scheduler,

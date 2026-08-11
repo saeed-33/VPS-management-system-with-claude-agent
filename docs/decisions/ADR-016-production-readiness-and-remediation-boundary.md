@@ -8,7 +8,7 @@ Accepted.
 
 ## Context
 
-The Investigation architecture can execute real read-only diagnostic operations through LangGraph, Specialists, Policy, SSH tools, Evidence collection, correlation, Final Diagnosis, persistence, API, and UI.
+The Investigation architecture can execute real read-only diagnostic operations through Claude-supervised, Specialists, Policy, SSH tools, Evidence collection, correlation, Final Diagnosis, persistence, API, and UI.
 
 Successful runtime acceptance alone is insufficient to authorize operational use or future write-capable actions.
 
@@ -62,7 +62,7 @@ Phase 5 requires a new ADR/contract set for remediation plans, approval, audit, 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **DECISION**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

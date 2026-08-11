@@ -2,6 +2,13 @@ from app.shared.database.models.knowledge_document import (
     KnowledgeChunkModel,
     KnowledgeDocumentModel,
 )
+from app.shared.database.models.agent_job import (
+    AgentJobModel,
+)
+from app.shared.database.models.remediation import (
+    RemediationPlanModel,
+    RemediationSandboxResultModel,
+)
 from app.shared.database.models.knowledge_source import (
     KnowledgeSourceModel,
 )
@@ -58,4 +65,7 @@ __all__ = [
     "KnowledgeSourceModel",
     "KnowledgeDocumentModel",
     "KnowledgeChunkModel",
+    "AgentJobModel",
+    "RemediationPlanModel",
+    "RemediationSandboxResultModel",
 ]

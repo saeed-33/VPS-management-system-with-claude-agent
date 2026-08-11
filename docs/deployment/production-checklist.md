@@ -76,7 +76,7 @@ Such capabilities belong to Phase 5 supervised remediation with separate approva
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

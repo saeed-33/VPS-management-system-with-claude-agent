@@ -10,10 +10,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.agent.analysis.retrieval.embedding_factory import (
+from app.domain.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.agent.investigation.knowledge_indexer import (
+from app.domain.knowledge.indexer import (
     KnowledgeIndexer,
 )
 from app.bootstrap import container

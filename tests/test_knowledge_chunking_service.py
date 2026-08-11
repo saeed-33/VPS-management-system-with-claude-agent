@@ -1,10 +1,10 @@
 from types import SimpleNamespace
 
-from app.agent.investigation.knowledge_chunker import (
+from app.domain.knowledge.chunker import (
     KnowledgeChunkerConfig,
     StructureAwareKnowledgeChunker,
 )
-from app.agent.investigation.knowledge_chunking_service import (
+from app.domain.knowledge.chunking_service import (
     KnowledgeChunkingService,
 )
 

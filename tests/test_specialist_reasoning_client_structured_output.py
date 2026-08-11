@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from app.agent.investigation.specialist_reasoning_client import (
+from app.domain.investigation.specialist_reasoning_client import (
     OllamaSpecialistReasoningClient,
 )
 

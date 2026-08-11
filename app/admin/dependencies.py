@@ -1,6 +1,12 @@
 from app.shared.services.investigation_read_service import (
     InvestigationReadService,
 )
+from app.runtime.claude.supervisor import (
+    ClaudeSupervisor,
+)
+from app.tools.project_boundary import (
+    ProjectMcpToolBoundary,
+)
 from app.shared.services.knowledge_source_service import (
     KnowledgeSourceService,
 )
@@ -81,3 +87,12 @@ def get_knowledge_source_service(
 def get_investigation_read_service(
 ) -> InvestigationReadService:
     return container.investigation_read_service
+
+
+def get_claude_supervisor() -> ClaudeSupervisor:
+    return container.claude_supervisor
+
+
+def get_project_tool_boundary(
+) -> ProjectMcpToolBoundary:
+    return container.project_mcp_tool_boundary

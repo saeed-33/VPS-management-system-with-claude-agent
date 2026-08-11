@@ -21,7 +21,7 @@ Persisted Investigation
       |
 Dynamic Specialist Selection
       |
-LangGraph Specialist Investigation
+Claude-supervised Specialist Investigation
       |
 Evidence + Incident RAG + Knowledge RAG
       |
@@ -56,7 +56,7 @@ Evaluation + Safety Gate
 - Evidence وKnowledge IDs قابلة للتتبع.
 - Incident RAG وKnowledge RAG منفصلان.
 - التحقيق محدود بـspecialist/round/action budgets.
-- LangGraph يستخدم للتنسيق وليس لتجاوز domain boundaries.
+- Claude-supervised يستخدم للتنسيق وليس لتجاوز domain boundaries.
 - conflicts تبقى ظاهرة.
 - Final Diagnosis claims قابلة للتتبع.
 - remediation خارج Phase 4.
@@ -81,7 +81,7 @@ Evaluation + Safety Gate
 | 4.13 | Evidence Collection | Completed |
 | 4.14 | Specialist Investigation Loop | Completed |
 | 4.15 | Server Coordinator | Completed |
-| 4.16 | Parallel LangGraph Investigation | Completed |
+| 4.16 | Parallel Claude-supervised Investigation | Completed |
 | 4.17 | Dynamic Secondary Specialists | Completed |
 | 4.18 | Correlation + Final Diagnosis | Completed |
 | 4.19 | Investigation persistence/read API/UI | Completed |
@@ -138,7 +138,7 @@ Policy separation from read-only diagnostics
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

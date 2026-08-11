@@ -41,7 +41,7 @@ Unknown Evidence/Knowledge/Claim/Conflict IDs are rejected at the appropriate va
 
 ## Orchestration
 
-LangGraph coordinates workflow but does not override Registry, Policy, Evidence, SSH, or budget rules.
+Claude-supervised coordinates workflow but does not override Registry, Policy, Evidence, SSH, or budget rules.
 
 Secondary Specialists must exist in the enabled Registry and fit remaining budgets.
 
@@ -87,7 +87,7 @@ Phase 5 must define a separate approval/audit/rollback boundary before any of th
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

@@ -101,7 +101,7 @@ def test_runtime_snapshot_is_exposed_when_persisted():
     model.investigation_metadata = {
         "runtime_snapshot": {
             "status": "completed",
-            "orchestrator": "langgraph",
+            "orchestrator": "claude",
             "execution_mode": (
                 "dynamic-secondary"
             ),
@@ -152,7 +152,7 @@ def test_runtime_snapshot_is_exposed_when_persisted():
     assert output.runtime is not None
     assert (
         output.runtime.orchestrator
-        == "langgraph"
+        == "claude"
     )
     assert (
         output.runtime.execution_mode

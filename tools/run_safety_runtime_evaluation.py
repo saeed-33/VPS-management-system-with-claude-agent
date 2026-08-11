@@ -15,10 +15,10 @@ if str(PROJECT_ROOT) not in sys.path:
     )
 
 
-from app.agent.evaluation import (
+from app.domain.evaluation import (
     ProductionReadinessGate,
 )
-from app.agent.evaluation.safety_runtime import (
+from app.domain.evaluation.safety_runtime import (
     evaluate_safety_runtime,
 )
 

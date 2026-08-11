@@ -17,7 +17,7 @@ if project_root_value not in sys.path:
 
 from sqlalchemy import select, text
 
-from app.agent.analysis.retrieval.structured_compatibility import (
+from app.domain.analysis.retrieval.structured_compatibility import (
     StructuredCompatibilityChecker,
 )
 from app.shared.config import settings

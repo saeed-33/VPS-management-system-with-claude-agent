@@ -3,7 +3,7 @@
 **الحالة:** المنهجية الرسمية الحالية حتى إغلاق Phase 4.17  
 **بيئة الاختبار المرجعية:** Ubuntu Server 22.04.2 amd64 على VMware
 
-نجاح `pytest` وحده لا يكفي لإغلاق خطوة runtime في Phase 4. يجب فصل صحة العقود، وقاعدة البيانات، والاسترجاع، والـLLM، والسياسة الأمنية، وSSH، وLangGraph orchestration.
+نجاح `pytest` وحده لا يكفي لإغلاق خطوة runtime في Phase 4. يجب فصل صحة العقود، وقاعدة البيانات، والاسترجاع، والـLLM، والسياسة الأمنية، وSSH، وClaude-supervised orchestration.
 
 ## 1. Automated regression
 
@@ -84,14 +84,13 @@ final synthesis
 provenance validation
 ```
 
-## 7. LangGraph parallel acceptance — Phase 4.16
-
-Controlled acceptance may override only initial routing to guarantee two workers while keeping real LangGraph, Specialist loops, Policy, SSH, and Tool execution.
+## 7. Claude-supervised multi-Specialist acceptance - Phase C`r`n
+Controlled acceptance may override only initial routing to guarantee two workers while keeping real Claude-supervised coordination, Specialist loops, Policy, SSH, and Tool execution.
 
 Example:
 
 ```powershell
-uv run python tools/run_langgraph_parallel_acceptance.py 1076 `
+uv run python tools/run_claude_multi_specialist_acceptance.py 1076 `
   --specialists linux-cpu,linux-memory `
   --max-specialists 2 `
   --max-rounds 2 `
@@ -103,7 +102,7 @@ Required invariants:
 ```text
 two_or_more_workers
 requested_workers_preserved
-langgraph_orchestrator
+Claude-supervised_orchestrator
 parallel_mode
 global_budget_safe
 worker_action_sum_safe
@@ -118,7 +117,7 @@ There are two distinct acceptance questions.
 ### A. Natural recommendation acceptance
 
 ```powershell
-uv run python tools/run_langgraph_secondary_acceptance.py 1076 `
+uv run python tools/run_Claude-supervised_secondary_acceptance.py 1076 `
   --initial-specialist nginx `
   --max-specialists 3 `
   --max-rounds 3 `
@@ -133,7 +132,7 @@ Failure to recommend does not necessarily prove orchestration failure; it can be
 ### B. Controlled recommendation acceptance
 
 ```powershell
-uv run python tools/run_langgraph_controlled_secondary_acceptance.py 1076 `
+uv run python tools/run_Claude-supervised_controlled_secondary_acceptance.py 1076 `
   --initial-specialist nginx `
   --secondary-specialist systemd-service `
   --max-rounds 3 `
@@ -258,7 +257,7 @@ For canonical current state see `docs/PROJECT_STATUS.md`; for test execution see
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

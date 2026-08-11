@@ -1,0 +1,24 @@
+{
+  "project": {
+    "name": "AI VPS Management",
+    "transitionPhase": "Phase C - Claude Code Supervisory Runtime Transition",
+    "llmProvider": "ollama",
+    "orchestrationMode": "structure-only"
+  },
+  "instructions": {
+    "entrypoint": "CLAUDE.md",
+    "rulesDirectory": ".claude/rules",
+    "commandsDirectory": ".claude/commands",
+    "skillsDirectory": ".claude/skills",
+    "agentsDirectory": ".claude/agents"
+  },
+  "safety": {
+    "allowArbitraryShellForAgentOperations": false,
+    "allowRawProductionSsh": false,
+    "allowRawProductionSql": false,
+    "allowProductionRemediationWithoutPolicyApproval": false,
+    "requireProjectToolsForOperationalActions": true,
+    "requireOllamaProjectClientsForLlmReasoning": true,
+    "requireSandboxValidationBeforeProductionRemediation": true
+  }
+}

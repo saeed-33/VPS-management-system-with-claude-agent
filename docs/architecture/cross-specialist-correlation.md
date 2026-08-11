@@ -120,7 +120,7 @@ Phase 4.18.5 performs runtime acceptance using a real Final Diagnosis and the co
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

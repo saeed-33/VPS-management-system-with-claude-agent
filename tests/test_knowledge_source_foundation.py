@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.agent.investigation.knowledge_source_registry import (
+from app.domain.knowledge.source_registry import (
     KnowledgeSourceRegistry,
 )
 from app.shared.dto.knowledge_sources import (

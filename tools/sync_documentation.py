@@ -42,6 +42,7 @@ CURRENT_EXPLICIT = {
     "docs/deployment/production-checklist.md",
     "docs/deployment/production-deployment.md",
     "docs/operations/running-project.md",
+    "docs/operations/claude-runtime.md",
     "docs/operations/configuration.md",
     "docs/security/security-baseline.md",
     "docs/api/http-api.md",
@@ -51,6 +52,8 @@ CURRENT_EXPLICIT = {
     "docs/roadmap/phase-4-20-implementation.md",
     "docs/roadmap/phase-4-20-closeout.md",
     "docs/roadmap/next-phase-multi-agent.md",
+    "docs/roadmap/claude-runtime-implementation-plan.md",
+    "docs/architecture/target-project-structure.md",
 }
 
 

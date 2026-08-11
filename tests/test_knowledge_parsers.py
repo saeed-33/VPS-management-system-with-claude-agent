@@ -1,4 +1,4 @@
-from app.agent.investigation.knowledge_parsers import (
+from app.domain.knowledge.parsers import (
     KnowledgeContentParser,
     normalize_text,
 )

@@ -11,7 +11,7 @@ The reasoning contract exposes `recommended_next_specialists`, but treating mode
 
 ## Decision
 
-Model recommendations are advisory inputs to LangGraph routing.
+Model recommendations are advisory inputs to Claude-supervised routing.
 
 The outer Phase 4.17 graph validates each recommendation against:
 
@@ -37,7 +37,7 @@ budget validation
 duplicate suppression
 secondary Specialist execution
 Policy/SSH/Tool path
-LangGraph dynamic-secondary runtime
+Claude-supervised dynamic-secondary runtime
 ```
 
 The accepted run executed:
@@ -70,7 +70,7 @@ That is Phase 4.18.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **DECISION**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

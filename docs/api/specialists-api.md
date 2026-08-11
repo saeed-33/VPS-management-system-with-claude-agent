@@ -60,7 +60,7 @@ Tool IDs can be stored now, but no Tool Registry exists yet. Phase 4.11 will mak
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

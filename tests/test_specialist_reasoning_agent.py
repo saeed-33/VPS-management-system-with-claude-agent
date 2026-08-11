@@ -2,14 +2,14 @@ import asyncio
 
 import pytest
 
-from app.agent.investigation.contracts import (
+from app.domain.investigation.contracts import (
     KnowledgeSourceReference,
     KnowledgeSourceType,
 )
-from app.agent.investigation.specialist_context import (
+from app.domain.investigation.specialist_context import (
     SpecialistContextSnapshot,
 )
-from app.agent.investigation.specialist_reasoning_agent import (
+from app.domain.investigation.specialist_reasoning_agent import (
     SpecialistReasoningAgent,
 )
 from app.shared.dto.specialist_reasoning import (

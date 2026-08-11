@@ -87,6 +87,20 @@ async def reports_page(
         name="reports.html",
         context={},
     )
+
+
+@router.get(
+    "/system",
+    response_class=HTMLResponse,
+)
+async def system_page(
+    request: Request,
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="system.html",
+        context={},
+    )
 @router.get(
     "/monitoring-profiles",
     response_class=HTMLResponse,
@@ -157,4 +171,3 @@ async def knowledge_sources_page(
         name="knowledge_sources.html",
         context={},
     )
-

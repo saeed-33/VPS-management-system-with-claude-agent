@@ -1,6 +1,6 @@
 import asyncio
 
-from app.agent.investigation.knowledge_retrieval import (
+from app.domain.knowledge.retrieval import (
     KnowledgeHybridRetriever,
 )
 from app.shared.database.repositories.knowledge_retrieval_repository import (

@@ -1,17 +1,17 @@
 import asyncio
 from dataclasses import dataclass
 
-from app.agent.investigation.contracts import (
+from app.domain.investigation.contracts import (
     InvestigationBudget,
     SpecialistResult,
     SpecialistTaskStatus,
 )
-from app.agent.investigation.investigation_router import (
+from app.domain.investigation.investigation_router import (
     InvestigationRoutingDecision,
     SpecialistRoutingMatch,
 )
-from app.agent.investigation.server_coordinator import ServerCoordinator
-from app.agent.investigation.specialist_registry import (
+from app.domain.investigation.server_coordinator import ServerCoordinator
+from app.domain.investigation.specialist_registry import (
     SpecialistRegistrySnapshot,
     SpecialistRuntimeDefinition,
 )

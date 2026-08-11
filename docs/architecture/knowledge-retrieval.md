@@ -46,7 +46,7 @@ Phase 4.8.5 injects retrieved chunks into Specialist context.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

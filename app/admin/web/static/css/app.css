@@ -2005,7 +2005,7 @@ code {
     line-height: 1.6;
 }
 
-/* Override legacy tiny fixed-size text without changing layout widths. */
+/* Keep compact text readable without changing layout widths. */
 [style*="font-size: 10px"],
 [style*="font-size:10px"] {
     font-size: 12px !important;

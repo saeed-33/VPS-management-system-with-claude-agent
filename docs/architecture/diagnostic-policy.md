@@ -94,11 +94,11 @@ The Policy Engine remains mandatory inside every Specialist Investigation Loop, 
 ```text
 single-Specialist execution
 Server Coordinator execution
-LangGraph parallel workers
+Claude-supervised parallel workers
 dynamic secondary Specialist waves
 ```
 
-Neither LangGraph nor the Coordinator may bypass Policy.
+Neither Claude-supervised nor the Coordinator may bypass Policy.
 
 ## Security properties
 
@@ -115,7 +115,7 @@ Phase 4.12 is closed; later phases build on this accepted boundary.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

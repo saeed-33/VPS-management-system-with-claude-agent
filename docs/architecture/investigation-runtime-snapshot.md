@@ -8,7 +8,7 @@ The snapshot is stored under:
 investigations.metadata.runtime_snapshot
 ```
 
-This is intentionally a read projection rather than a replacement for LangGraph runtime state.
+This is intentionally a read projection rather than a replacement for Claude-supervised runtime state.
 
 ## Persisted envelope
 
@@ -53,7 +53,7 @@ Phase 4.19.3 exposes the read models through read-only Investigation API endpoin
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

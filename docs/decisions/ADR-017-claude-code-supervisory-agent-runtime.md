@@ -15,11 +15,8 @@ persistence, registered read-only diagnostic tools, policy enforcement,
 evidence tracking, multi-Specialist correlation, final diagnosis, and
 production-readiness evaluation.
 
-The project previously used project-owned Python orchestration, including
-LangGraph-based investigation orchestration, to coordinate these capabilities.
-
-A new architectural direction has been accepted: Claude Code becomes the
-**primary supervisory orchestration runtime**. Existing project functions remain
+A new architectural direction has been accepted: Claude Code is the
+**supervisory orchestration runtime**. Existing project functions remain
 the authoritative implementation of monitoring, analysis, retrieval,
 investigation, persistence, policy, safety, and infrastructure operations.
 
@@ -34,7 +31,7 @@ Adopt this responsibility split:
 
 ```text
 Claude Code
-  = primary supervisory reasoning and orchestration
+  = supervisory reasoning and orchestration
 
 Existing Python application
   = operational capabilities, control plane, persistence, policy, safety, UI
@@ -78,12 +75,11 @@ test_remediation_in_sandbox(plan_id)
 apply_or_request_approval(plan_id)
 ```
 
-The exact tool surface will be introduced incrementally and validated before
-becoming authoritative.
+The exact tool surface is introduced incrementally.
 
 ## Fixed operational workflow
 
-The Claude Code transition must preserve this workflow order:
+Claude Code must preserve this workflow order:
 
 ```text
 periodic monitoring
@@ -125,7 +121,7 @@ Claude Code Supervisor
 Claude Code must not bypass the project LLM clients for report analysis,
 specialist reasoning, or persisted diagnosis generation.
 
-## Existing functionality remains authoritative
+## Project functionality remains authoritative
 
 The following remain project-owned functions and are not moved into Claude
 prompts or replaced with unrestricted Claude execution:
@@ -258,44 +254,21 @@ The fixed workflow allows remediation proposal and isolated-environment testing,
 but real production application must be authorized by the project policy and
 must ask the user whenever risk or approval rules require it.
 
-## LangGraph consequence
+## Runtime Principle
 
-ADR-010 and ADR-014 describe the currently accepted LangGraph orchestration
-boundary and implementation. They remain historically valid for the implemented
-Phase 4 system, but this ADR changes the forward architectural direction.
-
-LangGraph is **not removed immediately**.
-
-During transition:
+Claude performs supervisory orchestration through controlled project tools:
 
 ```text
-existing Python/LangGraph orchestration
-              +
-new Claude supervisory path
-```
-
-Both may coexist until equivalence and safety acceptance tests pass. Only after
-the Claude supervisory path demonstrates equivalent or better behavior may
-duplicated orchestration be deprecated.
-
-Existing domain logic, services, retrieval, policy, evidence, and persistence
-are not candidates for removal merely because Claude Code is introduced.
-
-## Migration principle
-
-The migration must be additive first and subtractive only after acceptance:
-
-```text
-Add Claude boundary
- -> expose one existing capability
+define tool contract
+ -> expose deterministic project capability
  -> run controlled end-to-end acceptance
- -> expand capability surface
- -> compare with current execution
- -> switch orchestration ownership
- -> only then remove duplicated orchestration
+ -> expand tool surface
+ -> validate fixed workflow and safety gates
+ -> keep coordination decisions in Claude when Claude can perform them
 ```
 
-No big-bang rewrite is authorized by this ADR.
+Project-owned domain logic, services, retrieval, policy, evidence, and
+persistence remain the implementation layer behind those tools.
 
 ## Consequences
 
@@ -308,7 +281,7 @@ makes Claude Code the high-level reasoning coordinator
 retains deterministic safety boundaries
 keeps the Admin UI and database authoritative
 keeps Specialists dynamic and user-managed
-allows progressive migration with rollback
+keeps future orchestration work on one Claude-supervised path
 provides a clear place for Claude rules, skills, agents, commands, and MCP
 ```
 
@@ -318,14 +291,13 @@ Costs and risks:
 introduces an additional runtime dependency and process boundary
 requires strict MCP/tool contracts and runtime failure handling
 requires cost, timeout, turn, concurrency, and session observability
-creates a temporary period with two orchestration paths
-requires new acceptance tests before old orchestration can be retired
+requires acceptance gates before Claude jobs are allowed to execute
 ```
 
-## Acceptance criteria for this architectural transition
+## Acceptance Criteria
 
-The architectural transition is not complete until the Claude supervisory path
-can demonstrate all of the following using existing project capabilities:
+The Claude runtime must demonstrate all of the following using project
+capabilities:
 
 ```text
 scheduled monitoring trigger works
@@ -341,18 +313,16 @@ policy/budget enforcement cannot be bypassed
 runtime failure is recoverable and auditable
 remediation proposals are sandbox-tested before production application
 production application asks the user whenever policy requires approval
-current Phase 4 safety metrics do not regress
+accepted safety metrics pass
 ```
 
 ## Related decisions
 
 - ADR-008 - Dynamic user-defined specialists
 - ADR-009 - Hierarchical bounded read-only investigation
-- ADR-010 - LangGraph orchestration boundary
 - ADR-011 - Dual RAG and Knowledge Retrieval
 - ADR-012 - Specialist reasoning and provenance boundary
 - ADR-013 - Registered read-only diagnostic tools
-- ADR-014 - LangGraph Investigation Orchestration
 - ADR-015 - Dynamic Secondary Specialist Routing
 - ADR-016 - Production Readiness and Remediation Boundary
 
@@ -360,4 +330,20 @@ current Phase 4 safety metrics do not regress
 
 See:
 
-`docs/roadmap/claude-code-supervisory-transition-plan.md`
+`docs/roadmap/claude-runtime-implementation-plan.md`
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **DECISION**
+
+Documentation synchronized: **2026-08-12**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

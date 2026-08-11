@@ -4,13 +4,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.agent.investigation.contracts import EvidenceKind
-from app.agent.investigation.diagnostic_policy import (
+from app.domain.investigation.contracts import EvidenceKind
+from app.domain.investigation.diagnostic_policy import (
     DiagnosticPolicyDecision,
     DiagnosticPolicyReason,
     DiagnosticPolicyResult,
 )
-from app.agent.investigation.evidence_collection import (
+from app.domain.investigation.evidence_collection import (
     DiagnosticExecutionOutcome,
     EvidenceCollectionRequest,
     EvidenceCollectionService,

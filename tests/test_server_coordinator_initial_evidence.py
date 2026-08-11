@@ -1,5 +1,5 @@
-from app.agent.investigation.contracts import EvidenceKind
-from app.agent.investigation.server_coordinator import ServerCoordinator
+from app.domain.investigation.contracts import EvidenceKind
+from app.domain.investigation.server_coordinator import ServerCoordinator
 
 
 def test_initial_connection_failure_becomes_citable_analysis_evidence():

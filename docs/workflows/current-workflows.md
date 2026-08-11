@@ -16,9 +16,9 @@ Load Server
  -> save/index Analysis
 ```
 
-## Accepted Claude-supervised workflow
+## Claude-supervised workflow
 
-The Phase C transition must preserve this fixed workflow:
+Phase C preserves this fixed workflow:
 
 ```text
 periodic monitoring
@@ -37,8 +37,8 @@ periodic monitoring
  -> apply automatically only when policy allows, otherwise ask the user
 ```
 
-Claude Code owns high-level coordination only after the transition gate passes.
-The project services remain authoritative for monitoring, RAG retrieval,
+Claude Code owns high-level coordination. The project services remain
+authoritative for monitoring, RAG retrieval,
 Ollama-backed LLM calls, Specialist definitions, evidence, policy, persistence,
 sandbox validation, and user approval gates.
 
@@ -81,11 +81,11 @@ SpecialistTask
 
 Unknown Evidence/Knowledge IDs are rejected.
 
-## LangGraph orchestration
+## Claude-Supervised Orchestration
 
 ```text
 selected Specialists
- -> parallel LangGraph wave
+ -> Claude-supervised Specialist coordination
  -> bounded Specialist loops
  -> deterministic aggregation
  -> recommended_next_specialists
@@ -159,8 +159,7 @@ See `../testing/RUNTIME_SCENARIOS.md`.
 
 ## Phase 5 boundary
 
-Phase 5 follows the Claude Code supervisory transition. Its remediation workflow
-must remain policy-gated:
+Phase 5 remediation workflow must remain policy-gated:
 
 ```text
 diagnosis
@@ -179,7 +178,7 @@ That workflow is not implemented yet.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

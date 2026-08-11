@@ -53,7 +53,7 @@ Technical documentation is not live server Evidence.
 
 `recommended_next_specialists` is advisory output.
 
-The reasoning model does not spawn Specialists. Phase 4.17 LangGraph routing validates recommendations against the enabled Specialist Registry, duplicate-execution state, remaining Specialist slots, and remaining action budget.
+The reasoning model does not spawn Specialists. Phase 4.17 Claude-supervised routing validates recommendations against the enabled Specialist Registry, duplicate-execution state, remaining Specialist slots, and remaining action budget.
 
 ## Final Synthesis contract
 
@@ -95,7 +95,7 @@ The Policy Engine remains authoritative.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
         str(PROJECT_ROOT),
     )
 
-from app.agent.investigation.diagnostic_tools import (
+from app.domain.investigation.diagnostic_tools import (
     build_default_diagnostic_tool_registry,
 )
 from app.bootstrap import container

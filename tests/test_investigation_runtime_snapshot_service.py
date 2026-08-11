@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from app.agent.investigation.contracts import (
+from app.domain.investigation.contracts import (
     EvidenceKind,
     EvidenceReference,
     InvestigationBudget,
@@ -10,19 +10,19 @@ from app.agent.investigation.contracts import (
     SpecialistTask,
     SpecialistTaskStatus,
 )
-from app.agent.investigation.correlation import (
+from app.domain.investigation.correlation import (
     CorrelatedDiagnosisClaim,
     DiagnosisCertainty,
     DiagnosisConflict,
     FinalDiagnosis,
 )
-from app.agent.investigation.final_diagnosis_synthesizer import (
+from app.domain.investigation.final_diagnosis_synthesizer import (
     FinalDiagnosisNarrative,
 )
-from app.agent.investigation.runtime_snapshot_service import (
+from app.domain.investigation.runtime_snapshot_service import (
     InvestigationRuntimeSnapshotService,
 )
-from app.agent.investigation.server_coordinator import (
+from app.domain.investigation.server_coordinator import (
     ServerCoordinatorResult,
     ServerCoordinatorSpecialistRun,
 )
@@ -79,7 +79,7 @@ def make_result():
             max_actions=10,
         ),
         metadata={
-            "orchestrator": "langgraph",
+            "orchestrator": "claude",
             "execution_mode": (
                 "dynamic-secondary"
             ),
@@ -182,7 +182,7 @@ def test_build_snapshot_serializes_runtime():
     assert snapshot["status"] == "completed"
     assert (
         snapshot["orchestrator"]
-        == "langgraph"
+        == "claude"
     )
     assert snapshot["actions_used"] == 1
     assert snapshot["evidence_count"] == 1

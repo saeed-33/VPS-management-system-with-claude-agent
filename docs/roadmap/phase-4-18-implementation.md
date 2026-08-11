@@ -83,7 +83,7 @@ deterministic diagnosis remains available
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **HISTORICAL**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

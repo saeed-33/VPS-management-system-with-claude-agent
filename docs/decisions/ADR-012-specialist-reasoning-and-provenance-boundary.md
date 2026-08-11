@@ -164,7 +164,7 @@ This conservative result is the intended behavior.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **DECISION**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

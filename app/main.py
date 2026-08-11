@@ -15,6 +15,7 @@ from app.admin.api import (
     specialists_router,
     knowledge_sources_router,
     diagnostic_tools_router,
+    system_router,
 )
 from app.admin.web import router as web_router
 from app.bootstrap import container
@@ -166,6 +167,7 @@ app.include_router(specialists_router)
 app.include_router(knowledge_sources_router)
 app.include_router(diagnostic_tools_router)
 app.include_router(investigations_router)
+app.include_router(system_router)
 
 
 @app.get(
@@ -182,6 +184,7 @@ async def health_check() -> dict:
         "status": "ok",
         "application": settings.app_name,
         "monitoring_scheduler": "enabled",
+        "supervisor": container.claude_supervisor.status,
         "llm_analysis": {
             "enabled": analysis_enabled,
             "provider": (

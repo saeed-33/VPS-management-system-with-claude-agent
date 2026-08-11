@@ -1,4 +1,4 @@
-from app.agent.investigation.contracts import (
+from app.domain.investigation.contracts import (
     EvidenceKind,
     EvidenceReference,
     InvestigationBudget,
@@ -9,11 +9,11 @@ from app.agent.investigation.contracts import (
     SpecialistTask,
     SpecialistTaskStatus,
 )
-from app.agent.investigation.correlation import (
+from app.domain.investigation.correlation import (
     CrossSpecialistCorrelator,
     DiagnosisCertainty,
 )
-from app.agent.investigation.server_coordinator import (
+from app.domain.investigation.server_coordinator import (
     ServerCoordinatorResult,
     ServerCoordinatorSpecialistRun,
 )

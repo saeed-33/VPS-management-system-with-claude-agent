@@ -109,7 +109,7 @@ The accepted loop is now used by:
 
 ```text
 Phase 4.15 Server Coordinator
-Phase 4.16 LangGraph parallel workers
+Phase 4.16 Claude-supervised parallel workers
 Phase 4.17 dynamic secondary Specialist waves
 ```
 
@@ -120,7 +120,7 @@ Phase 4.14 is closed and runtime accepted.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 

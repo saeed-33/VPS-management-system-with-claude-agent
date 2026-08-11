@@ -68,7 +68,7 @@ Web router يستخدم `include_in_schema=False`، لذلك صفحات HTML ل�
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
 
-Documentation synchronized: **2026-08-11**
+Documentation synchronized: **2026-08-12**
 
 Canonical project state:
 
