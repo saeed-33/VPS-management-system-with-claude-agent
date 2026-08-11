@@ -74,3 +74,4 @@ The warning is the existing Starlette/TestClient deprecation warning and is not 
 - [Production Readiness Gate](architecture/production-readiness-gate.md)
 - [Phase 4.20 Implementation](roadmap/phase-4-20-implementation.md)
 - [Evaluation Dataset & Runner](architecture/evaluation-dataset-runner.md)
+- [Safety & Failure Injection](architecture/safety-failure-injection.md)
