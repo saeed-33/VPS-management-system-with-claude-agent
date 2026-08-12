@@ -25,6 +25,7 @@ SERVER_SUPERVISOR_ALLOWED_TOOLS = (
     "mcp__vps__get_investigation",
     "mcp__vps__get_investigation_status",
     "mcp__vps__get_evidence",
+    "mcp__vps__get_available_specialists",
     "mcp__vps__get_specialist_definition",
     "mcp__vps__run_specialist",
     "mcp__vps__propose_remediation",
