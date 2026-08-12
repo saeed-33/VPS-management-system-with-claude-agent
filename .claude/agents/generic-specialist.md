@@ -9,7 +9,7 @@ tools:
 mcpServers:
   - vps
 skills:
-  - specialist-investigation
+  - investigate-incident
 maxTurns: 8
 model: sonnet
 ---

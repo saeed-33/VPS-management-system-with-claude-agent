@@ -57,7 +57,7 @@ Deliverables:
 
 ### C.14.2 - Operational Skills
 
-Status: **NEXT**
+Status: **COMPLETE**
 
 Replace the current short workflow notes with operational contracts:
 
@@ -75,7 +75,7 @@ No production remediation is authorized.
 
 ### C.14.3 - Bounded Agents
 
-Status: **PENDING**
+Status: **NEXT**
 
 Target static agent roles:
 

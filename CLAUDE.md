@@ -181,16 +181,17 @@ skills.
 
 ## Current C.14 implementation boundary
 
-C.14.0 and C.14.1 establish the architecture and remove duplicated/cosmetic
-Claude surfaces.
+C.14.0 and C.14.1 established the architecture and removed duplicated/cosmetic
+Claude surfaces. C.14.2 replaces the workflow-note skills with operational
+contracts grounded in the current project MCP tool surface.
 
-Existing skill and agent files remain transitional until C.14.2 and C.14.3.
-Do not treat their current content as final runtime acceptance.
+Agent files remain transitional until C.14.3. The operational skills are
+accepted as contracts, but they are not proof that a real Claude session is
+already executing the production workflow.
 
 Before Phase 5, C.14 must still implement and prove:
 
 ```text
-operational skills
 bounded final agent contracts
 least-privilege tools and model inheritance
 concrete hooks where justified

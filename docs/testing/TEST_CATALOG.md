@@ -563,3 +563,8 @@ automatic_remediation_allowed: false
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
 <!-- PROJECT-DOC-METADATA:END -->
+
+
+## C.14.2 Operational Skills
+
+- `tests/test_claude_operational_skills.py` validates the canonical Skill set, frontmatter, intended MCP tool grants, operational contract sections, DB-defined Specialist boundary, legacy Skill removal, and proposal-only remediation boundary.

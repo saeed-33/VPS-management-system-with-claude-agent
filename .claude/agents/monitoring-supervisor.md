@@ -15,8 +15,8 @@ tools:
 mcpServers:
   - vps
 skills:
-  - server-monitoring
-  - incident-analysis
+  - monitor-server
+  - analyze-incident
 maxTurns: 12
 model: sonnet
 ---

@@ -126,8 +126,8 @@ real Claude-native execution path is complete.
 ```text
 C.14.0 Architecture decision: COMPLETE after foundation change
 C.14.1 Remove cosmetic/duplicated Claude surfaces: COMPLETE after foundation change
-C.14.2 Operational Skills: NEXT
-C.14.3 Bounded Agents: PENDING
+C.14.2 Operational Skills: COMPLETE
+C.14.3 Bounded Agents: NEXT
 C.14.4 Least privilege and model inheritance: PENDING
 C.14.5 Concrete Hooks: PENDING
 C.14.6 ClaudeSessionRunner: PENDING
