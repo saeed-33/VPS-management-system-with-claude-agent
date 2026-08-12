@@ -8,16 +8,9 @@ from app.runtime.claude.session_runner import ClaudeProcessCommand
 
 class OllamaClaudeCommandBuilder:
     """
-    Build the supported Ollama -> Claude Code headless command.
-
-    C.14.7 intentionally uses Claude Code's JSON envelope only
-    (--output-format json), without the provider structured-output schema flag.
-
-    Ollama's Anthropic-compatible endpoint does not currently document the
-    provider-side structured-output request extension. The project already
-    owns strict structured-result validation after Claude returns the textual
-    `result`, so the runtime contract remains enforced without depending on
-    that provider extension.
+    Run Claude Code directly while using Ollama as its Anthropic-compatible
+    backend. This preserves Claude Code's documented JSON envelope and avoids
+    depending on the `ollama launch claude` wrapper for MCP/stdout behavior.
     """
 
     def __init__(
@@ -25,11 +18,13 @@ class OllamaClaudeCommandBuilder:
         *,
         project_root: Path,
         model: str,
-        executable: str = "ollama",
+        base_url: str,
+        executable: str = "claude",
         agent: str = "server-supervisor",
     ) -> None:
         self._project_root = Path(project_root).resolve()
         self._model = model.strip()
+        self._base_url = base_url.strip().rstrip("/")
         self._executable = executable.strip()
         self._agent = agent.strip()
 
@@ -37,36 +32,35 @@ class OllamaClaudeCommandBuilder:
             raise ValueError(
                 "project_root must be an existing directory."
             )
-
         if not self._model:
             raise ValueError(
                 "Claude runtime Ollama model must not be empty."
             )
-
+        if not self._base_url:
+            raise ValueError(
+                "Ollama base URL must not be empty."
+            )
+        if not (
+            self._base_url.startswith("http://")
+            or self._base_url.startswith("https://")
+        ):
+            raise ValueError(
+                "Ollama base URL must use http:// or https://."
+            )
         if not self._executable:
             raise ValueError(
-                "Ollama executable must not be empty."
+                "Claude executable must not be empty."
             )
-
         if self._agent != "server-supervisor":
             raise ValueError(
                 "C.14.7 runtime agent must be server-supervisor."
             )
 
         self._mcp_config = self._project_root / ".mcp.json"
-
         if not self._mcp_config.is_file():
             raise ValueError(
                 "Project .mcp.json was not found."
             )
-
-    @property
-    def model(self) -> str:
-        return self._model
-
-    @property
-    def agent(self) -> str:
-        return self._agent
 
     def build(
         self,
@@ -74,12 +68,8 @@ class OllamaClaudeCommandBuilder:
     ) -> ClaudeProcessCommand:
         argv = (
             self._executable,
-            "launch",
-            "claude",
             "--model",
             self._model,
-            "--yes",
-            "--",
             "--agent",
             self._agent,
             "--permission-mode",
@@ -98,6 +88,13 @@ class OllamaClaudeCommandBuilder:
         )
 
         env = {
+            "ANTHROPIC_AUTH_TOKEN": "ollama",
+            "ANTHROPIC_API_KEY": "",
+            "ANTHROPIC_BASE_URL": self._base_url,
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": self._model,
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": self._model,
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": self._model,
+            "CLAUDE_CODE_SUBAGENT_MODEL": self._model,
             "AI_VPS_LLM_PROVIDER": "ollama",
             "AI_VPS_CLAUDE_RUNTIME": "1",
             "AI_VPS_CLAUDE_RUNTIME_AGENT": self._agent,

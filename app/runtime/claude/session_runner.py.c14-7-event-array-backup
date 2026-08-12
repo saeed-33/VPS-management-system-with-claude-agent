@@ -62,15 +62,14 @@ class ClaudeProcessCommandBuilder(Protocol):
 
 class ClaudeCliJsonDecoder:
     """
-    Decode Claude Code print-mode output.
+    Decode the documented Claude Code print-mode JSON envelope.
 
-    Supported forms:
-    1. The documented single JSON result envelope.
-    2. A strict batched event-array form observed from Claude Code 2.1.175,
-       equivalent to collected stream-json events:
-       system/init -> ... -> result.
+    The runner accepts either:
+    - `structured_output`: already validated structured data, or
+    - `result`: text returned by Claude Code.
 
-    Any other JSON root or event sequence is rejected.
+    The existing ClaudeRuntimeAdapter remains responsible for validating
+    the project's inner structured result contract.
     """
 
     def decode(
@@ -89,111 +88,11 @@ class ClaudeCliJsonDecoder:
                 "Claude process stdout was not valid JSON."
             ) from exc
 
-        if isinstance(payload, dict):
-            return self._decode_result_envelope(
-                payload
-            )
-
-        if isinstance(payload, list):
-            return self._decode_event_array(
-                payload
-            )
-
-        raise ClaudeProcessOutputError(
-            "Claude process JSON output must be an object "
-            "or a strict Claude event array."
-        )
-
-    def _decode_event_array(
-        self,
-        events: list,
-    ) -> ClaudeRawResult:
-        if not events:
+        if not isinstance(payload, dict):
             raise ClaudeProcessOutputError(
-                "Claude event array must not be empty."
+                "Claude process JSON output must be an object."
             )
 
-        if not all(
-            isinstance(event, dict)
-            for event in events
-        ):
-            raise ClaudeProcessOutputError(
-                "Claude event array must contain only objects."
-            )
-
-        init_events = [
-            event
-            for event in events
-            if (
-                event.get("type") == "system"
-                and event.get("subtype") == "init"
-            )
-        ]
-
-        if len(init_events) != 1:
-            raise ClaudeProcessOutputError(
-                "Claude event array must contain exactly "
-                "one system/init event."
-            )
-
-        result_events = [
-            event
-            for event in events
-            if event.get("type") == "result"
-        ]
-
-        if len(result_events) != 1:
-            raise ClaudeProcessOutputError(
-                "Claude event array must contain exactly "
-                "one result event."
-            )
-
-        result_event = result_events[0]
-
-        if events[-1] is not result_event:
-            raise ClaudeProcessOutputError(
-                "Claude event array result event must be last."
-            )
-
-        init_session_id = init_events[0].get(
-            "session_id"
-        )
-        result_session_id = result_event.get(
-            "session_id"
-        )
-
-        if (
-            not isinstance(init_session_id, str)
-            or not init_session_id.strip()
-        ):
-            raise ClaudeProcessOutputError(
-                "Claude system/init event is missing session_id."
-            )
-
-        if (
-            not isinstance(result_session_id, str)
-            or not result_session_id.strip()
-        ):
-            raise ClaudeProcessOutputError(
-                "Claude result event is missing session_id."
-            )
-
-        if (
-            init_session_id.strip()
-            != result_session_id.strip()
-        ):
-            raise ClaudeProcessOutputError(
-                "Claude event array session_id mismatch."
-            )
-
-        return self._decode_result_envelope(
-            result_event
-        )
-
-    def _decode_result_envelope(
-        self,
-        payload: dict,
-    ) -> ClaudeRawResult:
         session_id = payload.get("session_id")
         if (
             not isinstance(session_id, str)
@@ -204,13 +103,11 @@ class ClaudeCliJsonDecoder:
             )
 
         content = self._content(payload)
-
         turn_count = self._non_negative_int(
             payload,
             "num_turns",
             fallback_key="turn_count",
         )
-
         tool_call_count = self._non_negative_int(
             payload,
             "tool_call_count",
@@ -235,7 +132,6 @@ class ClaudeCliJsonDecoder:
         structured = payload.get(
             "structured_output"
         )
-
         if structured is not None:
             if not isinstance(
                 structured,
@@ -252,11 +148,7 @@ class ClaudeCliJsonDecoder:
             )
 
         result = payload.get("result")
-
-        if (
-            not isinstance(result, str)
-            or not result.strip()
-        ):
+        if not isinstance(result, str) or not result.strip():
             raise ClaudeProcessOutputError(
                 "Claude process JSON output must contain "
                 "structured_output or non-empty result."
@@ -317,8 +209,6 @@ class ClaudeCliJsonDecoder:
             "duration_api_ms",
             "is_error",
             "modelUsage",
-            "subtype",
-            "stop_reason",
         ):
             if key in payload:
                 metadata[key] = payload[key]

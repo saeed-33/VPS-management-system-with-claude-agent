@@ -51,6 +51,7 @@ class Settings(BaseSettings):
         le=100,
     )
     claude_runtime_ollama_executable: str = "ollama"
+    claude_runtime_executable: str = "claude"
     claude_runtime_agent: Literal[
         "server-supervisor",
     ] = "server-supervisor"

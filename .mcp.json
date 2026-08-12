@@ -4,11 +4,16 @@
       "command": "uv",
       "args": [
         "run",
+        "--no-sync",
+        "--project",
+        "${CLAUDE_PROJECT_DIR:-.}",
         "python",
-        "tools/run_project_mcp_server.py"
+        "${CLAUDE_PROJECT_DIR:-.}/tools/run_project_mcp_server.py"
       ],
       "env": {
-        "PYTHONUNBUFFERED": "1"
+        "PYTHONUNBUFFERED": "1",
+        "UV_NO_PROGRESS": "1",
+        "UV_LINK_MODE": "copy"
       },
       "timeout": 600000,
       "alwaysLoad": true

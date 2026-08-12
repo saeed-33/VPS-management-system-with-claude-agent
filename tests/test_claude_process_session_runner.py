@@ -1,10 +1,12 @@
 import asyncio
 import json
+import pytest
 import sys
 from pathlib import Path
 
 from app.runtime.claude import (
     ClaudeJobStatus,
+    ClaudeCliJsonDecoder,
     ClaudeProcessCommand,
     ClaudeRuntimeAdapter,
     ClaudeRuntimeRequest,
@@ -408,3 +410,107 @@ print(json.dumps({
     assert result.structured_output.data[
         "provider"
     ] == "test-provider"
+
+
+def test_decoder_accepts_strict_batched_event_array():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "working",
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "session_id": "session-123",
+                "num_turns": 2,
+                "result": (
+                    '{"status":"completed",'
+                    '"summary":"done",'
+                    '"data":{},'
+                    '"metadata":{}}'
+                ),
+                "usage": {
+                    "input_tokens": 10,
+                    "output_tokens": 5,
+                },
+            },
+        ]
+    )
+
+    result = decoder.decode(stdout)
+
+    assert result.session_id == "session-123"
+    assert result.turn_count == 2
+    assert '"status":"completed"' in result.content
+    assert result.usage_metadata["input_tokens"] == 10
+    assert result.usage_metadata["subtype"] == "success"
+
+
+def test_decoder_rejects_event_array_without_final_result():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+            },
+            {
+                "type": "assistant",
+            },
+        ]
+    )
+
+    with pytest.raises(
+        ClaudeProcessOutputError,
+        match="exactly one result event",
+    ):
+        decoder.decode(stdout)
+
+
+def test_decoder_rejects_event_array_session_mismatch():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-a",
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "session_id": "session-b",
+                "result": (
+                    '{"status":"completed",'
+                    '"summary":"done",'
+                    '"data":{},'
+                    '"metadata":{}}'
+                ),
+            },
+        ]
+    )
+
+    with pytest.raises(
+        ClaudeProcessOutputError,
+        match="session_id mismatch",
+    ):
+        decoder.decode(stdout)
+

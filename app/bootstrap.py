@@ -684,8 +684,9 @@ def build_container() -> ApplicationContainer:
                 model=(
                     settings.effective_claude_runtime_model
                 ),
+                base_url=settings.ollama_base_url,
                 executable=(
-                    settings.claude_runtime_ollama_executable
+                    settings.claude_runtime_executable
                 ),
                 agent=settings.claude_runtime_agent,
             )
