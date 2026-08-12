@@ -1,125 +1,224 @@
-# AI VPS Management - Claude Code Instructions
+# AI VPS Management - Claude Code Runtime Contract
 
-## Role
-
-Claude Code is the primary supervisory orchestration runtime for this project.
-It coordinates the fixed operational workflow and invokes project-owned tools
-when they become available.
-
-Claude Code does not replace Python services, PostgreSQL, RAG, SSH execution,
-Policy, Evidence, Specialist definitions, or Ollama clients.
-
-## Current transition phase
+## Current project phase
 
 The project is in:
 
 ```text
-Phase C - Claude Code Supervisory Runtime Transition
+Phase C
+C.14 - Real Claude-Native Orchestration
 ```
 
-C.1 is structure-only. These instructions define boundaries and responsibilities
-without changing production monitoring behavior.
+Phase 4 autonomous diagnosis capabilities are accepted. Production automatic
+remediation is not authorized.
 
-## Fixed workflow
+The current transition is not complete: project MCP capability exposure exists,
+but scheduled production execution still contains Python-owned orchestration
+that must be replaced by a real bounded Claude session before Phase C closes.
 
-This workflow is mandatory:
-
-```text
-periodic monitoring
- -> per-server subordinate agent
- -> monitoring completion
- -> exact/similar historical report lookup
- -> exact match: reuse previous analysis
- -> similar match: pass top 3 similar reports to the LLM
- -> initial LLM analysis and potential issue discovery
- -> if issues exist: select and run specialist agents
- -> specialist deep analysis
- -> subordinate agent aggregates results
- -> final diagnosis
- -> if a problem exists: propose remediation
- -> test remediation in an isolated environment
- -> apply automatically only when policy allows, otherwise ask the user
-```
-
-Do not skip retrieval, analysis, Specialist execution, evidence grounding,
-policy checks, persistence, sandbox validation, or approval gates.
-
-## Responsibility split
+## Runtime responsibility split
 
 ```text
 Claude Code
-  = high-level supervision and orchestration
+  = reasoning, sequencing, branching, task decomposition, synthesis
+
+.claude/skills
+  = operational workflow contracts
+
+.claude/agents
+  = bounded intelligent worker contracts
+
+MCP
+  = only normal operational capability interface exposed to Claude
 
 Python application
-  = execution, persistence, safety, policy, evidence, RAG, SSH, Admin/API
+  = deterministic execution, validation, persistence, policy, evidence, safety
 
 PostgreSQL
   = source of truth
 
 Ollama
-  = operational LLM provider for analysis and specialist reasoning
-
-MCP / controlled project tools
-  = boundary between Claude Code and application capabilities
+  = configured LLM provider
 ```
 
-## LLM provider
-
-Ollama is the project LLM provider for:
+Core rule:
 
 ```text
-report analysis
-assisted RAG analysis
-specialist reasoning
-final synthesis
+Claude decides WHAT/NEXT.
+Python decides WHETHER ALLOWED and HOW TO EXECUTE SAFELY.
 ```
 
-Do not bypass project LLM clients for these responsibilities. When tools exist,
-call project tools that route LLM work through the configured Ollama clients.
+## Fixed product workflow
+
+Preserve this product-level order:
+
+```text
+periodic monitoring
+ -> per-server Claude session
+ -> monitoring completion
+ -> exact historical report lookup
+ -> exact match: reuse stored analysis
+ -> otherwise retrieve top similar historical reports
+ -> Ollama-backed analysis
+ -> issue detection
+ -> DB-defined Specialist selection when needed
+ -> bounded specialist investigation
+ -> evidence-grounded aggregation
+ -> final diagnosis
+ -> remediation proposal when needed
+ -> isolated validation when implemented/available
+ -> production action only through Phase 5+ policy/approval contracts
+```
+
+The workflow order is fixed at the product level. Claude owns allowed branch and
+next-step decisions inside that contract once the real runtime path is enabled.
+
+## Source-of-truth boundaries
+
+Do not reimplement these inside prompts:
+
+```text
+monitoring execution
+SSH execution
+report persistence
+Incident RAG
+Knowledge RAG
+embeddings / pgvector / FTS
+dynamic Specialist definitions
+DiagnosticToolRegistry
+DiagnosticPolicyEngine
+Evidence persistence/validation
+budgets
+remediation authorization
+database persistence
+Admin/API control plane
+```
+
+Use project MCP tools.
+
+## Dynamic Specialists
+
+Specialists are database-managed definitions.
+
+Do not create hard-coded CPU, Memory, PostgreSQL, Nginx, or similar static Claude
+agent files as the domain source of truth.
+
+A generic Specialist worker may execute:
+
+```text
+SpecialistDefinition from DB
++ current task
++ allowed tool IDs
++ budgets
++ current Evidence
++ retrieved Knowledge
+```
+
+## Evidence and reasoning
+
+Historical incidents and technical documentation are context, not proof of the
+current server state.
+
+Operational claims about current server state require current report data or
+persisted Evidence returned by project services.
+
+Never fabricate:
+
+```text
+Evidence IDs
+Knowledge IDs
+Claim IDs
+Conflict IDs
+Investigation IDs
+Report IDs
+Analysis IDs
+Remediation IDs
+```
 
 ## Safety invariants
 
-Claude Code may request operations; Python authorizes them.
+Claude requests operations. Python authorizes them.
 
-Never introduce or use normal-operation shortcuts that bypass:
-
-```text
-DiagnosticToolRegistry
-DiagnosticPolicyEngine
-Evidence validation
-SpecialistDefinition permissions
-budget enforcement
-PostgreSQL persistence
-Ollama project clients
-sandbox remediation validation
-user approval when policy requires it
-```
-
-Forbidden as normal agent capabilities:
+Forbidden normal-operation paths:
 
 ```text
 unrestricted shell
 raw production SSH
 raw production SQL
-write-capable production remediation without policy approval
-hard-coded domain Specialists as source of truth
+direct database writes
+bypass of DiagnosticToolRegistry
+bypass of DiagnosticPolicyEngine
+bypass of SpecialistDefinition permissions
+bypass of budgets
+bypass of Evidence validation
+production remediation without project authorization
 ```
 
-## Current implementation references
+Project LLM reasoning must use the configured Ollama path.
 
-Read these before changing transition behavior:
+## `.claude` design rule
+
+Keep only runtime artifacts with a concrete responsibility.
 
 ```text
-docs/PROJECT_STATUS.md
-docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md
-docs/roadmap/claude-code-supervisory-transition-plan.md
-docs/architecture/overview.md
-docs/workflows/current-workflows.md
-docs/operations/configuration.md
+skills
+  operational workflow contracts
+
+agents
+  bounded worker contracts
+
+rules
+  global invariants only
+
+hooks
+  only concrete enforcement/audit hooks
+```
+
+Do not recreate `.claude/commands/` as a duplicate workflow surface.
+
+Do not add placeholder hooks or workflow-specific rules that merely repeat
+skills.
+
+## Current C.14 implementation boundary
+
+C.14.0 and C.14.1 establish the architecture and remove duplicated/cosmetic
+Claude surfaces.
+
+Existing skill and agent files remain transitional until C.14.2 and C.14.3.
+Do not treat their current content as final runtime acceptance.
+
+Before Phase 5, C.14 must still implement and prove:
+
+```text
+operational skills
+bounded final agent contracts
+least-privilege tools and model inheritance
+concrete hooks where justified
+real ClaudeSessionRunner
+Ollama-backed Claude launch
+Claude-owned workflow sequencing
+runtime observability
+runtime acceptance tests
+readiness/safety reevaluation
 ```
 
 ## Development rule
 
-Preserve existing behavior unless an implementation step explicitly changes it
-and includes tests. The current Python/LangGraph path remains available until
-Claude-supervised execution passes equivalence and safety gates.
+Before adding a Python high-level workflow branch, ask whether that decision
+belongs to Claude. If Claude can make the decision using structured project
+tools, expose the capability and keep the decision in Claude.
+
+Do not remove existing deterministic orchestration until the real Claude path
+passes equivalence and safety tests.
+
+## Required references
+
+Read before changing the transition:
+
+```text
+docs/PROJECT_STATUS.md
+docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md
+docs/decisions/ADR-018-claude-native-operational-contracts.md
+docs/roadmap/claude-runtime-implementation-plan.md
+docs/roadmap/c14-claude-native-execution-plan.md
+```

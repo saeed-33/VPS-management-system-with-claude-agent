@@ -1,26 +1,39 @@
-# Safety Rule
+# Claude Runtime Safety Invariants
 
-Claude Code is not the authorization authority.
+These rules apply to every project Claude workflow.
 
-Claude may request an operation. Python services authorize, execute, persist,
-and audit it.
+Claude is a requester and coordinator. Python project services remain the
+authorization and execution authority.
 
-Non-negotiable boundaries:
+Never use or introduce a normal-operation path that bypasses:
 
 ```text
-no unrestricted shell as a normal project tool
-no raw production SSH exposed to Claude
-no raw production SQL exposed to Claude
-no bypass of DiagnosticToolRegistry
-no bypass of DiagnosticPolicyEngine
-no bypass of Evidence validation
-no bypass of SpecialistDefinition permissions
-no bypass of budgets
-no bypass of Ollama project clients for project LLM reasoning
-no production remediation before sandbox validation
-ask the user whenever policy requires approval
+project MCP tools
+DiagnosticToolRegistry
+DiagnosticPolicyEngine
+Evidence validation
+SpecialistDefinition permissions
+investigation budgets
+PostgreSQL persistence
+configured Ollama project/runtime path
+remediation policy and approval gates
 ```
 
-If a requested action would bypass one of these boundaries, stop and use the
-project-owned service/tool path or report that the required controlled tool has
-not been implemented yet.
+Forbidden normal-operation capabilities:
+
+```text
+unrestricted shell
+raw production SSH
+raw production SQL
+direct database modification
+direct production write remediation
+hard-coded domain Specialists as the source of truth
+```
+
+A tool result that is denied, unsupported, unavailable, or incomplete is a
+valid controlled outcome. Do not bypass the boundary to obtain the result by
+another mechanism.
+
+Production remediation remains unauthorized until Phase 5 explicitly introduces
+and accepts the required write-tool, policy, approval, verification, rollback,
+and audit contracts.

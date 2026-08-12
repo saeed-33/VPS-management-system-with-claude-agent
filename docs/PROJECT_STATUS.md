@@ -2,16 +2,24 @@
 
 <!-- DOC-STATUS: CURRENT -->
 
-Last synchronized project milestone: **Phase 4.20 complete**.
+Last accepted diagnosis milestone: **Phase 4.20 complete**.
+
+Current transition milestone: **C.14 - Real Claude-Native Orchestration**.
 
 ## Operational status
 
 ```text
-readiness: ready_for_supervised_operations
+diagnosis_readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
+claude_native_runtime: transition_in_progress
+phase_5: blocked_pending_c14
 ```
 
-## Accepted readiness evidence
+The Phase 4 readiness result remains valid for the accepted diagnosis
+capabilities. It must not be interpreted as evidence that the new Claude-native
+execution path has already passed equivalent runtime acceptance.
+
+## Accepted Phase 4 readiness evidence
 
 ```text
 runtime snapshots: 10
@@ -21,7 +29,7 @@ aggregate observations: 80
 readiness metrics passed: 8/8
 ```
 
-## Accepted metrics
+Accepted metrics:
 
 ```text
 routing_recall              PASS
@@ -34,18 +42,20 @@ provider_resilience         PASS
 policy_safety               PASS
 ```
 
-## Current product boundary
+These metrics must be re-run against the final C.14 runtime before Phase C can
+close.
 
-Implemented:
+## Current product capabilities
+
+Implemented and retained:
 
 ```text
 monitoring
 analysis
 Incident RAG
 Knowledge RAG
-dynamic Specialists
-deterministic routing
-Claude-supervised orchestration
+dynamic DB-defined Specialists
+diagnostic routing
 read-only diagnostic tools
 Policy
 Evidence
@@ -54,193 +64,133 @@ Final Diagnosis
 runtime persistence
 Investigation API/UI
 evaluation and safety gate
+project MCP tool surface
+Claude Code project configuration
 ```
 
-Not implemented/authorized:
+Not implemented/authorized for production:
 
 ```text
 automatic remediation
-write-capable remediation tools
-approval workflow
-rollback workflow
+general write-capable remediation tools
+production remediation executor
+real isolated remediation environment
+complete approval/verification/rollback workflow
 ```
 
-## Claude Runtime Architecture
+## Claude runtime truth
 
-ADR-017 defines **Claude Code as the supervisory orchestration runtime**.
+ADR-017 defines Claude Code as the intended supervisory orchestration runtime.
 
-Python services remain authoritative for monitoring tools, analysis tools,
-Incident RAG, Knowledge RAG, dynamic Specialists, SSH execution, persistence,
-policy, evidence, and the Admin/API control plane.
-
-## Fixed operational workflow
-
-Claude Code must preserve this workflow order:
+ADR-018 clarifies that a real Claude-native runtime means:
 
 ```text
-periodic monitoring
- -> per-server subordinate agent
- -> monitoring completion
- -> exact/similar historical report lookup
- -> exact match: reuse previous analysis
- -> similar match: pass top 3 similar reports to the LLM
- -> initial LLM analysis and potential issue discovery
- -> if issues exist: select and run specialist agents
- -> specialist deep analysis
- -> subordinate agent aggregates results
- -> final diagnosis
- -> if a problem exists: propose remediation
- -> test remediation in an isolated environment
- -> apply automatically only when policy allows, otherwise ask the user
+Claude Code
+  = reasoning + high-level sequencing
+
+skills
+  = operational workflow contracts
+
+agents
+  = bounded intelligent worker contracts
+
+MCP
+  = Claude's project capability interface
+
+Python
+  = execution + validation + policy + persistence + safety
 ```
 
-The workflow is fixed. Claude Code may coordinate decisions inside this path,
-but must not skip or replace the project-owned retrieval, policy, evidence,
-persistence, or sandbox validation boundaries.
+The repository already exposes the `vps` project MCP server and Claude
+configuration.
 
-## LLM provider
+However, the scheduled production path still includes Python-owned workflow
+sequencing through the current Claude-named monitoring/Specialist wrappers.
+Therefore the project must not report C.14 or Phase C as complete yet.
 
-Ollama is the operational LLM provider for project analysis and specialist
-reasoning. Claude Code supervises orchestration and must invoke project tools
-that use the configured Ollama clients instead of bypassing them.
-
-## Next phase
-
-**Phase C - Claude Code Supervisory Runtime.**
-
-Implementation plan:
-
-`docs/roadmap/claude-runtime-implementation-plan.md`
-
-Current Phase C progress:
+## Completed runtime refactor milestones
 
 ```text
-C.0 Documentation and architectural freeze: complete
-C.1 Claude Code project structure: complete
-C.2 Claude Runtime Adapter: complete
-C.3 Agent Job Persistence and Observability: complete
-C.4 Project MCP Boundary: complete
-C.5 First Claude-supervised Monitoring Cycle: complete
-C.6 Analysis and Retrieval Tools: complete
-C.7 Claude-supervised Investigation: complete
-C.8 Dynamic Specialist Integration: complete
-C.9 Multi-Specialist Supervision: complete
-C.10 Remediation Proposal and Sandbox Validation: complete
-C.11 Runtime Readiness Evaluation: complete
-C.12 Claude Supervisor Runtime Boundary: complete
-C.13 Remove Duplicated Control Flow: complete
 R.1 Runtime Package Boundary: complete
 R.2 Tool Package Boundary: complete
 R.3 Domain Services Boundary: complete
 R.4 Admin Surface Alignment: complete
 R.5 Documentation and Tests: complete
-C.14 Real Claude-Native Orchestration: in progress
 ```
 
-C.1 added the project-level Claude Code instruction structure only. It did not
-change production monitoring, analysis, investigation, or remediation behavior.
+These remain accepted structural milestones. They do not imply that C.14's
+real Claude-native execution path is complete.
 
-C.2 added a project-owned Claude runtime adapter with bounded execution,
-structured-result parsing, timeout handling, controlled failure results, and
-tool-access blocking for this phase. It does not expose operational MCP tools
-or change production monitoring behavior.
+## C.14 progress
 
-C.3 added persistent `agent_jobs` records, repository/service APIs, recovery of
-queued/running jobs after restart into an auditable failed state, and tests for
-job creation, completion, filtering, and recovery. It does not expose
-operational MCP tools or change production monitoring behavior.
+```text
+C.14.0 Architecture decision: COMPLETE after foundation change
+C.14.1 Remove cosmetic/duplicated Claude surfaces: COMPLETE after foundation change
+C.14.2 Operational Skills: NEXT
+C.14.3 Bounded Agents: PENDING
+C.14.4 Least privilege and model inheritance: PENDING
+C.14.5 Concrete Hooks: PENDING
+C.14.6 ClaudeSessionRunner: PENDING
+C.14.7 Ollama-backed Claude runtime: PENDING
+C.14.8 MCP boundary refactor: PENDING
+C.14.9 Remove duplicate Python orchestration: PENDING
+C.14.10 Session/job observability: PENDING
+C.14.11 Runtime acceptance tests: PENDING
+C.14.12 Readiness and safety reevaluation: PENDING
+C.14.13 Documentation synchronization: PENDING
+C.14.14 Phase C closure: PENDING
+```
 
-C.4 added the first controlled project tool boundary for Claude-facing
-capabilities: `get_server_context`, `get_monitoring_profile`, `run_monitoring`,
-`get_report`, and `get_latest_report`. These tools call existing project
-services, normalize errors, expose schemas, and reject unknown tools. This is an
-internal boundary only; no external MCP server is exposed yet.
+Detailed plan:
 
-C.5 added the first Claude-supervised monitoring cycle service. It records an
-agent job, follows the fixed tool order, invokes the controlled project tool
-boundary, persists a controlled runtime result, and stops with an auditable
-failure if any required tool fails. It does not introduce an external Claude CLI
-runner or external MCP server yet.
+`docs/roadmap/c14-claude-native-execution-plan.md`
 
-C.6 added controlled analysis and retrieval tools: exact report match lookup,
-top-3 similar incident retrieval, report analysis through `AnalysisOrchestrator`,
-persisted analysis reads, and Knowledge RAG search. These tools reuse existing
-Python services and keep Ollama calls behind project analysis/specialist
-clients. Missing optional LLM/RAG dependencies return controlled errors.
+## `.claude` transition state
 
-C.7 added controlled high-level investigation tools: `start_investigation`,
-`get_investigation`, `get_investigation_status`, and `get_evidence`. Starting
-an investigation uses the existing `InvestigationRouter` and
-`InvestigationPersistenceService`, then exposes read models through
-`InvestigationReadService`. It does not run Specialist runtime loops yet.
+After C.14.1 the project-owned Claude surface intentionally contains:
 
-C.8 added dynamic Specialist MCP tools: `get_available_specialists`,
-`get_specialist_definition`, and `run_specialist`. Specialist definitions still
-come from the DB-backed `SpecialistRegistry`; disabled or unselected
-Specialists are rejected; `allowed_tool_ids` and per-Specialist budgets remain
-enforced by the existing Specialist runtime loop. Specialist LLM reasoning stays
-behind the configured Ollama-backed project clients.
+```text
+agents/
+  existing transitional agents until C.14.3
 
-C.9 added `ClaudeMultiSpecialistSupervisor`, a sequential Claude-supervised
-coordination layer over selected DB-defined Specialists. It records an
-`agent_jobs` runtime job, reads the persisted Investigation, runs selected
-Specialists through controlled MCP tools, enforces supervisor-level limits for
-max Specialists, max turns, max tool calls, and timeout, then returns structured
-run summaries without sharing Specialist-local state outside the persisted
-Investigation/tool boundary.
+skills/
+  existing transitional skills until C.14.2
 
-C.10 added supervised remediation contracts, persistence, and controlled MCP
-tools: `propose_remediation`, `create_remediation_plan`,
-`test_remediation_in_sandbox`, `get_sandbox_result`,
-`request_user_approval`, and `apply_approved_remediation`. Plans must link to
-diagnosis claims and Evidence, sandbox results are persisted, failed sandbox
-validation blocks production application, high-risk actions request user
-approval, and project policy still denies production remediation because
-`automatic_remediation_allowed` remains false.
+rules/
+  safety.md
+  evidence-grounding.md
 
-C.11 added `RuntimeReadinessGate`, a deterministic acceptance gate that
-compares required acceptance observations across the Phase C matrix. Critical
-failures in safety, grounding, policy, fixed workflow order, budget behavior,
-conflict preservation, final diagnosis grounding, or sandbox validation block
-Claude orchestration. Latency, tool calls, and cost regressions are recorded
-for review but do not by themselves authorize or block the safety decision.
+settings.json
+```
 
-C.12 added the Claude supervisor used by scheduled monitoring. The scheduler
-calls the Claude monitoring cycle through this supervisor, and `/health`
-exposes the active supervisor status.
+`.claude/commands/` is removed because it duplicated skills.
 
-C.13 sets future orchestration development around Claude-supervised runtime
-coordination, while project-owned operational services remain authoritative and
-reusable.
+Placeholder hook documentation is removed. Hooks will only be introduced in
+C.14.5 when they enforce or audit a concrete runtime condition.
 
-R.1 moved Claude runtime code under `app/runtime/claude/` and kept
-`ClaudeSupervisor` as the scheduler-facing runtime entrypoint.
+## LLM provider
 
-R.2 moved the project tool execution boundary under `app/tools/`, added a
-tool catalog with monitoring, reports, retrieval, investigation, specialists,
-and remediation groups, and kept MCP as a thin schema/compatibility boundary.
+Ollama remains the configured LLM provider.
 
-R.3 moved Knowledge RAG domain code under `app/domain/knowledge/`, kept
-knowledge ingestion, chunking, source loading, and retrieval callable from
-tools and tests, and added a domain boundary test that prevents domain modules
-from importing runtime or MCP adapters.
+C.14.7 must prove the actual Claude runtime launch path through the supported
+Ollama integration. Agent model configuration must inherit the session runtime
+model instead of hard-coding an Anthropic model alias.
 
-R.4 added the operator-facing system runtime surface. `/api/system/runtime`
-returns supervisor status and the grouped project tool catalog, while `/system`
-renders that state in the admin UI. The admin layer reads runtime/tool metadata
-only and does not encode supervisory workflow order or branch decisions.
+## Phase 5 gate
 
-R.5 added documentation contract coverage for the runtime guides, generated
-project structure, and generated test catalog. It also aligns the Claude runtime
-operations guide with the configured Ollama defaults.
+Phase 5 - Supervised Remediation follows only after C.14.14.
 
-C.14 starts the correction that connects Claude Code to project tools directly.
-The project now registers a `vps` MCP server in `.mcp.json`, exposes project
-tools through a stdio MCP protocol server, and defines Claude subagents with
-frontmatter, allowed MCP tools, skills, and turn budgets.
+Before Phase 5:
 
-Phase 5 - Supervised Remediation follows after Phase C unless a later ADR
-changes this ordering.
+```text
+real Claude session launch must work
+Claude must see and use project MCP tools
+operational skills must be executable contracts
+bounded agents must be used by the runtime
+high-level sequencing must move out of duplicate Python orchestration
+runtime observability must be sufficient
+safety/readiness evaluation must pass again
+```
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT**
@@ -251,8 +201,9 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+diagnosis_readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
+Claude-native runtime transition: C.14 in progress
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

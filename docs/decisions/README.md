@@ -35,37 +35,46 @@ Semantic similarity -> context only
 ## ADR-009 — Hierarchical bounded read-only investigation
 **Accepted.** Server Coordinator + dynamic Specialists operate within specialist/round/action budgets. Phase 4 permits registered read-only diagnostics only; remediation is deferred to Phase 5. See `ADR-009-hierarchical-investigation.md`.
 
-## ADR-010 - Superseded orchestration boundary`r`n**Superseded for future phases by ADR-017.** Registry/RAG/database/policy/tools/SSH remain project-owned Python services, while Claude Code owns high-level supervisory orchestration going forward.`r`n`r`n## ADR-011 — Separate Incident RAG and Knowledge RAG with Hybrid Retrieval
-**Accepted.** Incident history and technical documentation remain separate
-retrieval systems. Knowledge RAG uses structure-aware chunks, PostgreSQL FTS,
-pgvector/HNSW, RRF fusion, Specialist/domain scope, deterministic reranking,
-and preserved source attribution. See
-`ADR-011-dual-rag-and-knowledge-retrieval.md`.
+## ADR-010 — Superseded orchestration boundary
+**Superseded for future orchestration by ADR-017.** Registry/RAG/database/policy/tools/SSH remain project-owned Python services, while Claude Code owns high-level supervisory orchestration going forward.
+
+## ADR-011 — Separate Incident RAG and Knowledge RAG with Hybrid Retrieval
+**Accepted.** Incident history and technical documentation remain separate retrieval systems. Knowledge RAG uses structure-aware chunks, PostgreSQL FTS, pgvector/HNSW, RRF fusion, Specialist/domain scope, deterministic reranking, and preserved source attribution. See `ADR-011-dual-rag-and-knowledge-retrieval.md`.
 
 ## ADR-012 — Specialist reasoning and provenance boundary
-**Accepted.** Specialist LLM reasoning is structured and read-only; Evidence
-and Knowledge IDs are validated against the actual context, documentation is
-not proof of server state, and missing evidence is first-class output. See
-`ADR-012-specialist-reasoning-and-provenance-boundary.md`.
+**Accepted.** Specialist LLM reasoning is structured and read-only; Evidence and Knowledge IDs are validated against the actual context, documentation is not proof of server state, and missing evidence is first-class output. See `ADR-012-specialist-reasoning-and-provenance-boundary.md`.
 
 ## ADR-013 — Registered read-only diagnostic tools
-**Accepted.** Specialists choose from finite registered capabilities through
-`allowed_tool_ids`; typed parameters and fixed command templates prevent
-arbitrary shell. SSH execution remains behind later policy/evidence stages.
-See `ADR-013-registered-read-only-diagnostic-tools.md`.
+**Accepted.** Specialists choose from finite registered capabilities through `allowed_tool_ids`; typed parameters and fixed command templates prevent arbitrary shell. SSH execution remains behind policy/evidence stages. See `ADR-013-registered-read-only-diagnostic-tools.md`.
+
 - [ADR-015: Dynamic Secondary Specialist Routing](ADR-015-dynamic-secondary-specialist-routing.md)
 - [ADR-016: Production Readiness and Remediation Boundary](ADR-016-production-readiness-and-remediation-boundary.md)
 - [ADR-017: Claude Code as Supervisory Agent Runtime](ADR-017-claude-code-supervisory-agent-runtime.md)
+- [ADR-018: Claude-Native Operational Contracts](ADR-018-claude-native-operational-contracts.md)
 
-## Claude runtime decision
+## Claude runtime decisions
 
 ADR-017 accepts Claude Code as the supervisory orchestration runtime.
-The fixed workflow remains periodic monitoring, per-server subordinate agent,
-historical report reuse/similarity lookup, Ollama-backed LLM analysis,
-dynamic Specialist execution, final diagnosis, remediation proposal, sandbox
-validation, and policy/user-gated production application. Existing Python
-services remain authoritative for execution, persistence, policy, evidence,
-RAG, SSH, and Ollama client usage.
+
+ADR-018 clarifies the operational meaning of that decision:
+
+```text
+Claude reasoning/orchestration
+ -> operational skills and bounded agents
+ -> project MCP tools
+ -> Python execution/policy/persistence
+```
+
+Commands are not maintained as a duplicate workflow surface. Global rules are
+limited to cross-workflow invariants. Hooks are introduced only when they
+enforce or audit a concrete runtime condition.
+
+Dynamic Specialists remain DB-defined. Python remains authoritative for
+execution, policy, evidence, RAG, SSH, persistence, and remediation
+authorization.
+
+Phase 5 remains blocked until C.14 proves a real Ollama-backed Claude execution
+path and re-passes the runtime safety/readiness gate.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **REFERENCE**
@@ -78,6 +87,7 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
+Claude-native runtime transition: C.14 in progress
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

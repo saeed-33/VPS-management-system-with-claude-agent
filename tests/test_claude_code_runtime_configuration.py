@@ -98,7 +98,7 @@ def test_claude_settings_use_enforced_permissions():
     assert "Bash(psql *)" in permissions["deny"]
 
 
-def test_claude_agents_have_frontmatter_and_tools():
+def test_transitional_agents_have_real_frontmatter_and_project_tools():
     agent_paths = [
         ".claude/agents/monitoring-supervisor.md",
         ".claude/agents/investigation-coordinator.md",
@@ -125,17 +125,44 @@ def test_claude_agents_have_frontmatter_and_tools():
         )
 
 
-def test_monitoring_supervisor_can_delegate_to_agent():
-    frontmatter = parse_frontmatter(
-        read_text(
-            ".claude/agents/monitoring-supervisor.md"
-        )
+def test_commands_are_not_a_second_workflow_surface():
+    assert not (
+        ROOT
+        / ".claude"
+        / "commands"
+    ).exists()
+
+
+def test_global_rules_are_invariants_only():
+    rules_dir = (
+        ROOT
+        / ".claude"
+        / "rules"
     )
 
-    assert "Agent" in frontmatter["tools"]
-    assert "server-monitoring" in frontmatter[
-        "skills"
-    ]
-    assert "incident-analysis" in frontmatter[
-        "skills"
-    ]
+    rule_names = {
+        path.name
+        for path in rules_dir.glob("*.md")
+    }
+
+    assert rule_names == {
+        "safety.md",
+        "evidence-grounding.md",
+    }
+
+
+def test_placeholder_hooks_are_not_checked_in():
+    assert not (
+        ROOT
+        / ".claude"
+        / "hooks"
+        / "README.md"
+    ).exists()
+
+
+def test_active_runtime_instructions_do_not_claim_c1_structure_only():
+    claude_md = read_text("CLAUDE.md")
+
+    assert "C.1 is structure-only" not in claude_md
+    assert "C.14 - Real Claude-Native Orchestration" in claude_md
+    assert "Do not recreate `.claude/commands/`" in claude_md
