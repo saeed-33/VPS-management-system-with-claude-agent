@@ -98,11 +98,10 @@ def test_claude_settings_use_enforced_permissions():
     assert "Bash(psql *)" in permissions["deny"]
 
 
-def test_transitional_agents_have_real_frontmatter_and_project_tools():
+def test_claude_agents_have_frontmatter_and_tools():
     agent_paths = [
-        ".claude/agents/monitoring-supervisor.md",
-        ".claude/agents/investigation-coordinator.md",
-        ".claude/agents/generic-specialist.md",
+        ".claude/agents/server-supervisor.md",
+        ".claude/agents/specialist-worker.md",
     ]
 
     for path in agent_paths:
@@ -115,6 +114,7 @@ def test_transitional_agents_have_real_frontmatter_and_project_tools():
         assert frontmatter["mcpServers"] == [
             "vps",
         ]
+        assert frontmatter["model"] == "inherit"
         assert isinstance(
             frontmatter["tools"],
             list,
@@ -123,6 +123,45 @@ def test_transitional_agents_have_real_frontmatter_and_project_tools():
             str(tool).startswith("mcp__vps__")
             for tool in frontmatter["tools"]
         )
+
+
+def test_server_supervisor_can_delegate_only_specialist_worker():
+    frontmatter = parse_frontmatter(
+        read_text(
+            ".claude/agents/server-supervisor.md"
+        )
+    )
+
+    assert "Agent(specialist-worker)" in frontmatter[
+        "tools"
+    ]
+    assert "Agent" not in frontmatter["tools"]
+    assert "monitor-server" in frontmatter[
+        "skills"
+    ]
+    assert "analyze-incident" in frontmatter[
+        "skills"
+    ]
+    assert "investigate-incident" in frontmatter[
+        "skills"
+    ]
+    assert "plan-remediation" in frontmatter[
+        "skills"
+    ]
+
+
+def test_specialist_worker_cannot_spawn_agents():
+    frontmatter = parse_frontmatter(
+        read_text(
+            ".claude/agents/specialist-worker.md"
+        )
+    )
+
+    assert not any(
+        str(tool) == "Agent"
+        or str(tool).startswith("Agent(")
+        for tool in frontmatter["tools"]
+    )
 
 
 def test_commands_are_not_a_second_workflow_surface():

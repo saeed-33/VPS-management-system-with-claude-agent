@@ -185,15 +185,19 @@ C.14.0 and C.14.1 established the architecture and removed duplicated/cosmetic
 Claude surfaces. C.14.2 replaces the workflow-note skills with operational
 contracts grounded in the current project MCP tool surface.
 
-Agent files remain transitional until C.14.3. The operational skills are
-accepted as contracts, but they are not proof that a real Claude session is
-already executing the production workflow.
+C.14.3 establishes two bounded project agent contracts: `server-supervisor`
+and `specialist-worker`. `server-supervisor` is intended to run as the main
+per-server session agent and may delegate only `specialist-worker` tasks.
+`specialist-worker` cannot delegate further.
+
+The agent and Skill contracts are accepted project runtime specifications,
+but they are not proof that a real Claude session is already executing the
+production workflow. The concrete session runner remains pending.
 
 Before Phase 5, C.14 must still implement and prove:
 
 ```text
-bounded final agent contracts
-least-privilege tools and model inheritance
+least-privilege session/settings permissions
 concrete hooks where justified
 real ClaudeSessionRunner
 Ollama-backed Claude launch

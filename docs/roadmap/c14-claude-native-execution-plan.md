@@ -75,7 +75,7 @@ No production remediation is authorized.
 
 ### C.14.3 - Bounded Agents
 
-Status: **NEXT**
+Status: **COMPLETE**
 
 Target static agent roles:
 
@@ -90,7 +90,7 @@ source of truth for CPU/Memory/PostgreSQL/etc. Specialists.
 
 ### C.14.4 - Least privilege and model inheritance
 
-Status: **PENDING**
+Status: **NEXT**
 
 - replace hard-coded `model: sonnet` with `model: inherit`
 - restrict each agent to only required MCP tools

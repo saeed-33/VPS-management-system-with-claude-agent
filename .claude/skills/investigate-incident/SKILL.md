@@ -1,6 +1,6 @@
 ---
 name: investigate-incident
-description: Coordinate a bounded investigation for one analyzed report by persisting the routing decision, running only DB-defined Specialists selected by project policy/routing, and returning evidence-grounded investigation state.
+description: Coordinate a bounded investigation for one analyzed report by persisting the routing decision and delegating only project-selected DB Specialist tasks to specialist-worker.
 argument-hint: "<report_id> [analysis_id]"
 allowed-tools:
   - mcp__vps__get_analysis
@@ -8,8 +8,7 @@ allowed-tools:
   - mcp__vps__get_investigation
   - mcp__vps__get_investigation_status
   - mcp__vps__get_evidence
-  - mcp__vps__get_specialist_definition
-  - mcp__vps__run_specialist
+  - Agent(specialist-worker)
 ---
 
 # Investigate Incident
@@ -17,10 +16,10 @@ allowed-tools:
 ## Purpose
 
 Coordinate deeper investigation only when persisted analysis identifies issues.
-Specialists remain database-defined and project-authorized.
 
-This skill does not create static CPU, Memory, database, web, or other domain
-Specialists.
+Specialists remain database-defined and project-authorized. This skill runs in
+the main per-server supervisor context and delegates selected Specialist work to
+the bounded `specialist-worker`.
 
 ## Input contract
 
@@ -53,22 +52,20 @@ Do not infer an issue solely from historical Knowledge/RAG context.
 2. Read `routing.should_investigate`,
    `routing.selected_specialists`, and the persisted investigation.
 3. If `should_investigate == false`, return the persisted investigation state
-   without running a Specialist.
+   without delegating a Specialist.
 4. Treat `selected_specialists` as the current project authorization envelope.
-   Do not run a Specialist outside that set.
-5. Read the persisted investigation detail before Specialist execution so
-   routing candidates, budgets, and current state are known.
-6. For each selected Specialist that is still eligible:
-   - call `mcp__vps__get_specialist_definition`;
-   - build a concise objective only from the current analysis and persisted
-     routing context;
-   - call `mcp__vps__run_specialist` once.
-7. `run_specialist` owns the bounded Specialist reasoning/evidence loop. Do not
-   duplicate that inner loop in this skill.
-8. If one Specialist fails with a Specialist-local controlled failure, preserve
-   the failure and continue with other authorized selected Specialists when the
-   investigation remains valid.
-9. After Specialist execution, read:
+5. Read the persisted investigation detail/status before delegation.
+6. For each selected Specialist still eligible:
+   - delegate to `Agent(specialist-worker)`;
+   - pass `investigation_id`, selected `specialist_slug`, and a concise
+     evidence-grounded objective;
+   - do not pass credentials or raw commands.
+7. The worker verifies the DB definition and invokes the current bounded project
+   Specialist capability.
+8. If one worker returns a Specialist-local controlled failure, preserve it and
+   continue only when the persisted investigation remains valid and another
+   selected Specialist is still authorized.
+9. After delegation, read:
    - `mcp__vps__get_investigation_status`;
    - `mcp__vps__get_evidence`;
    - `mcp__vps__get_investigation`.
@@ -79,29 +76,20 @@ Do not infer an issue solely from historical Knowledge/RAG context.
 
 ## Current selection boundary
 
-C.14.2 does not pretend Claude has already replaced every Python routing
-decision.
+The project `start_investigation` tool currently persists the routing decision
+and selected Specialist set.
 
-At this stage:
+Claude owns the bounded delegation order/objectives inside that authorized set.
 
-```text
-project start_investigation
-  -> persists routing decision
-  -> returns selected Specialists
-
-Claude
-  -> owns bounded execution order/objectives inside that authorized set
-```
-
-The remaining duplicated orchestration/routing ownership is addressed in later
-C.14 steps after the real Claude session path exists and passes parity tests.
+Later C.14 steps may move more high-level selection/sequencing out of Python
+after the real Claude runtime and parity tests are available.
 
 ## Concurrency rule
 
-Default to sequential Specialist tool calls in C.14.2.
+Default to sequential Specialist delegation in the current transition.
 
-Do not assume parallel writes to persisted investigation state are safe until
-the C.14 runtime concurrency tests explicitly prove isolation.
+Do not assume concurrent writes to one persisted investigation are safe until
+C.14 runtime concurrency tests prove isolation.
 
 ## Failure behavior
 
@@ -118,11 +106,11 @@ Specialist-local controlled failures may be isolated:
 ```text
 specialist_not_found
 specialist_not_selected
-specialist budget/policy/tool denial
+budget/policy denial
 provider/tool failure inside one Specialist
 ```
 
-Never bypass a denial by requesting a raw shell/SSH/SQL path.
+Never bypass a denial through shell/SSH/SQL.
 
 ## Stopping conditions
 
@@ -132,9 +120,9 @@ Stop when:
 no investigation is required
 no authorized selected Specialist remains
 project budget/policy prevents further work
-all selected Specialists have returned/failed
+all delegated selected Specialists have returned/failed
 a final diagnosis is persisted
-the investigation is persistently incomplete and no authorized next action exists
+the investigation is incomplete and no authorized next action exists
 ```
 
 ## Output contract
@@ -155,4 +143,4 @@ remaining_uncertainty
 error_code/error_message, when failed
 ```
 
-All IDs must come from project tool results.
+All IDs must come from project tools or delegated worker results.

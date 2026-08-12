@@ -45,8 +45,7 @@ SKILLS = {
             "mcp__vps__get_investigation",
             "mcp__vps__get_investigation_status",
             "mcp__vps__get_evidence",
-            "mcp__vps__get_specialist_definition",
-            "mcp__vps__run_specialist",
+            "Agent(specialist-worker)",
         },
         "sections": {
             "## Input contract",
@@ -156,7 +155,7 @@ def test_investigation_skill_preserves_db_specialist_authority():
 
     assert "database-defined" in text
     assert "selected_specialists" in text
-    assert "Do not run a Specialist outside that set." in text
+    assert "Agent(specialist-worker)" in text
 
 
 def test_remediation_skill_is_proposal_only():
@@ -171,31 +170,27 @@ def test_remediation_skill_is_proposal_only():
     assert "production_application_allowed: false" in text
 
 
-def test_transitional_agents_reference_canonical_skill_names():
-    expected = {
-        "monitoring-supervisor.md": {
-            "monitor-server",
-            "analyze-incident",
-        },
-        "investigation-coordinator.md": {
-            "analyze-incident",
-            "investigate-incident",
-        },
-        "generic-specialist.md": {
-            "investigate-incident",
-        },
-    }
+def test_server_supervisor_preloads_canonical_workflow_skills():
+    text = (
+        ROOT
+        / ".claude"
+        / "agents"
+        / "server-supervisor.md"
+    ).read_text(encoding="utf-8")
 
-    for filename, skill_names in expected.items():
-        text = (
-            ROOT
-            / ".claude"
-            / "agents"
-            / filename
-        ).read_text(encoding="utf-8")
+    for skill_name in SKILLS:
+        assert f"  - {skill_name}" in text
 
-        for skill_name in skill_names:
-            assert f"  - {skill_name}" in text
+
+def test_specialist_worker_is_not_a_workflow_coordinator():
+    text = (
+        ROOT
+        / ".claude"
+        / "agents"
+        / "specialist-worker.md"
+    ).read_text(encoding="utf-8")
+
+    assert "This agent is a worker, not a coordinator." in text
 
 
 def test_legacy_skill_names_are_removed():
