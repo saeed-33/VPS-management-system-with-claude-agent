@@ -114,7 +114,7 @@ Stop -> prevent silent incomplete session termination
 
 ### C.14.6 - ClaudeSessionRunner
 
-Status: **NEXT**
+Status: **COMPLETE**
 
 Implement the concrete process/session runner used by `ClaudeSupervisor`.
 The scheduler must stop calling a Python workflow sequencer as its Claude
@@ -122,7 +122,7 @@ runtime implementation.
 
 ### C.14.7 - Ollama-backed Claude runtime
 
-Status: **PENDING**
+Status: **NEXT**
 
 Add explicit runtime configuration and launch the real session through the
 supported Ollama-to-Claude Code integration. The selected agent model must

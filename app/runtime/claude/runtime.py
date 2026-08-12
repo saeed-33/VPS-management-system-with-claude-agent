@@ -28,9 +28,9 @@ class ClaudeSessionRunner(Protocol):
 
     async def cancel(
         self,
-        session_id: str,
+        identifier: str,
     ) -> None:
-        """Best-effort session cancellation."""
+        """Best-effort cancellation by current runtime identifier."""
 
 
 class ClaudeRuntimeAdapter:
@@ -76,6 +76,9 @@ class ClaudeRuntimeAdapter:
             )
 
         except TimeoutError:
+            await self._best_effort_cancel(
+                request.job_id
+            )
             return self._failure(
                 request,
                 status=ClaudeJobStatus.TIMED_OUT,
@@ -153,6 +156,18 @@ class ClaudeRuntimeAdapter:
             usage_metadata=raw_result.usage_metadata,
         )
 
+    async def _best_effort_cancel(
+        self,
+        identifier: str,
+    ) -> None:
+        try:
+            await self._runner.cancel(
+                identifier
+            )
+        except Exception:
+            # The primary controlled outcome remains timeout.
+            pass
+
     def _validate_tool_access(
         self,
         request: ClaudeRuntimeRequest,
@@ -163,7 +178,7 @@ class ClaudeRuntimeAdapter:
         ):
             raise ClaudeToolAccessError(
                 "Operational tool access is not enabled "
-                "in Phase C.2."
+                "for this Claude runtime adapter."
             )
 
     def _failure(

@@ -585,3 +585,11 @@ For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md
   exec-form commands, runtime-only preflight behavior, Ollama/provider gating,
   immutable runtime configuration, Specialist lifecycle event sanitization,
   and the ignored transient runtime-event directory.
+
+## C.14.6 Concrete ClaudeSessionRunner
+
+- `tests/test_claude_process_session_runner.py` validates the subprocess runner
+  against local child processes: Claude JSON-envelope decoding, structured
+  output forwarding, project-root enforcement, controlled non-zero failures,
+  environment injection, explicit cancellation, and timeout process cleanup.
+  It does not require Ollama or Claude Code to be installed.

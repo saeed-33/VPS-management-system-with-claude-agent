@@ -250,3 +250,18 @@ The project has concrete runtime-only Claude hooks:
 The transitional local hook event files are not the authoritative audit store
 and must not contain prompts, tool inputs, tool outputs, credentials, or
 assistant messages. Durable runtime observability remains a later C.14 step.
+
+## C.14.6 Process Session Runner
+
+`SubprocessClaudeSessionRunner` is the concrete bounded process host for one
+Claude session. It owns subprocess creation, project-root enforcement, JSON
+envelope decoding, controlled non-zero failures, timeout/cancellation cleanup,
+and best-effort process-tree termination.
+
+C.14.6 deliberately does not choose the model provider or launcher command.
+The command is supplied through `ClaudeProcessCommandBuilder`. Production
+scheduler/bootstrap wiring remains on the legacy bridge until C.14.7 provides
+and validates the Ollama-backed command builder.
+
+Do not claim that production monitoring is Claude-native merely because the
+process runner exists.

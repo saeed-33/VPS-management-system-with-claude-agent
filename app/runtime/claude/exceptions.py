@@ -8,3 +8,11 @@ class ClaudeStructuredOutputError(ClaudeRuntimeError):
 
 class ClaudeToolAccessError(ClaudeRuntimeError):
     """Raised when a request asks for tools that are not enabled."""
+
+
+class ClaudeProcessExecutionError(ClaudeRuntimeError):
+    """Raised when the external Claude process cannot execute cleanly."""
+
+
+class ClaudeProcessOutputError(ClaudeRuntimeError):
+    """Raised when Claude process JSON output is outside its envelope."""

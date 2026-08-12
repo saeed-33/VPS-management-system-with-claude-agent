@@ -120,8 +120,8 @@ C.14.2 Operational Skills: COMPLETE
 C.14.3 Bounded Agents: COMPLETE
 C.14.4 Least privilege and model inheritance: COMPLETE
 C.14.5 Concrete Hooks: COMPLETE
-C.14.6 ClaudeSessionRunner: NEXT
-C.14.7 Ollama-backed Claude runtime: PENDING
+C.14.6 ClaudeSessionRunner: COMPLETE
+C.14.7 Ollama-backed Claude runtime: NEXT
 C.14.8 MCP boundary refactor: PENDING
 C.14.9 Remove duplicate Python orchestration: PENDING
 C.14.10 Session/job observability: PENDING

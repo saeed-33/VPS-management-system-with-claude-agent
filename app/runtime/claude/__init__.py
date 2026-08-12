@@ -24,13 +24,22 @@ from app.runtime.claude.runtime import (
     ClaudeRuntimeAdapter,
     ClaudeSessionRunner,
 )
+from app.runtime.claude.session_runner import (
+    ClaudeCliJsonDecoder,
+    ClaudeProcessCommand,
+    ClaudeProcessCommandBuilder,
+    SubprocessClaudeSessionRunner,
+)
 
 __all__ = [
+    "ClaudeCliJsonDecoder",
     "ClaudeJobStatus",
     "ClaudeAgentJobService",
     "ClaudeMonitoringCycleResult",
     "ClaudeMultiSpecialistResult",
     "ClaudeMultiSpecialistSupervisor",
+    "ClaudeProcessCommand",
+    "ClaudeProcessCommandBuilder",
     "ClaudeRawResult",
     "ClaudeRuntimeAdapter",
     "ClaudeRuntimeRequest",
@@ -40,4 +49,5 @@ __all__ = [
     "ClaudeStructuredOutput",
     "ClaudeSupervisedMonitoringCycle",
     "ClaudeSupervisor",
+    "SubprocessClaudeSessionRunner",
 ]
