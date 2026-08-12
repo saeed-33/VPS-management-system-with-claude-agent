@@ -7,3 +7,4 @@ reports/
 apply**.py
 .**backup
 .claude/settings.local.json
+.claude/runtime-events/

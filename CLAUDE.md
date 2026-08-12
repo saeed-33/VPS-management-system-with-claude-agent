@@ -232,3 +232,21 @@ docs/decisions/ADR-018-claude-native-operational-contracts.md
 docs/roadmap/claude-runtime-implementation-plan.md
 docs/roadmap/c14-claude-native-execution-plan.md
 ```
+
+## C.14.5 Runtime Hooks
+
+The project has concrete runtime-only Claude hooks:
+
+- `SessionStart` injects runtime contract context for `server-supervisor`.
+- `UserPromptSubmit` blocks a `server-supervisor` prompt when the local
+  C.14 runtime contract is not ready (Ollama provider declaration, project
+  root, MCP wiring, permission mode, agent contracts, and Phase 5 denials).
+- `ConfigChange` blocks project/local settings and Skill changes while the
+  runtime supervisor session is active.
+- `SubagentStart` and `SubagentStop` record minimal lifecycle events for
+  `specialist-worker`.
+- `SessionEnd` records the end of a runtime supervisor session.
+
+The transitional local hook event files are not the authoritative audit store
+and must not contain prompts, tool inputs, tool outputs, credentials, or
+assistant messages. Durable runtime observability remains a later C.14 step.

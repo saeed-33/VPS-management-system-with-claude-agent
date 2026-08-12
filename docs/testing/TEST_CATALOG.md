@@ -578,3 +578,10 @@ For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md
 ## C.14.4 Least Privilege
 
 - `tests/test_claude_least_privilege.py` validates the exact pre-approved runtime tool set, `dontAsk` agent mode, PowerShell/Bash operational denials, disabled Skill shell execution, and explicit Phase 5 remediation denials.
+
+## C.14.5 Concrete Runtime Hooks
+
+- `tests/test_claude_runtime_hooks.py` validates hook registration, portable
+  exec-form commands, runtime-only preflight behavior, Ollama/provider gating,
+  immutable runtime configuration, Specialist lifecycle event sanitization,
+  and the ignored transient runtime-event directory.

@@ -99,7 +99,7 @@ Status: **COMPLETE**
 
 ### C.14.5 - Concrete Hooks
 
-Status: **NEXT**
+Status: **COMPLETE**
 
 Only introduce hooks with real enforcement/audit value.
 
@@ -114,7 +114,7 @@ Stop -> prevent silent incomplete session termination
 
 ### C.14.6 - ClaudeSessionRunner
 
-Status: **PENDING**
+Status: **NEXT**
 
 Implement the concrete process/session runner used by `ClaudeSupervisor`.
 The scheduler must stop calling a Python workflow sequencer as its Claude
