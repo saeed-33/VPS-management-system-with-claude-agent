@@ -71,8 +71,14 @@ def test_project_mcp_server_is_registered_for_claude_code():
     assert server["command"] == "uv"
     assert server["args"] == [
         "run",
+        "--no-sync",
+        "--project",
+        "${CLAUDE_PROJECT_DIR:-.}",
         "python",
-        "tools/run_project_mcp_server.py",
+        (
+            "${CLAUDE_PROJECT_DIR:-.}/"
+            "tools/run_project_mcp_server.py"
+        ),
     ]
     assert server["alwaysLoad"] is True
 

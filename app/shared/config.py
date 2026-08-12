@@ -204,11 +204,13 @@ class Settings(BaseSettings):
     @property
     def effective_claude_runtime_model(self) -> str:
         configured = (
-            self.claude_runtime_model
-            if self.claude_runtime_model is not None
-            else self.ollama_model
-        )
-        return configured.strip()
+            self.claude_runtime_model or ""
+        ).strip()
+
+        if configured:
+            return configured
+
+        return self.ollama_model.strip()
 
     @property
     def rag_retrieval_enabled(self) -> bool:

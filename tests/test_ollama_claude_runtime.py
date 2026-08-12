@@ -36,7 +36,8 @@ def test_direct_claude_uses_ollama_backend(tmp_path):
     assert "launch" not in argv
     assert argv[argv.index("--model") + 1] == "gemma-test"
     assert argv[argv.index("--agent") + 1] == "server-supervisor"
-    assert argv[argv.index("--output-format") + 1] == "json"
+    assert argv[argv.index("--output-format") + 1] == "stream-json"
+    assert "--verbose" in argv
     assert argv[argv.index("--setting-sources") + 1] == "project"
     assert "--strict-mcp-config" in argv
     assert "--json-schema" not in argv

@@ -15,6 +15,7 @@ tools:
   - mcp__vps__get_investigation
   - mcp__vps__get_investigation_status
   - mcp__vps__get_evidence
+  - mcp__vps__get_available_specialists
   - mcp__vps__propose_remediation
   - Agent(specialist-worker)
 mcpServers:

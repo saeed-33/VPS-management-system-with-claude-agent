@@ -633,7 +633,7 @@ def test_decoder_uses_final_assistant_text_when_success_result_omits_result():
                                 "report_id": 1,
                                 "force": False,
                             },
-                        }
+                        },
                     ]
                 },
             },
@@ -667,10 +667,11 @@ def test_decoder_uses_final_assistant_text_when_success_result_omits_result():
     result = decoder.decode(stdout)
 
     assert result.session_id == "session-123"
-    assert result.tool_call_count == 1
+    assert result.tool_call_count == 2
     assert '"status":"completed"' in result.content
     assert result.usage_metadata["event_tool_names"] == [
         "mcp__vps__run_monitoring",
+        "mcp__vps__analyze_report",
     ]
     assert result.usage_metadata["event_mcp_servers"] == [
         {
@@ -678,6 +679,7 @@ def test_decoder_uses_final_assistant_text_when_success_result_omits_result():
             "status": "connected",
         }
     ]
+
 
 
 def test_decoder_rejects_tool_use_message_as_final_text_fallback():
@@ -747,7 +749,15 @@ def test_decoder_success_event_array_can_use_final_assistant_text():
                             "type": "tool_use",
                             "name": "mcp__vps__run_monitoring",
                             "input": {"server_id": 2},
-                        }
+                        },
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__analyze_report",
+                            "input": {
+                                "report_id": 1,
+                                "force": False,
+                            },
+                        },
                     ]
                 },
             },
@@ -781,10 +791,11 @@ def test_decoder_success_event_array_can_use_final_assistant_text():
     result = decoder.decode(stdout)
 
     assert result.session_id == "session-123"
-    assert result.tool_call_count == 1
+    assert result.tool_call_count == 2
     assert '"status":"completed"' in result.content
     assert result.usage_metadata["event_tool_names"] == [
         "mcp__vps__run_monitoring",
+        "mcp__vps__analyze_report",
     ]
     assert result.usage_metadata["event_mcp_servers"] == [
         {
@@ -792,6 +803,7 @@ def test_decoder_success_event_array_can_use_final_assistant_text():
             "status": "connected",
         }
     ]
+
 
 
 def test_decoder_does_not_use_tool_message_as_final_fallback():

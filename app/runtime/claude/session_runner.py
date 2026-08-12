@@ -758,6 +758,8 @@ class SubprocessClaudeSessionRunner:
         decoder: ClaudeCliJsonDecoder | None = None,
         base_env: dict[str, str] | None = None,
         terminate_grace_seconds: float = 2.0,
+        max_stdout_bytes: int = 16 * 1024 * 1024,
+        max_stderr_bytes: int = 2 * 1024 * 1024,
     ) -> None:
         self._command_builder = (
             command_builder
@@ -778,6 +780,8 @@ class SubprocessClaudeSessionRunner:
         self._terminate_grace_seconds = (
             terminate_grace_seconds
         )
+        self._max_stdout_bytes = max_stdout_bytes
+        self._max_stderr_bytes = max_stderr_bytes
 
         if not self._project_root.is_dir():
             raise ValueError(
@@ -787,6 +791,16 @@ class SubprocessClaudeSessionRunner:
         if self._terminate_grace_seconds <= 0:
             raise ValueError(
                 "terminate_grace_seconds must be > 0."
+            )
+
+        if self._max_stdout_bytes < 1024:
+            raise ValueError(
+                "max_stdout_bytes must be >= 1024."
+            )
+
+        if self._max_stderr_bytes < 1024:
+            raise ValueError(
+                "max_stderr_bytes must be >= 1024."
             )
 
         self._processes: dict[
@@ -845,7 +859,9 @@ class SubprocessClaudeSessionRunner:
 
         try:
             stdout_bytes, stderr_bytes = (
-                await process.communicate()
+                await self._communicate_bounded(
+                    process
+                )
             )
         except asyncio.CancelledError:
             await self._terminate_process(
@@ -884,6 +900,72 @@ class SubprocessClaudeSessionRunner:
         return self._decoder.decode(
             stdout
         )
+
+    async def _communicate_bounded(
+        self,
+        process: asyncio.subprocess.Process,
+    ) -> tuple[bytes, bytes]:
+        stdout_task = asyncio.create_task(
+            self._read_stream_bounded(
+                process.stdout,
+                limit=self._max_stdout_bytes,
+                label="stdout",
+            )
+        )
+        stderr_task = asyncio.create_task(
+            self._read_stream_bounded(
+                process.stderr,
+                limit=self._max_stderr_bytes,
+                label="stderr",
+            )
+        )
+        wait_task = asyncio.create_task(process.wait())
+        tasks = (stdout_task, stderr_task, wait_task)
+
+        try:
+            stdout_bytes, stderr_bytes, _ = (
+                await asyncio.gather(*tasks)
+            )
+            return stdout_bytes, stderr_bytes
+        except BaseException:
+            if process.returncode is None:
+                await self._terminate_process(process)
+            for task in tasks:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(
+                *tasks,
+                return_exceptions=True,
+            )
+            raise
+
+    @staticmethod
+    async def _read_stream_bounded(
+        stream: asyncio.StreamReader | None,
+        *,
+        limit: int,
+        label: str,
+    ) -> bytes:
+        if stream is None:
+            return b""
+
+        chunks: list[bytes] = []
+        total = 0
+
+        while True:
+            chunk = await stream.read(64 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > limit:
+                raise ClaudeProcessExecutionError(
+                    "Claude process "
+                    f"{label} exceeded the configured "
+                    f"{limit}-byte capture limit."
+                )
+            chunks.append(chunk)
+
+        return b"".join(chunks)
 
     async def cancel(
         self,
