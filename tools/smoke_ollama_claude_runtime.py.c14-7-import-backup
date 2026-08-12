@@ -1,0 +1,77 @@
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+from dataclasses import asdict, is_dataclass
+from enum import Enum
+
+from app.bootstrap import build_container
+from app.shared.config import settings
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Run one real Ollama-backed Claude monitoring "
+            "session for an existing server."
+        )
+    )
+    parser.add_argument(
+        "--server-id",
+        type=int,
+        required=True,
+    )
+    return parser.parse_args()
+
+
+def jsonable(value):
+    if isinstance(value, Enum):
+        return value.value
+    if is_dataclass(value):
+        return {
+            key: jsonable(item)
+            for key, item in asdict(value).items()
+        }
+    if isinstance(value, dict):
+        return {
+            str(key): jsonable(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [jsonable(item) for item in value]
+    return value
+
+
+async def main_async(server_id: int) -> int:
+    if not settings.claude_runtime_enabled:
+        print(
+            "CLAUDE_RUNTIME_ENABLED must be true "
+            "for the real C.14.7 smoke test."
+        )
+        return 2
+
+    if settings.llm_provider != "ollama":
+        print("LLM_PROVIDER must be ollama for C.14.7.")
+        return 2
+
+    container = build_container()
+    result = await container.claude_supervisor.run(server_id)
+
+    print(
+        json.dumps(
+            jsonable(result),
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
+def main() -> int:
+    args = parse_args()
+    return asyncio.run(main_async(args.server_id))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

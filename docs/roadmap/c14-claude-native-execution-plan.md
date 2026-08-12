@@ -122,7 +122,7 @@ runtime implementation.
 
 ### C.14.7 - Ollama-backed Claude runtime
 
-Status: **NEXT**
+Status: **IMPLEMENTED - REAL SMOKE REQUIRED**
 
 Add explicit runtime configuration and launch the real session through the
 supported Ollama-to-Claude Code integration. The selected agent model must

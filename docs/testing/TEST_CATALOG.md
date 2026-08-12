@@ -593,3 +593,12 @@ For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md
   output forwarding, project-root enforcement, controlled non-zero failures,
   environment injection, explicit cancellation, and timeout process cleanup.
   It does not require Ollama or Claude Code to be installed.
+
+## C.14.7 Ollama-backed Claude Runtime
+
+- `tests/test_ollama_claude_runtime.py` validates launcher argv, model/agent
+  inheritance path, strict project MCP configuration, structured output,
+  runtime hook markers, persisted job lifecycle, failure propagation, and the
+  feature-flagged bootstrap switch.
+- `tools/smoke_ollama_claude_runtime.py --server-id <id>` is the required real
+  integration smoke and requires `CLAUDE_RUNTIME_ENABLED=true`.

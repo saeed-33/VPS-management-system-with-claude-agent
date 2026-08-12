@@ -118,7 +118,16 @@ def _audit(payload: dict[str, Any], event: str) -> None:
 
 
 def _is_main_runtime(payload: dict[str, Any]) -> bool:
-    return payload.get("agent_type") == RUNTIME_MAIN_AGENT
+    if payload.get("agent_type") == RUNTIME_MAIN_AGENT:
+        return True
+
+    return (
+        os.environ.get("AI_VPS_CLAUDE_RUNTIME") == "1"
+        and os.environ.get(
+            "AI_VPS_CLAUDE_RUNTIME_AGENT"
+        )
+        == RUNTIME_MAIN_AGENT
+    )
 
 
 def _is_worker(payload: dict[str, Any]) -> bool:

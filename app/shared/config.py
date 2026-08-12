@@ -37,6 +37,23 @@ class Settings(BaseSettings):
 
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "qwen3:8b"
+
+    # C.14.7 real Claude Code runtime.
+    claude_runtime_enabled: bool = False
+    claude_runtime_model: str | None = None
+    claude_runtime_timeout_seconds: float = Field(
+        default=300.0,
+        gt=0,
+    )
+    claude_runtime_max_turns: int = Field(
+        default=20,
+        ge=1,
+        le=100,
+    )
+    claude_runtime_ollama_executable: str = "ollama"
+    claude_runtime_agent: Literal[
+        "server-supervisor",
+    ] = "server-supervisor"
     app_name: str = "AI VPS Management"
     debug: bool = True
 
@@ -155,6 +172,42 @@ class Settings(BaseSettings):
             )
 
         return self
+
+    @model_validator(mode="after")
+    def validate_claude_runtime(self) -> "Settings":
+        if not self.claude_runtime_enabled:
+            return self
+
+        if not self.llm_enabled:
+            raise ValueError(
+                "CLAUDE_RUNTIME_ENABLED requires LLM_ENABLED."
+            )
+
+        if self.llm_provider != "ollama":
+            raise ValueError(
+                "CLAUDE_RUNTIME_ENABLED requires LLM_PROVIDER=ollama."
+            )
+
+        if not self.effective_claude_runtime_model:
+            raise ValueError(
+                "Claude runtime model must not be empty."
+            )
+
+        if not self.claude_runtime_ollama_executable.strip():
+            raise ValueError(
+                "CLAUDE_RUNTIME_OLLAMA_EXECUTABLE must not be empty."
+            )
+
+        return self
+
+    @property
+    def effective_claude_runtime_model(self) -> str:
+        configured = (
+            self.claude_runtime_model
+            if self.claude_runtime_model is not None
+            else self.ollama_model
+        )
+        return configured.strip()
 
     @property
     def rag_retrieval_enabled(self) -> bool:

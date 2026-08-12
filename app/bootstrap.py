@@ -13,6 +13,18 @@ from app.runtime.claude.multi_specialist_supervision import (
 from app.runtime.claude.supervisor import (
     ClaudeSupervisor,
 )
+from app.runtime.claude.native_monitoring import (
+    ClaudeNativeMonitoringRunner,
+)
+from app.runtime.claude.ollama_runtime import (
+    OllamaClaudeCommandBuilder,
+)
+from app.runtime.claude.runtime import (
+    ClaudeRuntimeAdapter,
+)
+from app.runtime.claude.session_runner import (
+    SubprocessClaudeSessionRunner,
+)
 from app.tools.project_boundary import (
     ProjectMcpToolBoundary,
 )
@@ -156,7 +168,7 @@ from app.tools.monitoring.service import (
     MonitoringService,
 )
 from app.tools.monitoring.scheduler import MonitoringScheduler
-from app.shared.config import settings
+from app.shared.config import PROJECT_ROOT, settings
 from app.shared.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
@@ -661,8 +673,48 @@ def build_container() -> ApplicationContainer:
         )
     )
 
+    claude_supervisor_runner = (
+        claude_supervised_monitoring_cycle
+    )
+
+    if settings.claude_runtime_enabled:
+        claude_command_builder = (
+            OllamaClaudeCommandBuilder(
+                project_root=PROJECT_ROOT,
+                model=(
+                    settings.effective_claude_runtime_model
+                ),
+                executable=(
+                    settings.claude_runtime_ollama_executable
+                ),
+                agent=settings.claude_runtime_agent,
+            )
+        )
+        claude_session_runner = (
+            SubprocessClaudeSessionRunner(
+                command_builder=claude_command_builder,
+                project_root=PROJECT_ROOT,
+            )
+        )
+        claude_runtime_adapter = ClaudeRuntimeAdapter(
+            runner=claude_session_runner,
+            operational_tools_enabled=True,
+        )
+        claude_supervisor_runner = (
+            ClaudeNativeMonitoringRunner(
+                runtime_adapter=claude_runtime_adapter,
+                agent_job_service=claude_agent_job_service,
+                timeout_seconds=(
+                    settings.claude_runtime_timeout_seconds
+                ),
+                max_turns=(
+                    settings.claude_runtime_max_turns
+                ),
+            )
+        )
+
     claude_supervisor = ClaudeSupervisor(
-        runner=claude_supervised_monitoring_cycle,
+        runner=claude_supervisor_runner,
     )
 
     scheduler = MonitoringScheduler(

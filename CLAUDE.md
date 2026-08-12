@@ -265,3 +265,13 @@ and validates the Ollama-backed command builder.
 
 Do not claim that production monitoring is Claude-native merely because the
 process runner exists.
+
+## C.14.7 Ollama-backed Runtime
+
+The real Claude runtime is feature-flagged by `CLAUDE_RUNTIME_ENABLED`.
+When enabled, the scheduler-facing supervisor launches one headless
+`server-supervisor` session per scheduled server through Ollama, with strict
+project MCP loading and a validated JSON output schema.
+
+C.14.7 is not COMPLETE until the operator runs the real smoke successfully.
+Unit tests alone are insufficient for this acceptance gate.
