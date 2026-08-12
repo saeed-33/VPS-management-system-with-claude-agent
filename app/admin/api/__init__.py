@@ -1,3 +1,6 @@
+from app.admin.api.agent_observability import (
+    router as agent_observability_router,
+)
 from app.admin.api.investigations import (
     router as investigations_router,
 )
@@ -27,6 +30,7 @@ from app.admin.api.profiles import (
 )
 
 __all__ = [
+    "agent_observability_router",
     "investigations_router",
     "servers_router",
     "commands_router",

@@ -1,3 +1,6 @@
+from app.runtime.claude.observability import (
+    ClaudeAgentObservabilityService,
+)
 from app.shared.services.investigation_read_service import (
     InvestigationReadService,
 )
@@ -96,3 +99,10 @@ def get_claude_supervisor() -> ClaudeSupervisor:
 def get_project_tool_boundary(
 ) -> ProjectMcpToolBoundary:
     return container.project_mcp_tool_boundary
+
+def get_claude_agent_observability_service(
+) -> ClaudeAgentObservabilityService:
+    return ClaudeAgentObservabilityService(
+        container.agent_job_repository
+    )
+
