@@ -43,6 +43,7 @@ app/
     schemas.py
     serializers.py
     project_tools.py
+    server.py
   admin/
     api/
     services/
@@ -64,7 +65,8 @@ specialist contracts, evaluation, and knowledge handling.
 cross-cutting services, and utilities.
 
 `app/mcp/` exposes project tools to Claude through stable schemas and
-serializers.
+serializers. `app/mcp/server.py` is the stdio MCP protocol surface configured
+from `.mcp.json`.
 
 `app/admin/` remains the operator control plane for viewing state and approving
 actions.

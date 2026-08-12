@@ -134,6 +134,7 @@ R.2 Tool Package Boundary: complete
 R.3 Domain Services Boundary: complete
 R.4 Admin Surface Alignment: complete
 R.5 Documentation and Tests: complete
+C.14 Real Claude-Native Orchestration: in progress
 ```
 
 C.1 added the project-level Claude Code instruction structure only. It did not
@@ -232,6 +233,11 @@ only and does not encode supervisory workflow order or branch decisions.
 R.5 added documentation contract coverage for the runtime guides, generated
 project structure, and generated test catalog. It also aligns the Claude runtime
 operations guide with the configured Ollama defaults.
+
+C.14 starts the correction that connects Claude Code to project tools directly.
+The project now registers a `vps` MCP server in `.mcp.json`, exposes project
+tools through a stdio MCP protocol server, and defines Claude subagents with
+frontmatter, allowed MCP tools, skills, and turn budgets.
 
 Phase 5 - Supervised Remediation follows after Phase C unless a later ADR
 changes this ordering.

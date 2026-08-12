@@ -205,6 +205,38 @@ docs/operations/claude-runtime.md matches configured Ollama defaults
 tests/test_claude_runtime_documentation.py guards runtime documentation coverage
 ```
 
+### C.14 - Real Claude-Native Orchestration
+
+Status: **IN PROGRESS**
+
+Goal:
+
+```text
+Claude Code session owns workflow sequencing and tool selection
+project MCP server exposes capabilities to Claude Code
+Python modules provide tools, policies, persistence, and validation
+```
+
+Implemented:
+
+```text
+.mcp.json registers the project-scoped vps MCP server
+tools/run_project_mcp_server.py starts the stdio MCP server
+app/mcp/server.py exposes initialize, tools/list, and tools/call
+.claude/settings.json uses Claude Code permissions instead of project metadata
+.claude/agents/*.md include YAML frontmatter, tools, MCP server, skills, and maxTurns
+tests/test_claude_code_runtime_configuration.py validates Claude Code project configuration
+tests/test_project_mcp_protocol_server.py validates the MCP protocol surface
+```
+
+Remaining:
+
+```text
+replace Python monitoring workflow sequencing with a Claude session launch
+replace Python Specialist loop sequencing with Claude-selected tool calls
+add runtime smoke tests for Claude session prompt and MCP tool availability
+```
+
 ## Target Runtime Shape
 
 ```text

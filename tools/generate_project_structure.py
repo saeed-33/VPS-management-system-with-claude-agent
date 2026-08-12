@@ -116,6 +116,12 @@ SPECIAL = {
     "app/mcp/project_tools.py": (
         "Thin MCP compatibility export for the project tool boundary implemented under app/tools."
     ),
+    "app/mcp/server.py": (
+        "Project-scoped MCP protocol server exposing project tools to Claude Code."
+    ),
+    "tools/run_project_mcp_server.py": (
+        "Stdio entrypoint used by .mcp.json to run the project MCP server."
+    ),
     "app/shared/config.py": (
         "Environment-backed application configuration."
     ),

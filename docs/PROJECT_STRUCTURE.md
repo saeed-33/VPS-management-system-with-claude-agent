@@ -97,6 +97,7 @@ Evaluation / Production Readiness Gate
 - `app/mcp/project_tools.py` — Thin MCP compatibility export for the project tool boundary implemented under app/tools.
 - `app/mcp/schemas.py` — Python module containing class `ProjectToolDefinition`, class `ProjectToolCall`, class `ProjectToolResult`.
 - `app/mcp/serializers.py` — Python module containing `serialize_value()`, `serialize_server()`, `serialize_profile()`, `serialize_monitoring_report_data()`, `serialize_report_details()`.
+- `app/mcp/server.py` — Project-scoped MCP protocol server exposing project tools to Claude Code.
 - `app/runtime/__init__.py` — Runtime adapters and supervisors.
 
 ### Claude Runtime
@@ -363,6 +364,7 @@ Evaluation / Production Readiness Gate
 - `tools/run_investigation_web_api_acceptance.py` — Operator/developer tool exposing `status()`, `main()`.
 - `tools/run_persisted_runtime_evaluation.py` — Operator/developer tool exposing `main()`.
 - `tools/run_production_readiness_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/run_project_mcp_server.py` — Stdio entrypoint used by .mcp.json to run the project MCP server.
 - `tools/run_safety_runtime_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/run_server_coordinator_acceptance.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/run_specialist_investigation.py` — Operator/developer tool exposing `run()`, `main()`.
@@ -378,6 +380,7 @@ Evaluation / Production Readiness Gate
 - `tests/test_admin_system_web.py` — Pytest coverage for `test_system_runtime_page_is_available()`.
 - `tests/test_aggregate_readiness.py` — Pytest coverage for `obs()`, `test_aggregate_combines_sources()`, `test_sample_deficits_are_reported()`, `test_one_real_runtime_sample_is_not_ready()`, `test_hard_failure_blocks_when_samples_sufficient()`.
 - `tests/test_claude_agent_job_persistence.py` — Pytest coverage for `make_repository()`, `make_request()`, `test_job_is_created_from_runtime_request()`, `test_job_completion_preserves_result_observability()`, `test_job_survives_repository_recreation()`.
+- `tests/test_claude_code_runtime_configuration.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_project_mcp_server_is_registered_for_claude_code()`, `test_claude_settings_use_enforced_permissions()`, `test_claude_agents_have_frontmatter_and_tools()`.
 - `tests/test_claude_multi_specialist_supervision.py` — Pytest coverage for class `JobService`, class `ToolBoundary`, `run_supervisor()`, `test_multi_specialist_supervision_runs_selected_specialists_sequentially()`, `test_multi_specialist_supervision_respects_max_specialists()`.
 - `tests/test_claude_runtime_adapter.py` — Pytest coverage for `request()`, class `Runner`, `test_bounded_claude_invocation_succeeds()`, `test_timeout_is_returned_as_controlled_result()`, `test_runtime_failure_is_returned_as_controlled_result()`.
 - `tests/test_claude_runtime_documentation.py` — Pytest coverage for `read_doc()`, `test_project_structure_documents_runtime_files()`, `test_runtime_operations_doc_matches_configured_ollama_defaults()`, `test_runtime_documentation_has_current_verification_commands()`, `test_r5_status_and_test_catalog_are_documented()`.
@@ -419,6 +422,7 @@ Evaluation / Production Readiness Gate
 - `tests/test_production_readiness_gate.py` — Pytest coverage for `observations_for_thresholds()`, `test_gate_requires_minimum_samples()`, `test_all_thresholds_pass_supervised_only()`, `test_hard_safety_failure_blocks()`, `test_policy_failure_blocks()`.
 - `tests/test_project_mcp_analysis_tools.py` — Pytest coverage for class `Analysis`, class `AnalysisRepository`, class `AnalysisOrchestrator`, class `IncidentRetriever`, class `KnowledgeRetriever`.
 - `tests/test_project_mcp_investigation_tools.py` — Pytest coverage for class `Router`, class `PersistedInvestigation`, class `PersistenceService`, class `ReadService`, class `EmptyAnalysisRepository`.
+- `tests/test_project_mcp_protocol_server.py` — Pytest coverage for class `ToolBoundary`, `run_message()`, `test_mcp_initialize_exposes_tool_capability()`, `test_mcp_tools_list_uses_project_tool_definitions()`, `test_mcp_tools_call_returns_structured_project_result()`.
 - `tests/test_project_mcp_remediation_tools.py` — Pytest coverage for `make_remediation_service()`, `boundary()`, `run_tool()`, `plan_arguments()`, `test_propose_remediation_requires_diagnosis_and_evidence_links()`.
 - `tests/test_project_mcp_specialist_tools.py` — Pytest coverage for `specialist()`, class `SpecialistRegistry`, class `SpecialistLoop`, `boundary()`, `run_tool()`.
 - `tests/test_project_mcp_tool_boundary.py` — Pytest coverage for class `Server`, class `Profile`, class `Command`, class `Assignment`, class `ServerService`.
@@ -528,19 +532,3 @@ Evaluation / Production Readiness Gate
 ## Maintenance rule
 
 Regenerate this document whenever files are added, removed, or substantially repurposed. Descriptions are derived from path conventions, module docstrings, and public classes/functions; core files have explicit descriptions in the generator.
-
-<!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
-
-Documentation synchronized: **2026-08-12**
-
-Canonical project state:
-
-```text
-Phase 4.20: complete
-readiness: ready_for_supervised_operations
-automatic_remediation_allowed: false
-```
-
-For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
-<!-- PROJECT-DOC-METADATA:END -->

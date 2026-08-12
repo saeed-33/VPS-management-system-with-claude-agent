@@ -84,9 +84,23 @@ CLAUDE.md
 .claude/hooks/
 ```
 
-Claude should call project tools through the configured MCP boundary. Direct SSH,
-SQL, remediation, or Ollama calls outside the project tools are not part of the
-runtime contract.
+The repository registers the project-scoped MCP server in `.mcp.json`:
+
+```text
+vps -> uv run python tools/run_project_mcp_server.py
+```
+
+Claude Code uses that server to call project tools as `mcp__vps__*`. Direct
+SSH, SQL, remediation, or Ollama calls outside project tools are not part of
+the runtime contract.
+
+Useful checks:
+
+```powershell
+Get-Content .mcp.json
+Get-Content .claude\settings.json
+Get-Content .claude\agents\monitoring-supervisor.md
+```
 
 ## Verification
 

@@ -33,6 +33,13 @@ uv run python tools/generate_test_catalog.py
 - `test_interrupted_jobs_are_recovered_as_failed`
 - `test_recent_jobs_can_be_filtered_by_status`
 
+### `tests/test_claude_code_runtime_configuration.py`
+
+- `test_project_mcp_server_is_registered_for_claude_code`
+- `test_claude_settings_use_enforced_permissions`
+- `test_claude_agents_have_frontmatter_and_tools`
+- `test_monitoring_supervisor_can_delegate_to_agent`
+
 ### `tests/test_claude_multi_specialist_supervision.py`
 
 - `test_multi_specialist_supervision_runs_selected_specialists_sequentially`
@@ -339,6 +346,13 @@ uv run python tools/generate_test_catalog.py
 - `test_get_evidence_reads_runtime_evidence`
 - `test_missing_investigation_is_controlled_error`
 
+### `tests/test_project_mcp_protocol_server.py`
+
+- `test_mcp_initialize_exposes_tool_capability`
+- `test_mcp_tools_list_uses_project_tool_definitions`
+- `test_mcp_tools_call_returns_structured_project_result`
+- `test_mcp_unknown_method_returns_jsonrpc_error`
+
 ### `tests/test_project_mcp_remediation_tools.py`
 
 - `test_propose_remediation_requires_diagnosis_and_evidence_links`
@@ -516,6 +530,7 @@ uv run python tools/generate_test_catalog.py
 - `tools/run_investigation_web_api_acceptance.py`
 - `tools/run_persisted_runtime_evaluation.py`
 - `tools/run_production_readiness_evaluation.py`
+- `tools/run_project_mcp_server.py`
 - `tools/run_safety_runtime_evaluation.py`
 - `tools/run_server_coordinator_acceptance.py`
 - `tools/run_specialist_investigation.py`

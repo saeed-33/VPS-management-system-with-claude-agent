@@ -1,3 +1,17 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "vps": {
+      "command": "uv",
+      "args": [
+        "run",
+        "python",
+        "tools/run_project_mcp_server.py"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      },
+      "timeout": 600000,
+      "alwaysLoad": true
+    }
+  }
 }
