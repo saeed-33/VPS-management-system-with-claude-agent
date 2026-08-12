@@ -222,3 +222,33 @@ def test_runtime_event_directory_is_gitignored():
     )
 
     assert ".claude/runtime-events/" in gitignore
+
+
+def test_runtime_preflight_accepts_hardened_project_mcp_command(
+    tmp_path,
+):
+    payload = runtime_payload("UserPromptSubmit")
+    payload["prompt"] = "run server 2"
+
+    result, output, _ = run_hook(
+        payload,
+        tmp_path,
+    )
+
+    assert result.returncode == 0
+    assert output is not None
+    assert "decision" not in output
+    assert (
+        "preflight passed"
+        in output["hookSpecificOutput"]["additionalContext"]
+    )
+
+
+def test_project_mcp_validation_accepts_hardened_argv():
+    hook_source = HOOK.read_text(encoding="utf-8")
+
+    assert "def _valid_project_mcp_command" in hook_source
+    assert '"--no-sync"' in hook_source
+    assert '"--project"' in hook_source
+    assert '"${CLAUDE_PROJECT_DIR:-.}"' in hook_source
+

@@ -141,6 +141,44 @@ def _load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _valid_project_mcp_command(server: dict[str, Any]) -> bool:
+    """
+    Accept only the project's bounded stdio MCP runner.
+
+    Supports both the original launch form and the C.14.7 hardened
+    uv invocation.
+    """
+    if server.get("command") != "uv":
+        return False
+
+    args = server.get("args")
+    if not isinstance(args, list):
+        return False
+
+    if not all(isinstance(item, str) for item in args):
+        return False
+
+    original = [
+        "run",
+        "python",
+        "tools/run_project_mcp_server.py",
+    ]
+
+    hardened = [
+        "run",
+        "--no-sync",
+        "--project",
+        "${CLAUDE_PROJECT_DIR:-.}",
+        "python",
+        (
+            "${CLAUDE_PROJECT_DIR:-.}/"
+            "tools/run_project_mcp_server.py"
+        ),
+    ]
+
+    return args in (original, hardened)
+
+
 def _preflight_errors(payload: dict[str, Any]) -> list[str]:
     root = _project_root(payload)
     errors: list[str] = []
@@ -184,15 +222,10 @@ def _preflight_errors(payload: dict[str, Any]) -> list[str]:
                 mcp.get("mcpServers", {})
                 .get("vps", {})
             )
-            if server.get("command") != "uv":
-                errors.append("vps MCP command must be 'uv'")
-            if server.get("args") != [
-                "run",
-                "python",
-                "tools/run_project_mcp_server.py",
-            ]:
+            if not _valid_project_mcp_command(server):
                 errors.append(
-                    "vps MCP args do not match project MCP runner"
+                    "vps MCP command does not match an approved "
+                    "project MCP runner form"
                 )
         except (OSError, ValueError, json.JSONDecodeError):
             errors.append(".mcp.json is invalid")

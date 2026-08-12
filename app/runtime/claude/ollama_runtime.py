@@ -74,13 +74,16 @@ class OllamaClaudeCommandBuilder:
             self._agent,
             "--permission-mode",
             "dontAsk",
+            "--allowedTools",
+            "mcp__vps__*",
             "--setting-sources",
             "project",
             "--strict-mcp-config",
             "--mcp-config",
             str(self._mcp_config),
             "--output-format",
-            "json",
+            "stream-json",
+            "--verbose",
             "--max-turns",
             str(request.max_turns),
             "-p",
@@ -100,6 +103,8 @@ class OllamaClaudeCommandBuilder:
             "AI_VPS_CLAUDE_RUNTIME_AGENT": self._agent,
             "CLAUDE_PROJECT_DIR": str(self._project_root),
             "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
+            "MCP_TIMEOUT": "60000",
+            "ENABLE_TOOL_SEARCH": "false",
         }
 
         return ClaudeProcessCommand(

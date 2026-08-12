@@ -598,3 +598,241 @@ def test_decoder_counts_tool_use_blocks_from_event_array():
         "mcp__vps__run_monitoring",
     ]
 
+
+def test_decoder_uses_final_assistant_text_when_success_result_omits_result():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+                "mcp_servers": [
+                    {
+                        "name": "vps",
+                        "status": "connected",
+                    }
+                ],
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__run_monitoring",
+                            "input": {
+                                "server_id": 2,
+                            },
+                        },
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__analyze_report",
+                            "input": {
+                                "report_id": 1,
+                                "force": False,
+                            },
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                '{"status":"completed",'
+                                '"summary":"done",'
+                                '"data":{},'
+                                '"metadata":{}}'
+                            ),
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "session_id": "session-123",
+                "num_turns": 2,
+                "is_error": False,
+                "usage": {},
+            },
+        ]
+    )
+
+    result = decoder.decode(stdout)
+
+    assert result.session_id == "session-123"
+    assert result.tool_call_count == 1
+    assert '"status":"completed"' in result.content
+    assert result.usage_metadata["event_tool_names"] == [
+        "mcp__vps__run_monitoring",
+    ]
+    assert result.usage_metadata["event_mcp_servers"] == [
+        {
+            "name": "vps",
+            "status": "connected",
+        }
+    ]
+
+
+def test_decoder_rejects_tool_use_message_as_final_text_fallback():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "not final",
+                        },
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__run_monitoring",
+                            "input": {},
+                        },
+                    ]
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "session_id": "session-123",
+                "is_error": False,
+                "usage": {},
+            },
+        ]
+    )
+
+    with pytest.raises(
+        ClaudeProcessOutputError,
+        match="no safe final assistant text",
+    ):
+        decoder.decode(stdout)
+
+
+def test_decoder_success_event_array_can_use_final_assistant_text():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+                "mcp_servers": [
+                    {
+                        "name": "vps",
+                        "status": "connected",
+                    }
+                ],
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__run_monitoring",
+                            "input": {"server_id": 2},
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                '{"status":"completed",'
+                                '"summary":"done",'
+                                '"data":{},'
+                                '"metadata":{}}'
+                            ),
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "session_id": "session-123",
+                "num_turns": 2,
+                "is_error": False,
+                "usage": {},
+            },
+        ]
+    )
+
+    result = decoder.decode(stdout)
+
+    assert result.session_id == "session-123"
+    assert result.tool_call_count == 1
+    assert '"status":"completed"' in result.content
+    assert result.usage_metadata["event_tool_names"] == [
+        "mcp__vps__run_monitoring",
+    ]
+    assert result.usage_metadata["event_mcp_servers"] == [
+        {
+            "name": "vps",
+            "status": "connected",
+        }
+    ]
+
+
+def test_decoder_does_not_use_tool_message_as_final_fallback():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "not final",
+                        },
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__run_monitoring",
+                            "input": {},
+                        },
+                    ]
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "session_id": "session-123",
+                "is_error": False,
+                "usage": {},
+            },
+        ]
+    )
+
+    with pytest.raises(
+        ClaudeProcessOutputError,
+        match="no safe final assistant text",
+    ):
+        decoder.decode(stdout)
+
