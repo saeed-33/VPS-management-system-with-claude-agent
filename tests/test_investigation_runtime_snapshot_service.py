@@ -22,9 +22,9 @@ from app.domain.investigation.final_diagnosis_synthesizer import (
 from app.domain.investigation.runtime_snapshot_service import (
     InvestigationRuntimeSnapshotService,
 )
-from app.domain.investigation.server_coordinator import (
-    ServerCoordinatorResult,
-    ServerCoordinatorSpecialistRun,
+from app.domain.investigation.execution_contracts import (
+    InvestigationExecutionResult,
+    InvestigationSpecialistRun,
 )
 
 
@@ -125,14 +125,14 @@ def make_result():
         evidence_ids=("e1",),
     )
 
-    run = ServerCoordinatorSpecialistRun(
+    run = InvestigationSpecialistRun(
         specialist_slug="nginx",
         task=task,
         result=result,
         loop_result=None,
     )
 
-    return ServerCoordinatorResult(
+    return InvestigationExecutionResult(
         state=state,
         runs=(run,),
         investigation_actions_used=1,
@@ -175,7 +175,7 @@ def test_build_snapshot_serializes_runtime():
     )
 
     snapshot = service.build_snapshot(
-        coordinator_result=make_result(),
+        execution_result=make_result(),
         final_diagnosis=make_diagnosis(),
     )
 
@@ -210,7 +210,7 @@ def test_persist_preserves_existing_metadata():
 
     result = service.persist(
         investigation_id="persisted-1",
-        coordinator_result=make_result(),
+        execution_result=make_result(),
         final_diagnosis=make_diagnosis(),
     )
 
@@ -252,7 +252,7 @@ def test_narrative_is_persisted():
     )
 
     snapshot = service.build_snapshot(
-        coordinator_result=make_result(),
+        execution_result=make_result(),
         final_diagnosis=make_diagnosis(),
         narrative=narrative,
     )
@@ -281,7 +281,7 @@ def test_missing_investigation_fails():
     try:
         service.persist(
             investigation_id="missing",
-            coordinator_result=make_result(),
+            execution_result=make_result(),
         )
     except ValueError as exc:
         assert (

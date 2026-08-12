@@ -9,8 +9,8 @@ from app.domain.investigation.contracts import (
     InvestigationFinding,
     SpecialistTaskStatus,
 )
-from app.domain.investigation.server_coordinator import (
-    ServerCoordinatorResult,
+from app.domain.investigation.execution_contracts import (
+    InvestigationExecutionResult,
 )
 
 
@@ -140,7 +140,7 @@ class CrossSpecialistCorrelator:
 
     def correlate(
         self,
-        result: ServerCoordinatorResult,
+        result: InvestigationExecutionResult,
     ) -> FinalDiagnosis:
         evidence_by_id = {
             item.evidence_id: item

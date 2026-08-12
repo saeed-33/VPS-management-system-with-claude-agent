@@ -1,3 +1,7 @@
+from app.domain.investigation.execution_contracts import (
+    InvestigationExecutionResult,
+    InvestigationSpecialistRun,
+)
 from app.domain.investigation.persistence_service import (
     InvestigationPersistenceService,
 )
@@ -20,11 +24,6 @@ from app.domain.investigation.specialist_investigation_loop import (
     SpecialistLoopRoundTrace,
     SpecialistLoopStopReason,
     SpecialistLoopToolDecision,
-)
-from app.domain.investigation.server_coordinator import (
-    ServerCoordinator,
-    ServerCoordinatorResult,
-    ServerCoordinatorSpecialistRun,
 )
 from app.domain.investigation.evidence_collection import (
     DiagnosticExecutionOutcome,
@@ -74,6 +73,8 @@ from app.domain.investigation.contracts import (
 )
 
 __all__ = [
+    "InvestigationSpecialistRun",
+    "InvestigationExecutionResult",
     "InvestigationRuntimeSnapshotService",
     "create_final_diagnosis_narrative_client",
     "OpenAIFinalDiagnosisNarrativeClient",
@@ -96,9 +97,6 @@ __all__ = [
     "EvidenceCollectionRequest",
     "EvidenceCollectionService",
     "SSHDiagnosticCommandRunner",
-    "ServerCoordinator",
-    "ServerCoordinatorResult",
-    "ServerCoordinatorSpecialistRun",
     "SpecialistInvestigationLoop",
     "SpecialistInvestigationLoopResult",
     "SpecialistLoopRoundTrace",

@@ -13,9 +13,9 @@ from app.domain.investigation.correlation import (
     CrossSpecialistCorrelator,
     DiagnosisCertainty,
 )
-from app.domain.investigation.server_coordinator import (
-    ServerCoordinatorResult,
-    ServerCoordinatorSpecialistRun,
+from app.domain.investigation.execution_contracts import (
+    InvestigationExecutionResult,
+    InvestigationSpecialistRun,
 )
 
 
@@ -63,7 +63,7 @@ def make_run(*, slug, finding):
         confidence=finding.confidence,
         findings=(finding,),
     )
-    return ServerCoordinatorSpecialistRun(
+    return InvestigationSpecialistRun(
         specialist_slug=slug,
         task=task,
         result=result,
@@ -75,7 +75,7 @@ def wrap(state, *runs):
     for run in runs:
         state.add_task(run.task)
         state.add_result(run.result)
-    return ServerCoordinatorResult(
+    return InvestigationExecutionResult(
         state=state,
         runs=tuple(runs),
         investigation_actions_used=1,

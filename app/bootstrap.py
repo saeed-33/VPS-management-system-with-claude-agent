@@ -4,12 +4,6 @@ from app.domain.investigation.specialist_investigation_loop import (
 from app.runtime.claude.job_service import (
     ClaudeAgentJobService,
 )
-from app.runtime.claude.monitoring_cycle import (
-    ClaudeSupervisedMonitoringCycle,
-)
-from app.runtime.claude.multi_specialist_supervision import (
-    ClaudeMultiSpecialistSupervisor,
-)
 from app.runtime.claude.supervisor import (
     ClaudeSupervisor,
 )
@@ -36,9 +30,6 @@ from app.shared.database.repositories.remediation_repository import (
 )
 from app.shared.services.remediation_service import (
     RemediationService,
-)
-from app.domain.investigation.server_coordinator import (
-    ServerCoordinator,
 )
 from app.domain.investigation.specialist_context import (
     SpecialistContextBuilder,
@@ -121,9 +112,6 @@ from dataclasses import dataclass
 
 from app.admin.services.ssh_test_service import (
     SSHTestService,
-)
-from app.domain.analysis.analysis_agent_manager import (
-    AnalysisAgentManager,
 )
 from app.domain.analysis.client_factory import (
     create_llm_analysis_client,
@@ -236,11 +224,8 @@ class ApplicationContainer:
     evidence_collection_service: EvidenceCollectionService
     remediation_service: RemediationService
     specialist_investigation_loop: SpecialistInvestigationLoop | None
-    server_coordinator: ServerCoordinator | None
     claude_agent_job_service: ClaudeAgentJobService
     project_mcp_tool_boundary: ProjectMcpToolBoundary
-    claude_supervised_monitoring_cycle: ClaudeSupervisedMonitoringCycle
-    claude_multi_specialist_supervisor: ClaudeMultiSpecialistSupervisor
     claude_supervisor: ClaudeSupervisor
 
     # Admin services
@@ -253,7 +238,6 @@ class ApplicationContainer:
     # LLM analysis
     report_analyzer: ReportAnalyzer | None
     analysis_orchestrator: AnalysisOrchestrator | None
-    analysis_agent_manager: AnalysisAgentManager | None
     report_pdf_service: ReportPdfService | None
 
 
@@ -402,7 +386,6 @@ def build_container() -> ApplicationContainer:
     rag_context_builder = None
     report_pdf_service = None
     specialist_investigation_loop = None
-    server_coordinator = None
 
     try:
         report_pdf_service = ReportPdfService(
@@ -500,10 +483,6 @@ def build_container() -> ApplicationContainer:
         AnalysisOrchestrator | None
     ) = None
 
-    analysis_agent_manager: (
-        AnalysisAgentManager | None
-    ) = None
-
     if settings.llm_enabled:
         llm_client = create_llm_analysis_client(
             settings
@@ -549,13 +528,6 @@ def build_container() -> ApplicationContainer:
             ),
         )
 
-        server_coordinator = ServerCoordinator(
-            specialist_registry=specialist_registry,
-            specialist_loop=(
-                specialist_investigation_loop
-            ),
-        )
-
         report_analyzer = ReportAnalyzer(
             report_query_service=report_query_service,
             analysis_repository=analysis_repository,
@@ -589,21 +561,6 @@ def build_container() -> ApplicationContainer:
             )
         )
 
-        analysis_agent_manager = (
-            AnalysisAgentManager(
-                analysis_orchestrator=(
-                    analysis_orchestrator
-                ),
-                analysis_repository=(
-                    analysis_repository
-                ),
-                queue_size_per_server=(
-                    settings
-                    .llm_analysis_queue_size_per_server
-                ),
-            )
-        )
-
     # -------------------------------------------------
     # Monitoring agent
     # -------------------------------------------------
@@ -612,9 +569,6 @@ def build_container() -> ApplicationContainer:
         server_repository=server_repository,
         profile_repository=profile_repository,
         report_repository=report_repository,
-        analysis_agent_manager=(
-            analysis_agent_manager
-        ),
         default_private_key_path=str(
             settings.default_ssh_private_key_path
         ),
@@ -655,27 +609,7 @@ def build_container() -> ApplicationContainer:
         remediation_service=remediation_service,
     )
 
-    claude_supervised_monitoring_cycle = (
-        ClaudeSupervisedMonitoringCycle(
-            tool_boundary=project_mcp_tool_boundary,
-            agent_job_service=(
-                claude_agent_job_service
-            ),
-        )
-    )
-
-    claude_multi_specialist_supervisor = (
-        ClaudeMultiSpecialistSupervisor(
-            tool_boundary=project_mcp_tool_boundary,
-            agent_job_service=(
-                claude_agent_job_service
-            ),
-        )
-    )
-
-    claude_supervisor_runner = (
-        claude_supervised_monitoring_cycle
-    )
+    claude_supervisor_runner = None
 
     if settings.claude_runtime_enabled:
         claude_command_builder = (
@@ -798,20 +732,11 @@ def build_container() -> ApplicationContainer:
         specialist_investigation_loop=(
             specialist_investigation_loop
         ),
-        server_coordinator=(
-            server_coordinator
-        ),
         claude_agent_job_service=(
             claude_agent_job_service
         ),
         project_mcp_tool_boundary=(
             project_mcp_tool_boundary
-        ),
-        claude_supervised_monitoring_cycle=(
-            claude_supervised_monitoring_cycle
-        ),
-        claude_multi_specialist_supervisor=(
-            claude_multi_specialist_supervisor
         ),
         claude_supervisor=claude_supervisor,
         ssh_test_service=ssh_test_service,
@@ -819,9 +744,6 @@ def build_container() -> ApplicationContainer:
         scheduler=scheduler,
         report_analyzer=report_analyzer,
         analysis_orchestrator=analysis_orchestrator,
-        analysis_agent_manager=(
-            analysis_agent_manager
-        ),
         report_pdf_service=report_pdf_service,
     )
 

@@ -49,18 +49,10 @@ STATIC_DIRECTORY = (
 async def lifespan(
     app: FastAPI,
 ):
-    """
-    يدير دورة حياة التطبيق.
-
-    عند التشغيل:
-    - ينشئ الجداول الناقصة.
-    - يستعيد مهام تحليل LLM غير المكتملة.
-    - يشغل مجدول المراقبة.
-
-    عند الإغلاق:
-    - يوقف المجدول.
-    - ينتظر مهام التحليل الموجودة في Queue.
-    """
+    # Application lifecycle after C.14.9:
+    # - create database tables;
+    # - start periodic scheduling only when the Claude runtime is active;
+    # - no Python analysis-agent queue recovery or draining.
 
     logger.info(
         "Application startup started."
@@ -68,26 +60,21 @@ async def lifespan(
 
     create_database_tables()
 
+    scheduler_task = None
+
     if (
-        container.analysis_agent_manager
-        is not None
+        container.claude_supervisor.status["state"]
+        == "active"
     ):
-        try:
-            await (
-                container.analysis_agent_manager
-                .recover_pending_jobs()
-            )
-
-        except Exception:
-            logger.exception(
-                "Failed to recover pending "
-                "analysis jobs."
-            )
-
-    scheduler_task = asyncio.create_task(
-        container.scheduler.start(),
-        name="monitoring-scheduler",
-    )
+        scheduler_task = asyncio.create_task(
+            container.scheduler.start(),
+            name="monitoring-scheduler",
+        )
+    else:
+        logger.warning(
+            "Scheduled monitoring disabled because "
+            "the Claude operational runtime is disabled."
+        )
 
     app.state.scheduler = container.scheduler
     app.state.scheduler_task = scheduler_task
@@ -105,41 +92,25 @@ async def lifespan(
             "Application shutdown started."
         )
 
-        container.scheduler.stop()
+        if scheduler_task is not None:
+            container.scheduler.stop()
+            scheduler_task.cancel()
 
-        scheduler_task.cancel()
-
-        try:
-            await scheduler_task
-
-        except asyncio.CancelledError:
-            pass
-
-        except Exception:
-            logger.exception(
-                "Scheduler shutdown failed."
-            )
-
-        if (
-            container.analysis_agent_manager
-            is not None
-        ):
             try:
-                await (
-                    container.analysis_agent_manager
-                    .stop_all(
-                        drain=True
-                    )
-                )
+                await scheduler_task
+
+            except asyncio.CancelledError:
+                pass
 
             except Exception:
                 logger.exception(
-                    "Analysis agents shutdown failed."
+                    "Scheduler shutdown failed."
                 )
 
         logger.info(
             "Application shutdown completed."
         )
+
 
 
 app = FastAPI(
@@ -175,16 +146,23 @@ app.include_router(system_router)
     tags=["system"],
 )
 async def health_check() -> dict:
+    supervisor_status = (
+        container.claude_supervisor.status
+    )
     analysis_enabled = (
-        container.analysis_agent_manager
+        container.analysis_orchestrator
         is not None
     )
 
     return {
         "status": "ok",
         "application": settings.app_name,
-        "monitoring_scheduler": "enabled",
-        "supervisor": container.claude_supervisor.status,
+        "monitoring_scheduler": (
+            "enabled"
+            if supervisor_status["state"] == "active"
+            else "disabled"
+        ),
+        "supervisor": supervisor_status,
         "llm_analysis": {
             "enabled": analysis_enabled,
             "provider": (
@@ -201,3 +179,4 @@ async def health_check() -> dict:
             ),
         },
     }
+

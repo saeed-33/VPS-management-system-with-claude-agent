@@ -3,11 +3,6 @@ import logging
 from datetime import UTC, datetime
 from typing import Protocol
 
-from app.tools.monitoring.service import (
-    MonitoringService,
-)
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -15,6 +10,14 @@ class SchedulableServerRecord(Protocol):
     id: int
     interval_seconds: int
     monitor_enabled: bool
+
+
+class MonitoringRunnerProtocol(Protocol):
+    async def run(
+        self,
+        server_id: int,
+    ):
+        ...
 
 
 class SchedulerServerRepositoryProtocol(Protocol):
@@ -38,7 +41,7 @@ class MonitoringScheduler:
         server_repository: (
             SchedulerServerRepositoryProtocol
         ),
-        monitoring_service: MonitoringService,
+        monitoring_service: MonitoringRunnerProtocol,
         polling_interval_seconds: float = 5.0,
         max_concurrent_servers: int = 5,
     ) -> None:

@@ -1,7 +1,7 @@
 import logging
 from datetime import UTC, datetime
 from time import perf_counter
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 import asyncssh
 
@@ -18,12 +18,6 @@ from app.shared.dto.reports import (
     MonitoringReportData,
     MonitoringReportStatus,
 )
-
-
-if TYPE_CHECKING:
-    from app.domain.analysis.analysis_agent_manager import (
-        AnalysisAgentManager,
-    )
 
 
 logger = logging.getLogger(__name__)
@@ -98,7 +92,6 @@ class MonitoringService:
     - تنفيذ الأوامر بالتسلسل.
     - إنشاء التقرير.
     - حفظ التقرير.
-    - إرسال التقرير إلى وكيل التحليل الفرعي.
     - تحديث حالة السيرفر.
 
     لا يحتوي على منطق SQL مباشر.
@@ -112,9 +105,6 @@ class MonitoringService:
             MonitoringProfileRepositoryProtocol
         ),
         report_repository: ReportRepositoryProtocol,
-        analysis_agent_manager: (
-            "AnalysisAgentManager | None"
-        ) = None,
         default_private_key_path: str,
         known_hosts_path: str,
         connection_timeout_seconds: float,
@@ -124,10 +114,6 @@ class MonitoringService:
             profile_repository
         )
         self._report_repository = report_repository
-
-        self._analysis_agent_manager = (
-            analysis_agent_manager
-        )
 
         self._default_private_key_path = (
             default_private_key_path
@@ -277,11 +263,6 @@ class MonitoringService:
             report.status.value,
         )
 
-        await self._enqueue_analysis(
-            server_id=server_id,
-            report_id=report_id,
-        )
-
         self._update_server_status(
             server_id=server_id,
             report=report,
@@ -346,45 +327,6 @@ class MonitoringService:
 
         return executions
 
-    async def _enqueue_analysis(
-        self,
-        *,
-        server_id: int,
-        report_id: int,
-    ) -> None:
-        """
-        يرسل التقرير إلى وكيل التحليل الفرعي الخاص
-        بالسيرفر.
-
-        فشل Queue أو LLM لا يؤدي إلى فشل دورة المراقبة.
-        """
-
-        if self._analysis_agent_manager is None:
-            logger.debug(
-                "LLM analysis disabled | "
-                "server_id=%s | report_id=%s",
-                server_id,
-                report_id,
-            )
-
-            return
-
-        try:
-            await (
-                self._analysis_agent_manager
-                .enqueue_report(
-                    server_id=server_id,
-                    report_id=report_id,
-                )
-            )
-
-        except Exception:
-            logger.exception(
-                "Failed to enqueue report analysis | "
-                "server_id=%s | report_id=%s",
-                server_id,
-                report_id,
-            )
 
     def _update_server_status(
         self,

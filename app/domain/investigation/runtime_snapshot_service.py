@@ -7,8 +7,8 @@ from app.domain.investigation.correlation import FinalDiagnosis
 from app.domain.investigation.final_diagnosis_synthesizer import (
     FinalDiagnosisNarrative,
 )
-from app.domain.investigation.server_coordinator import (
-    ServerCoordinatorResult,
+from app.domain.investigation.execution_contracts import (
+    InvestigationExecutionResult,
 )
 from app.shared.database.repositories.investigation_repository import (
     InvestigationRepository,
@@ -36,7 +36,7 @@ class InvestigationRuntimeSnapshotService:
         self,
         *,
         investigation_id: str,
-        coordinator_result: ServerCoordinatorResult,
+        execution_result: InvestigationExecutionResult,
         final_diagnosis: FinalDiagnosis | None = None,
         narrative: FinalDiagnosisNarrative | None = None,
     ):
@@ -56,7 +56,7 @@ class InvestigationRuntimeSnapshotService:
             )
 
         runtime_id = (
-            coordinator_result
+            execution_result
             .state
             .investigation_id
         )
@@ -67,7 +67,7 @@ class InvestigationRuntimeSnapshotService:
         )
 
         snapshot = self.build_snapshot(
-            coordinator_result=coordinator_result,
+            execution_result=execution_result,
             final_diagnosis=final_diagnosis,
             narrative=narrative,
         )
@@ -83,7 +83,7 @@ class InvestigationRuntimeSnapshotService:
         return self._repository.update_runtime_snapshot(
             investigation_id=investigation_id,
             status=(
-                coordinator_result
+                execution_result
                 .state
                 .status
                 .value
@@ -94,15 +94,15 @@ class InvestigationRuntimeSnapshotService:
     def build_snapshot(
         self,
         *,
-        coordinator_result: ServerCoordinatorResult,
+        execution_result: InvestigationExecutionResult,
         final_diagnosis: FinalDiagnosis | None = None,
         narrative: FinalDiagnosisNarrative | None = None,
     ) -> dict:
-        state = coordinator_result.state
+        state = execution_result.state
 
         specialist_runs = tuple(
             self._serialize_run(run)
-            for run in coordinator_result.runs
+            for run in execution_result.runs
         )
 
         evidence = tuple(
@@ -129,7 +129,7 @@ class InvestigationRuntimeSnapshotService:
                 )
             ),
             "actions_used": (
-                coordinator_result
+                execution_result
                 .investigation_actions_used
             ),
             "evidence_count": len(evidence),
