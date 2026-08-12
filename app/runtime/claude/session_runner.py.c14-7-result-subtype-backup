@@ -66,10 +66,11 @@ class ClaudeCliJsonDecoder:
 
     Supported forms:
     1. The documented single JSON result envelope.
-    2. A strict batched event-array form observed from Claude Code 2.1.175.
+    2. A strict batched event-array form observed from Claude Code 2.1.175,
+       equivalent to collected stream-json events:
+       system/init -> ... -> result.
 
-    Error result subtypes are surfaced explicitly instead of being mistaken
-    for malformed successful output.
+    Any other JSON root or event sequence is rejected.
     """
 
     def decode(
@@ -185,69 +186,15 @@ class ClaudeCliJsonDecoder:
                 "Claude event array session_id mismatch."
             )
 
-        tool_names = self._event_tool_names(
-            events
-        )
-
-        normalized_result = dict(
+        return self._decode_result_envelope(
             result_event
-        )
-
-        reported_tool_count = (
-            normalized_result.get(
-                "tool_call_count"
-            )
-        )
-
-        if reported_tool_count is None:
-            normalized_result[
-                "tool_call_count"
-            ] = len(tool_names)
-        elif (
-            isinstance(reported_tool_count, int)
-            and not isinstance(
-                reported_tool_count,
-                bool,
-            )
-            and reported_tool_count >= 0
-        ):
-            normalized_result[
-                "tool_call_count"
-            ] = max(
-                reported_tool_count,
-                len(tool_names),
-            )
-
-        raw = self._decode_result_envelope(
-            normalized_result
-        )
-
-        if not tool_names:
-            return raw
-
-        usage_metadata = dict(
-            raw.usage_metadata
-        )
-        usage_metadata[
-            "event_tool_names"
-        ] = tool_names
-
-        return ClaudeRawResult(
-            session_id=raw.session_id,
-            content=raw.content,
-            turn_count=raw.turn_count,
-            tool_call_count=raw.tool_call_count,
-            usage_metadata=usage_metadata,
         )
 
     def _decode_result_envelope(
         self,
         payload: dict,
     ) -> ClaudeRawResult:
-        session_id = payload.get(
-            "session_id"
-        )
-
+        session_id = payload.get("session_id")
         if (
             not isinstance(session_id, str)
             or not session_id.strip()
@@ -256,13 +203,7 @@ class ClaudeCliJsonDecoder:
                 "Claude process JSON output is missing session_id."
             )
 
-        self._raise_for_error_result(
-            payload
-        )
-
-        content = self._content(
-            payload
-        )
+        content = self._content(payload)
 
         turn_count = self._non_negative_int(
             payload,
@@ -286,96 +227,6 @@ class ClaudeCliJsonDecoder:
             tool_call_count=tool_call_count,
             usage_metadata=usage_metadata,
         )
-
-    @staticmethod
-    def _raise_for_error_result(
-        payload: dict,
-    ) -> None:
-        subtype = payload.get("subtype")
-        is_error = payload.get("is_error")
-
-        is_result_event = (
-            payload.get("type") == "result"
-        )
-
-        if (
-            is_result_event
-            and isinstance(subtype, str)
-            and subtype
-            and subtype != "success"
-        ):
-            num_turns = payload.get(
-                "num_turns"
-            )
-            stop_reason = payload.get(
-                "stop_reason"
-            )
-            session_id = payload.get(
-                "session_id"
-            )
-
-            raise ClaudeProcessOutputError(
-                "Claude result reported failure: "
-                f"subtype={subtype}; "
-                f"num_turns={num_turns}; "
-                f"stop_reason={stop_reason}; "
-                f"is_error={is_error}; "
-                f"session_id={session_id}"
-            )
-
-        if (
-            is_result_event
-            and is_error is True
-        ):
-            raise ClaudeProcessOutputError(
-                "Claude result reported is_error=true "
-                f"with subtype={subtype!r}."
-            )
-
-    @staticmethod
-    def _event_tool_names(
-        events: list[dict],
-    ) -> list[str]:
-        names: list[str] = []
-
-        for event in events:
-            if event.get("type") != "assistant":
-                continue
-
-            message = event.get("message")
-
-            if not isinstance(message, dict):
-                continue
-
-            content = message.get("content")
-
-            if not isinstance(content, list):
-                continue
-
-            for block in content:
-                if not isinstance(
-                    block,
-                    dict,
-                ):
-                    continue
-
-                if (
-                    block.get("type")
-                    != "tool_use"
-                ):
-                    continue
-
-                name = block.get("name")
-
-                if (
-                    isinstance(name, str)
-                    and name.strip()
-                ):
-                    names.append(
-                        name.strip()
-                    )
-
-        return names
 
     @staticmethod
     def _content(
@@ -407,7 +258,7 @@ class ClaudeCliJsonDecoder:
             or not result.strip()
         ):
             raise ClaudeProcessOutputError(
-                "Claude successful JSON output must contain "
+                "Claude process JSON output must contain "
                 "structured_output or non-empty result."
             )
 
@@ -448,10 +299,7 @@ class ClaudeCliJsonDecoder:
     def _usage_metadata(
         payload: dict,
     ) -> dict:
-        usage = payload.get(
-            "usage",
-            {},
-        )
+        usage = payload.get("usage", {})
 
         if usage is None:
             usage = {}

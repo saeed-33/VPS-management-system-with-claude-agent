@@ -514,3 +514,87 @@ def test_decoder_rejects_event_array_session_mismatch():
     ):
         decoder.decode(stdout)
 
+
+def test_decoder_surfaces_error_max_turns_result():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+            },
+            {
+                "type": "result",
+                "subtype": "error_max_turns",
+                "session_id": "session-123",
+                "num_turns": 20,
+                "is_error": True,
+                "stop_reason": "tool_use",
+            },
+        ]
+    )
+
+    with pytest.raises(
+        ClaudeProcessOutputError,
+        match="subtype=error_max_turns",
+    ):
+        decoder.decode(stdout)
+
+
+def test_decoder_counts_tool_use_blocks_from_event_array():
+    decoder = ClaudeCliJsonDecoder()
+
+    stdout = json.dumps(
+        [
+            {
+                "type": "system",
+                "subtype": "init",
+                "session_id": "session-123",
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__get_server_context",
+                            "input": {
+                                "server_id": 2,
+                            },
+                        },
+                        {
+                            "type": "tool_use",
+                            "name": "mcp__vps__run_monitoring",
+                            "input": {
+                                "server_id": 2,
+                            },
+                        },
+                    ]
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "session_id": "session-123",
+                "num_turns": 2,
+                "result": (
+                    '{"status":"completed",'
+                    '"summary":"done",'
+                    '"data":{},'
+                    '"metadata":{}}'
+                ),
+                "usage": {},
+            },
+        ]
+    )
+
+    result = decoder.decode(stdout)
+
+    assert result.tool_call_count == 2
+    assert result.usage_metadata["event_tool_names"] == [
+        "mcp__vps__get_server_context",
+        "mcp__vps__run_monitoring",
+    ]
+
