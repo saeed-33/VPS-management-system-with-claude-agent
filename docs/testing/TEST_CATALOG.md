@@ -573,3 +573,8 @@ For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md
 ## C.14.3 Bounded Agents
 
 - `tests/test_claude_bounded_agents.py` validates the two-agent architecture, main-session-only specialist delegation, model inheritance, DB Specialist authority, absence of nested delegation, no raw execution tools, and the investigation Skill integration.
+
+
+## C.14.4 Least Privilege
+
+- `tests/test_claude_least_privilege.py` validates the exact pre-approved runtime tool set, `dontAsk` agent mode, PowerShell/Bash operational denials, disabled Skill shell execution, and explicit Phase 5 remediation denials.

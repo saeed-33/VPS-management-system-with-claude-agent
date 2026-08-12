@@ -90,7 +90,7 @@ source of truth for CPU/Memory/PostgreSQL/etc. Specialists.
 
 ### C.14.4 - Least privilege and model inheritance
 
-Status: **NEXT**
+Status: **COMPLETE**
 
 - replace hard-coded `model: sonnet` with `model: inherit`
 - restrict each agent to only required MCP tools
@@ -99,7 +99,7 @@ Status: **NEXT**
 
 ### C.14.5 - Concrete Hooks
 
-Status: **PENDING**
+Status: **NEXT**
 
 Only introduce hooks with real enforcement/audit value.
 

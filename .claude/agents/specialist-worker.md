@@ -11,6 +11,7 @@ mcpServers:
   - vps
 maxTurns: 7
 model: inherit
+permissionMode: dontAsk
 ---
 
 # Specialist Worker

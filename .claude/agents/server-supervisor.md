@@ -26,6 +26,7 @@ skills:
   - plan-remediation
 maxTurns: 20
 model: inherit
+permissionMode: dontAsk
 ---
 
 # Server Supervisor

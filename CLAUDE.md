@@ -190,9 +190,14 @@ and `specialist-worker`. `server-supervisor` is intended to run as the main
 per-server session agent and may delegate only `specialist-worker` tasks.
 `specialist-worker` cannot delegate further.
 
-The agent and Skill contracts are accepted project runtime specifications,
-but they are not proof that a real Claude session is already executing the
-production workflow. The concrete session runner remains pending.
+The agent and Skill contracts are accepted project runtime specifications.
+C.14.4 applies least-privilege runtime permissions: both runtime agents use
+`permissionMode: dontAsk`, only current MCP capabilities are pre-approved,
+raw operational SSH/SQL paths are denied for Bash and PowerShell, and Phase 5
+remediation execution tools are explicitly denied.
+
+These contracts are still not proof that a real Claude session is executing
+the production workflow. The concrete session runner remains pending.
 
 Before Phase 5, C.14 must still implement and prove:
 
