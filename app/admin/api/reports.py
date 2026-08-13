@@ -23,10 +23,10 @@ from app.admin.schemas.reports import (
 from app.admin.services.report_pdf_service import (
     ReportPdfService,
 )
-from app.shared.database.repositories.analysis_repository import (
+from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
-from app.shared.database.repositories.analysis_source_repository import (
+from app.infrastructure.database.repositories.analysis_source_repository import (
     AnalysisSourceRepository,
 )
 from app.shared.exceptions import (

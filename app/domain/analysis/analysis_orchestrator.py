@@ -33,10 +33,10 @@ from app.domain.analysis.retrieval.performance_profiler import (
     snapshot,
     start_profile,
 )
-from app.shared.database.repositories.analysis_repository import (
+from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
-from app.shared.database.repositories.analysis_source_repository import (
+from app.infrastructure.database.repositories.analysis_source_repository import (
     AnalysisSourceRepository,
 )
 from app.shared.services.report_service import (

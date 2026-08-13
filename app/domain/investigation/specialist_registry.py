@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
-from app.shared.database.repositories.specialist_definition_repository import (
+from app.infrastructure.database.repositories.specialist_definition_repository import (
     SpecialistDefinitionRepository,
 )
 from app.shared.dto.specialists import validate_specialist_slug

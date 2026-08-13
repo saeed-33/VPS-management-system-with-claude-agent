@@ -1,5 +1,9 @@
-from sqlalchemy.orm import DeclarativeBase
+"""Compatibility facade for relocated database implementation."""
 
+from app.infrastructure.database.base import (
+    Base,
+)
 
-class Base(DeclarativeBase):
-    pass
+__all__ = [
+    "Base",
+]

@@ -30,7 +30,7 @@ from app.domain.investigation.specialist_reasoning_client import (
 )
 from app.domain.knowledge.retrieval import KnowledgeHybridRetriever
 from app.shared.config import Settings
-from app.shared.database.repositories.knowledge_retrieval_repository import (
+from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
     KnowledgeRetrievalRepository,
 )
 

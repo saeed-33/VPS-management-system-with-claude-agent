@@ -10,13 +10,13 @@ from app.shared.database.models.profile_command import (
 from app.shared.database.models.server import (
     ServerModel,
 )
-from app.shared.database.repositories.command_repository import (
+from app.infrastructure.database.repositories.command_repository import (
     CommandRepository,
 )
-from app.shared.database.repositories.profile_repository import (
+from app.infrastructure.database.repositories.profile_repository import (
     MonitoringProfileRepository,
 )
-from app.shared.database.repositories.server_repository import (
+from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
 from app.shared.dto.profiles import (

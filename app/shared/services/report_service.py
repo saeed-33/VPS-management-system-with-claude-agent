@@ -1,4 +1,4 @@
-from app.shared.database.repositories.report_repository import (
+from app.infrastructure.database.repositories.report_repository import (
     ReportRepository,
 )
 from app.shared.dto.reports import (

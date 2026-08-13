@@ -11,13 +11,13 @@ from app.domain.analysis.retrieval.rag_context import (
 from app.domain.analysis.retrieval.rag_retriever import (
     RagRetriever,
 )
-from app.shared.database.repositories.analysis_repository import (
+from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
 from app.domain.analysis.retrieval.structured_compatibility import (
     StructuredCompatibilityChecker,
 )
-from app.shared.database.repositories.retrieval_repository import (
+from app.infrastructure.database.repositories.retrieval_repository import (
     RetrievalRepository,
 )
 from app.domain.analysis.retrieval.performance_profiler import (

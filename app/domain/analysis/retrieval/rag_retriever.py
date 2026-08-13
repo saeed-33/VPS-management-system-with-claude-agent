@@ -3,8 +3,8 @@ from time import perf_counter
 
 from app.domain.analysis.retrieval.embedding_client import EmbeddingClient
 from app.domain.analysis.retrieval.rag_context import RetrievedAnalysisContext
-from app.shared.database.repositories.analysis_repository import AnalysisRepository
-from app.shared.database.repositories.retrieval_repository import RetrievalRepository
+from app.infrastructure.database.repositories.analysis_repository import AnalysisRepository
+from app.infrastructure.database.repositories.retrieval_repository import RetrievalRepository
 from app.domain.analysis.retrieval.performance_profiler import (
     record_timing,
     set_counter,

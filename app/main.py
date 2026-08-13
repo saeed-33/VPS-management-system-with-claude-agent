@@ -21,7 +21,7 @@ from app.admin.api import (
 from app.admin.web import router as web_router
 from app.bootstrap import container
 from app.shared.config import settings
-from app.shared.database.engine import (
+from app.infrastructure.database.engine import (
     create_database_tables,
 )
 from app.shared.logging import configure_logging

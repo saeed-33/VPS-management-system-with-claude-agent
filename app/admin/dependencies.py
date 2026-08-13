@@ -23,7 +23,7 @@ from app.admin.services.ssh_test_service import (
 from app.admin.services.report_pdf_service import (
     ReportPdfService,
 )
-from app.shared.database.repositories.analysis_source_repository import (
+from app.infrastructure.database.repositories.analysis_source_repository import (
     AnalysisSourceRepository,
 )
 from app.shared.services import (
@@ -34,7 +34,7 @@ from app.shared.services import (
 from app.shared.services.profile_service import (
     MonitoringProfileService,
 )
-from app.shared.database.repositories.analysis_repository import (
+from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
 

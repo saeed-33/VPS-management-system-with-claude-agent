@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from app.domain.investigation.contracts import InvestigationBudget
 from app.domain.investigation.investigation_router import InvestigationRoutingDecision
-from app.shared.database.repositories.investigation_repository import InvestigationRepository
+from app.infrastructure.database.repositories.investigation_repository import InvestigationRepository
 from app.shared.dto.investigations import (
     PersistInvestigationCandidateDTO,
     PersistInvestigationDTO,

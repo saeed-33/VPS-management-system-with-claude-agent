@@ -3,7 +3,7 @@ import logging
 from time import perf_counter
 from dataclasses import dataclass
 
-from app.shared.database.repositories.retrieval_repository import (
+from app.infrastructure.database.repositories.retrieval_repository import (
     RetrievalRepository,
 )
 from app.domain.analysis.retrieval.performance_profiler import (

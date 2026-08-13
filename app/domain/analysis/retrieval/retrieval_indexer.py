@@ -2,8 +2,8 @@ import json
 import logging
 
 from app.domain.analysis.retrieval.embedding_client import EmbeddingClient
-from app.shared.database.repositories.analysis_repository import AnalysisRepository
-from app.shared.database.repositories.retrieval_repository import RetrievalRepository
+from app.infrastructure.database.repositories.analysis_repository import AnalysisRepository
+from app.infrastructure.database.repositories.retrieval_repository import RetrievalRepository
 
 logger = logging.getLogger(__name__)
 

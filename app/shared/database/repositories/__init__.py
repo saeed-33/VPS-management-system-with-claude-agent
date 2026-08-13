@@ -1,19 +1,3 @@
-from app.shared.database.repositories.specialist_definition_repository import (
-    SpecialistDefinitionRepository,
-)
-from app.shared.database.repositories.command_repository import (
-    CommandRepository,
-)
-from app.shared.database.repositories.report_repository import (
-    ReportRepository,
-)
-from app.shared.database.repositories.server_repository import (
-    ServerRepository,
-)
+"""Compatibility facade for relocated database repositories."""
 
-__all__ = [
-    "ServerRepository",
-    "CommandRepository",
-    "ReportRepository",
-    "SpecialistDefinitionRepository",
-]
+from app.infrastructure.database.repositories import *  # noqa: F401,F403

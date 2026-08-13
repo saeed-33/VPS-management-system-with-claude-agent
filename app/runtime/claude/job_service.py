@@ -7,7 +7,7 @@ from app.runtime.claude.models import (
     ClaudeRuntimeRequest,
     ClaudeRuntimeResult,
 )
-from app.shared.database.repositories.agent_job_repository import (
+from app.infrastructure.database.repositories.agent_job_repository import (
     AgentJobRepository,
 )
 from app.shared.dto.agent_jobs import (

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.shared.database.repositories.investigation_repository import (
+from app.infrastructure.database.repositories.investigation_repository import (
     InvestigationRepository,
 )
 from app.shared.dto.investigation_read_models import (

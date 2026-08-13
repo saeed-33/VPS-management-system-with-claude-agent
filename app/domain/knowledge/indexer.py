@@ -6,7 +6,7 @@ from app.domain.analysis.retrieval.embedding_client import EmbeddingClient
 from app.domain.knowledge.ingestion_contracts import (
     KnowledgeDocumentStatus,
 )
-from app.shared.database.repositories.knowledge_document_repository import (
+from app.infrastructure.database.repositories.knowledge_document_repository import (
     KnowledgeDocumentRepository,
 )
 

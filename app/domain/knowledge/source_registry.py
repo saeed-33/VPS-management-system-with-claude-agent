@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Mapping
 
-from app.shared.database.repositories.knowledge_source_repository import (
+from app.infrastructure.database.repositories.knowledge_source_repository import (
     KnowledgeSourceRepository,
 )
 

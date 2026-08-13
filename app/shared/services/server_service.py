@@ -1,7 +1,7 @@
 from app.shared.database.models.server import (
     ServerModel,
 )
-from app.shared.database.repositories.server_repository import (
+from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
 from app.shared.dto.servers import (

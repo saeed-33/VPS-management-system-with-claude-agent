@@ -8,10 +8,10 @@ from app.domain.knowledge.parsers import (
 from app.domain.knowledge.source_loader import (
     KnowledgeSourceLoader,
 )
-from app.shared.database.repositories.knowledge_document_repository import (
+from app.infrastructure.database.repositories.knowledge_document_repository import (
     KnowledgeDocumentRepository,
 )
-from app.shared.database.repositories.knowledge_source_repository import (
+from app.infrastructure.database.repositories.knowledge_source_repository import (
     KnowledgeSourceRepository,
 )
 from app.shared.utils.datetime import utc_now

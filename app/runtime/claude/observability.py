@@ -4,7 +4,7 @@ from collections import Counter
 from datetime import datetime
 from typing import Any
 
-from app.shared.database.repositories.agent_job_repository import (
+from app.infrastructure.database.repositories.agent_job_repository import (
     AgentJobRepository,
 )
 

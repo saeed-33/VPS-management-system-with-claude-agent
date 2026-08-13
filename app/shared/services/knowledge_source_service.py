@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.shared.database.repositories.knowledge_source_repository import (
+from app.infrastructure.database.repositories.knowledge_source_repository import (
     KnowledgeSourceRepository,
 )
 from app.shared.dto.knowledge_sources import (

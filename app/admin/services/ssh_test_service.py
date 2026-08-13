@@ -7,7 +7,7 @@ from app.tools.ssh.client import (
 from app.tools.ssh.command_executor import (
     SSHCommandExecutor,
 )
-from app.shared.database.repositories.server_repository import (
+from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
 from app.shared.exceptions import ServerNotFoundError

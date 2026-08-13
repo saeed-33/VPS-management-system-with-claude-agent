@@ -4,7 +4,7 @@ import asyncio
 from dataclasses import dataclass
 
 from app.domain.analysis.retrieval.embedding_client import EmbeddingClient
-from app.shared.database.repositories.knowledge_retrieval_repository import (
+from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
     KnowledgeRetrievalRepository,
     KnowledgeSearchRow,
 )

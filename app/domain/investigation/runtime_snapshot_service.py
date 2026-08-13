@@ -10,7 +10,7 @@ from app.domain.investigation.final_diagnosis_synthesizer import (
 from app.domain.investigation.execution_contracts import (
     InvestigationExecutionResult,
 )
-from app.shared.database.repositories.investigation_repository import (
+from app.infrastructure.database.repositories.investigation_repository import (
     InvestigationRepository,
 )
 

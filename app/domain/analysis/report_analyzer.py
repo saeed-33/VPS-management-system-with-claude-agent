@@ -18,7 +18,7 @@ from app.domain.analysis.prompts import (
 from app.domain.analysis.report_serializer import (
     ReportSerializer,
 )
-from app.shared.database.repositories.analysis_repository import (
+from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
 from app.shared.dto.analysis import (

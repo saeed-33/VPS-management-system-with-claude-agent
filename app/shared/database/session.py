@@ -1,27 +1,11 @@
-from collections.abc import Generator
+"""Compatibility facade for relocated database implementation."""
 
-from sqlalchemy.orm import Session, sessionmaker
-
-from app.shared.database.engine import engine
-
-
-SessionLocal = sessionmaker(
-    bind=engine,
-    class_=Session,
-    autoflush=False,
-    autocommit=False,
-    expire_on_commit=False,
+from app.infrastructure.database.session import (
+    SessionLocal,
+    get_database_session,
 )
 
-
-def get_database_session() -> Generator[
-    Session,
-    None,
-    None,
-]:
-    session = SessionLocal()
-
-    try:
-        yield session
-    finally:
-        session.close()
+__all__ = [
+    "SessionLocal",
+    "get_database_session",
+]

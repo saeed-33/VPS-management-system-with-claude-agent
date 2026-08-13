@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from app.shared.database.repositories.remediation_repository import (
+from app.infrastructure.database.repositories.remediation_repository import (
     RemediationRepository,
 )
 from app.shared.dto.remediation import (

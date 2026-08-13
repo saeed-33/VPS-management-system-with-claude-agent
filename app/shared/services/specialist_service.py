@@ -3,7 +3,7 @@ from __future__ import annotations
 from app.shared.database.models.specialist_definition import (
     SpecialistDefinitionModel,
 )
-from app.shared.database.repositories.specialist_definition_repository import (
+from app.infrastructure.database.repositories.specialist_definition_repository import (
     SpecialistDefinitionRepository,
 )
 from app.shared.dto.specialists import (
