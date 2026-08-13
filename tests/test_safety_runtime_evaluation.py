@@ -1,9 +1,9 @@
 import asyncio
 
-from app.domain.evaluation.contracts import (
+from tools.acceptance.evaluation.contracts import (
     EvaluationMetric,
 )
-from app.domain.evaluation.safety_runtime import (
+from tools.acceptance.evaluation.safety_runtime import (
     evaluate_policy_cases,
     evaluate_provider_cases,
     evaluate_routing_cases,

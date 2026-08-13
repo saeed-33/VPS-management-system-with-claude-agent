@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.domain.knowledge.source_registry import (
+from app.capabilities.knowledge.source_registry import (
     KnowledgeSourceRegistry,
 )
 from app.core.contracts.knowledge_sources import (

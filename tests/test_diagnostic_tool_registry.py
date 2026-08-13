@@ -1,6 +1,6 @@
 import pytest
 
-from app.domain.investigation.diagnostic_tools import (
+from app.core.policies.diagnostic_tools import (
     DiagnosticToolCall,
     build_default_diagnostic_tool_registry,
 )

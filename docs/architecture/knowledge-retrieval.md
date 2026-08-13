@@ -32,7 +32,7 @@ priority. No LLM reranker is used in this phase.
 Acceptance:
 
 ```powershell
-uv run python tools/search_knowledge.py `
+uv run python tools/dev/search_knowledge.py `
   "nginx modules configuration" `
   --specialist nginx `
   --domains nginx,http,proxy

@@ -33,7 +33,7 @@ Apply the migration:
 
 ```powershell
 psql -U <POSTGRES_USER> -d <POSTGRES_DB> `
-  -f .\app\shared\database\migrations\step_4_2_specialist_definitions.sql
+  -f .\app\infrastructure\database\migrations\step_4_2_specialist_definitions.sql
 ```
 
 Then:

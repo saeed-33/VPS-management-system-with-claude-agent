@@ -1,13 +1,13 @@
 import asyncio
 from dataclasses import dataclass
 
-from app.domain.analysis.retrieval.rag_context import (
+from app.capabilities.analysis.retrieval.rag_context import (
     RetrievedAnalysisContext,
 )
-from app.domain.knowledge.retrieval import (
+from app.capabilities.knowledge.retrieval import (
     KnowledgeRetrievalContext,
 )
-from app.mcp import (
+from app.interfaces.mcp import (
     ProjectMcpToolBoundary,
     ProjectToolCall,
 )

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.admin.api.diagnostic_tools import router
+from app.interfaces.admin.api.diagnostic_tools import router
 
 
 def test_diagnostic_tools_api_lists_registry():

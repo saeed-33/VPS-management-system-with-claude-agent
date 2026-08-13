@@ -1,6 +1,6 @@
 import pytest
 
-from app.domain.investigation import (
+from app.capabilities.investigation import (
     EvidenceKind,
     EvidenceReference,
     InvestigationBudget,

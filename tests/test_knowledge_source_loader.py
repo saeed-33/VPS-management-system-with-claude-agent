@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.domain.knowledge.source_loader import (
+from app.capabilities.knowledge.source_loader import (
     KnowledgeSourceLoader,
 )
 

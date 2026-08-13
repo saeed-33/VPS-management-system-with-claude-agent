@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.admin.api.system import router
-from app.admin.dependencies import (
+from app.interfaces.admin.api.system import router
+from app.interfaces.admin.dependencies import (
     get_claude_supervisor,
     get_project_tool_boundary,
 )
-from app.mcp.schemas import ProjectToolDefinition
+from app.interfaces.mcp.schemas import ProjectToolDefinition
 
 
 class FakeSupervisor:

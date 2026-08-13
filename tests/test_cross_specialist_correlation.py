@@ -1,4 +1,4 @@
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     EvidenceKind,
     EvidenceReference,
     InvestigationBudget,
@@ -9,11 +9,11 @@ from app.domain.investigation.contracts import (
     SpecialistTask,
     SpecialistTaskStatus,
 )
-from app.domain.investigation.correlation import (
+from app.capabilities.investigation.correlation import (
     CrossSpecialistCorrelator,
     DiagnosisCertainty,
 )
-from app.domain.investigation.execution_contracts import (
+from app.capabilities.investigation.execution_contracts import (
     InvestigationExecutionResult,
     InvestigationSpecialistRun,
 )

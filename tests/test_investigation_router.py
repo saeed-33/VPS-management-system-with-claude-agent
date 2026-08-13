@@ -2,11 +2,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.domain.investigation.investigation_router import (
+from app.capabilities.investigation.investigation_router import (
     InvestigationRouter,
     RoutingReason,
 )
-from app.domain.investigation.specialist_registry import SpecialistRegistry
+from app.capabilities.investigation.specialist_registry import SpecialistRegistry
 
 
 def specialist(i, slug, *, domains, trigger_hints, priority=100):

@@ -1,4 +1,4 @@
-from app.domain.evaluation import (
+from tools.acceptance.evaluation import (
     EvaluationMetric,
     EvaluationObservation,
     RUNTIME_READINESS_CASES,

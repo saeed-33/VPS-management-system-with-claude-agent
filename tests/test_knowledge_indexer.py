@@ -1,7 +1,7 @@
 import asyncio
 from types import SimpleNamespace
 
-from app.domain.knowledge.indexer import (
+from app.capabilities.knowledge.indexer import (
     KnowledgeIndexer,
 )
 

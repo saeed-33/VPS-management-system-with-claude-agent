@@ -16,7 +16,7 @@ from app.capabilities.knowledge.source_service import (
 from app.capabilities.investigation.specialist_service import (
     SpecialistDefinitionService,
 )
-from app.bootstrap import container
+from app.composition import container
 from app.interfaces.admin.services.ssh_test_service import (
     SSHTestService,
 )

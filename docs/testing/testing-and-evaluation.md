@@ -72,7 +72,7 @@ aggregate readiness
 Dataset coverage:
 
 ```powershell
-uv run python tools/run_evaluation_dataset.py
+uv run python tools/acceptance/run_evaluation_dataset.py
 ```
 
 This verifies dataset/gate wiring only.
@@ -80,7 +80,7 @@ This verifies dataset/gate wiring only.
 Safety/runtime controlled evaluation:
 
 ```powershell
-uv run python tools/run_safety_runtime_evaluation.py
+uv run python tools/acceptance/run_safety_runtime_evaluation.py
 ```
 
 This executes real routing and Policy logic and real Ollama-client parsing/retry/failure behavior through controlled HTTP transport.
@@ -92,7 +92,7 @@ Real runtime tests may contact Ollama and Linux hosts over SSH.
 Current acceptance commands:
 
 ```powershell
-uv run python tools/smoke_ollama_claude_runtime.py --server-id <server_id>
+uv run python tools/acceptance/smoke_ollama_claude_runtime.py --server-id <server_id>
 uv run python -m pytest tests/real_runtime -q
 ```
 
@@ -101,7 +101,7 @@ Use `docs/testing/TEST_CATALOG.md` for the exact tools/tests available in the cu
 ## Persisted runtime measurement
 
 ```powershell
-uv run python tools/run_persisted_runtime_evaluation.py --limit 500
+uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 500
 ```
 
 Measured from persisted real snapshots:
@@ -117,7 +117,7 @@ final_diagnosis_grounding
 ## Production readiness
 
 ```powershell
-uv run python tools/run_production_readiness_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
 ```
 
 Current accepted result:

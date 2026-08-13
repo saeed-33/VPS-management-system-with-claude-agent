@@ -19,7 +19,7 @@ from app.interfaces.admin.api import (
     system_router,
 )
 from app.interfaces.admin.web import router as web_router
-from app.bootstrap import container
+from app.composition import container
 from app.core.config import settings
 from app.infrastructure.database.engine import (
     create_database_tables,

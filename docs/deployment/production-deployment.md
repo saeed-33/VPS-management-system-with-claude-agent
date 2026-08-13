@@ -163,7 +163,7 @@ git status
 uv sync
 uv run python -m pytest
 uv run python tools/bootstrap_database.py --verify-only
-uv run python tools/list_routes.py
+uv run python tools/dev/list_routes.py
 ```
 
 ثم:

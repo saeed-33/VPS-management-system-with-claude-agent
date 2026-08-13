@@ -15,7 +15,7 @@ from app.interfaces.mcp.schemas import (
     ProjectToolResult,
 )
 from app.interfaces.mcp.catalog import group_definitions
-from app.interfaces.mcp.project_boundary_parts import (
+from app.interfaces.mcp.handlers import (
     AnalysisToolsMixin,
     BoundaryCommonMixin,
     BoundaryDefinitionsMixin,

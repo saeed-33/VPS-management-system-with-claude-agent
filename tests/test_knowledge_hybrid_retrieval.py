@@ -1,6 +1,6 @@
 import asyncio
 
-from app.domain.knowledge.retrieval import (
+from app.capabilities.knowledge.retrieval import (
     KnowledgeHybridRetriever,
 )
 from app.infrastructure.database.repositories.knowledge_retrieval_repository import (

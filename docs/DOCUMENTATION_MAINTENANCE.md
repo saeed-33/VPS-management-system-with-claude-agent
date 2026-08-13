@@ -29,10 +29,10 @@ REFERENCE
 ## Sync commands
 
 ```powershell
-uv run python tools/generate_test_catalog.py
-uv run python tools/generate_project_structure.py
-uv run python tools/sync_documentation.py
-uv run python tools/audit_documentation.py
+uv run python tools/dev/generate_test_catalog.py
+uv run python tools/dev/generate_project_structure.py
+uv run python tools/dev/sync_documentation.py
+uv run python tools/dev/audit_documentation.py
 ```
 
 ## Audit rules

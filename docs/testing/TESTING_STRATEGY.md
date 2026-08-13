@@ -49,13 +49,13 @@ The normal pytest suite includes FastAPI API/web tests.
 Useful runtime inventories:
 
 ```powershell
-uv run python tools/list_routes.py
+uv run python tools/dev/list_routes.py
 ```
 
 Investigation read/API/UI acceptance:
 
 ```powershell
-uv run python tools/run_investigation_web_api_acceptance.py --limit 25
+uv run python tools/acceptance/run_investigation_web_api_acceptance.py --limit 25
 ```
 
 ### Layer 3 — Deterministic evaluation
@@ -63,7 +63,7 @@ uv run python tools/run_investigation_web_api_acceptance.py --limit 25
 Dataset coverage and gate wiring:
 
 ```powershell
-uv run python tools/run_evaluation_dataset.py
+uv run python tools/acceptance/run_evaluation_dataset.py
 ```
 
 This validates the evaluation dataset. It is not a runtime-quality score.
@@ -71,7 +71,7 @@ This validates the evaluation dataset. It is not a runtime-quality score.
 Controlled safety evaluation:
 
 ```powershell
-uv run python tools/run_safety_runtime_evaluation.py
+uv run python tools/acceptance/run_safety_runtime_evaluation.py
 ```
 
 This exercises the real routing, Policy, and Ollama client logic with controlled provider transport.
@@ -83,7 +83,7 @@ These tests may contact real Linux servers and/or Ollama. Run them only in a con
 The current native acceptance entrypoint is:
 
 ```powershell
-uv run python tools/smoke_ollama_claude_runtime.py --server-id <server_id>
+uv run python tools/acceptance/smoke_ollama_claude_runtime.py --server-id <server_id>
 uv run python -m pytest tests/real_runtime -q
 ```
 
@@ -95,7 +95,7 @@ the current checkout.
 Evaluate real persisted Investigation snapshots:
 
 ```powershell
-uv run python tools/run_persisted_runtime_evaluation.py --limit 500
+uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 500
 ```
 
 This measures:
@@ -113,7 +113,7 @@ final_diagnosis_grounding
 Aggregate all measured observations:
 
 ```powershell
-uv run python tools/run_production_readiness_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
 ```
 
 Expected Phase 4 closeout state:

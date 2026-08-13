@@ -117,13 +117,13 @@ normal Tool failure, not as an Investigation crash.
 Inspect all tools:
 
 ```powershell
-uv run python tools/inspect_diagnostic_tools.py
+uv run python tools/dev/inspect_diagnostic_tools.py
 ```
 
 Then inspect the effective allow-list for an existing Specialist:
 
 ```powershell
-uv run python tools/inspect_diagnostic_tools.py --specialist nginx
+uv run python tools/dev/inspect_diagnostic_tools.py --specialist nginx
 ```
 
 If the Specialist currently has no `allowed_tool_ids`, the second command

@@ -1,11 +1,11 @@
 import asyncio
 import json
 
-from app.mcp.schemas import (
+from app.interfaces.mcp.schemas import (
     ProjectToolDefinition,
     ProjectToolResult,
 )
-from app.mcp.server import (
+from app.interfaces.mcp.server import (
     ProjectMcpProtocolServer,
 )
 

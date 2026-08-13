@@ -66,7 +66,7 @@ DELETE /api/knowledge-sources/{id}
 
 ```powershell
 psql -U <POSTGRES_USER> -d <POSTGRES_DB> `
-  -f .\app\shared\database\migrations\step_4_7_knowledge_sources.sql
+  -f .\app\infrastructure\database\migrations\step_4_7_knowledge_sources.sql
 ```
 
 ## Acceptance
@@ -74,8 +74,8 @@ psql -U <POSTGRES_USER> -d <POSTGRES_DB> `
 ```powershell
 uv run python tools/bootstrap_database.py --verify-only
 uv run python -m pytest
-uv run python tools/list_routes.py
-uv run python tools/inspect_knowledge_sources.py
+uv run python tools/dev/list_routes.py
+uv run python tools/dev/inspect_knowledge_sources.py
 ```
 
 After migration, database verification should report 13/13 tables.

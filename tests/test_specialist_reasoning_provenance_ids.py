@@ -1,13 +1,13 @@
 import asyncio
 
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     EvidenceKind,
     EvidenceReference,
 )
-from app.domain.investigation.specialist_context import (
+from app.capabilities.investigation.specialist_context import (
     SpecialistContextSnapshot,
 )
-from app.domain.investigation.specialist_reasoning_agent import (
+from app.capabilities.investigation.specialist_reasoning_agent import (
     SpecialistReasoningAgent,
 )
 from app.core.contracts.specialist_reasoning import (

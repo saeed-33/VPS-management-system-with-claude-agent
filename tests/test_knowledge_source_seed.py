@@ -1,4 +1,4 @@
-from tools.seed_knowledge_sources import (
+from tools.dev.seed_knowledge_sources import (
     SOURCES,
 )
 

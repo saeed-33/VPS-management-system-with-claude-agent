@@ -1,6 +1,6 @@
 import json
 
-from app.domain.analysis.retrieval.structured_compatibility import (
+from app.capabilities.analysis.retrieval.structured_compatibility import (
     StructuredCompatibilityChecker,
 )
 

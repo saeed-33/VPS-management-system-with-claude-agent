@@ -1,22 +1,22 @@
 import asyncio
 from types import MappingProxyType
 
-from app.domain.analysis.retrieval.rag_context import (
+from app.capabilities.analysis.retrieval.rag_context import (
     RetrievedAnalysisContext,
 )
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     EvidenceKind,
     EvidenceReference,
     SpecialistTask,
 )
-from app.domain.knowledge.retrieval import (
+from app.capabilities.knowledge.retrieval import (
     KnowledgeRetrievalContext,
 )
-from app.domain.investigation.specialist_context import (
+from app.capabilities.investigation.specialist_context import (
     SpecialistContextBudget,
     SpecialistContextBuilder,
 )
-from app.domain.investigation.specialist_registry import (
+from app.capabilities.investigation.specialist_registry import (
     SpecialistRuntimeDefinition,
 )
 

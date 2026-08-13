@@ -5,7 +5,7 @@ This document is generated from the current checkout.
 Regenerate with:
 
 ```powershell
-uv run python tools/generate_project_structure.py
+uv run python tools/dev/generate_project_structure.py
 ```
 
 ## Architectural flow
@@ -86,6 +86,13 @@ Evaluation / Production Readiness Gate
 - `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611751679880700-SubagentStart-a47a2447f9d1f674a.json` — Structured configuration or generated data.
 - `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611827936170500-SubagentStop-a47a2447f9d1f674a.json` — Structured configuration or generated data.
 - `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611846621773900-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/5353acca-78e0-4b71-b899-fb21c2ae0c72/1786613740958790600-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/5353acca-78e0-4b71-b899-fb21c2ae0c72/1786613742405928700-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/5353acca-78e0-4b71-b899-fb21c2ae0c72/1786613815763307200-SubagentStart-adf9164b8817f9a86.json` — Structured configuration or generated data.
+- `.claude/runtime-events/5353acca-78e0-4b71-b899-fb21c2ae0c72/1786613837969999900-SubagentStop-adf9164b8817f9a86.json` — Structured configuration or generated data.
+- `.claude/runtime-events/5353acca-78e0-4b71-b899-fb21c2ae0c72/1786613852904729500-SubagentStart-a64dd7146f71fde6b.json` — Structured configuration or generated data.
+- `.claude/runtime-events/5353acca-78e0-4b71-b899-fb21c2ae0c72/1786613936164859200-SubagentStop-a64dd7146f71fde6b.json` — Structured configuration or generated data.
+- `.claude/runtime-events/5353acca-78e0-4b71-b899-fb21c2ae0c72/1786613958388210400-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/554f9f39-1a6d-434e-8f32-f3d06b64bab0/1786556072699345500-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/554f9f39-1a6d-434e-8f32-f3d06b64bab0/1786556074684267400-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/554f9f39-1a6d-434e-8f32-f3d06b64bab0/1786556077079515800-SessionEnd-main.json` — Structured configuration or generated data.
@@ -127,12 +134,22 @@ Evaluation / Production Readiness Gate
 - `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561380879406700-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561383116863100-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561388312756700-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b03b9679-4057-4a30-99fc-0c405df5627e/1786615469985110600-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b03b9679-4057-4a30-99fc-0c405df5627e/1786615471387346000-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b03b9679-4057-4a30-99fc-0c405df5627e/1786615562544349300-SubagentStart-a5009a68773ddfa21.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b03b9679-4057-4a30-99fc-0c405df5627e/1786615600809962300-SubagentStop-a5009a68773ddfa21.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b03b9679-4057-4a30-99fc-0c405df5627e/1786615613702241100-SubagentStart-aa0cdeb4fc0dff0f8.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b03b9679-4057-4a30-99fc-0c405df5627e/1786615701064296500-SubagentStop-aa0cdeb4fc0dff0f8.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b03b9679-4057-4a30-99fc-0c405df5627e/1786615736390206900-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/b6155e84-22e7-4954-9e7b-a240c1cecd3c/1786560231353731200-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/b6155e84-22e7-4954-9e7b-a240c1cecd3c/1786560233356393000-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/b6155e84-22e7-4954-9e7b-a240c1cecd3c/1786560234326782500-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/c069533c-fa44-496a-9c66-9ad7e0140d39/1786561867173454800-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/c069533c-fa44-496a-9c66-9ad7e0140d39/1786561869591595800-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/c069533c-fa44-496a-9c66-9ad7e0140d39/1786561880414902200-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c1d9af3f-70d3-454b-8298-015a38464758/1786615859465942900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c1d9af3f-70d3-454b-8298-015a38464758/1786615860849682600-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c1d9af3f-70d3-454b-8298-015a38464758/1786615912591296900-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/c45f1e6f-2b1b-42a6-8887-89b9342921b7/1786554320745556900-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/c45f1e6f-2b1b-42a6-8887-89b9342921b7/1786554320865332300-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/c45f1e6f-2b1b-42a6-8887-89b9342921b7/1786554341731351700-SessionEnd-main.json` — Structured configuration or generated data.
@@ -190,93 +207,16 @@ Evaluation / Production Readiness Gate
 ### Application core
 
 - `app/__init__.py` — Python module.
-- `app/admin/__init__.py` — Compatibility facade for :mod:`app.interfaces.admin`.
-- `app/admin/api/__init__.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/agent_observability.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/commands.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/diagnostic_tools.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/investigations.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/knowledge_sources.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/profiles.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/reports.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/servers.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/specialists.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/api/system.py` — Compatibility facade for the canonical Admin API.
-- `app/admin/dependencies.py` — Compatibility facade for the canonical Admin interface.
-- `app/admin/schemas/__init__.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/schemas/commands.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/schemas/investigations.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/schemas/knowledge_sources.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/schemas/profiles.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/schemas/reports.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/schemas/servers.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/schemas/specialists.py` — Compatibility facade for the canonical Admin schemas.
-- `app/admin/services/__init__.py` — Compatibility facade for the canonical Admin services.
-- `app/admin/services/report_pdf_service.py` — Compatibility facade for the canonical Admin services.
-- `app/admin/services/ssh_test_service.py` — Compatibility facade for the canonical Admin services.
-- `app/admin/web/__init__.py` — Compatibility facade for the canonical Admin web interface.
-- `app/admin/web/routes.py` — Compatibility facade for the canonical Admin web interface.
-- `app/bootstrap.py` — Application composition root / dependency container. Builds repositories, services, LLM clients, registries, Policy, coordinators, and shared runtime dependencies.
 - `app/capabilities/__init__.py` — Application capabilities: bounded business execution used by interfaces.
 - `app/capabilities/remediation/__init__.py` — Policy-gated remediation proposal and application capabilities.
 - `app/capabilities/remediation/service.py` — Python module containing class `RemediationService`.
-- `app/composition/__init__.py` — Python module.
+- `app/composition/__init__.py` — Application composition root / dependency container. Exports the canonical wired application container.
 - `app/composition/analysis.py` — Python module containing class `RetrievalComposition`, class `AnalysisInvestigationComposition`, `build_retrieval_composition()`, `build_analysis_investigation_composition()`.
 - `app/composition/builder.py` — Python module containing `build_container()`.
 - `app/composition/container.py` — Python module containing class `ApplicationContainer`.
 - `app/composition/repositories.py` — Python module containing class `RepositoryBundle`, `build_repositories()`.
 - `app/composition/runtime.py` — Python module containing class `RuntimeComposition`, `build_runtime_composition()`.
 - `app/composition/services.py` — Python module containing class `CoreServiceBundle`, `build_core_services()`.
-- `app/domain/__init__.py` — Project domain services and contracts.
-- `app/domain/analysis/__init__.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/analysis_orchestrator.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/client_factory.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/llm_client.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/ollama_client.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/prompts.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/report_analyzer.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/report_serializer.py` — Compatibility facade for the canonical analysis capability.
-- `app/domain/analysis/retrieval/__init__.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/context_builder.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/embedding_client.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/embedding_factory.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/full_text_retriever.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/hybrid_retriever.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/ollama_embedding_client.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/performance_profiler.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/rag_context.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/rag_retriever.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/report_fingerprint.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/report_normalizer.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/retrieval_indexer.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/reuse_policy.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/analysis/retrieval/structured_compatibility.py` — Compatibility facade for canonical analysis retrieval capabilities.
-- `app/domain/investigation/__init__.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/contracts.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/correlation.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/diagnostic_policy.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/diagnostic_tools.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/evidence_collection.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/execution_contracts.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/final_diagnosis_synthesizer.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/investigation_router.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/persistence_service.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/runtime_snapshot_service.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/specialist_context.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/specialist_investigation_loop.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/specialist_reasoning_agent.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/specialist_reasoning_client.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/investigation/specialist_registry.py` — Compatibility facade for the canonical investigation capability.
-- `app/domain/knowledge/__init__.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/chunker.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/chunking_service.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/indexer.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/ingestion_contracts.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/ingestion_service.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/parsers.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/retrieval.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/source_loader.py` — Compatibility facade for the canonical knowledge capability.
-- `app/domain/knowledge/source_registry.py` — Compatibility facade for the canonical knowledge capability.
 - `app/infrastructure/__init__.py` — Infrastructure adapters and external-system implementations.
 - `app/infrastructure/database/__init__.py` — Database infrastructure implementations.
 - `app/infrastructure/database/base.py` — Python module containing class `Base`.
@@ -333,22 +273,18 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/__init__.py` — External adapters for HTTP administration and MCP.
 - `app/interfaces/mcp/__init__.py` — Python module.
 - `app/interfaces/mcp/catalog.py` — Categorizes project tools into monitoring, reports, retrieval, investigation, specialists, and remediation groups.
-- `app/interfaces/mcp/project_boundary_parts/__init__.py` — Python module.
-- `app/interfaces/mcp/project_boundary_parts/analysis.py` — Python module containing class `AnalysisToolsMixin`.
-- `app/interfaces/mcp/project_boundary_parts/common.py` — Python module containing class `BoundaryCommonMixin`.
-- `app/interfaces/mcp/project_boundary_parts/definitions.py` — Python module containing class `BoundaryDefinitionsMixin`.
-- `app/interfaces/mcp/project_boundary_parts/investigation.py` — Python module containing class `InvestigationToolsMixin`.
-- `app/interfaces/mcp/project_boundary_parts/monitoring.py` — Python module containing class `MonitoringToolsMixin`.
-- `app/interfaces/mcp/project_boundary_parts/remediation.py` — Python module containing class `RemediationToolsMixin`.
+- `app/interfaces/mcp/handlers/__init__.py` — Python module.
+- `app/interfaces/mcp/handlers/analysis.py` — Python module containing class `AnalysisToolsMixin`.
+- `app/interfaces/mcp/handlers/common.py` — Python module containing class `BoundaryCommonMixin`.
+- `app/interfaces/mcp/handlers/definitions.py` — Python module containing class `BoundaryDefinitionsMixin`.
+- `app/interfaces/mcp/handlers/investigation.py` — Python module containing class `InvestigationToolsMixin`.
+- `app/interfaces/mcp/handlers/monitoring.py` — Python module containing class `MonitoringToolsMixin`.
+- `app/interfaces/mcp/handlers/remediation.py` — Python module containing class `RemediationToolsMixin`.
 - `app/interfaces/mcp/registry.py` — Project tool execution boundary used by Claude through MCP; validates calls, invokes deterministic services, and returns structured results.
 - `app/interfaces/mcp/schemas.py` — Stable MCP request and response contracts exposed to Claude Code.
 - `app/interfaces/mcp/serializers.py` — Python module containing `serialize_value()`, `serialize_server()`, `serialize_profile()`, `serialize_monitoring_report_data()`, `serialize_report_details()`.
 - `app/interfaces/mcp/server.py` — Project-scoped MCP protocol server exposing project tools to Claude Code.
 - `app/main.py` — FastAPI application entry point; registers API/web routers and startup/shutdown behavior.
-- `app/mcp/__init__.py` — Compatibility facade for :mod:`app.interfaces.mcp`.
-- `app/mcp/schemas.py` — Compatibility facade for the canonical MCP interface.
-- `app/mcp/serializers.py` — Compatibility facade for the canonical MCP interface.
-- `app/mcp/server.py` — Compatibility facade for the canonical MCP interface.
 - `app/runtime/__init__.py` — Runtime adapters and supervisors.
 
 ### Claude Runtime
@@ -390,7 +326,6 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/analysis/analysis_orchestrator.py` — Analysis domain module containing class `AnalysisOrchestrator`.
 - `app/capabilities/analysis/client_factory.py` — Analysis domain module containing `create_llm_analysis_client()`.
 - `app/capabilities/analysis/llm_client.py` — Analysis domain module containing class `LLMAnalysisClient`.
-- `app/capabilities/analysis/ollama_client.py` — Compatibility facade for the relocated Ollama analysis client.
 - `app/capabilities/analysis/prompts.py` — Analysis domain module containing `build_analysis_prompt()`.
 - `app/capabilities/analysis/report_analyzer.py` — Analysis domain module containing class `ReportAnalyzer`.
 - `app/capabilities/analysis/report_serializer.py` — Analysis domain module containing class `ReportSerializer`.
@@ -400,7 +335,6 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/analysis/retrieval/embedding_factory.py` — Analysis domain module containing `create_embedding_client()`.
 - `app/capabilities/analysis/retrieval/full_text_retriever.py` — Analysis domain module containing class `FullTextCandidate`, class `FullTextQueryBuilder`, class `FullTextRetriever`.
 - `app/capabilities/analysis/retrieval/hybrid_retriever.py` — Analysis domain module containing class `_FusionCandidate`, class `HybridRetriever`.
-- `app/capabilities/analysis/retrieval/ollama_embedding_client.py` — Compatibility facade for the relocated Ollama embedding client.
 - `app/capabilities/analysis/retrieval/performance_profiler.py` — Analysis domain module containing class `PerformanceProfile`, `start_profile()`, `record_timing()`, `set_counter()`, `snapshot()`.
 - `app/capabilities/analysis/retrieval/rag_context.py` — Analysis domain module containing class `RetrievedAnalysisContext`.
 - `app/capabilities/analysis/retrieval/rag_retriever.py` — Analysis domain module containing class `RagRetriever`.
@@ -444,15 +378,15 @@ Evaluation / Production Readiness Gate
 
 ### Evaluation and Production Readiness
 
-- `app/domain/evaluation/__init__.py` — Runtime evaluation/readiness component.
-- `app/domain/evaluation/aggregate_readiness.py` — Runtime evaluation/readiness component containing class `AggregateEvaluationResult`, class `AggregateReadinessEvaluator`.
-- `app/domain/evaluation/cases.py` — Runtime evaluation/readiness component containing class `EvaluationCase`, `default_evaluation_cases()`.
-- `app/domain/evaluation/contracts.py` — Runtime evaluation/readiness component containing class `EvaluationMetric`, class `ReadinessStatus`, class `EvaluationObservation`, class `MetricThreshold`, class `MetricEvaluation`.
-- `app/domain/evaluation/persisted_runtime.py` — Runtime evaluation/readiness component containing class `PersistedRuntimeEvaluation`, class `PersistedRuntimeEvaluator`.
-- `app/domain/evaluation/readiness_gate.py` — Runtime evaluation/readiness component containing class `ProductionReadinessGate`.
-- `app/domain/evaluation/runner.py` — Runtime evaluation/readiness component containing class `EvaluationCaseResult`, class `EvaluationRunResult`, class `DeterministicEvaluationRunner`, `expected_behavior_executor()`.
-- `app/domain/evaluation/runtime_readiness.py` — Runtime evaluation/readiness component containing class `RuntimeReadinessMetric`, class `RuntimeReadinessResult`, class `RuntimeReadinessGate`.
-- `app/domain/evaluation/safety_runtime.py` — Runtime evaluation/readiness component containing class `_StaticRegistry`, `evaluate_routing_cases()`, `evaluate_policy_cases()`, `evaluate_provider_cases()`, `evaluate_safety_runtime()`.
+- `tools/acceptance/evaluation/__init__.py` — Operator/developer tool.
+- `tools/acceptance/evaluation/aggregate_readiness.py` — Operator/developer tool exposing class `AggregateEvaluationResult`, class `AggregateReadinessEvaluator`.
+- `tools/acceptance/evaluation/cases.py` — Operator/developer tool exposing class `EvaluationCase`, `default_evaluation_cases()`.
+- `tools/acceptance/evaluation/contracts.py` — Operator/developer tool exposing class `EvaluationMetric`, class `ReadinessStatus`, class `EvaluationObservation`, class `MetricThreshold`.
+- `tools/acceptance/evaluation/persisted_runtime.py` — Operator/developer tool exposing class `PersistedRuntimeEvaluation`, class `PersistedRuntimeEvaluator`.
+- `tools/acceptance/evaluation/readiness_gate.py` — Operator/developer tool exposing class `ProductionReadinessGate`.
+- `tools/acceptance/evaluation/runner.py` — Operator/developer tool exposing class `EvaluationCaseResult`, class `EvaluationRunResult`, class `DeterministicEvaluationRunner`, `expected_behavior_executor()`.
+- `tools/acceptance/evaluation/runtime_readiness.py` — Operator/developer tool exposing class `RuntimeReadinessMetric`, class `RuntimeReadinessResult`, class `RuntimeReadinessGate`.
+- `tools/acceptance/evaluation/safety_runtime.py` — Operator/developer tool exposing class `_StaticRegistry`, `evaluate_routing_cases()`, `evaluate_policy_cases()`, `evaluate_provider_cases()`.
 
 ### Administration API and Web UI
 
@@ -484,6 +418,10 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/admin/web/routes.py` — Python module containing `dashboard_page()`, `servers_page()`, `commands_page()`, `investigations_page()`, `reports_page()`.
 - `app/interfaces/admin/web/static/css/app.css` — Administration UI stylesheet.
 - `app/interfaces/admin/web/static/js/app.js` — Administration UI browser-side JavaScript.
+- `app/interfaces/admin/web/static/js/commands.js` — Administration UI browser-side JavaScript.
+- `app/interfaces/admin/web/static/js/monitoring_profiles.js` — Administration UI browser-side JavaScript.
+- `app/interfaces/admin/web/static/js/report_details.js` — Administration UI browser-side JavaScript.
+- `app/interfaces/admin/web/static/js/servers.js` — Administration UI browser-side JavaScript.
 - `app/interfaces/admin/web/templates/agent_runs.html` — Jinja/HTML administration UI template.
 - `app/interfaces/admin/web/templates/base.html` — Jinja/HTML administration UI template.
 - `app/interfaces/admin/web/templates/commands.html` — Jinja/HTML administration UI template.
@@ -502,45 +440,47 @@ Evaluation / Production Readiness Gate
 
 ### Tools and acceptance scripts
 
-- `tools/audit_documentation.py` — Operator/developer tool exposing `rel()`, `local_markdown_links()`, `main()`.
+- `tools/acceptance/__init__.py` — Acceptance and runtime verification entry points.
+- `tools/acceptance/check_knowledge_source_acceptance.py` — Operator/developer tool exposing `main()`.
+- `tools/acceptance/run_all_tests.py` — Operator/developer tool exposing `run()`, `tool_exists()`, `main()`.
+- `tools/acceptance/run_evaluation_dataset.py` — Operator/developer tool exposing `main()`.
+- `tools/acceptance/run_investigation_web_api_acceptance.py` — Operator/developer tool exposing `status()`, `main()`.
+- `tools/acceptance/run_persisted_runtime_evaluation.py` — Operator/developer tool exposing `main()`.
+- `tools/acceptance/run_production_readiness_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/acceptance/run_safety_runtime_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/acceptance/smoke_ollama_claude_runtime.py` — Operator/developer tool exposing `parse_args()`, `jsonable()`, `prepare_database_schema()`, `main_async()`.
 - `tools/bootstrap_database.py` — Operator/developer tool exposing `connection_kwargs()`, `database_exists()`, `create_database_if_missing()`, `ensure_vector_extension()`.
-- `tools/check_knowledge_source_acceptance.py` — Operator/developer tool exposing `main()`.
-- `tools/chunk_knowledge_document.py` — Operator/developer tool exposing `main()`.
 - `tools/claude_hooks/runtime_hooks.py` — Operator/developer tool exposing `dispatch()`, `main()`.
-- `tools/collect_diagnostic_evidence.py` — Operator/developer tool exposing `parse_args()`, `run()`, `main()`.
-- `tools/evaluate_rag.py` — Operator/developer tool exposing class `EvaluationSummary`, `ratio()`, `fetch_hnsw_index_present()`, `build_document_map()`.
-- `tools/generate_project_structure.py` — Operator/developer tool exposing `should_skip()`, `python_summary()`, `describe()`, `group()`.
-- `tools/generate_test_catalog.py` — Operator/developer tool exposing `first_docstring()`, `test_functions()`, `main()`.
-- `tools/index_knowledge_document.py` — Operator/developer tool exposing `run()`, `main()`.
-- `tools/ingest_knowledge_source.py` — Operator/developer tool exposing `main()`.
-- `tools/inspect_diagnostic_policy.py` — Operator/developer tool exposing `main()`.
-- `tools/inspect_diagnostic_tools.py` — Operator/developer tool exposing `main()`.
-- `tools/inspect_investigation.py` — Operator/developer tool exposing `main()`.
-- `tools/inspect_investigation_routing.py` — Operator/developer tool exposing `print_matches()`, `main()`.
-- `tools/inspect_knowledge_index.py` — Operator/developer tool exposing `db_indexes()`, `main()`.
-- `tools/inspect_knowledge_sources.py` — Operator/developer tool exposing `main()`.
-- `tools/inspect_specialist_context.py` — Operator/developer tool exposing `run()`, `main()`.
-- `tools/inspect_specialist_registry.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/__init__.py` — Developer, inspection, seeding, and documentation utilities.
+- `tools/dev/audit_documentation.py` — Operator/developer tool exposing `rel()`, `local_markdown_links()`, `main()`.
+- `tools/dev/chunk_knowledge_document.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/collect_diagnostic_evidence.py` — Operator/developer tool exposing `parse_args()`, `run()`, `main()`.
+- `tools/dev/evaluate_rag.py` — Operator/developer tool exposing class `EvaluationSummary`, `ratio()`, `fetch_hnsw_index_present()`, `build_document_map()`.
+- `tools/dev/generate_project_structure.py` — Operator/developer tool exposing `should_skip()`, `python_summary()`, `describe()`, `group()`.
+- `tools/dev/generate_test_catalog.py` — Operator/developer tool exposing `first_docstring()`, `test_functions()`, `main()`.
+- `tools/dev/index_knowledge_document.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/dev/ingest_knowledge_source.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/inspect_diagnostic_policy.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/inspect_diagnostic_tools.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/inspect_investigation.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/inspect_investigation_routing.py` — Operator/developer tool exposing `print_matches()`, `main()`.
+- `tools/dev/inspect_knowledge_index.py` — Operator/developer tool exposing `db_indexes()`, `main()`.
+- `tools/dev/inspect_knowledge_sources.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/inspect_specialist_context.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/dev/inspect_specialist_registry.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/list_routes.py` — Operator/developer tool exposing `collect_routes()`, `main()`.
+- `tools/dev/persist_investigation_routing.py` — Operator/developer tool exposing `main()`.
+- `tools/dev/production_preflight.py` — Operator/developer tool exposing `check()`, `main()`.
+- `tools/dev/reason_specialist_context.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/dev/report_rag_performance.py` — Operator/developer tool exposing `percentile()`, `stats()`, `main()`.
+- `tools/dev/run_specialist_investigation.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/dev/search_knowledge.py` — Operator/developer tool exposing `run()`, `main()`.
+- `tools/dev/seed_knowledge_sources.py` — Operator/developer tool exposing class `SeedKnowledgeSource`, `create_dto()`, `update_dto()`, `main()`.
+- `tools/dev/seed_specialists.py` — Operator/developer tool exposing `build_create_dto()`, `build_update_dto()`, `main()`.
+- `tools/dev/sync_documentation.py` — Operator/developer tool exposing `rel()`, `classify()`, `title()`, `remove_managed_block()`.
 - `tools/linux_scenarios/random_linux_workload.py` — Operator/developer tool exposing `now()`, `busy_worker()`, `cpu_scenario()`, `memory_scenario()`.
 - `tools/linux_scenarios/run_linux_scenario_matrix.py` — Operator/developer tool exposing `main()`.
-- `tools/list_routes.py` — Operator/developer tool exposing `collect_routes()`, `main()`.
-- `tools/persist_investigation_routing.py` — Operator/developer tool exposing `main()`.
-- `tools/production_preflight.py` — Operator/developer tool exposing `check()`, `main()`.
-- `tools/reason_specialist_context.py` — Operator/developer tool exposing `run()`, `main()`.
-- `tools/report_rag_performance.py` — Operator/developer tool exposing `percentile()`, `stats()`, `main()`.
-- `tools/run_all_tests.py` — Operator/developer tool exposing `run()`, `tool_exists()`, `main()`.
-- `tools/run_evaluation_dataset.py` — Operator/developer tool exposing `main()`.
-- `tools/run_investigation_web_api_acceptance.py` — Operator/developer tool exposing `status()`, `main()`.
-- `tools/run_persisted_runtime_evaluation.py` — Operator/developer tool exposing `main()`.
-- `tools/run_production_readiness_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/run_project_mcp_server.py` — Stdio entrypoint used by .mcp.json to run the project MCP server.
-- `tools/run_safety_runtime_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
-- `tools/run_specialist_investigation.py` — Operator/developer tool exposing `run()`, `main()`.
-- `tools/search_knowledge.py` — Operator/developer tool exposing `run()`, `main()`.
-- `tools/seed_knowledge_sources.py` — Operator/developer tool exposing class `SeedKnowledgeSource`, `create_dto()`, `update_dto()`, `main()`.
-- `tools/seed_specialists.py` — Operator/developer tool exposing `build_create_dto()`, `build_update_dto()`, `main()`.
-- `tools/smoke_ollama_claude_runtime.py` — Operator/developer tool exposing `parse_args()`, `jsonable()`, `prepare_database_schema()`, `main_async()`.
-- `tools/sync_documentation.py` — Operator/developer tool exposing `rel()`, `classify()`, `title()`, `remove_managed_block()`.
 
 ### Tests
 
@@ -551,16 +491,16 @@ Evaluation / Production Readiness Gate
 - `tests/test_admin_system_web.py` — Pytest coverage for `test_system_runtime_page_is_available()`.
 - `tests/test_agent_job_persistence.py` — Pytest coverage for `test_agent_job_error_messages_are_bounded_to_schema_contract()`.
 - `tests/test_aggregate_readiness.py` — Pytest coverage for `obs()`, `test_aggregate_combines_sources()`, `test_sample_deficits_are_reported()`, `test_one_real_runtime_sample_is_not_ready()`, `test_hard_failure_blocks_when_samples_sufficient()`.
-- `tests/test_architecture_dependencies.py` — Pytest coverage for `test_core_has_no_outer_layer_dependencies()`, `test_capabilities_do_not_depend_on_interfaces_composition_or_runtime()`, `test_infrastructure_does_not_depend_on_interface_or_runtime_layers()`, `test_transitional_shared_and_tools_packages_are_absent()`, `test_application_import_graph_is_acyclic()`.
+- `tests/test_architecture_dependencies.py` — Pytest coverage for `test_core_has_no_outer_layer_dependencies()`, `test_capabilities_do_not_depend_on_interfaces_composition_or_runtime()`, `test_infrastructure_does_not_depend_on_interface_or_runtime_layers()`, `test_legacy_application_packages_are_absent()`, `test_application_sources_do_not_import_deleted_namespaces()`.
 - `tests/test_c14_10_claude_observability.py` — Pytest coverage for class `FakeRepository`, `make_job()`, `test_trace_normalizes_runtime_evidence()`, `test_summary_exposes_failures_tools_and_mcp_health()`, `test_completed_job_missing_required_tools_is_visible()`.
 - `tests/test_c14_11_runtime_contract.py` — Pytest coverage for `test_c14_11_runtime_allows_mandatory_operational_tools()`, `test_c14_11_native_prompt_requires_real_mcp_execution()`.
 - `tests/test_c14_11a3_ollama_only_contract.py` — Pytest coverage for `test_c14_11a3_removes_legacy_runtime_surfaces()`, `test_c14_11a3_runtime_dependencies_are_ollama_only()`, `test_c14_11a3_no_openai_implementation_surfaces_remain()`, `test_c14_11a3_ollama_implementations_remain()`.
-- `tests/test_c14_11a4_1_composition_boundary.py` — Pytest coverage for `test_bootstrap_is_a_small_compatibility_facade()`, `test_composition_builder_owns_dependency_wiring()`, `test_composition_package_exists_as_explicit_boundary()`.
+- `tests/test_c14_11a4_1_composition_boundary.py` — Pytest coverage for `test_composition_owns_the_application_container()`, `test_composition_builder_owns_dependency_wiring()`, `test_composition_package_exists_as_explicit_boundary()`.
 - `tests/test_c14_11a4_2a_repository_composition.py` — Pytest coverage for `test_repository_construction_lives_in_repository_composition_module()`, `test_repository_composition_module_is_not_eager()`.
 - `tests/test_c14_11a4_2b_container_services_composition.py` — Pytest coverage for `test_application_container_is_outside_builder()`, `test_core_service_construction_is_outside_builder()`, `test_analysis_and_runtime_are_outside_builder()`.
 - `tests/test_c14_11a4_2c_analysis_investigation_composition.py` — Pytest coverage for `test_analysis_and_investigation_composition_is_outside_builder()`, `test_claude_mcp_and_scheduler_wiring_moves_to_runtime_composition()`.
 - `tests/test_c14_11a4_2d_runtime_composition.py` — Pytest coverage for `test_runtime_composition_is_outside_builder()`, `test_runtime_composition_keeps_ollama_claude_contract()`, `test_builder_is_composition_coordinator_after_a4_2d()`.
-- `tests/test_c14_11a4_3a_ollama_infrastructure_boundary.py` — Pytest coverage for `test_ollama_provider_implementations_live_in_infrastructure()`, `test_analysis_capability_factories_use_infrastructure_implementations()`, `test_legacy_ollama_modules_are_thin_facades()`.
+- `tests/test_c14_11a4_3a_ollama_infrastructure_boundary.py` — Pytest coverage for `test_ollama_provider_implementations_live_in_infrastructure()`, `test_analysis_capability_factories_use_infrastructure_implementations()`, `test_legacy_ollama_modules_are_removed()`.
 - `tests/test_c14_11a4_3b_investigation_ollama_infrastructure.py` — Pytest coverage for `test_investigation_ollama_adapters_live_in_infrastructure()`, `test_investigation_capability_keeps_contracts_not_ollama_implementations()`, `test_capability_contracts_resolve_provider_adapters_lazily()`.
 - `tests/test_c14_11a4_3c_database_infrastructure_boundary.py` — Pytest coverage for `test_database_core_implementation_lives_in_infrastructure()`, `test_repository_implementations_live_only_in_infrastructure()`, `test_production_composition_uses_infrastructure_repositories()`, `test_shared_database_package_is_removed_after_boundary_closure()`.
 - `tests/test_c14_11a4_3d_database_models_migrations_boundary.py` — Pytest coverage for `test_database_models_live_only_in_infrastructure()`, `test_production_uses_infrastructure_model_imports()`, `test_engine_registers_infrastructure_models()`, `test_migrations_have_one_canonical_owner()`.
@@ -584,7 +524,7 @@ Evaluation / Production Readiness Gate
 - `tests/test_diagnostic_policy.py` — Pytest coverage for `specialist()`, `request()`, `engine()`, `test_policy_allows_registered_assigned_safe_tool()`, `test_policy_denies_unknown_tool()`.
 - `tests/test_diagnostic_tool_registry.py` — Pytest coverage for `registry()`, `test_default_registry_contains_expected_read_only_tools()`, `test_service_parameter_rejects_shell_injection()`, `test_path_parameter_rejects_shell_injection()`, `test_connect_probe_validates_port()`.
 - `tests/test_diagnostic_tools_api.py` — Pytest coverage for `test_diagnostic_tools_api_lists_registry()`.
-- `tests/test_domain_boundaries.py` — Pytest coverage for `test_domain_does_not_import_runtime_or_mcp_boundaries()`.
+- `tests/test_domain_boundaries.py` — Pytest coverage for `test_removed_domain_package_has_no_boundary_to_audit()`.
 - `tests/test_evaluation_dataset_runner.py` — Pytest coverage for `test_default_dataset_meets_gate_sample_counts()`, `test_case_ids_are_unique()`, `test_expected_behavior_executor_wires_gate()`, `test_runtime_failure_blocks_hard_metric()`, `test_executor_must_return_matching_case_id()`.
 - `tests/test_evidence_collection.py` — Pytest coverage for class `Repository`, class `Runner`, `make_outcome()`, `allowed_policy()`, `denied_policy()`.
 - `tests/test_final_diagnosis_synthesizer.py` — Pytest coverage for `diagnosis()`, class `Client`, `test_valid_llm_narrative_is_used()`, `test_unknown_claim_id_uses_fallback()`, `test_conflict_must_be_preserved()`.

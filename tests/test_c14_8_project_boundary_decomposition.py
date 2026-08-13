@@ -64,22 +64,22 @@ def test_c14_8_bounded_modules_own_tool_implementations():
 
     expected_modules = {
         "_run_monitoring": (
-            "app.interfaces.mcp.project_boundary_parts.monitoring"
+        "app.interfaces.mcp.handlers.monitoring"
         ),
         "_analyze_report": (
-            "app.interfaces.mcp.project_boundary_parts.analysis"
+        "app.interfaces.mcp.handlers.analysis"
         ),
         "_run_specialist": (
-            "app.interfaces.mcp.project_boundary_parts.investigation"
+        "app.interfaces.mcp.handlers.investigation"
         ),
         "_create_remediation_plan": (
-            "app.interfaces.mcp.project_boundary_parts.remediation"
+        "app.interfaces.mcp.handlers.remediation"
         ),
         "_required_int": (
-            "app.interfaces.mcp.project_boundary_parts.common"
+        "app.interfaces.mcp.handlers.common"
         ),
         "_build_definitions": (
-            "app.interfaces.mcp.project_boundary_parts.definitions"
+        "app.interfaces.mcp.handlers.definitions"
         ),
     }
 
@@ -89,7 +89,7 @@ def test_c14_8_bounded_modules_own_tool_implementations():
 
 
 def test_c14_8_mcp_package_export_is_lazy_and_cycle_free():
-    from app.mcp import ProjectMcpToolBoundary as PackageBoundary
+    from app.interfaces.mcp import ProjectMcpToolBoundary as PackageBoundary
     from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
     assert PackageBoundary is ProjectMcpToolBoundary

@@ -32,7 +32,7 @@ def _restore_operational_database_env() -> None:
     # Normal pytest configuration may inject isolated POSTGRES_* test
     # values into os.environ. Environment variables override Pydantic's
     # .env source, so restore only PostgreSQL settings from the project
-    # .env before importing app.bootstrap.
+    # .env before importing app.composition.
     from dotenv import dotenv_values
 
     project_root = (
@@ -110,7 +110,7 @@ def test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence():
     _restore_operational_database_env()
 
     try:
-        from app.bootstrap import container
+        from app.composition import container
     except Exception as exc:
         message = str(exc)
 

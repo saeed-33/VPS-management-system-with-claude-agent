@@ -4,13 +4,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_bootstrap_is_a_small_compatibility_facade():
-    bootstrap = ROOT / "app/bootstrap.py"
-    text = bootstrap.read_text(encoding="utf-8")
+def test_composition_owns_the_application_container():
+    composition = ROOT / "app/composition/__init__.py"
+    text = composition.read_text(encoding="utf-8")
 
-    assert "from app.composition.builder import" in text
     assert "container = build_container()" in text
-    assert len(text) < 1500
+    assert '"container"' in text
+    assert not (ROOT / "app/bootstrap.py").exists()
 
 
 def test_composition_builder_owns_dependency_wiring():

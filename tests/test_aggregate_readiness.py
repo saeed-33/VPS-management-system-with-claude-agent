@@ -1,7 +1,7 @@
-from app.domain.evaluation.aggregate_readiness import (
+from tools.acceptance.evaluation.aggregate_readiness import (
     AggregateReadinessEvaluator,
 )
-from app.domain.evaluation.contracts import (
+from tools.acceptance.evaluation.contracts import (
     EvaluationMetric,
     EvaluationObservation,
     ReadinessStatus,

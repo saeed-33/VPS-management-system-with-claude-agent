@@ -1,10 +1,10 @@
-from app.domain.investigation.contracts import InvestigationBudget
-from app.domain.investigation.investigation_router import (
+from app.core.contracts.investigation import InvestigationBudget
+from app.capabilities.investigation.investigation_router import (
     InvestigationRoutingDecision,
     RoutingReason,
     SpecialistRoutingMatch,
 )
-from app.domain.investigation.persistence_service import (
+from app.capabilities.investigation.persistence_service import (
     InvestigationPersistenceService,
 )
 

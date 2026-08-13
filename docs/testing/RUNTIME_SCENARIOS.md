@@ -158,8 +158,8 @@ uv run python tools/run_server_coordinator_acceptance.py <report_id> --max-speci
 If an Investigation is persisted:
 
 ```powershell
-uv run python tools/run_persisted_runtime_evaluation.py --limit 500
-uv run python tools/run_production_readiness_evaluation.py --limit 500
+uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
 ```
 
 ## Recording a scenario

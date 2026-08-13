@@ -7,7 +7,11 @@ from app.composition.builder import (
 )
 
 
+container = build_container()
+
+
 __all__ = [
     "ApplicationContainer",
     "build_container",
+    "container",
 ]

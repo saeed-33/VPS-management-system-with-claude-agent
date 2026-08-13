@@ -4,16 +4,16 @@ from dataclasses import dataclass
 
 import pytest
 
-from app.domain.analysis.retrieval.full_text_retriever import (
+from app.capabilities.analysis.retrieval.full_text_retriever import (
     FullTextCandidate,
 )
-from app.domain.analysis.retrieval.hybrid_retriever import (
+from app.capabilities.analysis.retrieval.hybrid_retriever import (
     HybridRetriever,
 )
-from app.domain.analysis.retrieval.rag_context import (
+from app.capabilities.analysis.retrieval.rag_context import (
     RetrievedAnalysisContext,
 )
-from app.domain.analysis.retrieval.structured_compatibility import (
+from app.capabilities.analysis.retrieval.structured_compatibility import (
     StructuredCompatibilityChecker,
 )
 

@@ -13,7 +13,7 @@ if str(ROOT) not in sys.path:
         str(ROOT),
     )
 
-from app.bootstrap import container
+from app.composition import container
 from app.interfaces.mcp.server import (
     ProjectMcpProtocolServer,
     run_stdio_server,

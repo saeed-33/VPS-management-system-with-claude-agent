@@ -2,12 +2,12 @@ import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from app.domain.investigation.investigation_router import (
+from app.capabilities.investigation.investigation_router import (
     InvestigationRoutingDecision,
     RoutingReason,
     SpecialistRoutingMatch,
 )
-from app.mcp import (
+from app.interfaces.mcp import (
     ProjectMcpToolBoundary,
     ProjectToolCall,
 )

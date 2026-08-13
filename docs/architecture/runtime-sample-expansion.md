@@ -66,7 +66,7 @@ Use `--max-new` to limit how many real runs occur in one invocation.
 Run:
 
 ```text
-uv run python tools/run_production_readiness_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
 ```
 
 The aggregate gate will then decide whether Phase 4.20 can close as `ready_for_supervised_operations`.

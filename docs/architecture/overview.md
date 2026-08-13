@@ -474,7 +474,8 @@ behavior.
 
 The controlled project-tool execution boundary lives under `app/interfaces/mcp/`.
 `app/interfaces/mcp/` provides schemas, serializers, the single registry, and
-the protocol server for Claude. Historical `app/mcp/` imports are facades.
+the protocol server for Claude. The historical `app/mcp/` compatibility tree
+was removed during C.14.11A.
 tool calls.
 
 The initial tool set is deliberately small:

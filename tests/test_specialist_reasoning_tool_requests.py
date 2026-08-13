@@ -1,12 +1,12 @@
 import asyncio
 
-from app.domain.investigation.diagnostic_tools import (
+from app.core.policies.diagnostic_tools import (
     DiagnosticToolCall,
 )
-from app.domain.investigation.specialist_context import (
+from app.capabilities.investigation.specialist_context import (
     SpecialistContextSnapshot,
 )
-from app.domain.investigation.specialist_reasoning_agent import (
+from app.capabilities.investigation.specialist_reasoning_agent import (
     SpecialistReasoningAgent,
 )
 from app.core.contracts.specialist_reasoning import (

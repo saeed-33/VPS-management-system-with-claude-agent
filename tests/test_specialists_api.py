@@ -4,8 +4,8 @@ from types import SimpleNamespace
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.admin.api.specialists import router
-from app.admin.dependencies import (
+from app.interfaces.admin.api.specialists import router
+from app.interfaces.admin.dependencies import (
     get_specialist_definition_service,
 )
 from app.core.exceptions import (

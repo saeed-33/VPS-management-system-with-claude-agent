@@ -65,7 +65,7 @@ No arbitrary shell is permitted.
 Example:
 
 ```powershell
-uv run python tools/run_specialist_investigation.py 2 nginx `
+uv run python tools/dev/run_specialist_investigation.py 2 nginx `
   "Determine whether NGINX is installed/running and what live evidence supports the conclusion." `
   --domains nginx,http,network `
   --max-rounds 3 `
@@ -93,7 +93,7 @@ entrypoint rather than retired one-off scripts.
 Example:
 
 ```powershell
-uv run python tools/smoke_ollama_claude_runtime.py --server-id <server_id>
+uv run python tools/acceptance/smoke_ollama_claude_runtime.py --server-id <server_id>
 uv run python -m pytest tests/real_runtime -q
 ```
 

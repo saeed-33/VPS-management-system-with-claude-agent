@@ -178,13 +178,13 @@ Endpoint خفيف للاستعلام عن توفر وحالة التحليل.
 ## التحقق من المسارات
 
 ```powershell
-uv run python tools/list_routes.py
+uv run python tools/dev/list_routes.py
 ```
 
 ولحفظ JSON:
 
 ```powershell
-uv run python tools/list_routes.py --json artifacts/routes.json
+uv run python tools/dev/list_routes.py --json artifacts/routes.json
 ```
 
 # Specialists API

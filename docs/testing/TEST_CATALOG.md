@@ -5,7 +5,7 @@ Generated from the current checkout.
 Regenerate with:
 
 ```powershell
-uv run python tools/generate_test_catalog.py
+uv run python tools/dev/generate_test_catalog.py
 ```
 
 ## Pytest files
@@ -34,7 +34,8 @@ uv run python tools/generate_test_catalog.py
 - `test_core_has_no_outer_layer_dependencies`
 - `test_capabilities_do_not_depend_on_interfaces_composition_or_runtime`
 - `test_infrastructure_does_not_depend_on_interface_or_runtime_layers`
-- `test_transitional_shared_and_tools_packages_are_absent`
+- `test_legacy_application_packages_are_absent`
+- `test_application_sources_do_not_import_deleted_namespaces`
 - `test_application_import_graph_is_acyclic`
 
 ### `tests/test_c14_10_claude_observability.py`
@@ -58,7 +59,7 @@ uv run python tools/generate_test_catalog.py
 
 ### `tests/test_c14_11a4_1_composition_boundary.py`
 
-- `test_bootstrap_is_a_small_compatibility_facade`
+- `test_composition_owns_the_application_container`
 - `test_composition_builder_owns_dependency_wiring`
 - `test_composition_package_exists_as_explicit_boundary`
 
@@ -88,7 +89,7 @@ uv run python tools/generate_test_catalog.py
 
 - `test_ollama_provider_implementations_live_in_infrastructure`
 - `test_analysis_capability_factories_use_infrastructure_implementations`
-- `test_legacy_ollama_modules_are_thin_facades`
+- `test_legacy_ollama_modules_are_removed`
 
 ### `tests/test_c14_11a4_3b_investigation_ollama_infrastructure.py`
 
@@ -297,7 +298,7 @@ uv run python tools/generate_test_catalog.py
 
 ### `tests/test_domain_boundaries.py`
 
-- `test_domain_does_not_import_runtime_or_mcp_boundaries`
+- `test_removed_domain_package_has_no_boundary_to_audit`
 
 ### `tests/test_evaluation_dataset_runner.py`
 
@@ -692,25 +693,17 @@ uv run python tools/generate_test_catalog.py
 
 ## Runtime / acceptance tools
 
-- `tools/list_routes.py`
-- `tools/run_all_tests.py`
-- `tools/run_evaluation_dataset.py`
-- `tools/run_investigation_web_api_acceptance.py`
-- `tools/run_persisted_runtime_evaluation.py`
-- `tools/run_production_readiness_evaluation.py`
 - `tools/run_project_mcp_server.py`
-- `tools/run_safety_runtime_evaluation.py`
-- `tools/run_specialist_investigation.py`
 
 ## Standard commands
 
 ```powershell
 uv run python -m pytest
-uv run python tools/list_routes.py
-uv run python tools/run_evaluation_dataset.py
-uv run python tools/run_safety_runtime_evaluation.py
-uv run python tools/run_persisted_runtime_evaluation.py --limit 500
-uv run python tools/run_production_readiness_evaluation.py --limit 500
+uv run python tools/dev/list_routes.py
+uv run python tools/acceptance/run_evaluation_dataset.py
+uv run python tools/acceptance/run_safety_runtime_evaluation.py
+uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
 ```
 
 See `TESTING_STRATEGY.md` for when each layer is required.

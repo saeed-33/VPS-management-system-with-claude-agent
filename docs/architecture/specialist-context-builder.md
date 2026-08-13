@@ -100,7 +100,7 @@ inputs instead of producing unsupported claims.
 With the currently indexed NGINX source:
 
 ```powershell
-uv run python tools/inspect_specialist_context.py `
+uv run python tools/dev/inspect_specialist_context.py `
   nginx `
   "Determine which NGINX module/configuration is relevant to this failure." `
   --domains nginx,http,proxy

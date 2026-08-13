@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.admin.api.investigations import router
-from app.admin.dependencies import get_investigation_read_service
+from app.interfaces.admin.api.investigations import router
+from app.interfaces.admin.dependencies import get_investigation_read_service
 from app.core.contracts.investigation_read_models import (
     InvestigationCandidateReadModel,
     InvestigationDetailReadModel,

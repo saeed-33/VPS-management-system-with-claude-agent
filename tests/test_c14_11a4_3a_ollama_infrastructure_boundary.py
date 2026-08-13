@@ -1,5 +1,4 @@
 from pathlib import Path
-import ast
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,19 +34,5 @@ def test_analysis_capability_factories_use_infrastructure_implementations():
     )
 
 
-def test_legacy_ollama_modules_are_thin_facades():
-    analysis = (
-        ROOT / "app/domain/analysis/ollama_client.py"
-    ).read_text(encoding="utf-8")
-    embedding = (
-        ROOT / "app/domain/analysis/retrieval/ollama_embedding_client.py"
-    ).read_text(encoding="utf-8")
-
-    assert not any(
-        isinstance(node, ast.ClassDef)
-        for node in ast.parse(analysis).body
-    )
-    assert not any(
-        isinstance(node, ast.ClassDef)
-        for node in ast.parse(embedding).body
-    )
+def test_legacy_ollama_modules_are_removed():
+    assert not (ROOT / "app/domain").exists()

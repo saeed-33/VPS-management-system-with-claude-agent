@@ -39,8 +39,8 @@ Acceptance:
 
 ```powershell
 uv run python -m pytest
-uv run python tools/inspect_investigation_routing.py 807
-uv run python tools/inspect_investigation_routing.py 825
+uv run python tools/dev/inspect_investigation_routing.py 807
+uv run python tools/dev/inspect_investigation_routing.py 825
 ```
 
 The inspection tool prints candidate and selected sections separately.

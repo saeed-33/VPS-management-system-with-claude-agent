@@ -34,7 +34,7 @@ Migration:
 
 ```powershell
 psql -U <POSTGRES_USER> -d <POSTGRES_DB> `
-  -f .\app\shared\database\migrations\step_4_6_investigation_persistence.sql
+  -f .\app\infrastructure\database\migrations\step_4_6_investigation_persistence.sql
 ```
 
 Acceptance:
@@ -42,8 +42,8 @@ Acceptance:
 ```powershell
 uv run python tools/bootstrap_database.py --verify-only
 uv run python -m pytest
-uv run python tools/persist_investigation_routing.py 807
-uv run python tools/inspect_investigation.py <INVESTIGATION_ID>
+uv run python tools/dev/persist_investigation_routing.py 807
+uv run python tools/dev/inspect_investigation.py <INVESTIGATION_ID>
 ```
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->

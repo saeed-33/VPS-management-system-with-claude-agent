@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-import app.domain.analysis as analysis_domain
-import app.domain.investigation as investigation_domain
+import app.capabilities.analysis as analysis_domain
+import app.capabilities.investigation as investigation_domain
 import app.runtime.claude as claude_runtime
 from app.runtime.claude.supervisor import ClaudeSupervisor
 from app.capabilities.monitoring.service import MonitoringService
@@ -19,9 +19,9 @@ ROOT = Path(__file__).resolve().parents[1]
 LEGACY_PATHS = (
     "app/runtime/claude/monitoring_cycle.py",
     "app/runtime/claude/multi_specialist_supervision.py",
-    "app/domain/investigation/server_coordinator.py",
-    "app/domain/analysis/analysis_agent_manager.py",
-    "app/domain/analysis/server_analysis_agent.py",
+    "app/capabilities/investigation/server_coordinator.py",
+    "app/capabilities/analysis/analysis_agent_manager.py",
+    "app/capabilities/analysis/server_analysis_agent.py",
     "tools/run_server_coordinator_acceptance.py",
 )
 

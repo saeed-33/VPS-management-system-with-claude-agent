@@ -50,18 +50,18 @@ no execution capability.
 Manual inspection:
 
 ```powershell
-uv run python tools/inspect_specialist_registry.py
-uv run python tools/inspect_specialist_registry.py --domain cpu
-uv run python tools/inspect_specialist_registry.py --domains cpu,process
-uv run python tools/inspect_specialist_registry.py --domains cpu,process --require-all
+uv run python tools/dev/inspect_specialist_registry.py
+uv run python tools/dev/inspect_specialist_registry.py --domain cpu
+uv run python tools/dev/inspect_specialist_registry.py --domains cpu,process
+uv run python tools/dev/inspect_specialist_registry.py --domains cpu,process --require-all
 ```
 
 Acceptance:
 
 ```powershell
 uv run python -m pytest
-uv run python tools/inspect_specialist_registry.py
-uv run python tools/inspect_specialist_registry.py --domain cpu
+uv run python tools/dev/inspect_specialist_registry.py
+uv run python tools/dev/inspect_specialist_registry.py --domain cpu
 ```
 
 No database migration, LLM, Claude-supervised, SSH or investigation execution is

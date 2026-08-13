@@ -1,4 +1,4 @@
-from app.domain.knowledge.parsers import (
+from app.capabilities.knowledge.parsers import (
     KnowledgeContentParser,
     normalize_text,
 )

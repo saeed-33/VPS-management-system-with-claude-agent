@@ -1,4 +1,4 @@
-from app.domain.knowledge.chunker import (
+from app.capabilities.knowledge.chunker import (
     KnowledgeChunkerConfig,
     StructureAwareKnowledgeChunker,
 )

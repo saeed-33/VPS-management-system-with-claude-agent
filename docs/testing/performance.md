@@ -2,7 +2,7 @@
 
 الأداة:
 ```powershell
-uv run python tools/report_rag_performance.py
+uv run python tools/dev/report_rag_performance.py
 ```
 
 آخر عينة موثقة: 65 analyses.

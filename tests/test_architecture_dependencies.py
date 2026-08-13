@@ -81,9 +81,29 @@ def test_infrastructure_does_not_depend_on_interface_or_runtime_layers():
     ) == []
 
 
-def test_transitional_shared_and_tools_packages_are_absent():
+def test_legacy_application_packages_are_absent():
     assert not (APP / "shared").exists()
     assert not (APP / "tools").exists()
+    assert not (APP / "domain").exists()
+    assert not (APP / "admin").exists()
+    assert not (APP / "mcp").exists()
+    assert not (APP / "interfaces" / "mcp" / "project_boundary_parts").exists()
+
+
+def test_application_sources_do_not_import_deleted_namespaces():
+    forbidden = (
+        "app.domain",
+        "app.admin",
+        "app.mcp",
+        "app.shared",
+        "app.tools",
+    )
+    offenders: list[str] = []
+    for path in (ROOT / "app").rglob("*.py"):
+        for imported in _imports(path):
+            if imported.startswith(forbidden):
+                offenders.append(f"{path.relative_to(ROOT)} -> {imported}")
+    assert offenders == []
 
 
 def test_application_import_graph_is_acyclic():

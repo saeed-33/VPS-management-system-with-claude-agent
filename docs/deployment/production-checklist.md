@@ -53,10 +53,10 @@ Run:
 
 ```powershell
 uv run python -m pytest
-uv run python tools/run_evaluation_dataset.py
-uv run python tools/run_safety_runtime_evaluation.py
-uv run python tools/run_persisted_runtime_evaluation.py --limit 500
-uv run python tools/run_production_readiness_evaluation.py --limit 500
+uv run python tools/acceptance/run_evaluation_dataset.py
+uv run python tools/acceptance/run_safety_runtime_evaluation.py
+uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
 ```
 
 The final command must report:

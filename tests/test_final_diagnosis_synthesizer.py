@@ -1,12 +1,12 @@
 import asyncio
 
-from app.domain.investigation.correlation import (
+from app.capabilities.investigation.correlation import (
     CorrelatedDiagnosisClaim,
     DiagnosisCertainty,
     DiagnosisConflict,
     FinalDiagnosis,
 )
-from app.domain.investigation.final_diagnosis_synthesizer import (
+from app.capabilities.investigation.final_diagnosis_synthesizer import (
     FinalDiagnosisNarrativeOutput,
     FinalDiagnosisSynthesizer,
 )

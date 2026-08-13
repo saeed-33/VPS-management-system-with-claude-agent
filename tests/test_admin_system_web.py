@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.admin.web.routes import router
+from app.interfaces.admin.web.routes import router
 
 
 def test_system_runtime_page_is_available():

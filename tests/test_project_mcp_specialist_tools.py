@@ -1,20 +1,20 @@
 import asyncio
 
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     EvidenceKind,
     EvidenceReference,
     SpecialistResult,
     SpecialistTaskStatus,
 )
-from app.domain.investigation.specialist_investigation_loop import (
+from app.capabilities.investigation.specialist_investigation_loop import (
     SpecialistInvestigationLoopResult,
     SpecialistLoopStopReason,
 )
-from app.domain.investigation.specialist_registry import (
+from app.capabilities.investigation.specialist_registry import (
     SpecialistRegistrySnapshot,
     SpecialistRuntimeDefinition,
 )
-from app.mcp import (
+from app.interfaces.mcp import (
     ProjectMcpToolBoundary,
     ProjectToolCall,
 )

@@ -59,7 +59,7 @@ def test_runtime_documentation_has_current_verification_commands():
     )
 
     assert "app\\runtime" in runtime_doc
-    assert "app\\tools" in runtime_doc
+    assert "app\\interfaces" in runtime_doc
     assert "app\\integrations" not in runtime_doc
 
 

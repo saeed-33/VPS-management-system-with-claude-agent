@@ -29,7 +29,7 @@ Use the configured environment as the source of truth.
 ## Health and routes
 
 ```powershell
-uv run python tools/list_routes.py
+uv run python tools/dev/list_routes.py
 ```
 
 ## Test the project
@@ -43,13 +43,13 @@ uv run python -m pytest
 Documented full deterministic sequence:
 
 ```powershell
-uv run python tools/run_all_tests.py --mode full
+uv run python tools/acceptance/run_all_tests.py --mode full
 ```
 
 Readiness sequence:
 
 ```powershell
-uv run python tools/run_all_tests.py --mode readiness --limit 500
+uv run python tools/acceptance/run_all_tests.py --mode readiness --limit 500
 ```
 
 See:
@@ -63,7 +63,7 @@ docs/testing/RUNTIME_SCENARIOS.md
 ## Production-readiness report
 
 ```powershell
-uv run python tools/run_production_readiness_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
 ```
 
 Current accepted Phase 4 state is:
@@ -99,10 +99,10 @@ These scripts are bounded workload generators, not remediation tools.
 After adding/removing tests or files:
 
 ```powershell
-uv run python tools/generate_test_catalog.py
-uv run python tools/generate_project_structure.py
-uv run python tools/sync_documentation.py
-uv run python tools/audit_documentation.py
+uv run python tools/dev/generate_test_catalog.py
+uv run python tools/dev/generate_project_structure.py
+uv run python tools/dev/sync_documentation.py
+uv run python tools/dev/audit_documentation.py
 ```
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->

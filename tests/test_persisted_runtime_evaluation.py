@@ -3,10 +3,10 @@ from datetime import (
     timezone,
 )
 
-from app.domain.evaluation import (
+from tools.acceptance.evaluation import (
     EvaluationMetric,
 )
-from app.domain.evaluation.persisted_runtime import (
+from tools.acceptance.evaluation.persisted_runtime import (
     PersistedRuntimeEvaluator,
 )
 from app.core.contracts.investigation_read_models import (

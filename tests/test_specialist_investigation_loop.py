@@ -1,7 +1,7 @@
 import asyncio
 from types import MappingProxyType
 
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     EvidenceKind,
     EvidenceReference,
     InvestigationBudget,
@@ -9,25 +9,25 @@ from app.domain.investigation.contracts import (
     SpecialistTask,
     SpecialistTaskStatus,
 )
-from app.domain.investigation.diagnostic_policy import (
+from app.core.policies.diagnostic_policy import (
     DiagnosticPolicyEngine,
 )
-from app.domain.investigation.diagnostic_tools import (
+from app.core.policies.diagnostic_tools import (
     DiagnosticToolCall,
     build_default_diagnostic_tool_registry,
 )
-from app.domain.investigation.specialist_context import (
+from app.capabilities.investigation.specialist_context import (
     SpecialistContextSnapshot,
 )
-from app.domain.investigation.specialist_investigation_loop import (
+from app.capabilities.investigation.specialist_investigation_loop import (
     SpecialistInvestigationLoop,
     SpecialistLoopStopReason,
 )
-from app.domain.investigation.specialist_reasoning_agent import (
+from app.capabilities.investigation.specialist_reasoning_agent import (
     SpecialistDiagnosticToolRequest,
     SpecialistReasoningExecution,
 )
-from app.domain.investigation.specialist_registry import (
+from app.capabilities.investigation.specialist_registry import (
     SpecialistRuntimeDefinition,
 )
 

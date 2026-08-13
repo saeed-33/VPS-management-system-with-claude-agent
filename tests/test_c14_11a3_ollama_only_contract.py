@@ -5,12 +5,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_c14_11a3_removes_legacy_runtime_surfaces():
-    assert not (
-        ROOT / "app/domain/analysis/openai_client.py"
-    ).exists()
-    assert not (
-        ROOT / "app/mcp/project_tools.py"
-    ).exists()
+    assert not (ROOT / "app/domain").exists()
+    assert not (ROOT / "app/admin").exists()
+    assert not (ROOT / "app/mcp").exists()
+    assert not (ROOT / "app/interfaces/mcp/project_boundary_parts").exists()
     assert not (
         ROOT / "app/.python-version"
     ).exists()

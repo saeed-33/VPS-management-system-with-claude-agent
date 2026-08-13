@@ -2,7 +2,7 @@ import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from app.mcp import (
+from app.interfaces.mcp import (
     ProjectMcpToolBoundary,
     ProjectToolCall,
 )

@@ -1,6 +1,6 @@
 import pytest
 
-from app.domain.analysis.retrieval.reuse_policy import (
+from app.capabilities.analysis.retrieval.reuse_policy import (
     AnalysisDecision,
     AnalysisReusePolicy,
 )

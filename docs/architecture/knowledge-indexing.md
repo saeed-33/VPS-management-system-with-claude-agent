@@ -36,14 +36,14 @@ Apply indexes:
 
 ```powershell
 psql -U <POSTGRES_USER> -d <POSTGRES_DB> `
-  -f .\app\shared\database\migrations\step_4_8_3_knowledge_indexes.sql
+  -f .\app\infrastructure\database\migrations\step_4_8_3_knowledge_indexes.sql
 ```
 
 Then:
 
 ```powershell
-uv run python tools/index_knowledge_document.py 1
-uv run python tools/inspect_knowledge_index.py 1
+uv run python tools/dev/index_knowledge_document.py 1
+uv run python tools/dev/inspect_knowledge_index.py 1
 ```
 
 Expected:

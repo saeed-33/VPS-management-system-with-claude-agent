@@ -1,187 +1,72 @@
 # AI VPS Management
 
-نظام لمراقبة خوادم Linux عبر SSH وتحليل تقاريرها باستخدام LLM وRAG، مع طبقة تحقيق تشخيصي متعددة الوكلاء ومقيدة بسياسات read-only.
+AI-assisted Linux VPS monitoring and investigation through SSH, Ollama-backed
+analysis, Claude-native supervision, a project MCP server, and a browser Admin
+interface. Production remediation remains disabled and policy/user-gated.
 
-## الوضع الحالي
-
-المشروع أنهى التنفيذ والقبول حتى **Phase 4.17 — Dynamic Secondary Specialist Routing**.
-
-```text
-Phase 1–3                         completed
-Phase 4.0–4.14                  completed
-Phase 4.15 Server Coordinator    completed
-Phase 4.16 LangGraph Parallel    completed
-Phase 4.17 Dynamic Secondary     completed
-Phase 4.18 Correlation/Diagnosis next
-Phase 4.19 Investigation UI/API  planned
-Phase 4.20 Evaluation/Safety     planned
-```
-
-آخر baseline اختبارات موثق بعد قبول 4.17:
+## Current status
 
 ```text
-184 passed, 1 warning
+Phase 4.20: complete
+C.14.0–C.14.11: implemented and accepted
+C.14.11A: complete
+C.14.12: next, not started
+Phase 5: blocked pending C.14.12 and later gates
+automatic_remediation_allowed: false
+llm_provider: ollama
 ```
 
-الـwarning الحالي هو Starlette/TestClient deprecation warning وليس فشلًا وظيفيًا في Phase 4.17.
+The current implementation keeps Python responsible for execution, persistence,
+policy, evidence, RAG, SSH, and Admin/API surfaces. Claude Code is the intended
+supervisory runtime and sees the stable project MCP contract through
+`.mcp.json`.
 
-## القدرات المنفذة
-
-### Monitoring + Initial Analysis
-
-- monitoring profiles وSSH monitoring.
-- report normalization وexact fingerprint reuse.
-- PostgreSQL + pgvector وPostgreSQL Full-Text Search.
-- Hybrid Retrieval باستخدام RRF وStructured Compatibility.
-- Incident RAG مع source tracing وperformance profiling.
-
-### Multi-Agent Investigation
-
-- Dynamic user-defined Specialists وليس hard-coded agent classes.
-- Specialist Registry وInvestigation Router وInvestigation persistence.
-- Knowledge Sources وKnowledge RAG المنفصل عن Incident RAG.
-- Specialist Context Builder وStructured Specialist Reasoning مع provenance validation.
-- Diagnostic Tool Registry محدود بأدوات معروفة وread-only.
-- Diagnostic Policy Engine قبل أي execution.
-- Evidence Collection عبر SSH من approved execution envelopes فقط.
-- Bounded Specialist Investigation Loop.
-- Server Coordinator.
-- LangGraph parallel Specialist execution.
-- Dynamic secondary Specialist waves مع Registry/budget/duplicate validation.
-
-## سير العمل الحالي
+## Architecture
 
 ```text
-Scheduler
-  -> MonitoringService
-  -> SSH
-  -> Monitoring Report
-  -> AnalysisOrchestrator
-       -> exact fingerprint -> REUSE
-       -> Incident Hybrid Retrieval -> ASSISTED/FULL analysis
-  -> Investigation Router
-  -> Dynamic Specialist selection
-  -> Specialist Context
-       + Current Evidence
-       + Incident RAG
-       + Knowledge RAG
-  -> Specialist reasoning
-  -> registered Tool request
-  -> Diagnostic Policy
-  -> approved read-only SSH Evidence
-  -> bounded investigation loop
-  -> LangGraph parallel wave
-  -> optional validated secondary Specialist wave
+app/core            contracts, policies, configuration
+app/capabilities    analysis, investigation, knowledge, monitoring
+app/infrastructure  database, SSH, Ollama, external adapters
+app/interfaces      Admin HTTP/Web and Claude MCP interfaces
+app/runtime         Claude session/runtime integration
+app/composition     dependency wiring and application bootstrap
+tools/acceptance    runtime acceptance and evaluation entry points
+tools/dev           documentation, inspection, seed, and developer tools
 ```
 
-## الحد الحالي
-
-**Phase 4.18 — Correlation + Final Diagnosis** هي الخطوة التالية.
-
-المطلوب فيها دمج عدة `SpecialistResult` وEvidence على مستوى السيرفر وإنتاج تشخيص يميز بين:
+The canonical project MCP entry point is:
 
 ```text
-confirmed
-probable
-unknown
+tools/run_project_mcp_server.py
 ```
 
-مع traceability لكل claim مادي وإظهار التعارض بين نتائج Specialists بدل إخفائه.
+It is referenced by `.mcp.json`; do not move it without updating that contract.
 
-لا توجد autonomous remediation في Phase 4.
-
-## الاختبارات
+## Running locally
 
 ```powershell
 uv run python -m pytest
-uv run python tools/evaluate_rag.py
-uv run python tools/report_rag_performance.py
+uv run python tools/acceptance/run_all_tests.py --mode full
+uv run python tools/acceptance/run_all_tests.py --mode readiness --limit 500
 ```
 
-تفاصيل الـMulti-Agent والـruntime acceptance:
-
-- `docs/testing/multi-agent-test-methodology.md`
-- `docs/roadmap/phase-4-17-closeout.md`
-
-ابدأ من `docs/README.md` لفهرس الوثائق الكامل.
-
-## Phase 4 Production Readiness
-
-Phase 4 autonomous diagnosis has completed the Phase 4.20 evaluation and safety gate.
-
-Current operational state:
-
-```text
-ready_for_supervised_operations
-automatic_remediation_allowed = false
-```
-
-Testing and architecture documentation:
-
-- `docs/testing/TESTING_STRATEGY.md`
-- `docs/testing/TEST_CATALOG.md`
-- `docs/testing/RUNTIME_SCENARIOS.md`
-- `docs/PROJECT_STRUCTURE.md`
-- `docs/roadmap/phase-4-20-closeout.md`
-
-Convenience commands:
+Useful developer commands:
 
 ```powershell
-uv run python tools/run_all_tests.py --mode full
-uv run python tools/run_all_tests.py --mode readiness --limit 500
-uv run python tools/generate_test_catalog.py
-uv run python tools/generate_project_structure.py
+uv run python tools/dev/generate_test_catalog.py
+uv run python tools/dev/generate_project_structure.py
+uv run python tools/dev/sync_documentation.py
+uv run python tools/dev/audit_documentation.py
 ```
 
-## Current Production Readiness
+For real Claude/Ollama/MCP acceptance, see
+`docs/testing/TESTING_STRATEGY.md` and
+`docs/testing/multi-agent-test-methodology.md`.
 
-Phase 4.20 is complete.
+## Documentation
 
-```text
-readiness: ready_for_supervised_operations
-automatic_remediation_allowed: false
-```
-
-## Current Transition
-
-The accepted next phase is **Phase C - Claude Code Supervisory Runtime
-Transition**.
-
-Decision summary:
-
-```text
-Claude Code = primary supervisory orchestration runtime
-Python services = execution, persistence, policy, evidence, RAG, SSH, Admin/API
-Ollama = operational LLM provider for analysis and specialist reasoning
-```
-
-The fixed workflow is:
-
-```text
-periodic monitoring
- -> per-server subordinate agent
- -> exact/similar historical report lookup
- -> exact match: reuse previous analysis
- -> similar match: pass top 3 similar reports to the LLM
- -> Ollama-backed initial analysis
- -> Specialist execution when issues exist
- -> final diagnosis
- -> remediation proposal
- -> isolated-environment validation
- -> policy/user-gated production application
-```
-
-See `docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md` and
-`docs/roadmap/claude-code-supervisory-transition-plan.md`.
-
-Canonical documentation:
-
-- `docs/PROJECT_STATUS.md`
-- `docs/architecture/overview.md`
-- `docs/testing/TESTING_STRATEGY.md`
-- `docs/testing/TEST_CATALOG.md`
-- `docs/testing/RUNTIME_SCENARIOS.md`
-- `docs/PROJECT_STRUCTURE.md`
-- `docs/DOCUMENTATION_INVENTORY.md`
-- `docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md`
-- `docs/roadmap/claude-code-supervisory-transition-plan.md`
+- [Current project status](docs/PROJECT_STATUS.md)
+- [Architecture overview](docs/architecture/overview.md)
+- [Target project structure](docs/architecture/target-project-structure.md)
+- [Testing strategy](docs/testing/TESTING_STRATEGY.md)
+- [Generated project structure](docs/PROJECT_STRUCTURE.md)

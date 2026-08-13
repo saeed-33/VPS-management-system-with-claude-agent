@@ -1,59 +1,58 @@
 # Current Project Structure and Boundaries
 
-This document describes the implemented local architecture after C.14.11A.
+This is the implemented C.14.11A architecture. There are no compatibility
+packages under `app/domain`, `app/admin`, `app/mcp`, `app/shared`, or
+`app/tools`.
 
 ```text
 app/
-├── core/
-│   ├── contracts/
-│   └── policies/
-├── capabilities/
-│   ├── monitoring/
-│   ├── analysis/
-│   ├── investigation/
-│   ├── knowledge/
-│   └── remediation/
-├── runtime/claude/
+├── core/            contracts, policies, configuration, exceptions
+├── capabilities/    monitoring, analysis, investigation, knowledge
+├── runtime/claude/  native Claude session/runtime integration
 ├── interfaces/
-│   ├── mcp/
-│   └── admin/
-├── infrastructure/
-│   ├── database/
-│   ├── ssh/
-│   └── llm/ollama/
-├── composition/
-└── domain/evaluation/
+│   ├── mcp/         MCP server, registry, schemas, handlers
+│   └── admin/       Admin API, web routes, templates, static assets
+├── infrastructure/  database, SSH, and Ollama adapters
+└── composition/     dependency wiring and bootstrap
+
+tools/
+├── run_project_mcp_server.py  .mcp.json stdio entry point
+├── acceptance/                 runtime acceptance and evaluation
+└── dev/                       inspection, seed, and documentation tools
 ```
 
 ## Responsibility and dependency rules
 
-- `core` owns provider-neutral contracts, configuration, exceptions, utilities, and fail-closed diagnostic policy. It does not import interfaces, infrastructure, composition, capabilities, or Claude runtime.
-- `capabilities` owns bounded monitoring, analysis/RAG, investigation/evidence, knowledge, and remediation behavior. It does not import interfaces.
-- `runtime/claude` owns native Claude CLI process execution, stream decoding, runtime result interpretation, and `AgentJob` lifecycle. Claude decides workflow order; Python validates and executes every capability.
-- `interfaces/mcp` owns the single MCP registry/protocol server and stable Claude-visible tool names. The `.mcp.json` entrypoint remains `tools/run_project_mcp_server.py`.
-- `interfaces/admin` owns HTTP routes, schemas, Admin services, templates, and static assets. Agent Runs reads the existing `agent_jobs` projection; no duplicate observability model was added.
-- `infrastructure/database` owns SQLAlchemy engine/session/models/repositories. `infrastructure/ssh` is the only package importing `asyncssh`; known-hosts checking, key validation, connection timeout, command timeout, and result semantics remain enforced there.
-- `infrastructure/llm/ollama` owns Ollama-specific clients. Ollama is the only configured provider.
-- `composition` wires the application. It does not implement workflows.
-- `app/shared` has been eliminated; contracts, configuration, exceptions, utilities, and application services now have canonical owners.
+- `core` owns provider-neutral contracts, configuration, exceptions, utilities,
+  and fail-closed policy. It does not import outer layers.
+- `capabilities` owns bounded monitoring, analysis/RAG, investigation/evidence,
+  and knowledge behavior. It does not import interfaces, composition, or the
+  runtime.
+- `runtime/claude` owns Claude CLI execution, stream decoding, and job
+  lifecycle. Claude supplies supervisory sequencing; Python validates and
+  executes capabilities.
+- `interfaces/mcp` owns the single MCP registry/protocol server and the stable
+  Claude-visible tool contract. Its handler implementations are grouped under
+  `interfaces/mcp/handlers`.
+- `interfaces/admin` owns HTTP routes, schemas, services, templates, and static
+  assets. Admin observability reads the existing `agent_jobs` projection.
+- `infrastructure/database` owns database engine/session/models/repositories;
+  `infrastructure/ssh` is the only package importing `asyncssh`; and
+  `infrastructure/llm/ollama` owns the configured LLM provider.
+- `composition` wires the application and does not implement workflows.
+- `tools/acceptance/evaluation` contains acceptance/readiness evaluation code;
+  it is not imported by production application packages.
 
 ## Safety boundaries
 
-Claude receives only MCP tools with bounded permissions. It has no raw SQL, raw SSH, unrestricted shell, direct database, direct Ollama, or remediation-bypass capability. MCP handlers call Python capabilities; policy, evidence, persistence, and approval remain Python-owned. `No solution found` remains a valid remediation result.
-
-## Compatibility facades
-
-Thin facades remain at historical import paths required by existing tests and callers:
-
-- `app/domain/{analysis,investigation,knowledge}` → `app/capabilities` and `app/core`.
-- `app/tools` has been eliminated; MCP catalog and boundary code live under `app/interfaces/mcp`, monitoring and SSH live under their canonical capability/infrastructure packages.
-- `app/admin` and `app/mcp` → `app/interfaces/admin` and `app/interfaces/mcp`.
-- No `app/shared` compatibility layer remains; database, contracts, configuration, and application services have canonical owners.
-
-These facades contain no duplicate business implementation. `app/domain/evaluation` remains a single evaluation/readiness implementation rather than a migrated duplicate.
+Claude receives only bounded MCP tools. It has no raw SQL, raw SSH, unrestricted
+shell, direct database, direct Ollama, or remediation-bypass capability. MCP
+handlers call Python capabilities; policy, evidence, persistence, and approval
+remain Python-owned. Automatic remediation remains disabled.
 
 ## Verification
 
-- Normal suite: `407 passed, 1 skipped`.
-- Real Claude/Ollama/MCP acceptance: accepted against operational server 2 using native `claude`, Ollama model `gemma4:e4b-it-q4_K_M`, connected `vps` MCP, persisted `AgentJob`, report, analysis, investigation, and observability.
-- The acceptance also exposed and fixed bounded persistence of oversized `agent_jobs.error_message` values without changing the schema.
+The architecture tests enforce deleted legacy package trees, canonical import
+ownership, layer dependency rules, and an acyclic application import graph.
+The final C.14.11A report records the full suite and real Claude/Ollama/MCP
+acceptance results.

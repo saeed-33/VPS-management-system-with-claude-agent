@@ -44,7 +44,7 @@ materialization, retaining the full parsed text can be revisited.
 Runtime acceptance example:
 
 ```powershell
-uv run python tools/ingest_knowledge_source.py nginx-docs
+uv run python tools/dev/ingest_knowledge_source.py nginx-docs
 ```
 
 Expected document status:

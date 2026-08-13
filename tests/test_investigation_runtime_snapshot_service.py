@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     EvidenceKind,
     EvidenceReference,
     InvestigationBudget,
@@ -10,19 +10,19 @@ from app.domain.investigation.contracts import (
     SpecialistTask,
     SpecialistTaskStatus,
 )
-from app.domain.investigation.correlation import (
+from app.capabilities.investigation.correlation import (
     CorrelatedDiagnosisClaim,
     DiagnosisCertainty,
     DiagnosisConflict,
     FinalDiagnosis,
 )
-from app.domain.investigation.final_diagnosis_synthesizer import (
+from app.capabilities.investigation.final_diagnosis_synthesizer import (
     FinalDiagnosisNarrative,
 )
-from app.domain.investigation.runtime_snapshot_service import (
+from app.capabilities.investigation.runtime_snapshot_service import (
     InvestigationRuntimeSnapshotService,
 )
-from app.domain.investigation.execution_contracts import (
+from app.capabilities.investigation.execution_contracts import (
     InvestigationExecutionResult,
     InvestigationSpecialistRun,
 )

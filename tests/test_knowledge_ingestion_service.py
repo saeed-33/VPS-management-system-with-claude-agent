@@ -1,12 +1,12 @@
 from types import SimpleNamespace
 
-from app.domain.knowledge.ingestion_service import (
+from app.capabilities.knowledge.ingestion_service import (
     KnowledgeIngestionService,
 )
-from app.domain.knowledge.parsers import (
+from app.capabilities.knowledge.parsers import (
     KnowledgeContentParser,
 )
-from app.domain.knowledge.source_loader import (
+from app.capabilities.knowledge.source_loader import (
     LoadedKnowledgeContent,
 )
 

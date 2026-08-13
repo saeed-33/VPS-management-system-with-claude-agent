@@ -1,5 +1,5 @@
 import pytest
-from app.domain.knowledge.ingestion_contracts import (
+from app.capabilities.knowledge.ingestion_contracts import (
     KnowledgeChunkDraft, KnowledgeDocumentStatus, ParsedKnowledgeDocument,
 )
 

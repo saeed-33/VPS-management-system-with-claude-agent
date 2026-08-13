@@ -25,7 +25,7 @@ scope but does not crawl or index content.
 Run:
 
 ```powershell
-uv run python tools/seed_knowledge_sources.py
+uv run python tools/dev/seed_knowledge_sources.py
 ```
 
 The command is idempotent:
@@ -38,15 +38,15 @@ existing slug -> update
 Then inspect:
 
 ```powershell
-uv run python tools/inspect_knowledge_sources.py
-uv run python tools/inspect_knowledge_sources.py --domain cpu
-uv run python tools/inspect_knowledge_sources.py --specialist linux-network
+uv run python tools/dev/inspect_knowledge_sources.py
+uv run python tools/dev/inspect_knowledge_sources.py --domain cpu
+uv run python tools/dev/inspect_knowledge_sources.py --specialist linux-network
 ```
 
 Acceptance:
 
 ```powershell
-uv run python tools/check_knowledge_source_acceptance.py
+uv run python tools/acceptance/check_knowledge_source_acceptance.py
 ```
 
 All nine baseline Specialists must resolve to at least one enabled knowledge
