@@ -18,8 +18,10 @@ C.14.14: PASS
 Phase C: COMPLETE / CLOSED
 Phase 5: COMPLETE / CLOSED
 Phase 5 readiness: 13/13 PASS
+Phase 6: IMPLEMENTED / NOT CLOSED
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
-readiness: READY_FOR_SUPERVISED_OPERATIONS
+readiness: BLOCKED_BY_SANDBOX_RUNTIME
 ```
 
 ### State meanings
@@ -50,6 +52,9 @@ readiness: READY_FOR_SUPERVISED_OPERATIONS
 - Phase 5 real supervised remediation acceptance: PASS on the explicitly
   designated non-production `phase5-lab` target (server 4).
 - Final Phase 5 regression: `433 passed, 2 skipped, 1 warning`.
+- Phase 6 adds a fingerprint-bound isolated validation record and approval
+  gate. The native-sandbox runtime requires explicit attestation from WSL2;
+  no unsandboxed fallback is permitted.
 
 
 ## C.14.12 readiness acceptance
@@ -100,6 +105,10 @@ controlled execution, verification, idempotency, state-aware rollback, and
 audit events, and restored the dedicated service to its original `inactive`
 state. Automatic remediation remains disabled.
 
+Phase 6 Claude-Native Isolated Sandbox Validation is implemented but not
+closed. The deterministic 13-dimension gate is blocked until a real native
+sandbox runtime attestation and safe validation acceptance are available.
+
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
 
@@ -108,10 +117,10 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-readiness: READY_FOR_SUPERVISED_OPERATIONS
+Phase 6: implemented / not closed
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
 ```
 

@@ -14,7 +14,8 @@ C.14.12: PASS
 C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
-Phase 5: NEXT
+Phase 5: COMPLETE / CLOSED
+Phase 6: IMPLEMENTED / NOT CLOSED
 automatic_remediation_allowed: false
 ```
 
@@ -72,7 +73,9 @@ periodic monitoring
  -> dynamic DB-defined Specialists
  -> Evidence
  -> Final Diagnosis
- -> bounded remediation proposal only
+ -> bounded remediation proposal
+ -> Claude-native isolated sandbox validation
+ -> fingerprint-bound approval gate
 ```
 
 Do not fabricate current operational facts from historical incidents or
@@ -146,6 +149,6 @@ docs/testing/TESTING_STRATEGY.md
 docs/architecture/c14-12-runtime-readiness-gate.md
 ```
 
-Phase 5 is the next allowed phase, but do not implement it as part of this
-closeout. Keep `automatic_remediation_allowed` false until its separate gates
-pass.
+Phase 5 is complete and closed. Phase 6 is implemented but not closed until
+its real native-sandbox acceptance gate passes. Keep
+`automatic_remediation_allowed` false.

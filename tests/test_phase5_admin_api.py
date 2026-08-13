@@ -21,6 +21,7 @@ def test_phase5_admin_routes_are_registered():
     assert "/api/remediation/{plan_id}/audit" in paths
     assert "/api/remediation/{plan_id}/execute" in paths
     assert "/api/remediation/{plan_id}/rollback" in paths
+    assert "/api/remediation/{plan_id}/sandbox-validation" in paths
 
 
 def test_phase5_admin_page_is_operator_review_surface():

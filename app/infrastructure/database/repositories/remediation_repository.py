@@ -4,7 +4,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import sessionmaker
 
 from app.core.contracts.remediation import (
@@ -26,6 +26,7 @@ from app.infrastructure.database.models.remediation import (
     RemediationRollbackModel,
     RemediationSandboxResultModel,
     RemediationVerificationModel,
+    SandboxValidationModel,
 )
 from app.infrastructure.database.session import SessionLocal
 
@@ -143,6 +144,57 @@ class RemediationRepository:
                 .where(RemediationSandboxResultModel.plan_id == plan_id)
                 .order_by(RemediationSandboxResultModel.created_at.desc(), RemediationSandboxResultModel.id.desc())
             )
+
+    def create_sandbox_validation(self, **data) -> SandboxValidationModel:
+        model = SandboxValidationModel(**data)
+        with self._session_factory() as session:
+            session.add(model)
+            session.commit()
+            session.refresh(model)
+            return model
+
+    def get_sandbox_validation(self, validation_id: str) -> SandboxValidationModel | None:
+        try:
+            with self._session_factory() as session:
+                return session.scalar(select(SandboxValidationModel).where(
+                    SandboxValidationModel.validation_id == validation_id
+                ))
+        except OperationalError:
+            return None
+
+    def get_latest_sandbox_validation(self, plan_id: str) -> SandboxValidationModel | None:
+        try:
+            with self._session_factory() as session:
+                return session.scalar(
+                    select(SandboxValidationModel)
+                    .where(SandboxValidationModel.plan_id == plan_id)
+                    .order_by(SandboxValidationModel.created_at.desc(), SandboxValidationModel.id.desc())
+                )
+        except OperationalError:
+            return None
+
+    def list_sandbox_validations(self, plan_id: str) -> list[SandboxValidationModel]:
+        with self._session_factory() as session:
+            return list(session.scalars(
+                select(SandboxValidationModel)
+                .where(SandboxValidationModel.plan_id == plan_id)
+                .order_by(SandboxValidationModel.created_at.asc(), SandboxValidationModel.id.asc())
+            ).all())
+
+    def update_sandbox_validation(self, validation_id: str, **updates) -> SandboxValidationModel:
+        with self._session_factory() as session:
+            model = session.scalar(select(SandboxValidationModel).where(
+                SandboxValidationModel.validation_id == validation_id
+            ))
+            if model is None:
+                raise ValueError(f"Sandbox validation not found: {validation_id}")
+            for name, value in updates.items():
+                if hasattr(model, name):
+                    setattr(model, name, value)
+            session.add(model)
+            session.commit()
+            session.refresh(model)
+            return model
 
     def update_plan_status(self, plan_id: str, status: str, *, approved_by: str | None = None,
                            denial_reason: str | None = None, approval_requested: bool = False,

@@ -17,9 +17,9 @@ allowed-tools:
 
 ## Purpose
 
-Create a grounded, auditable remediation plan and use the supervised Phase 5
-lifecycle. No Claude call itself grants approval; execution requires persisted
-human approval.
+Create a grounded, auditable remediation plan and use the Phase 6 isolated
+validation gate before the existing supervised Phase 5 lifecycle. No Claude
+call itself grants approval; execution requires persisted human approval.
 
 ## Input contract
 
@@ -56,8 +56,12 @@ inventing a solution.
    ```
 6. If the proposal supports a registered action, call
    `mcp__vps__create_remediation_plan`.
-7. Call `mcp__vps__test_remediation_in_sandbox` and require a passed result.
-8. Call `mcp__vps__request_user_approval` and return the approval ID and plan
+7. Call `mcp__vps__test_remediation_in_sandbox` with an explicitly designated
+   safe/non-production target and require a passed, fingerprint-bound result.
+   Inspect Before/After Evidence, verification, cleanup, and native-sandbox
+   runtime attestation. Stop on any failure or stale result.
+8. Call `mcp__vps__request_user_approval`; Python refuses this unless the
+   current exact fingerprint has a Phase 6 validation PASS. Return the approval ID and plan
    fingerprint to the operator. Stop and wait for the human decision.
 9. Only after the operator supplies a persisted human approval ID that is
    approved, call
@@ -67,7 +71,8 @@ inventing a solution.
 ## Hard boundary
 
 This skill must never call raw SSH, arbitrary shell, or an unregistered write
-tool. `apply_approved_remediation` is valid only with a human-created,
+tool. Claude native sandbox availability is fail-closed, and Python remains
+the authority for policy, target safety, Evidence, and approval. `apply_approved_remediation` is valid only with a human-created,
 unexpired approval whose fingerprint still matches the immutable plan.
 
 ## Failure behavior

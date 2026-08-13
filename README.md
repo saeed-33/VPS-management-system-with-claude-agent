@@ -15,14 +15,15 @@ C.14.12: PASS
 C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
-Phase 5: IMPLEMENTED / NOT CLOSED
+Phase 5: COMPLETE / CLOSED
+Phase 6: IMPLEMENTED / NOT CLOSED
 automatic_remediation_allowed: false
 provider: ollama
 ```
 
-The current readiness state is `blocked_by_safe_test_environment`. Phase 5
-Supervised Remediation is implemented, but real supervised acceptance is
-pending an explicitly safe reversible target.
+Phase 5 is accepted and closed. Phase 6 is implemented but its readiness is
+`blocked_by_sandbox_runtime` until real WSL2 Claude-native sandbox evidence is
+available. Automatic remediation remains disabled.
 
 ## Current architecture
 
@@ -74,7 +75,8 @@ periodic monitoring
  -> persisted Evidence
  -> final diagnosis
  -> bounded remediation proposal
- -> sandbox
+ -> Claude-native isolated sandbox validation
+ -> sandbox PASS
  -> persisted human approval
  -> registered named write
  -> verification or rollback
@@ -99,6 +101,9 @@ available only through the persisted approval and policy gates.
   fingerprints, idempotency, verification, rollback, and audit events;
 - Admin remediation review/approval/execution/rollback surface;
 - 13-metric Phase 5 readiness evaluator.
+- Phase 6 fingerprint-bound isolated validation, project-owned Evidence,
+  cleanup/restoration, fail-closed native-sandbox attestation, and 13-metric
+  readiness evaluator.
 
 ## Safety model
 
@@ -152,9 +157,10 @@ uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_accepta
 - [Testing strategy](docs/testing/TESTING_STRATEGY.md)
 - [C.14.12 readiness closeout](docs/architecture/c14-12-runtime-readiness-gate.md)
 
-## Phase 5 acceptance state
+## Phase 6 acceptance state
 
-C.14.14 Phase C Closure is complete. Phase 5 is implemented but remains
-`PHASE 5 = NOT CLOSED` because the configured servers are offline and no safe
-reversible real-test target is designated. Phase 6 is not started or
-authorized by this task.
+Phase 5 is complete and closed on the explicitly designated non-production
+`phase5-lab` target. Phase 6 is implemented but remains `PHASE 6 = NOT CLOSED`
+until the opt-in Claude-native sandbox acceptance produces real WSL2 runtime
+attestation and completes the safe validation flow. Automatic remediation
+remains disabled.

@@ -157,6 +157,7 @@ def build_core_services(
             connect_timeout_seconds=settings.ssh_connect_timeout_seconds,
             command_timeout_seconds=settings.command_timeout_seconds,
         ),
+        server_repository=repositories.server_repository,
     )
 
     return CoreServiceBundle(

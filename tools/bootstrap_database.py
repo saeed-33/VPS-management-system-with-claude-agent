@@ -40,6 +40,7 @@ EXPECTED_TABLES = {
     "remediation_rollbacks",
     "remediation_evidence",
     "remediation_audit_events",
+    "sandbox_validations",
 }
 
 CUSTOM_INDEXES = {

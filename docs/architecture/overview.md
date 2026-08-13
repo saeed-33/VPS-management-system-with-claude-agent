@@ -139,11 +139,11 @@ queued/running jobs as failed with `interrupted_after_restart`.
 
 ## Bounded autonomy
 
-The current system is ready for supervised diagnostic operations only. The MCP
-catalog may expose bounded remediation planning, sandbox, and approval-shaped
-contracts, but `automatic_remediation_allowed` remains `false` and no
-production write action is authorized. Phase 5 is the next phase after C.14.14;
-it is not part of this implementation.
+The current system is ready for supervised diagnostic operations and the
+implemented Phase 5/6 remediation workflow remains explicitly bounded:
+`automatic_remediation_allowed` is `false`, production writes are not
+authorized, and Phase 6 cannot request approval until native sandbox
+attestation and safe-target validation pass.
 
 ## Related canonical documents
 
@@ -162,8 +162,10 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+Phase 6: implemented / not closed
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
 ```
 

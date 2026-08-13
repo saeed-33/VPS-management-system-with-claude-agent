@@ -493,13 +493,25 @@ class BoundaryDefinitionsMixin:
             ProjectToolDefinition(
                 tool_id="test_remediation_in_sandbox",
                 description=(
-                    "Validate a remediation plan in an "
-                    "isolated sandbox dry-run."
+                    "Validate a remediation plan in the Phase 6 "
+                    "isolated sandbox when an explicit safe target is "
+                    "provided; otherwise preserve the Phase 5 dry-run "
+                    "contract."
                 ),
                 input_schema={
                     "type": "object",
                     "properties": {
                         "plan_id": {
+                            "type": "string",
+                        },
+                        "target_server_id": {
+                            "type": "integer",
+                            "minimum": 1,
+                        },
+                        "target_server_name": {
+                            "type": "string",
+                        },
+                        "target_service": {
                             "type": "string",
                         },
                     },
@@ -511,13 +523,17 @@ class BoundaryDefinitionsMixin:
             ProjectToolDefinition(
                 tool_id="get_sandbox_result",
                 description=(
-                    "Read an auditable sandbox result "
-                    "by result_id or plan_id."
+                    "Read an auditable Phase 5 sandbox result or Phase 6 "
+                    "sandbox validation by result_id, validation_id, or "
+                    "plan_id."
                 ),
                 input_schema={
                     "type": "object",
                     "properties": {
                         "result_id": {
+                            "type": "string",
+                        },
+                        "validation_id": {
                             "type": "string",
                         },
                         "plan_id": {

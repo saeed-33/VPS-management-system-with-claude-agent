@@ -29,3 +29,9 @@ class RollbackRemediationRequest(BaseModel):
     execution_id: str = Field(min_length=1, max_length=64)
     server_id: int = Field(ge=1)
     actor: str = Field(min_length=1, max_length=120)
+
+
+class SandboxValidationRequest(BaseModel):
+    target_server_id: int = Field(ge=1)
+    target_server_name: str = Field(min_length=1, max_length=100)
+    target_service: str = Field(min_length=1, max_length=128)

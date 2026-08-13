@@ -46,7 +46,8 @@ C.14.12: PASS
 C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
-Phase 5: IMPLEMENTED / NOT CLOSED
+Phase 5: COMPLETE / CLOSED
+Phase 6: IMPLEMENTED / NOT CLOSED
 automatic_remediation_allowed: false
 ```
 
@@ -61,8 +62,10 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+Phase 6: implemented / not closed
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
 ```
 

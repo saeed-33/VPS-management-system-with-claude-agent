@@ -181,11 +181,11 @@ uv run python tools/dev/generate_test_catalog.py
 ### `tests/test_claude_least_privilege.py`
 
 - `test_settings_allow_only_current_runtime_capabilities`
-- `test_phase5_execution_tools_are_explicitly_denied`
+- `test_raw_remediation_escape_tools_are_explicitly_denied`
 - `test_raw_operational_shell_paths_are_denied_for_both_shells`
 - `test_skill_inline_shell_execution_is_disabled`
 - `test_runtime_agents_use_inherited_model_and_dontask`
-- `test_server_supervisor_is_proposal_only_for_remediation`
+- `test_server_supervisor_uses_supervised_remediation_tools`
 - `test_specialist_worker_has_no_remediation_tools`
 
 ### `tests/test_claude_operational_skills.py`
@@ -195,7 +195,7 @@ uv run python tools/dev/generate_test_catalog.py
 - `test_skills_define_operational_contract_sections`
 - `test_analysis_skill_never_forces_normal_analysis`
 - `test_investigation_skill_preserves_db_specialist_authority`
-- `test_remediation_skill_is_proposal_only`
+- `test_remediation_skill_is_supervised_and_approval_gated`
 - `test_server_supervisor_preloads_canonical_workflow_skills`
 - `test_specialist_worker_is_not_a_workflow_coordinator`
 - `test_legacy_skill_names_are_removed`
@@ -511,6 +511,51 @@ uv run python tools/dev/generate_test_catalog.py
 - `test_foreign_server_evidence_fails_closed`
 - `test_evidence_without_context_fails_closed`
 
+### `tests/test_phase5_admin_api.py`
+
+- `test_phase5_admin_routes_are_registered`
+- `test_phase5_admin_page_is_operator_review_surface`
+
+### `tests/test_phase5_readiness.py`
+
+- `test_phase5_gate_requires_all_metrics_and_real_acceptance`
+- `test_phase5_gate_passes_only_with_explicit_real_acceptance`
+
+### `tests/test_phase5_supervised_remediation.py`
+
+- `test_raw_command_and_unknown_write_tool_are_rejected`
+- `test_supervised_execution_rechecks_approval_server_and_idempotency`
+- `test_rejected_and_expired_approval_cannot_execute`
+- `test_execution_and_verification_failures_are_not_reported_as_success`
+- `test_rollback_uses_only_registered_reverse_action_and_records_evidence`
+- `test_rollback_failure_is_explicit_and_not_hidden`
+- `test_state_aware_rollback_requires_original_inactive_state_for_start`
+- `test_state_aware_rollback_requires_original_active_state_for_stop`
+- `test_restart_and_reload_are_not_declared_reversible`
+- `test_foreign_or_mismatched_before_evidence_cannot_authorize_rollback`
+- `test_prior_active_state_does_not_make_start_reversible`
+- `test_no_solution_found_is_a_persisted_normal_outcome`
+
+### `tests/test_phase6_native_sandbox_runtime.py`
+
+- `test_native_sandbox_runtime_fails_closed_without_attestation`
+- `test_native_sandbox_runtime_requires_all_isolation_claims`
+- `test_native_sandbox_runtime_accepts_complete_attestation_in_wsl`
+
+### `tests/test_phase6_readiness.py`
+
+- `test_phase6_real_runtime_blocker_keeps_gate_closed`
+- `test_phase6_gate_requires_all_thirteen_metrics`
+
+### `tests/test_phase6_sandbox_validation.py`
+
+- `test_validation_contracts_and_invalid_target_fail_closed`
+- `test_successful_validation_persists_evidence_and_allows_approval`
+- `test_action_or_verification_failure_blocks_approval`
+- `test_changed_fingerprint_marks_validation_stale_and_blocks_approval`
+- `test_restart_and_reload_cannot_be_validated_without_restoration`
+- `test_native_sandbox_runtime_is_required_by_default`
+
 ### `tests/test_production_readiness_gate.py`
 
 - `test_gate_requires_minimum_samples`
@@ -728,8 +773,10 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+Phase 6: implemented / not closed
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
 ```
 

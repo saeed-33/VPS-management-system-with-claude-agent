@@ -20,6 +20,7 @@
         <header class="panel-header"><h2 class="panel-title">Operator gate</h2></header>
         <div class="panel-body">
             <p>Only a persisted, unexpired approval matching the immutable plan fingerprint can authorize a named write.</p>
+            <p>Phase 6 requires a PASSED, non-stale Claude-native sandbox validation with project-owned Before/After Evidence before approval is eligible.</p>
             <p>Raw SSH, arbitrary shell, and generic command input are not available from this page or MCP.</p>
             <div id="remediation-detail" class="muted">Select a plan to inspect its audit trail.</div>
         </div>
@@ -60,6 +61,12 @@
                 const controls = document.createElement("div");
                 const plan = current.plan;
                 const approval = current.approval;
+                const validation = current.sandbox_validation;
+                const validationSummary = document.createElement("p");
+                validationSummary.textContent = validation
+                    ? `Sandbox validation: ${validation.status} | fingerprint: ${validation.plan_fingerprint} | target: ${validation.server_name}/${validation.service} | expected: ${validation.expected_state} | observed: ${validation.observed_state}`
+                    : "Sandbox validation: NOT AVAILABLE — approval is blocked.";
+                detail.appendChild(validationSummary);
                 if (approval && approval.status === "pending") {
                     const approve = document.createElement("button");
                     approve.className = "button button-primary";

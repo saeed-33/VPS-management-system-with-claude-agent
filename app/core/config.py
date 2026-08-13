@@ -57,6 +57,8 @@ class Settings(BaseSettings):
     safe_remediation_server_id: int | None = None
     safe_remediation_server_name: str = ""
     safe_remediation_service: str = ""
+    phase6_native_sandbox_attestation_file: Path | None = None
+    phase6_require_wsl2: bool = True
 
     app_name: str = "AI VPS Management"
     debug: bool = True

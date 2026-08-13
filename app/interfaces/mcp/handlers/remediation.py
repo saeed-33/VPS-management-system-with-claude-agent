@@ -123,24 +123,31 @@ class RemediationToolsMixin:
             self._remediation_service,
             "remediation_service",
         )
-        result = (
-            self._remediation_service
-            .test_in_sandbox(
-                plan_id=self._required_string(
-                    arguments,
-                    "plan_id",
-                )
+        plan_id = self._required_string(arguments, "plan_id")
+        if all(key in arguments for key in ("target_server_id", "target_server_name", "target_service")):
+            result = self._remediation_service.validate_in_isolated_sandbox(
+                plan_id=plan_id,
+                target_server_id=int(arguments["target_server_id"]),
+                target_server_name=self._required_string(arguments, "target_server_name"),
+                target_service=self._required_string(arguments, "target_service"),
             )
-        )
+        else:
+            # Preserve the Phase 5 dry-run contract for existing callers.
+            result = self._remediation_service.test_in_sandbox(plan_id=plan_id)
 
         return ProjectToolResult(
             tool_id="test_remediation_in_sandbox",
-            success=True,
+            success=getattr(result, "status", "") in {"passed", "sandbox_passed"},
             data={
                 "sandbox_result": serialize_value(
                     result
-                )
+                ),
+                "sandbox_validation": serialize_value(
+                    result if hasattr(result, "validation_id") else None
+                ),
             },
+            error_code=None if getattr(result, "status", "") in {"passed", "sandbox_passed"} else "sandbox_validation_failed",
+            error_message=None if getattr(result, "status", "") in {"passed", "sandbox_passed"} else getattr(result, "failure_reason", "Sandbox validation failed."),
         )
 
     async def _get_sandbox_result(
@@ -153,21 +160,11 @@ class RemediationToolsMixin:
         )
 
         result_id = arguments.get("result_id")
+        validation_id = arguments.get("validation_id")
         plan_id = arguments.get("plan_id")
-        if result_id is not None and not isinstance(
-            result_id,
-            str,
-        ):
-            raise ValueError(
-                "result_id must be a string."
-            )
-        if plan_id is not None and not isinstance(
-            plan_id,
-            str,
-        ):
-            raise ValueError(
-                "plan_id must be a string."
-            )
+        for name, value in (("result_id", result_id), ("validation_id", validation_id), ("plan_id", plan_id)):
+            if value is not None and not isinstance(value, str):
+                raise ValueError(f"{name} must be a string.")
 
         result = (
             self._remediation_service
@@ -176,7 +173,17 @@ class RemediationToolsMixin:
                 plan_id=plan_id,
             )
         )
+        validation = None
+        if validation_id is not None:
+            validation = self._remediation_service.get_sandbox_validation(validation_id=validation_id)
+        elif plan_id is not None:
+            validation = self._remediation_service.get_sandbox_validation(plan_id=plan_id)
         if result is None:
+            if validation is not None:
+                return ProjectToolResult(
+                    tool_id="get_sandbox_result", success=True,
+                    data={"sandbox_validation": serialize_value(validation)},
+                )
             return ProjectToolResult(
                 tool_id="get_sandbox_result",
                 success=False,
@@ -190,9 +197,8 @@ class RemediationToolsMixin:
             tool_id="get_sandbox_result",
             success=True,
             data={
-                "sandbox_result": serialize_value(
-                    result
-                )
+                "sandbox_result": serialize_value(result),
+                "sandbox_validation": serialize_value(validation),
             },
         )
 

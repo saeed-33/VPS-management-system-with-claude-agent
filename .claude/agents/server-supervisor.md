@@ -73,8 +73,10 @@ monitor
  -> delegate selected DB-defined Specialist work when required
  -> read persisted investigation/evidence
  -> surface the persisted final diagnosis
- -> create and sandbox a grounded remediation plan when appropriate
- -> request explicit human approval and preserve its approval ID/fingerprint
+ -> create and validate a grounded remediation plan in the explicitly safe
+    Claude-native isolated sandbox when appropriate
+ -> request explicit human approval only after a current, fingerprint-bound
+    sandbox validation PASS
  -> execute only through the approved registered MCP action
  -> stop after the persisted execution/verification outcome
 ```

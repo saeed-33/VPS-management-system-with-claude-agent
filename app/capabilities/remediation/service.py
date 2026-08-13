@@ -15,6 +15,13 @@ from app.capabilities.remediation.execution import (
     WriteCommandResult,
     WriteCommandRunner,
 )
+from app.capabilities.remediation.sandbox_runtime import NativeSandboxRuntime
+from app.core.contracts.sandbox_validation import (
+    SandboxRuntimeCheck,
+    SandboxTarget,
+    SandboxValidationStatus,
+)
+from app.core.policies.sandbox_validation import validate_sandbox_target
 from app.core.contracts.remediation import (
     ApprovalStatus,
     CreateRemediationPlanDTO,
@@ -46,6 +53,8 @@ class RemediationService:
         write_runner: WriteCommandRunner | None = None,
         verification_runner: VerificationRunner | None = None,
         evidence_collector: ServiceStateEvidenceCollector | None = None,
+        server_repository=None,
+        sandbox_runtime=None,
     ) -> None:
         self._repository = repository
         self._automatic_remediation_allowed = automatic_remediation_allowed
@@ -55,6 +64,8 @@ class RemediationService:
         self._write_runner = write_runner or UnavailableWriteRunner()
         self._verification_runner = verification_runner or UnavailableVerificationRunner()
         self._evidence_collector = evidence_collector or UnavailableEvidenceCollector()
+        self._server_repository = server_repository
+        self._sandbox_runtime = sandbox_runtime or NativeSandboxRuntime()
 
     def propose_remediation(self, *, investigation_id: str, problem_summary: str,
                             diagnosis_claim_ids: list[str], evidence_ids: list[str]) -> dict:
@@ -185,10 +196,133 @@ class RemediationService:
             return self._repository.get_latest_sandbox_result_for_plan(plan_id)
         raise ValueError("result_id or plan_id is required.")
 
+    def get_sandbox_validation(self, validation_id: str | None = None, *, plan_id: str | None = None):
+        if validation_id is not None:
+            return self._repository.get_sandbox_validation(validation_id)
+        if plan_id is not None:
+            return self._repository.get_latest_sandbox_validation(plan_id)
+        raise ValueError("validation_id or plan_id is required.")
+
+    def validate_in_isolated_sandbox(self, *, plan_id: str, target_server_id: int,
+                                     target_server_name: str, target_service: str,
+                                     runtime_check: SandboxRuntimeCheck | None = None):
+        plan = self._require_plan(plan_id)
+        actions = [RemediationAction.from_dict(item) for item in (plan.proposed_actions or [])]
+        validation_id = str(uuid4())
+        started_at = utc_now()
+        base = {
+            "validation_id": validation_id,
+            "plan_id": plan.plan_id,
+            "plan_fingerprint": plan.plan_fingerprint,
+            "server_id": target_server_id,
+            "server_name": target_server_name,
+            "service": target_service,
+            "action_type": actions[0].action_type if len(actions) == 1 else "unknown",
+            "action_parameters": actions[0].parameters if len(actions) == 1 else {},
+            "expected_state": "unknown",
+            "observed_state": None,
+            "before_evidence_ids": [],
+            "after_evidence_ids": [],
+            "verification_status": "inconclusive",
+            "status": SandboxValidationStatus.ERROR.value,
+            "started_at": started_at,
+            "finished_at": None,
+            "failure_reason": None,
+            "validation_metadata": {"runtime": "claude-native-sandbox"},
+        }
+        if len(actions) != 1:
+            base["failure_reason"] = "exactly_one_registered_action_required"
+            return self._finish_sandbox_validation(plan, base, "sandbox_validation_failed")
+        action = actions[0]
+        try:
+            tool = self._write_tools.resolve(action)
+            base["expected_state"] = tool.expected_effect
+            if action.target != target_service:
+                raise ValueError("Sandbox service must match the registered plan action target.")
+            if self._server_repository is None:
+                raise ValueError("Sandbox target repository is unavailable.")
+            server = self._server_repository.get_by_id(target_server_id)
+            target = SandboxTarget(target_server_id, target_server_name, target_service, server.description if server else "")
+            validate_sandbox_target(server=server, target=target)
+            check = runtime_check or self._sandbox_runtime.check()
+            if not check.available:
+                raise ValueError(f"native_sandbox_unavailable:{check.reason}")
+            base["validation_metadata"] = {"runtime": check.runtime, "runtime_evidence": check.evidence}
+            self._audit(plan, "sandbox_validation_started", {"validation_id": validation_id})
+            before = self._collect_evidence(plan=plan, execution_id=validation_id, server_id=target_server_id,
+                                             service=target_service, phase="sandbox_before")
+            if before is None or before.observed_state not in {"active", "inactive"}:
+                raise ValueError("sandbox_before_evidence_unavailable")
+            base["before_evidence_ids"] = [before.evidence_id]
+            base["status"] = SandboxValidationStatus.RUNNING.value
+            self._audit(plan, "sandbox_before_evidence_collected", {"validation_id": validation_id})
+            rollback_type = self._resolve_state_aware_rollback(action, before.observed_state)
+            if rollback_type is None:
+                raise ValueError("sandbox_action_has_no_safe_restoration_path")
+            self._audit(plan, "sandbox_action_started", {"validation_id": validation_id, "action": action.action_type})
+            result = self._write_runner.run(server_id=target_server_id, action=action,
+                                            command=tool.command_for(action), timeout_seconds=tool.timeout_seconds)
+            if not isinstance(result, WriteCommandResult):
+                result = WriteCommandResult(**result)
+            after = self._collect_evidence(plan=plan, execution_id=validation_id, server_id=target_server_id,
+                                           service=target_service, phase="sandbox_after")
+            if after is None:
+                raise ValueError("sandbox_after_evidence_unavailable")
+            base["after_evidence_ids"] = [after.evidence_id]
+            base["observed_state"] = after.observed_state
+            self._audit(plan, "sandbox_after_evidence_collected", {"validation_id": validation_id})
+            if not result.success:
+                raise ValueError(result.error or "sandbox_action_failed")
+            verified, details = self._verify_state(server_id=target_server_id, action=action, expected_state=tool.expected_effect)
+            base["validation_metadata"]["verification"] = details
+            base["verification_status"] = "verified" if verified else "failed"
+            if not verified or after.observed_state != tool.expected_effect:
+                self._audit(plan, "sandbox_verification_failed", {"validation_id": validation_id})
+                raise ValueError("sandbox_verification_mismatch")
+            self._audit(plan, "sandbox_verification_passed", {"validation_id": validation_id})
+            reverse = RemediationAction(action_type=rollback_type, target=action.target, action_id=f"sandbox-restore:{action.action_id or action.action_type}")
+            reverse_tool = self._write_tools.resolve(reverse)
+            restore = self._write_runner.run(server_id=target_server_id, action=reverse,
+                                             command=reverse_tool.command_for(reverse), timeout_seconds=reverse_tool.timeout_seconds)
+            if not isinstance(restore, WriteCommandResult):
+                restore = WriteCommandResult(**restore)
+            final = self._collect_evidence(plan=plan, execution_id=validation_id, server_id=target_server_id,
+                                           service=target_service, phase="sandbox_restore")
+            base["validation_metadata"]["restored_state"] = final.observed_state if final else None
+            if not restore.success or final is None or final.observed_state != before.observed_state:
+                raise ValueError("sandbox_cleanup_restoration_failed")
+            base["validation_metadata"]["cleanup_evidence_id"] = final.evidence_id
+            base["status"] = SandboxValidationStatus.PASSED.value
+            self._audit(plan, "sandbox_validation_passed", {"validation_id": validation_id})
+        except Exception as exc:
+            base["status"] = SandboxValidationStatus.FAILED.value
+            base["failure_reason"] = str(exc)
+            self._audit(plan, "sandbox_validation_failed", {"validation_id": validation_id, "reason": str(exc)})
+        return self._finish_sandbox_validation(plan, base, None)
+
+    def _finish_sandbox_validation(self, plan, data: dict, event_type: str | None):
+        data["finished_at"] = utc_now()
+        model = self._repository.create_sandbox_validation(**data)
+        if event_type:
+            self._audit(plan, event_type, {"validation_id": model.validation_id})
+        return model
+
     def request_approval(self, *, plan_id: str, expires_in_seconds: int = 3600, scope: dict | None = None):
         plan = self._require_plan(plan_id)
-        if plan.status != RemediationPlanStatus.SANDBOX_PASSED.value:
-            raise ValueError("Sandbox must pass before approval can be requested.")
+        validation = self._repository.get_latest_sandbox_validation(plan_id)
+        if validation is None:
+            raise ValueError("Sandbox validation must pass before approval can be requested.")
+        if validation.plan_fingerprint != plan.plan_fingerprint:
+            self._repository.update_sandbox_validation(validation.validation_id, status=SandboxValidationStatus.STALE.value,
+                                                       failure_reason="plan_fingerprint_changed")
+            self._audit(plan, "sandbox_validation_stale", {"validation_id": validation.validation_id})
+            raise ValueError("Sandbox validation is stale for the current plan fingerprint.")
+        if validation.status != SandboxValidationStatus.PASSED.value:
+            raise ValueError("Sandbox validation must pass before approval can be requested.")
+        if validation.server_id != plan.server_id or validation.action_type != RemediationAction.from_dict(plan.proposed_actions[0]).action_type:
+            raise ValueError("Sandbox validation target/action does not belong to this plan.")
+        if plan.status not in {RemediationPlanStatus.SANDBOX_PASSED.value, RemediationPlanStatus.PROPOSED.value}:
+            raise ValueError("Plan is not eligible for approval.")
         approval = self._repository.create_approval(
             plan_id=plan_id,
             plan_fingerprint=plan.plan_fingerprint,

@@ -223,6 +223,7 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/__init__.py` — Application capabilities: bounded business execution used by interfaces.
 - `app/capabilities/remediation/__init__.py` — Policy-gated remediation proposal and application capabilities.
 - `app/capabilities/remediation/execution.py` — Python module containing class `WriteCommandResult`, class `ServiceStateObservation`, class `ServiceStateEvidenceCollector`, class `WriteCommandRunner`, class `VerificationRunner`.
+- `app/capabilities/remediation/sandbox_runtime.py` — Python module containing class `NativeSandboxRuntime`.
 - `app/capabilities/remediation/service.py` — Python module containing class `RemediationService`.
 - `app/composition/__init__.py` — Application composition root / dependency container. Exports the canonical wired application container.
 - `app/composition/analysis.py` — Python module containing class `RetrievalComposition`, class `AnalysisInvestigationComposition`, `build_retrieval_composition()`, `build_analysis_investigation_composition()`.
@@ -245,6 +246,8 @@ Evaluation / Production Readiness Gate
 - `app/infrastructure/database/migrations/step_4_8_0_knowledge_rag_schema.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_4_8_3_knowledge_indexes.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_5_1_supervised_remediation.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_5_2_remediation_id_sequences.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_6_1_sandbox_validation.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_c_10_remediation.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_c_3_agent_jobs.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/models/__init__.py` — Python module.
@@ -399,6 +402,7 @@ Evaluation / Production Readiness Gate
 - `tools/acceptance/evaluation/contracts.py` — Operator/developer tool exposing class `EvaluationMetric`, class `ReadinessStatus`, class `EvaluationObservation`, class `MetricThreshold`.
 - `tools/acceptance/evaluation/persisted_runtime.py` — Operator/developer tool exposing class `PersistedRuntimeEvaluation`, class `PersistedRuntimeEvaluator`.
 - `tools/acceptance/evaluation/phase5_readiness.py` — Operator/developer tool exposing class `Phase5Metric`, class `Phase5Observation`, class `Phase5MetricResult`, class `Phase5ReadinessResult`.
+- `tools/acceptance/evaluation/phase6_readiness.py` — Operator/developer tool exposing class `Phase6Metric`, class `Phase6Observation`, class `Phase6ReadinessGate`.
 - `tools/acceptance/evaluation/readiness_gate.py` — Operator/developer tool exposing class `ProductionReadinessGate`.
 - `tools/acceptance/evaluation/runner.py` — Operator/developer tool exposing class `EvaluationCaseResult`, class `EvaluationRunResult`, class `DeterministicEvaluationRunner`, `expected_behavior_executor()`.
 - `tools/acceptance/evaluation/runtime_readiness.py` — Operator/developer tool exposing class `RuntimeReadinessMetric`, class `RuntimeReadinessResult`, class `RuntimeReadinessGate`.
@@ -425,7 +429,7 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/admin/schemas/investigations.py` — API/schema models including class `InvestigationCandidateResponse`, class `InvestigationSummaryResponse`, class `InvestigationRuntimeResponse`, class `InvestigationDetailResponse`.
 - `app/interfaces/admin/schemas/knowledge_sources.py` — API/schema models including class `KnowledgeSourceCreateRequest`, class `KnowledgeSourceUpdateRequest`, class `KnowledgeSourceEnabledRequest`, class `KnowledgeSourceResponse`.
 - `app/interfaces/admin/schemas/profiles.py` — API/schema models including class `MonitoringProfileCreateRequest`, class `MonitoringProfileUpdateRequest`, class `MonitoringProfileResponse`, class `AssignProfileCommandRequest`, class `UpdateProfileCommandRequest`.
-- `app/interfaces/admin/schemas/remediation.py` — API/schema models including class `ApprovalRequest`, class `ApprovalDecisionRequest`, class `ExecuteRemediationRequest`, class `RollbackRemediationRequest`.
+- `app/interfaces/admin/schemas/remediation.py` — API/schema models including class `ApprovalRequest`, class `ApprovalDecisionRequest`, class `ExecuteRemediationRequest`, class `RollbackRemediationRequest`, class `SandboxValidationRequest`.
 - `app/interfaces/admin/schemas/reports.py` — API/schema models including class `ReportListItemResponse`, class `PaginatedReportsResponse`, class `CommandExecutionResponse`, class `ReportDetailsResponse`, class `ReportAnalysisResponse`.
 - `app/interfaces/admin/schemas/servers.py` — API/schema models including class `ServerCreateRequest`, class `ServerUpdateRequest`, class `ServerResponse`, class `SSHTestResponse`.
 - `app/interfaces/admin/schemas/specialists.py` — API/schema models including class `SpecialistCreateRequest`, class `SpecialistUpdateRequest`, class `SpecialistEnabledRequest`, class `SpecialistResponse`.
@@ -460,11 +464,15 @@ Evaluation / Production Readiness Gate
 
 - `tools/acceptance/__init__.py` — Acceptance and runtime verification entry points.
 - `tools/acceptance/check_knowledge_source_acceptance.py` — Operator/developer tool exposing `main()`.
+- `tools/acceptance/launch_phase6_claude.sh` — Project asset.
+- `tools/acceptance/phase6_runtime_preflight.py` — Operator/developer tool exposing `main()`.
+- `tools/acceptance/phase6_sandbox_probe.py` — Operator/developer tool exposing `main()`.
 - `tools/acceptance/run_all_tests.py` — Operator/developer tool exposing `run()`, `tool_exists()`, `main()`.
 - `tools/acceptance/run_evaluation_dataset.py` — Operator/developer tool exposing `main()`.
 - `tools/acceptance/run_investigation_web_api_acceptance.py` — Operator/developer tool exposing `status()`, `main()`.
 - `tools/acceptance/run_persisted_runtime_evaluation.py` — Operator/developer tool exposing `main()`.
 - `tools/acceptance/run_phase5_readiness_evaluation.py` — Operator/developer tool exposing `main()`.
+- `tools/acceptance/run_phase6_readiness_evaluation.py` — Operator/developer tool exposing `main()`.
 - `tools/acceptance/run_production_readiness_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/acceptance/run_safety_runtime_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/acceptance/smoke_ollama_claude_runtime.py` — Operator/developer tool exposing `parse_args()`, `jsonable()`, `prepare_database_schema()`, `main_async()`.
@@ -507,6 +515,7 @@ Evaluation / Production Readiness Gate
 - `tests/real_runtime/__init__.py` — Pytest coverage for the corresponding project behavior.
 - `tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py` — Pytest coverage for `test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence()`.
 - `tests/real_runtime/test_phase5_real_supervised_remediation_acceptance.py` — Pytest coverage for `test_phase5_real_supervised_remediation_acceptance()`.
+- `tests/real_runtime/test_phase6_real_sandbox_acceptance.py` — Pytest coverage for `test_phase6_real_native_sandbox_and_validation_acceptance()`.
 - `tests/test_admin_system_api.py` — Pytest coverage for class `FakeSupervisor`, class `FakeToolBoundary`, `test_system_runtime_api_exposes_supervisor_and_tools()`.
 - `tests/test_admin_system_web.py` — Pytest coverage for `test_system_runtime_page_is_available()`.
 - `tests/test_agent_job_persistence.py` — Pytest coverage for `test_agent_job_error_messages_are_bounded_to_schema_contract()`.
@@ -577,6 +586,9 @@ Evaluation / Production Readiness Gate
 - `tests/test_phase5_admin_api.py` — Pytest coverage for `test_phase5_admin_routes_are_registered()`, `test_phase5_admin_page_is_operator_review_surface()`.
 - `tests/test_phase5_readiness.py` — Pytest coverage for `test_phase5_gate_requires_all_metrics_and_real_acceptance()`, `test_phase5_gate_passes_only_with_explicit_real_acceptance()`.
 - `tests/test_phase5_supervised_remediation.py` — Pytest coverage for class `FakeWriter`, class `FakeVerifier`, class `FakeEvidenceCollector`, `make_service()`, `make_plan()`.
+- `tests/test_phase6_native_sandbox_runtime.py` — Pytest coverage for `test_native_sandbox_runtime_fails_closed_without_attestation()`, `test_native_sandbox_runtime_requires_all_isolation_claims()`, `test_native_sandbox_runtime_accepts_complete_attestation_in_wsl()`.
+- `tests/test_phase6_readiness.py` — Pytest coverage for `test_phase6_real_runtime_blocker_keeps_gate_closed()`, `test_phase6_gate_requires_all_thirteen_metrics()`.
+- `tests/test_phase6_sandbox_validation.py` — Pytest coverage for class `FakeServerRepository`, class `FakeWriter`, class `FakeEvidence`, class `FakeVerifier`, `make_service()`.
 - `tests/test_production_readiness_gate.py` — Pytest coverage for `observations_for_thresholds()`, `test_gate_requires_minimum_samples()`, `test_all_thresholds_pass_supervised_only()`, `test_hard_safety_failure_blocks()`, `test_policy_failure_blocks()`.
 - `tests/test_project_mcp_analysis_tools.py` — Pytest coverage for class `Analysis`, class `AnalysisRepository`, class `AnalysisOrchestrator`, class `IncidentRetriever`, class `KnowledgeRetriever`.
 - `tests/test_project_mcp_investigation_tools.py` — Pytest coverage for class `Router`, class `PersistedInvestigation`, class `PersistenceService`, class `ReadService`, class `EmptyAnalysisRepository`.
@@ -694,6 +706,8 @@ Evaluation / Production Readiness Gate
 - `docs/roadmap/phase-4-foundation-closeout.md` — Project documentation.
 - `docs/roadmap/phase-4-implementation-plan.md` — Project documentation.
 - `docs/roadmap/phase-5-final-report.md` — Project documentation.
+- `docs/roadmap/phase-6-final-report.md` — Project documentation.
+- `docs/roadmap/phase-6-implementation.md` — Project documentation.
 - `docs/roadmap/phase-c-closeout.md` — Project documentation.
 - `docs/security/security-baseline.md` — Project documentation.
 - `docs/testing/RUNTIME_SCENARIOS.md` — Project documentation.
@@ -717,8 +731,10 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+Phase 6: implemented / not closed
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
 ```
 

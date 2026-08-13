@@ -96,7 +96,9 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/roadmap/phase-4-4-5-to-4-11-closeout.md`](roadmap/phase-4-4-5-to-4-11-closeout.md) | HISTORICAL_CLOSEOUT | Phase 4 Closeout — Steps 4.5 through 4.11 |
 | [`docs/roadmap/phase-4-foundation-closeout.md`](roadmap/phase-4-foundation-closeout.md) | HISTORICAL_CLOSEOUT | Phase 4 Milestone A Closeout — Foundation |
 | [`docs/roadmap/phase-4-implementation-plan.md`](roadmap/phase-4-implementation-plan.md) | HISTORICAL_CLOSEOUT | Phase 4 Implementation Plan — Hierarchical Multi-Agent Investigation |
-| [`docs/roadmap/phase-5-final-report.md`](roadmap/phase-5-final-report.md) | ROADMAP | Phase 5.15R — Real Supervised Remediation Closure Report |
+| [`docs/roadmap/phase-5-final-report.md`](roadmap/phase-5-final-report.md) | ROADMAP | Phase 5 ? Supervised Remediation Final Closure Report |
+| [`docs/roadmap/phase-6-final-report.md`](roadmap/phase-6-final-report.md) | ROADMAP | Phase 6 — Final Report |
+| [`docs/roadmap/phase-6-implementation.md`](roadmap/phase-6-implementation.md) | ROADMAP | Phase 6 — Claude-Native Isolated Sandbox Validation |
 | [`docs/roadmap/phase-c-closeout.md`](roadmap/phase-c-closeout.md) | ROADMAP | Phase C Final Closeout |
 | [`docs/security/security-baseline.md`](security/security-baseline.md) | OPERATIONS | Security Baseline |
 | [`docs/testing/RUNTIME_SCENARIOS.md`](testing/RUNTIME_SCENARIOS.md) | CURRENT_CANONICAL | Linux Random Runtime Scenarios |
@@ -123,8 +125,10 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+Phase 6: implemented / not closed
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
 ```
 

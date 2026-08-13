@@ -9,6 +9,7 @@ from app.interfaces.admin.schemas.remediation import (
     ApprovalRequest,
     ExecuteRemediationRequest,
     RollbackRemediationRequest,
+    SandboxValidationRequest,
 )
 from app.interfaces.mcp.serializers import serialize_value
 
@@ -37,6 +38,7 @@ def get_remediation_plan(
         "plan": serialize_value(plan),
         "approval": serialize_value(service.get_approval(plan_id=plan_id)),
         "execution": serialize_value(service.get_latest_execution(plan_id)),
+        "sandbox_validation": serialize_value(service.get_sandbox_validation(plan_id=plan_id)),
     }
 
 
@@ -58,6 +60,19 @@ def request_remediation_approval(
 ):
     try:
         return serialize_value(service.request_approval(plan_id=plan_id, expires_in_seconds=payload.expires_in_seconds, scope=payload.scope))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/{plan_id}/sandbox-validation")
+def validate_remediation_in_sandbox(
+    plan_id: str,
+    payload: SandboxValidationRequest,
+    service: RemediationService = Depends(get_remediation_service),
+):
+    try:
+        result = service.validate_in_isolated_sandbox(plan_id=plan_id, **payload.model_dump())
+        return serialize_value(result)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

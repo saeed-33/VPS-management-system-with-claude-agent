@@ -28,7 +28,8 @@ The additive migration
 adds plan fingerprint/state columns and creates approval, execution,
 verification, rollback, audit-event, and project-owned service-state Evidence
 tables. Existing Phase C plans and sandbox results are preserved.
-`tools/bootstrap_database.py` verifies all 23 required tables.
+`tools/bootstrap_database.py` verifies all 24 required tables, including the
+additive Phase 6 `sandbox_validations` table.
 
 Every lifecycle boundary writes a project-owned audit event carrying plan,
 server, actor, session/job correlation where available, and structured
@@ -60,12 +61,13 @@ The public MCP inventory remains 24 tools and public names are unchanged.
 Phase 5 enriches the existing six remediation tools rather than adding a
 second facade.
 
-The readiness evaluator emits all 13 required metrics with numerator,
-denominator, score, threshold, and pass/fail state. Deterministic focused
-coverage passes. The configured operational servers (`vm1` and `vm2`) are
-offline and neither is explicitly designated as a safe reversible remediation
-target. Therefore no real write was attempted and real acceptance is
-`BLOCKED_BY_SAFE_TEST_ENVIRONMENT`; Phase 5 remains not closed.
+The readiness evaluator emitted all 13 required metrics with numerator,
+denominator, score, threshold, and pass/fail state. Phase 5 real acceptance
+passed on the explicitly designated non-production `phase5-lab` target (server
+4), restored the service to its initial state, and Phase 5 is closed. Phase 6
+adds the fingerprint-bound Claude-native isolated validation gate before the
+approval step; its real acceptance remains blocked until native sandbox
+attestation is available.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
@@ -75,8 +77,10 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+Phase 6: implemented / not closed
+Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 automatic_remediation_allowed: false
 ```
 

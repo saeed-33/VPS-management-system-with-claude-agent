@@ -18,7 +18,9 @@ from app.infrastructure.database.models.remediation import (
     RemediationRollbackModel,
     RemediationSandboxResultModel,
     RemediationVerificationModel,
+    SandboxValidationModel,
 )
+from app.infrastructure.database.models.server import ServerModel
 from app.infrastructure.database.repositories.remediation_repository import RemediationRepository
 
 
@@ -69,6 +71,8 @@ def make_service(*, writer=None, verifier=None, evidence_collector=None):
             RemediationRollbackModel.__table__,
             RemediationAuditEventModel.__table__,
             RemediationEvidenceModel.__table__,
+            ServerModel.__table__,
+            SandboxValidationModel.__table__,
         ],
     )
     factory = sessionmaker(bind=engine, expire_on_commit=False)
@@ -99,8 +103,25 @@ def make_plan(service, *, action=None, server_id=7):
 
 
 def approve_plan(service, plan_id="phase5-plan"):
-    make_plan(service, server_id=7)
+    plan = make_plan(service, server_id=7)
     service.test_in_sandbox(plan_id=plan_id)
+    service._repository.create_sandbox_validation(
+        validation_id="validation-" + plan_id,
+        plan_id=plan_id,
+        plan_fingerprint=plan.plan_fingerprint,
+        server_id=7,
+        server_name="phase5-lab",
+        service="nginx",
+        action_type="start_service",
+        action_parameters={},
+        expected_state="active",
+        observed_state="active",
+        before_evidence_ids=["before-validation"],
+        after_evidence_ids=["after-validation"],
+        verification_status="verified",
+        status="passed",
+        validation_metadata={"legacy_phase5_regression_fixture": True},
+    )
     approval = service.request_approval(plan_id=plan_id)
     service.approve(approval_id=approval.approval_id, approver="human-operator")
     return approval
@@ -151,6 +172,14 @@ def test_supervised_execution_rechecks_approval_server_and_idempotency():
 def test_rejected_and_expired_approval_cannot_execute():
     service = make_service()
     service.test_in_sandbox(plan_id=make_plan(service).plan_id)
+    plan = service.get_plan("phase5-plan")
+    service._repository.create_sandbox_validation(
+        validation_id="validation-phase5-rejected", plan_id=plan.plan_id,
+        plan_fingerprint=plan.plan_fingerprint, server_id=7, server_name="phase5-lab",
+        service="nginx", action_type="start_service", action_parameters={}, expected_state="active",
+        observed_state="active", before_evidence_ids=[], after_evidence_ids=[], verification_status="verified",
+        status="passed", validation_metadata={"legacy_phase5_regression_fixture": True},
+    )
     approval = service.request_approval(plan_id="phase5-plan")
     service.reject(approval_id=approval.approval_id, approver="human-operator", comment="not safe")
     result = service.apply_approved(plan_id="phase5-plan", approval_id=approval.approval_id, server_id=7)
@@ -159,6 +188,14 @@ def test_rejected_and_expired_approval_cannot_execute():
     service2 = make_service()
     make_plan(service2)
     service2.test_in_sandbox(plan_id="phase5-plan")
+    plan2 = service2.get_plan("phase5-plan")
+    service2._repository.create_sandbox_validation(
+        validation_id="validation-phase5-expired", plan_id=plan2.plan_id,
+        plan_fingerprint=plan2.plan_fingerprint, server_id=7, server_name="phase5-lab",
+        service="nginx", action_type="start_service", action_parameters={}, expected_state="active",
+        observed_state="active", before_evidence_ids=[], after_evidence_ids=[], verification_status="verified",
+        status="passed", validation_metadata={"legacy_phase5_regression_fixture": True},
+    )
     expired = service2.request_approval(plan_id="phase5-plan", expires_in_seconds=-1)
     service2.expire_approval(approval_id=expired.approval_id)
     result = service2.apply_approved(plan_id="phase5-plan", approval_id=expired.approval_id, server_id=7)
@@ -213,6 +250,13 @@ def test_state_aware_rollback_requires_original_active_state_for_stop():
     service = make_service(evidence_collector=FakeEvidenceCollector(("active", "inactive", "inactive", "active")))
     plan = make_plan(service, action={"id": "stop-test", "action_type": "stop_service", "target": "nginx", "reason": "stop named service"})
     service.test_in_sandbox(plan_id=plan.plan_id)
+    service._repository.create_sandbox_validation(
+        validation_id="validation-phase5-stop", plan_id=plan.plan_id,
+        plan_fingerprint=plan.plan_fingerprint, server_id=7, server_name="phase5-lab",
+        service="nginx", action_type="stop_service", action_parameters={}, expected_state="inactive",
+        observed_state="inactive", before_evidence_ids=[], after_evidence_ids=[], verification_status="verified",
+        status="passed", validation_metadata={"legacy_phase5_regression_fixture": True},
+    )
     approval = service.request_approval(plan_id=plan.plan_id)
     service.approve(approval_id=approval.approval_id, approver="human-operator")
     outcome = service.apply_approved(plan_id=plan.plan_id, approval_id=approval.approval_id, server_id=7)

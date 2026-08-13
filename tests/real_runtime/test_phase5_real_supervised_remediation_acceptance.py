@@ -8,6 +8,7 @@ from uuid import uuid4
 import pytest
 
 from app.core.policies.remediation_tools import SERVICE_NAME_RE
+from app.core.contracts.sandbox_validation import SandboxRuntimeCheck
 
 
 RUN_REAL_ACCEPTANCE = os.getenv("REAL_PHASE5_ACCEPTANCE_ENABLED", "").strip().lower() == "true"
@@ -111,7 +112,21 @@ def test_phase5_real_supervised_remediation_acceptance():
     )
     assert preflight.observed_state == "inactive", "Acceptance target must start inactive; no write was attempted."
 
-    sandbox = service.test_in_sandbox(plan_id=plan.plan_id)
+    # Phase 5's accepted real-server workflow now crosses the Phase 6
+    # fingerprint-bound approval gate. This compatibility acceptance supplies
+    # an explicit runtime check; native Claude sandbox acceptance is covered
+    # separately by the opt-in Phase 6 test.
+    sandbox = service.validate_in_isolated_sandbox(
+        plan_id=plan.plan_id,
+        target_server_id=server_id,
+        target_server_name=expected_name,
+        target_service=service_name,
+        runtime_check=SandboxRuntimeCheck(
+            available=True,
+            runtime="phase5-accepted-real-runtime",
+            evidence={"phase5_compatibility": True},
+        ),
+    )
     assert sandbox.status == "passed"
     approval_request = service.request_approval(plan_id=plan.plan_id)
     approval = service.approve(approval_id=approval_request.approval_id, approver="phase5-acceptance-operator")
