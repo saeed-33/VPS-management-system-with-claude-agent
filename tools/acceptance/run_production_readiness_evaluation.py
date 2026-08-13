@@ -27,6 +27,9 @@ from tools.acceptance.evaluation.safety_runtime import (
     evaluate_safety_runtime,
 )
 from app.composition import container
+from app.runtime.claude.observability import (
+    ClaudeAgentObservabilityService,
+)
 
 
 async def run(args) -> int:
@@ -78,6 +81,30 @@ async def run(args) -> int:
         await evaluate_safety_runtime()
     )
 
+    observability = ClaudeAgentObservabilityService(
+        container.agent_job_repository
+    )
+    runtime_traces = observability.list_recent_traces(
+        limit=500,
+        server_id=args.server_id,
+    )
+    completed_runtime_traces = [
+        trace
+        for trace in runtime_traces
+        if trace["status"] == "completed"
+        and trace.get("session_id")
+    ]
+
+    evaluated_details = []
+    for summary in summaries:
+        detail = (
+            container.investigation_read_service.get(
+                summary.investigation_id
+            )
+        )
+        if detail is not None and detail.runtime_available:
+            evaluated_details.append(detail)
+
     aggregate = (
         AggregateReadinessEvaluator()
         .evaluate(
@@ -92,7 +119,7 @@ async def run(args) -> int:
 
     print()
     print(
-        "# Phase 4.20.5 "
+        "# C.14.12 "
         "Aggregate Production Readiness"
     )
     print()
@@ -195,6 +222,20 @@ async def run(args) -> int:
                 "additional_samples_needed": (
                     deficit
                 ),
+                "numerator": metric.passed_samples,
+                "denominator": metric.samples,
+                "score": metric.pass_rate,
+                "threshold": metric.required_pass_rate,
+                "result": (
+                    "PASS"
+                    if metric.threshold_met
+                    else "FAIL"
+                ),
+                "supporting_observation_ids": [
+                    item.case_id
+                    for item in aggregate.observations
+                    if item.metric == metric.metric
+                ],
             }
         )
 
@@ -236,7 +277,7 @@ async def run(args) -> int:
     )
 
     payload = {
-        "phase": "4.20.5",
+        "phase": "C.14.12",
         "generated_at": (
             datetime.now(
                 timezone.utc
@@ -254,6 +295,58 @@ async def run(args) -> int:
         "total_observations": (
             len(aggregate.observations)
         ),
+        "runtime_sessions": len(
+            completed_runtime_traces
+        ),
+        "persisted_runtime_observations": len(
+            persisted_observations
+        ),
+        "controlled_safety_observations": len(
+            safety_observations
+        ),
+        "aggregate_observations": len(
+            aggregate.observations
+        ),
+        "observation_counts": {
+            "reports": len({
+                detail.report_id
+                for detail in evaluated_details
+            }),
+            "analyses": len({
+                detail.analysis_id
+                for detail in evaluated_details
+                if detail.analysis_id is not None
+            }),
+            "investigations": len(evaluated_details),
+            "specialist_runs": sum(
+                len(detail.runtime.specialist_runs)
+                for detail in evaluated_details
+                if detail.runtime is not None
+            ),
+            "evidence_records": sum(
+                len(detail.runtime.evidence)
+                for detail in evaluated_details
+                if detail.runtime is not None
+            ),
+            "controlled_failures": len(
+                safety_observations
+            ),
+        },
+        "real_runtime_observations": [
+            {
+                "agent_job_id": trace["job_id"],
+                "session_id": trace.get("session_id"),
+                "server_id": trace.get("server_id"),
+                "model": trace.get("model_usage", {}),
+                "turn_count": trace.get("turn_count"),
+                "tool_call_count": trace.get("tool_call_count"),
+                "mcp_servers": trace.get("mcp_servers", []),
+                "mcp_connected": trace.get("mcp_connected"),
+                "duration_ms": trace.get("duration_ms"),
+                "result": trace.get("status"),
+            }
+            for trace in completed_runtime_traces
+        ],
         "readiness_status": (
             aggregate.readiness.status.value
         ),
@@ -286,7 +379,7 @@ async def run(args) -> int:
 
     print()
     print(
-        "Phase 4.20.5 aggregation: PASS"
+        "C.14.12 aggregation: PASS"
     )
 
     if (
@@ -308,7 +401,7 @@ async def run(args) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Aggregate Phase 4.20 persisted "
+            "Aggregate C.14.12 persisted "
             "runtime + safety evaluation."
         )
     )
@@ -329,7 +422,7 @@ def main() -> int:
         "--output",
         default=(
             "artifacts/evaluation/"
-            "phase_4_20_readiness.json"
+            "c14_12_readiness.json"
         ),
     )
 

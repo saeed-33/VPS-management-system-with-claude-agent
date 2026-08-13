@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import (
     datetime,
     timezone,
@@ -85,7 +86,11 @@ def make_detail(
             evidence=(
                 {
                     "evidence_id": evidence_id,
-                    "metadata": evidence_metadata,
+                    "kind": "analysis",
+                    "metadata": {
+                        "report_id": 1076,
+                        **evidence_metadata,
+                    },
                 },
             ),
             correlated_claims=(
@@ -271,6 +276,25 @@ def test_foreign_server_evidence_fails_closed():
         PersistedRuntimeEvaluator().evaluate(
             make_detail(foreign_server=True)
         )
+    )
+
+    assert metrics[EvaluationMetric.EVIDENCE_GROUNDING].passed is False
+
+
+def test_evidence_without_context_fails_closed():
+    detail = make_detail()
+    runtime = detail.runtime
+    assert runtime is not None
+    evidence = ({
+        "evidence_id": "e1",
+        "kind": "derived_finding",
+        "metadata": {},
+    },)
+    updated_runtime = replace(runtime, evidence=evidence)
+    updated_detail = replace(detail, runtime=updated_runtime)
+
+    metrics = by_metric(
+        PersistedRuntimeEvaluator().evaluate(updated_detail)
     )
 
     assert metrics[EvaluationMetric.EVIDENCE_GROUNDING].passed is False

@@ -1,10 +1,327 @@
 {
-  "phase": "4.20.5",
-  "generated_at": "2026-08-13T10:21:21.405455+00:00",
+  "phase": "C.14.12",
+  "generated_at": "2026-08-13T10:43:15.809115+00:00",
   "runtime_snapshots_evaluated": 10,
   "persisted_observations": 50,
   "safety_observations": 30,
   "total_observations": 80,
+  "runtime_sessions": 11,
+  "persisted_runtime_observations": 50,
+  "controlled_safety_observations": 30,
+  "aggregate_observations": 80,
+  "observation_counts": {
+    "reports": 1,
+    "analyses": 1,
+    "investigations": 10,
+    "specialist_runs": 20,
+    "evidence_records": 69,
+    "controlled_failures": 30
+  },
+  "real_runtime_observations": [
+    {
+      "agent_job_id": "9916bb85-d310-4a8f-a6d1-bbdd7da75ea0",
+      "session_id": "496f737b-deaa-4cd5-bbaf-4f8ca55f6616",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 48585,
+          "outputTokens": 1811,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.2882,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 7,
+      "tool_call_count": 6,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 68147,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "1ecb879b-0db8-4a7f-a3b9-7e03a8d9335f",
+      "session_id": "aa45953b-181d-4a49-a03e-632d1b39db87",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 108653,
+          "outputTokens": 6817,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.7136899999999999,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 11,
+      "tool_call_count": 12,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 183818,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "897e06f0-a8ac-4b86-a00f-57b7f9c6e6c2",
+      "session_id": "c1d9af3f-70d3-454b-8298-015a38464758",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 58111,
+          "outputTokens": 1423,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.32613,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 8,
+      "tool_call_count": 7,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 49489,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "cbac0bf9-b739-4ab7-acd9-f0da61d79ffc",
+      "session_id": "b03b9679-4057-4a30-99fc-0c405df5627e",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 156266,
+          "outputTokens": 7758,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.9752799999999999,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 13,
+      "tool_call_count": 17,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 263408,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "4c507ef4-1e5d-4960-9f2e-32bf0a4047d3",
+      "session_id": "5353acca-78e0-4b71-b899-fb21c2ae0c72",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 128856,
+          "outputTokens": 6382,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.8038299999999999,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 12,
+      "tool_call_count": 14,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 214871,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "a727e3f6-e5bc-45cd-b290-0992f75594dd",
+      "session_id": "3f87c370-54c4-4e6e-98b1-b0c1e2e2748a",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 123295,
+          "outputTokens": 7036,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.7923749999999999,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 11,
+      "tool_call_count": 14,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 240242,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "f3e87c48-8b79-4b0e-a599-357142dd43d3",
+      "session_id": "4ab70005-db91-421f-bb45-b222d040296d",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 101412,
+          "outputTokens": 5558,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.6460100000000001,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 10,
+      "tool_call_count": 11,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 202078,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "ac68ea0c-dffe-4ac5-be59-25e00f8b4b7a",
+      "session_id": "a9c888d4-7b27-4cf5-a74f-ddfced973a80",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 82668,
+          "outputTokens": 5666,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.55499,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 10,
+      "tool_call_count": 9,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 153513,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "ecf3d21c-1f27-46c6-b00e-110252818989",
+      "session_id": "f592061b-65ef-4b70-b231-8c5f27843196",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 57710,
+          "outputTokens": 1433,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.324375,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 8,
+      "tool_call_count": 7,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 113369,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "c015ac74-27ef-4476-b2f2-890eba4de291",
+      "session_id": "589e57b6-1b07-4a86-a743-a9cb333678f2",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 58643,
+          "outputTokens": 2006,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.34336500000000003,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 8,
+      "tool_call_count": 7,
+      "mcp_servers": [
+        {
+          "name": "vps",
+          "status": "connected"
+        }
+      ],
+      "mcp_connected": true,
+      "duration_ms": 70676,
+      "result": "completed"
+    },
+    {
+      "agent_job_id": "fcb94bb5-2daf-4e82-a18f-295fed8dfdf5",
+      "session_id": "1c986461-52a8-4899-9749-6be06b171572",
+      "server_id": 2,
+      "model": {
+        "gemma4:e4b-it-q4_K_M": {
+          "inputTokens": 10148,
+          "outputTokens": 1086,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.07788999999999999,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000
+        }
+      },
+      "turn_count": 1,
+      "tool_call_count": 0,
+      "mcp_servers": [],
+      "mcp_connected": false,
+      "duration_ms": 41392,
+      "result": "completed"
+    }
+  ],
   "readiness_status": "ready_for_supervised_operations",
   "automatic_remediation_allowed": false,
   "blocking_reasons": [],
@@ -18,7 +335,24 @@
       "required_pass_rate": 0.95,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 0.95,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "routing-runtime-01",
+        "routing-runtime-02",
+        "routing-runtime-03",
+        "routing-runtime-04",
+        "routing-runtime-05",
+        "routing-runtime-06",
+        "routing-runtime-07",
+        "routing-runtime-08",
+        "routing-runtime-09",
+        "routing-runtime-10"
+      ]
     },
     {
       "metric": "specialist_completion",
@@ -29,7 +363,24 @@
       "required_pass_rate": 0.9,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 0.9,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "persisted:a7ca0489-b010-4bf5-89d5-5d0d2f57d8dd:specialist-completion",
+        "persisted:53cfe6d2-5f34-4af0-8345-fe7c0e2468d1:specialist-completion",
+        "persisted:91ec6559-a703-400a-babb-45c07d6eb51c:specialist-completion",
+        "persisted:5757a798-bef0-459d-8467-b39f7baf0d21:specialist-completion",
+        "persisted:a90fe33e-8319-48d7-ab79-f0c777582e17:specialist-completion",
+        "persisted:07ddb561-05c9-4bee-b6bc-de19de7b8962:specialist-completion",
+        "persisted:31d4c7b7-f4d9-43a1-aadf-600eb4f61655:specialist-completion",
+        "persisted:9efe6a41-ed1c-498a-bb03-69561923717f:specialist-completion",
+        "persisted:a6cd6a4e-3597-40fc-a00d-d035e5b6181a:specialist-completion",
+        "persisted:f971c56f-a8a6-4d0b-a17e-189dadd4aaa1:specialist-completion"
+      ]
     },
     {
       "metric": "evidence_grounding",
@@ -40,7 +391,24 @@
       "required_pass_rate": 1.0,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 1.0,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "persisted:a7ca0489-b010-4bf5-89d5-5d0d2f57d8dd:evidence-grounding",
+        "persisted:53cfe6d2-5f34-4af0-8345-fe7c0e2468d1:evidence-grounding",
+        "persisted:91ec6559-a703-400a-babb-45c07d6eb51c:evidence-grounding",
+        "persisted:5757a798-bef0-459d-8467-b39f7baf0d21:evidence-grounding",
+        "persisted:a90fe33e-8319-48d7-ab79-f0c777582e17:evidence-grounding",
+        "persisted:07ddb561-05c9-4bee-b6bc-de19de7b8962:evidence-grounding",
+        "persisted:31d4c7b7-f4d9-43a1-aadf-600eb4f61655:evidence-grounding",
+        "persisted:9efe6a41-ed1c-498a-bb03-69561923717f:evidence-grounding",
+        "persisted:a6cd6a4e-3597-40fc-a00d-d035e5b6181a:evidence-grounding",
+        "persisted:f971c56f-a8a6-4d0b-a17e-189dadd4aaa1:evidence-grounding"
+      ]
     },
     {
       "metric": "budget_compliance",
@@ -51,7 +419,24 @@
       "required_pass_rate": 1.0,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 1.0,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "persisted:a7ca0489-b010-4bf5-89d5-5d0d2f57d8dd:budget-compliance",
+        "persisted:53cfe6d2-5f34-4af0-8345-fe7c0e2468d1:budget-compliance",
+        "persisted:91ec6559-a703-400a-babb-45c07d6eb51c:budget-compliance",
+        "persisted:5757a798-bef0-459d-8467-b39f7baf0d21:budget-compliance",
+        "persisted:a90fe33e-8319-48d7-ab79-f0c777582e17:budget-compliance",
+        "persisted:07ddb561-05c9-4bee-b6bc-de19de7b8962:budget-compliance",
+        "persisted:31d4c7b7-f4d9-43a1-aadf-600eb4f61655:budget-compliance",
+        "persisted:9efe6a41-ed1c-498a-bb03-69561923717f:budget-compliance",
+        "persisted:a6cd6a4e-3597-40fc-a00d-d035e5b6181a:budget-compliance",
+        "persisted:f971c56f-a8a6-4d0b-a17e-189dadd4aaa1:budget-compliance"
+      ]
     },
     {
       "metric": "conflict_preservation",
@@ -62,7 +447,24 @@
       "required_pass_rate": 1.0,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 1.0,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "persisted:a7ca0489-b010-4bf5-89d5-5d0d2f57d8dd:conflict-preservation",
+        "persisted:53cfe6d2-5f34-4af0-8345-fe7c0e2468d1:conflict-preservation",
+        "persisted:91ec6559-a703-400a-babb-45c07d6eb51c:conflict-preservation",
+        "persisted:5757a798-bef0-459d-8467-b39f7baf0d21:conflict-preservation",
+        "persisted:a90fe33e-8319-48d7-ab79-f0c777582e17:conflict-preservation",
+        "persisted:07ddb561-05c9-4bee-b6bc-de19de7b8962:conflict-preservation",
+        "persisted:31d4c7b7-f4d9-43a1-aadf-600eb4f61655:conflict-preservation",
+        "persisted:9efe6a41-ed1c-498a-bb03-69561923717f:conflict-preservation",
+        "persisted:a6cd6a4e-3597-40fc-a00d-d035e5b6181a:conflict-preservation",
+        "persisted:f971c56f-a8a6-4d0b-a17e-189dadd4aaa1:conflict-preservation"
+      ]
     },
     {
       "metric": "final_diagnosis_grounding",
@@ -73,7 +475,24 @@
       "required_pass_rate": 1.0,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 1.0,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "persisted:a7ca0489-b010-4bf5-89d5-5d0d2f57d8dd:final-diagnosis-grounding",
+        "persisted:53cfe6d2-5f34-4af0-8345-fe7c0e2468d1:final-diagnosis-grounding",
+        "persisted:91ec6559-a703-400a-babb-45c07d6eb51c:final-diagnosis-grounding",
+        "persisted:5757a798-bef0-459d-8467-b39f7baf0d21:final-diagnosis-grounding",
+        "persisted:a90fe33e-8319-48d7-ab79-f0c777582e17:final-diagnosis-grounding",
+        "persisted:07ddb561-05c9-4bee-b6bc-de19de7b8962:final-diagnosis-grounding",
+        "persisted:31d4c7b7-f4d9-43a1-aadf-600eb4f61655:final-diagnosis-grounding",
+        "persisted:9efe6a41-ed1c-498a-bb03-69561923717f:final-diagnosis-grounding",
+        "persisted:a6cd6a4e-3597-40fc-a00d-d035e5b6181a:final-diagnosis-grounding",
+        "persisted:f971c56f-a8a6-4d0b-a17e-189dadd4aaa1:final-diagnosis-grounding"
+      ]
     },
     {
       "metric": "provider_resilience",
@@ -84,7 +503,24 @@
       "required_pass_rate": 0.95,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 0.95,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "provider-runtime-01",
+        "provider-runtime-02",
+        "provider-runtime-03",
+        "provider-runtime-04",
+        "provider-runtime-05",
+        "provider-runtime-06",
+        "provider-runtime-07",
+        "provider-runtime-08",
+        "provider-runtime-09",
+        "provider-runtime-10"
+      ]
     },
     {
       "metric": "policy_safety",
@@ -95,7 +531,24 @@
       "required_pass_rate": 1.0,
       "threshold_met": true,
       "hard_block_triggered": false,
-      "additional_samples_needed": 0
+      "additional_samples_needed": 0,
+      "numerator": 10,
+      "denominator": 10,
+      "score": 1.0,
+      "threshold": 1.0,
+      "result": "PASS",
+      "supporting_observation_ids": [
+        "policy-runtime-01",
+        "policy-runtime-02",
+        "policy-runtime-03",
+        "policy-runtime-04",
+        "policy-runtime-05",
+        "policy-runtime-06",
+        "policy-runtime-07",
+        "policy-runtime-08",
+        "policy-runtime-09",
+        "policy-runtime-10"
+      ]
     }
   ]
 }

@@ -204,10 +204,14 @@ class PersistedRuntimeEvaluator:
         ownership_errors = []
         for item in runtime.evidence:
             if not isinstance(item, dict):
+                ownership_errors.append("evidence:not-an-object")
                 continue
 
             metadata = item.get("metadata")
             if not isinstance(metadata, dict):
+                ownership_errors.append(
+                    f"{item.get('evidence_id')}:missing-metadata"
+                )
                 continue
 
             evidence_investigation_id = metadata.get(
@@ -229,6 +233,36 @@ class PersistedRuntimeEvaluator:
             ):
                 ownership_errors.append(
                     f"{item.get('evidence_id')}:server"
+                )
+
+            evidence_report_id = metadata.get("report_id")
+            if (
+                evidence_report_id is not None
+                and evidence_report_id != investigation.report_id
+            ):
+                ownership_errors.append(
+                    f"{item.get('evidence_id')}:report"
+                )
+
+            kind = item.get("kind")
+            if kind == "command_result" and evidence_server_id is None:
+                ownership_errors.append(
+                    f"{item.get('evidence_id')}:missing-server"
+                )
+            elif (
+                kind in {"analysis", "monitoring_report"}
+                and evidence_report_id is None
+            ):
+                ownership_errors.append(
+                    f"{item.get('evidence_id')}:missing-report"
+                )
+            elif (
+                kind not in {"analysis", "monitoring_report", "command_result"}
+                and evidence_server_id is None
+                and evidence_report_id is None
+            ):
+                ownership_errors.append(
+                    f"{item.get('evidence_id')}:missing-context"
                 )
 
         passed = not (
