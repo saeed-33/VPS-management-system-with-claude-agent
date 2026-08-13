@@ -118,9 +118,9 @@ Ollama uses parsed structured output with the same narrative schema.
 Phase 4.18.5 performs runtime acceptance using a real Final Diagnosis and the configured LLM provider, including deterministic fallback validation.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

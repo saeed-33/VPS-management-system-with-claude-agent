@@ -1,184 +1,81 @@
-# Current Workflows
+# Current Operational Workflows
 
 <!-- DOC-STATUS: CURRENT -->
 
-## Monitoring and analysis
-
-```text
-Load Server
- -> validate monitoring configuration
- -> SSH monitoring commands
- -> build/save Monitoring Report
- -> enqueue analysis
- -> normalize/fingerprint
- -> reuse policy / Incident RAG
- -> LLM when required
- -> save/index Analysis
-```
-
-## Claude-supervised workflow
-
-Phase C preserves this fixed workflow:
+## Monitoring to diagnosis
 
 ```text
 periodic monitoring
- -> per-server subordinate agent
- -> monitoring completion
- -> exact/similar historical report lookup
- -> exact match: reuse previous analysis
- -> similar match: pass top 3 similar reports to the LLM
- -> initial LLM analysis and potential issue discovery
- -> if issues exist: select and run specialist agents
- -> specialist deep analysis
- -> subordinate agent aggregates results
- -> final diagnosis
- -> if a problem exists: propose remediation
- -> test remediation in an isolated environment
- -> apply automatically only when policy allows, otherwise ask the user
+ -> Claude Code supervisory session
+ -> Ollama-backed model
+ -> vps MCP
+ -> monitoring capability
+ -> persisted Monitoring Report
+ -> exact historical match or similar historical retrieval
+ -> persisted Analysis
+ -> optional Investigation routing
+ -> dynamic DB-defined Specialists
+ -> Evidence collection
+ -> correlation and Final Diagnosis
+ -> bounded remediation proposal only
 ```
 
-Claude Code owns high-level coordination. The project services remain
-authoritative for monitoring, RAG retrieval,
-Ollama-backed LLM calls, Specialist definitions, evidence, policy, persistence,
-sandbox validation, and user approval gates.
+Claude chooses the next project-tool operation. Python services remain
+authoritative for execution, persistence, validation, policy, budgets, and
+Evidence.
 
-## Investigation routing and persistence
+## Analysis and retrieval
+
+An exact normalized report match may reuse a persisted Analysis. Otherwise the
+application retrieves bounded similar incidents and Knowledge RAG context, then
+uses the configured Ollama client for a structured Analysis. Historical context
+is never treated as proof of current server state.
+
+## Investigation and Specialists
 
 ```text
-Monitoring Report
-+ Initial Analysis
-+ SpecialistRegistrySnapshot
+Report + Analysis
  -> InvestigationRouter
- -> should investigate?
- -> detected domains
- -> selected Specialists
- -> persist routing decision
-```
-
-Healthy/no-issue analysis does not start an unnecessary Investigation.
-
-## Specialist execution
-
-```text
-SpecialistTask
-+ Specialist instructions
-+ Initial Analysis
-+ current Evidence
-+ Incident RAG
-+ Knowledge RAG
- -> SpecialistContextBuilder
- -> SpecialistReasoningAgent
- -> optional Diagnostic Tool request
+ -> persist should_investigate and selected DB Specialists
+ -> Claude invokes bounded MCP tools
+ -> Specialist worker receives DB definition, task, context, Evidence, and budgets
  -> DiagnosticPolicyEngine
- -> ALLOW / DENY
- -> EvidenceCollectionService
- -> known read-only SSH command
+ -> known-hosts SSH diagnostic execution
  -> Evidence
- -> rebuild context
- -> repeat within budgets
- -> Final Synthesis
+ -> correlation, conflict preservation, and Final Diagnosis
 ```
 
-Unknown Evidence/Knowledge IDs are rejected.
+Healthy/no-issue analyses do not create unnecessary investigations. Specialist
+definitions are database-managed; domain-specific Claude agent files are not
+the source of truth.
 
-## Claude-Supervised Orchestration
+## Persistence and observability
 
-```text
-selected Specialists
- -> Claude-supervised Specialist coordination
- -> bounded Specialist loops
- -> deterministic aggregation
- -> recommended_next_specialists
- -> validate against Registry/budgets
- -> optional secondary wave
-```
+Reports, analyses, investigations, runtime snapshots, Evidence, Specialist
+runs, and AgentJobs are persisted in PostgreSQL. AgentJob observability records
+session, tool-call, MCP, duration, and failure metadata. Startup recovery marks
+interrupted queued/running jobs failed instead of leaving them active.
 
-## Correlation and Final Diagnosis
+## Safety boundary
 
-```text
-SpecialistResults
-+ Evidence
- -> CrossSpecialistCorrelator
- -> correlated claims
- -> explicit conflicts
- -> confirmed/probable/unknown
- -> FinalDiagnosis
- -> FinalDiagnosisSynthesizer
-```
-
-Narrative generation cannot introduce unknown Claim/Conflict IDs.
-
-## Persistence and read workflow
-
-```text
-Runtime result
-+ Evidence
-+ correlated claims/conflicts
-+ Final Diagnosis
-+ narrative
- -> InvestigationRuntimeSnapshotService
- -> database metadata/runtime snapshot
- -> InvestigationReadService
- -> REST API
- -> read-only Administration UI
-```
-
-## Evaluation workflow
-
-```text
-deterministic evaluation dataset
-+
-controlled routing/provider/policy failure injection
-+
-persisted real runtime snapshots
- -> EvaluationObservation[]
- -> ProductionReadinessGate
-```
-
-Current accepted state:
-
-```text
-ready_for_supervised_operations
-automatic_remediation_allowed = false
-```
-
-## Random Linux workload workflow
-
-```text
-seeded safe workload on disposable Linux VM
- -> monitoring report
- -> analysis
- -> Investigation
- -> Specialist diagnosis
- -> persisted Evidence/Diagnosis
- -> persisted runtime evaluation
- -> aggregate readiness
-```
-
-See `../testing/RUNTIME_SCENARIOS.md`.
+All diagnostic operations use registered project tools and policy checks. The
+MCP surface does not expose raw SSH, raw SQL, arbitrary shell, unrestricted
+filesystem writes, or generic subprocess execution. Evidence references are
+validated and budgets are enforced. `automatic_remediation_allowed` remains
+`false`.
 
 ## Phase 5 boundary
 
-Phase 5 remediation workflow must remain policy-gated:
-
-```text
-diagnosis
- -> proposed RemediationPlan
- -> isolated-environment test
- -> risk classification
- -> human/operator approval
- -> bounded write-capable action
- -> before/after Evidence
- -> validation
- -> rollback when required
-```
-
-That workflow is not implemented yet.
+Phase C is closed at C.14.14. Phase 5 Supervised Remediation is the next
+allowed phase but is not implemented here. The current workflow may produce a
+bounded remediation proposal, but it does not perform production
+restart, process termination, package change, configuration write, reboot,
+firewall change, or arbitrary shell execution.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

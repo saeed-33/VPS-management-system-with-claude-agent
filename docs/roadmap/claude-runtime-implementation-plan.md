@@ -154,9 +154,9 @@ The existing remediation scaffolding remains non-authoritative for production
 write execution and `automatic_remediation_allowed` remains false.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 
@@ -164,7 +164,6 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
-Claude-native runtime transition: C.14 in progress
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

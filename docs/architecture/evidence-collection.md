@@ -76,9 +76,9 @@ Phase 4.13 itself introduced no new schema. Investigation persistence and later 
 Phase 4.13 is closed and runtime accepted.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

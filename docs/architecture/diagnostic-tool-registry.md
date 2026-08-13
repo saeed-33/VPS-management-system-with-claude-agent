@@ -1,143 +1,62 @@
 # Diagnostic Tool Registry
 
-**Phase:** 4.11  
-**Status:** Implemented — pending acceptance
-
-Phase 4.11 defines the diagnostic actions a Specialist may request.
-
-It deliberately does **not** execute SSH commands yet.
+The Diagnostic Tool Registry is the Python-owned boundary for Specialist
+diagnostic requests. It is implemented and covered by architecture, policy,
+and runtime acceptance tests.
 
 ```text
-Specialist
-   |
-allowed_tool_ids
-   |
-DiagnosticToolRegistry
-   |
-typed parameter validation
-   |
-safe pre-defined command rendering
-   |
-Phase 4.12 executor
+Specialist allowed_tool_ids
+        |
+registered DiagnosticToolRegistry
+        |
+typed argument validation
+        |
+DiagnosticPolicyEngine
+        |
+known-hosts SSH executor
+        |
+EvidenceReference
 ```
 
 ## Security boundary
 
-The Specialist is never given arbitrary shell access.
+Specialists and Claude never receive arbitrary shell access. A registered Tool
+contains a stable ID, typed parameters, a fixed command template, timeout,
+risk, and output limit. Unknown tools, unknown parameters, invalid arguments,
+unassigned Specialist tools, policy denials, and budget exhaustion fail closed.
 
-A Tool contains:
+Only bounded read-only diagnostic commands are available in the current Phase C
+runtime. SSH uses the configured private key and `known_hosts`; command text is
+rendered only after typed validation. Denials do not expose executable commands.
 
-```text
-tool_id
-name
-description
-domains
-typed parameters
-fixed command template
-timeout
-requires_sudo
-risk
-output limit
-```
+## Dynamic Specialist allow-list
 
-All Phase 4.11 tools are read-only.
+`SpecialistRuntimeDefinition.allowed_tool_ids` is loaded from the database and
+validated against the registered Tool catalog. A Specialist cannot request a
+Tool unless its exact ID is present in its persisted allow-list.
 
-Parameters are validated before rendering. Service names, paths, hosts and
-ports cannot contain arbitrary shell syntax. Unknown parameters are rejected.
+## Current tool families
 
-`shlex.join()` is used only after each dynamic value has passed the Tool's
-typed validator.
+The registry covers bounded diagnostics for systemd/journal, processes and
+memory, filesystems, network state, NGINX, Docker, and PostgreSQL readiness.
+The public Claude-facing MCP catalog remains a separate bounded surface and
+does not expose raw SSH or arbitrary command execution.
 
-## Specialist allow-list
-
-`SpecialistRuntimeDefinition.allowed_tool_ids` already exists in the dynamic
-Specialist definition.
-
-Phase 4.11 makes it enforceable:
-
-```text
-Specialist allowed_tool_ids
-      |
-      +--> Tool exists?
-      +--> Tool assigned?
-      +--> parameters valid?
-      |
-      v
-safe command
-```
-
-A Specialist cannot request a Registry Tool unless its exact ID appears in
-`allowed_tool_ids`.
-
-## Initial Tool set
-
-The default registry includes read-only diagnostics for:
-
-```text
-systemd
-journal
-process/CPU
-memory/vmstat
-filesystems/inodes
-network listeners/routes/connect probes
-NGINX config/build information
-Docker container state
-PostgreSQL readiness
-```
-
-Examples:
-
-```text
-systemd-status
-journal-unit
-process-top-cpu
-process-top-memory
-memory-summary
-vmstat-sample
-disk-filesystems
-disk-inodes
-network-listeners
-network-route
-network-connect
-nginx-config-test
-docker-ps
-postgres-ready
-```
-
-## Ubuntu 22.04 reference VM
-
-The current test VM is Ubuntu Server 22.04.2. The core commands used here are
-compatible with that reference environment. Optional component-specific tools
-such as `nginx`, `docker`, `pg_isready`, or `nc` may be unavailable when the
-corresponding package is not installed; Phase 4.12 must represent that as a
-normal Tool failure, not as an Investigation crash.
-
-## Acceptance
-
-Inspect all tools:
+## Verification
 
 ```powershell
 uv run python tools/dev/inspect_diagnostic_tools.py
+uv run python tools/dev/inspect_diagnostic_policy.py
+uv run python -m pytest tests/test_diagnostic_tool_registry.py tests/test_diagnostic_policy.py -v
 ```
 
-Then inspect the effective allow-list for an existing Specialist:
-
-```powershell
-uv run python tools/dev/inspect_diagnostic_tools.py --specialist nginx
-```
-
-If the Specialist currently has no `allowed_tool_ids`, the second command
-should show zero tools. That is expected until the operator assigns Tool IDs
-to the Specialist definitions.
-
-Phase 4.12 adds Tool Requests and execution through the existing bounded SSH
-command executor. The Tool Registry remains the authority that turns a typed
-Tool Request into command text.
+The C.14.12 readiness gate accepted policy safety and provider/runtime failure
+handling. Production remediation is not authorized.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

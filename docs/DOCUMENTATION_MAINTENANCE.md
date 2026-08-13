@@ -9,8 +9,9 @@ Canonical project status is recorded in:
 ```text
 docs/PROJECT_STATUS.md
 docs/architecture/overview.md
-docs/roadmap/phase-4-20-closeout.md
-artifacts/evaluation/phase_4_20_readiness.json
+docs/PROJECT_STRUCTURE.md
+docs/architecture/c14-12-runtime-readiness-gate.md
+artifacts/evaluation/c14_12_readiness.json
 ```
 
 ## Historical documents
@@ -20,9 +21,12 @@ Past phase closeouts and ADRs are historical records. Their original implementat
 Instead, every Markdown document receives a managed metadata block stating whether it is:
 
 ```text
-CURRENT
-HISTORICAL
-DECISION
+CURRENT_CANONICAL
+HISTORICAL_ADR
+HISTORICAL_CLOSEOUT
+ROADMAP
+TESTING
+OPERATIONS
 REFERENCE
 ```
 
@@ -47,9 +51,9 @@ The documentation audit checks:
 - automatic remediation remains false.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

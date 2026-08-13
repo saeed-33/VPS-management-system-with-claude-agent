@@ -1,102 +1,149 @@
-# Configuration Reference
+# Runtime Configuration
 
-## RAG
+<!-- DOC-STATUS: CURRENT -->
 
-| Setting | Default |
-|---|---:|
-| `RAG_EXACT_REUSE_ENABLED` | true |
-| `RAG_VECTOR_ENABLED` | true |
-| `RAG_ASSISTED_ENABLED` | true |
-| `RAG_STRUCTURED_COMPATIBILITY_ENABLED` | true |
-| `RAG_FULL_TEXT_ENABLED` | true |
-| `RAG_FULL_TEXT_CANDIDATE_LIMIT` | 20 |
-| `RAG_FULL_TEXT_MINIMUM_RANK` | 0.0 |
-| `RAG_MINIMUM_SIMILARITY` | 0.72 |
-| `RAG_CONTEXT_TOP_K` | 3 |
-| `RAG_RRF_K` | 60 |
-| `RAG_HNSW_EF_SEARCH` | 100 |
-| `RAG_TOP_K` | 5 |
+Configuration is loaded by `app/core/config.py` from the project `.env` file
+using case-insensitive environment names. Copy `.env.example` to `.env` and
+replace credentials and paths. Never commit the real `.env`.
 
-Validation:
+## Required
+
+These settings must be supplied for a normal application instance:
 
 ```text
-RAG_ASSISTED_ENABLED requires RAG_VECTOR_ENABLED
-RAG_FULL_TEXT_ENABLED currently requires RAG_VECTOR_ENABLED
-RAG_CONTEXT_TOP_K must be <= RAG_TOP_K
+POSTGRES_DB
+POSTGRES_USER
+POSTGRES_PASSWORD
+DEFAULT_SSH_PRIVATE_KEY_PATH
+SSH_KNOWN_HOSTS_PATH
 ```
 
-## Embedding
+The PostgreSQL database must be reachable and the SSH private key and
+`known_hosts` file must be readable by the application. Managed VPS records
+provide the target host, user, port, and monitoring configuration.
+
+## PostgreSQL
 
 ```text
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5432
+POSTGRES_DB=<database>
+POSTGRES_USER=<user>
+POSTGRES_PASSWORD=<secret>
+DATABASE_ECHO=false
+```
+
+The application uses PostgreSQL through `psycopg`, SQLModel/SQLAlchemy,
+`pgvector`, and the repository layer. Prepare a new database with:
+
+```powershell
+uv run python tools/bootstrap_database.py
+```
+
+## SSH and monitoring
+
+```text
+DEFAULT_SSH_PRIVATE_KEY_PATH=C:/Users/USER/.ssh/id_ed25519
+SSH_KNOWN_HOSTS_PATH=C:/Users/USER/.ssh/known_hosts
+SSH_CONNECT_TIMEOUT_SECONDS=15
+COMMAND_TIMEOUT_SECONDS=20
+MONITOR_POLLING_INTERVAL_SECONDS=5
+DEFAULT_MONITOR_INTERVAL_SECONDS=60
+MAX_CONCURRENT_SERVERS=5
+```
+
+The SSH client enforces private-key validation and `known_hosts` verification.
+Command execution is bounded by `COMMAND_TIMEOUT_SECONDS`.
+
+## Ollama analysis and Claude runtime
+
+```text
+LLM_ENABLED=true
+LLM_PROVIDER=ollama
+LLM_ANALYSIS_TIMEOUT_SECONDS=120
+LLM_MAX_REPORT_CHARACTERS=50000
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen3:8b
+CLAUDE_RUNTIME_ENABLED=false
+CLAUDE_RUNTIME_MODEL=gemma4:e4b-it-q4_K_M
+CLAUDE_RUNTIME_TIMEOUT_SECONDS=300
+CLAUDE_RUNTIME_MAX_TURNS=20
+CLAUDE_RUNTIME_OLLAMA_EXECUTABLE=ollama
+CLAUDE_RUNTIME_EXECUTABLE=claude
+CLAUDE_RUNTIME_AGENT=server-supervisor
+```
+
+`LLM_PROVIDER` and `EMBEDDING_PROVIDER` are restricted to `ollama`. The
+Settings default is `qwen3:8b`; the accepted C.14.12 operational `.env` used
+`gemma4:e4b-it-q4_K_M`. The Claude
+runtime requires `LLM_ENABLED=true`, `LLM_PROVIDER=ollama`, and a non-empty
+effective model. `CLAUDE_RUNTIME_MODEL` may be empty to reuse `OLLAMA_MODEL`.
+
+Required runtime binaries are the native `claude` CLI and the Ollama
+executable. The accepted C.14.12 runtime used model
+`gemma4:e4b-it-q4_K_M`; use a model installed in the local Ollama instance.
+
+## Retrieval and embeddings
+
+```text
+RAG_EXACT_REUSE_ENABLED=true
+RAG_VECTOR_ENABLED=true
+RAG_ASSISTED_ENABLED=true
+RAG_STRUCTURED_COMPATIBILITY_ENABLED=true
+RAG_FULL_TEXT_ENABLED=true
+RAG_FULL_TEXT_CANDIDATE_LIMIT=20
+RAG_FULL_TEXT_MINIMUM_RANK=0.0
+RAG_MINIMUM_SIMILARITY=0.72
+RAG_CONTEXT_TOP_K=3
+RAG_RRF_K=60
+RAG_HNSW_EF_SEARCH=100
+RAG_TOP_K=5
 EMBEDDING_PROVIDER=ollama
 OLLAMA_EMBEDDING_MODEL=nomic-embed-text
 EMBEDDING_DIMENSIONS=768
 EMBEDDING_TIMEOUT_SECONDS=60
 ```
 
-## LLM
+Vector retrieval is required when assisted or full-text retrieval is enabled.
 
-Defaults:
-
-```text
-LLM_ENABLED=false
-LLM_PROVIDER=ollama
-LLM_ANALYSIS_TIMEOUT_SECONDS=120
-LLM_MAX_REPORT_CHARACTERS=50000
-OLLAMA_MODEL=qwen3:8b
-```
-
-Operational decision:
+## Optional application settings
 
 ```text
-Ollama is the project LLM provider for report analysis, assisted RAG analysis,
-specialist reasoning, and final synthesis.
+APP_NAME=AI VPS Management
+DEBUG=true
+PDF_FONT_PATH=<optional project font path>
 ```
 
-Claude Code supervises orchestration and must invoke project tools that use the
-configured Ollama clients instead of bypassing them.
+## Test-only and acceptance-only settings
 
-Local `.env` cleanup note: existing developer machines may still contain
-`OPENAI_API_KEY`, `OPENAI_MODEL`, or
-`LLM_ANALYSIS_QUEUE_SIZE_PER_SERVER`. These values are ignored by the current
-settings contract and should be removed manually from local `.env` files; this
-repository does not edit real environment secrets automatically.
-
-## Monitoring/SSH
+Normal pytest configuration supplies isolated PostgreSQL test settings and
+disables the Claude runtime. Real acceptance is opt-in and uses the project
+`.env` operational database settings:
 
 ```text
-MONITOR_POLLING_INTERVAL_SECONDS=5
-DEFAULT_MONITOR_INTERVAL_SECONDS=60
-COMMAND_TIMEOUT_SECONDS=20
-SSH_CONNECT_TIMEOUT_SECONDS=15
-MAX_CONCURRENT_SERVERS=5
+AI_VPS_RUN_REAL_RUNTIME_TESTS=1
+AI_VPS_REAL_RUNTIME_SERVER_ID=<managed server id>
 ```
 
-## Database
+The real test also requires `LLM_ENABLED=true`, `LLM_PROVIDER=ollama`,
+`CLAUDE_RUNTIME_ENABLED=true`, Ollama, Claude CLI, PostgreSQL, MCP, and a
+reachable managed server.
 
-PostgreSQL host, port, database, user, and password are required. Settings are
-loaded from `.env`.
+## MCP configuration
 
-## Current Phase 4.20 Boundary
+`.mcp.json` registers one server named `vps` and launches:
 
 ```text
-readiness: ready_for_supervised_operations
-automatic_remediation_allowed: false
+uv run --no-sync --project ${CLAUDE_PROJECT_DIR:-.} python
+${CLAUDE_PROJECT_DIR:-.}/tools/run_project_mcp_server.py
 ```
 
-## Next Phase
-
-```text
-Phase C - Claude Code Supervisory Runtime
-```
-
-For canonical current state see `docs/PROJECT_STATUS.md`; for test execution
-see `docs/testing/TESTING_STRATEGY.md`.
+The MCP server is project-scoped and exposes exactly 24 bounded tools.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

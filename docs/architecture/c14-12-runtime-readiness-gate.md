@@ -121,3 +121,19 @@ C.14.12 = PASS
 
 NEXT ALLOWED STEP:
 C.14.13 — Documentation Synchronization
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT_CANONICAL**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

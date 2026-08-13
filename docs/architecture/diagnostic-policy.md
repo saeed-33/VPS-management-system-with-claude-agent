@@ -87,15 +87,16 @@ read_only
 
 No remediation/write risk class is admitted.
 
-## Runtime role through Phase 4.17
+## Runtime role
 
-The Policy Engine remains mandatory inside every Specialist Investigation Loop, including:
+The Policy Engine remains mandatory inside every Specialist Investigation Loop,
+including:
 
 ```text
 single-Specialist execution
-Server Coordinator execution
+Claude-supervised server sessions
 Claude-supervised parallel workers
-dynamic secondary Specialist waves
+DB-defined Specialist runs and follow-up waves
 ```
 
 Neither Claude-supervised nor the Coordinator may bypass Policy.
@@ -110,12 +111,13 @@ no SSH execution on DENY
 bounded round/action execution
 ```
 
-Phase 4.12 is closed; later phases build on this accepted boundary.
+This boundary is accepted by C.14.12 and remains required for all supervised
+diagnostic operations.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

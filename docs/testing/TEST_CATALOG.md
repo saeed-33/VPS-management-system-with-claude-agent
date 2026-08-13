@@ -111,6 +111,14 @@ uv run python tools/dev/generate_test_catalog.py
 - `test_engine_registers_infrastructure_models`
 - `test_migrations_have_one_canonical_owner`
 
+### `tests/test_c14_12_runtime_readiness.py`
+
+- `test_c14_12_startup_recovers_interrupted_jobs`
+- `test_c14_12_mcp_surface_is_bounded_and_stable`
+- `test_c14_12_unknown_and_unregistered_tools_fail_closed`
+- `test_c14_12_claude_malformed_output_fails_closed`
+- `test_c14_12_controlled_policy_and_provider_failures_are_measured`
+
 ### `tests/test_c14_7_smoke_schema_init.py`
 
 - `test_c14_7_smoke_initializes_schema_before_container`
@@ -498,6 +506,10 @@ uv run python tools/dev/generate_test_catalog.py
 - `test_unknown_evidence_fails_grounding`
 - `test_budget_overrun_fails`
 - `test_unknown_narrative_claim_fails`
+- `test_malformed_evidence_reference_fails_closed`
+- `test_foreign_investigation_evidence_fails_closed`
+- `test_foreign_server_evidence_fails_closed`
+- `test_evidence_without_context_fails_closed`
 
 ### `tests/test_production_readiness_gate.py`
 
@@ -707,3 +719,19 @@ uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 50
 ```
 
 See `TESTING_STRATEGY.md` for when each layer is required.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT_CANONICAL**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

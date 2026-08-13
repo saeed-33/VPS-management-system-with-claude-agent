@@ -162,9 +162,9 @@ This conservative result is the intended behavior.
 - Tool use can be introduced later without mixing reasoning and execution.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **DECISION**
+Document classification: **HISTORICAL_ADR**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

@@ -69,9 +69,9 @@ These are initial engineering thresholds and can later be revised through an ADR
 Phase 4.20.2 creates the deterministic evaluation case dataset and runner that emits `EvaluationObservation` records into this gate.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

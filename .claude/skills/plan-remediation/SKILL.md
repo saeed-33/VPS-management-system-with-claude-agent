@@ -15,9 +15,9 @@ allowed-tools:
 
 Create a grounded remediation proposal only.
 
-C.14.2 does not authorize production remediation, request production approval,
-or execute write-capable actions. Phase 5 introduces the accepted write-tool,
-approval, verification, rollback, and audit contracts.
+The current Phase C gate does not authorize production remediation, request
+production approval, or execute write-capable actions. Phase 5 introduces the
+accepted write-tool, approval, verification, rollback, and audit contracts.
 
 ## Input contract
 
@@ -68,7 +68,7 @@ mcp__vps__request_user_approval
 mcp__vps__apply_approved_remediation
 ```
 
-Those capabilities remain outside this C.14.2 operational skill.
+Those capabilities remain outside this pre-Phase-5 operational skill.
 
 The existing Phase C remediation service is scaffolding; it is not evidence of
 a real isolated sandbox or production write executor.

@@ -21,9 +21,9 @@ Automatic remediation remains disabled.
 Phase 4.20.5 combines these observations with persisted-runtime observations from Phase 4.20.3 and evaluates the aggregate Production Readiness Gate.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

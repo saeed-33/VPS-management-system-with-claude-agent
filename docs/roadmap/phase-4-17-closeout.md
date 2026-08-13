@@ -97,9 +97,9 @@ Every material diagnosis claim must be traceable to actual Evidence and/or expli
 Conflicting Specialist conclusions must remain visible rather than being silently flattened.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **HISTORICAL**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

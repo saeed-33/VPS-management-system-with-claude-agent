@@ -12,3 +12,19 @@ The extraction preserves the previous composition order:
 5. monitoring, MCP, Claude runtime, and scheduler wiring
 
 The remaining runtime wiring is intentionally left in `builder.py` for A.4.2d.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **HISTORICAL_CLOSEOUT**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

@@ -78,3 +78,18 @@ Remove-Item Env:AI_VPS_REAL_RUNTIME_SERVER_ID
 
 The opt-in real-runtime test explicitly reloads `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` from the project `.env` before importing the application container. This is intentional: the normal pytest environment may inject isolated test-database credentials, while C.14.11 must exercise the same persistence configuration used by the operational application.
 
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **HISTORICAL_CLOSEOUT**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

@@ -34,3 +34,19 @@ The old OpenAI implementations and the unused LangGraph dependency are removed.
 
 Claude decides WHAT/NEXT. Python decides WHETHER ALLOWED and HOW the approved
 capability is executed safely.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **HISTORICAL_CLOSEOUT**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

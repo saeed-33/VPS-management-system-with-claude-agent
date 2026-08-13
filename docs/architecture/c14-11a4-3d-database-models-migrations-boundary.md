@@ -16,3 +16,19 @@ infrastructure database package.
 
 This is a package-boundary change only. It does not alter table names, columns,
 relationships, constraints, migration SQL, or database runtime behavior.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **HISTORICAL_CLOSEOUT**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

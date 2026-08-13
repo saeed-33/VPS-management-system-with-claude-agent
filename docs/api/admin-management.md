@@ -14,12 +14,14 @@ Knowledge Source definition management is separate from ingestion/indexing.
 
 ## Deliberately internal for now
 
-RRF/HNSW/index tuning, embeddings, context-building internals and reasoning prompts remain internal. Investigation timeline/evidence/result UI remains planned for Phase 4.19.
+RRF/HNSW/index tuning, embeddings, context-building internals and reasoning
+prompts remain internal. Investigation timeline, Evidence, and result views
+are available through the current read-only Investigation API and Admin UI.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

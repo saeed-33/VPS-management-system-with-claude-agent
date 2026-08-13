@@ -77,9 +77,9 @@ Phase 5 remains blocked until C.14 proves a real Ollama-backed Claude execution
 path and re-passes the runtime safety/readiness gate.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **REFERENCE**
+Document classification: **HISTORICAL_ADR**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 
@@ -87,7 +87,6 @@ Canonical project state:
 Phase 4.20: complete
 readiness: ready_for_supervised_operations
 automatic_remediation_allowed: false
-Claude-native runtime transition: C.14 in progress
 ```
 
 For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).

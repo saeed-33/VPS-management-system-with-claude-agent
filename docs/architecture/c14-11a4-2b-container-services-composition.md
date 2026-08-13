@@ -11,3 +11,19 @@ Claude/MCP/scheduler runtime wiring. Those move in the next A.4.2 stages.
 
 Behavior is preserved by aliasing every service bundle member back to the
 same local variable names used by the existing builder.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **HISTORICAL_CLOSEOUT**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

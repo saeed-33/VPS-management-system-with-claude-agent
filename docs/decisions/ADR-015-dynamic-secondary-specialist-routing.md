@@ -68,9 +68,9 @@ Phase 4.17 does not correlate Specialist conclusions into a server-level diagnos
 That is Phase 4.18.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **DECISION**
+Document classification: **HISTORICAL_ADR**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

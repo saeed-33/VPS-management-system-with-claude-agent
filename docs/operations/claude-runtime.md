@@ -1,121 +1,109 @@
-# Running the Project with Claude
+# Claude Code Runtime Operations
 
-## Prerequisites
+<!-- DOC-STATUS: CURRENT -->
+
+## Contract
+
+The active runtime contract is:
 
 ```text
-PostgreSQL is running and migrated.
-Ollama is running.
-Required Ollama models are pulled.
-Claude Code is installed and authenticated.
-Project dependencies are installed with uv.
+Claude Code      supervisory reasoning and sequencing
+Ollama           operational model provider
+server-supervisor main bounded per-server agent
+specialist-worker bounded DB-defined Specialist worker
+vps MCP          24 project capability tools
+Python           execution, policy, evidence, budgets, persistence, safety
 ```
 
-## Ollama
+Canonical runtime packages are `app\runtime\claude` and
+`app\interfaces\mcp`; the Admin adapter is under `app\interfaces\admin`.
 
-Start Ollama, then pull the configured models:
+Claude decides WHAT/NEXT. Python decides WHETHER ALLOWED and HOW EXECUTED
+SAFELY. Claude does not receive raw SSH, raw SQL, arbitrary shell, unrestricted
+filesystem access, or generic subprocess access.
+
+## Project configuration
+
+The Settings default is `OLLAMA_MODEL=qwen3:8b`; prepare it with:
 
 ```powershell
-ollama serve
 ollama pull qwen3:8b
-ollama pull nomic-embed-text
 ```
 
-The project configuration uses Ollama for analysis and embeddings:
+The accepted C.14.12 operational run used `gemma4:e4b-it-q4_K_M` instead.
 
-```env
-LLM_PROVIDER=ollama
-EMBEDDING_PROVIDER=ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen3:8b
-OLLAMA_EMBEDDING_MODEL=nomic-embed-text
-```
+The native Claude CLI is launched through the project runtime with:
 
-## Application
+- `CLAUDE_RUNTIME_ENABLED` feature flag;
+- `CLAUDE_RUNTIME_EXECUTABLE`, normally `claude`;
+- `CLAUDE_RUNTIME_OLLAMA_EXECUTABLE`, normally `ollama`;
+- effective model from `CLAUDE_RUNTIME_MODEL` or `OLLAMA_MODEL`;
+- `CLAUDE_RUNTIME_AGENT=server-supervisor`;
+- bounded timeout and turn limits;
+- strict project MCP configuration from `.mcp.json`.
 
-Install dependencies:
+The project runtime uses an Ollama-backed Claude-compatible transport. It does
+not use an Anthropic-hosted reasoning model. Do not use
+`--dangerously-skip-permissions`; it is not an accepted project runtime method.
 
-```powershell
-uv sync
-```
+## Agents and Skills
 
-Apply database migrations or bootstrap a new database according to
-`docs/operations/database-bootstrap.md`.
-
-Start the API and scheduler:
-
-```powershell
-uv run uvicorn app.main:app --reload
-```
-
-Check runtime status:
-
-```powershell
-Invoke-RestMethod http://localhost:8000/health
-```
-
-Expected supervisor section:
-
-```json
-{
-  "runtime": "claude",
-  "state": "active"
-}
-```
-
-## Claude Code
-
-Start Claude Code from the repository root:
-
-```powershell
-cd E:\AI_VPS_Mamgment\chat_system
-claude
-```
-
-Claude loads:
+The project contracts are:
 
 ```text
-CLAUDE.md
-.mcp.json
-.claude/settings.json
-.claude/rules/
-.claude/commands/
-.claude/skills/
-.claude/agents/
-.claude/hooks/
+.claude/agents/server-supervisor.md
+.claude/agents/specialist-worker.md
+.claude/skills/monitor-server/SKILL.md
+.claude/skills/analyze-incident/SKILL.md
+.claude/skills/investigate-incident/SKILL.md
+.claude/skills/plan-remediation/SKILL.md
 ```
 
-The repository registers the project-scoped MCP server in `.mcp.json`:
+`server-supervisor` owns high-level sequencing for one server and may use
+project MCP tools. `specialist-worker` executes one bounded DB-defined
+Specialist task and cannot delegate. Skills describe the current workflow and
+must not bypass project tools, policy, Evidence, or budgets.
 
-```text
-vps -> uv run python tools/run_project_mcp_server.py
-```
+## MCP
 
-Claude Code uses that server to call project tools as `mcp__vps__*`. Direct
-SSH, SQL, remediation, or Ollama calls outside project tools are not part of
-the runtime contract.
+`.mcp.json` registers the `vps` server through
+`tools/run_project_mcp_server.py`. The registry exposes exactly 24 tools in
+monitoring, reports, retrieval, investigation, Specialists, and bounded
+remediation-planning groups. Non-read-only tools remain policy-gated and no
+production remediation is automatically applied.
 
-Useful checks:
+## Runtime observability
+
+Each supervisory run creates an AgentJob and records Claude session ID, status,
+turns, tool calls, MCP status, duration, usage metadata, and errors. Runtime
+snapshots persist report, analysis, investigation, Specialist, Evidence,
+conflict, and diagnosis state. Application startup recovers queued/running jobs
+interrupted by restart into a deterministic failed state.
+
+## Runtime acceptance
 
 ```powershell
-Get-Content .mcp.json
-Get-Content .claude\settings.json
-Get-Content .claude\agents\monitoring-supervisor.md
+$env:LLM_ENABLED="true"
+$env:LLM_PROVIDER="ollama"
+$env:CLAUDE_RUNTIME_ENABLED="true"
+$env:AI_VPS_REAL_RUNTIME_SERVER_ID="<server_id>"
+$env:AI_VPS_RUN_REAL_RUNTIME_TESTS="1"
+uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
 ```
 
-## Verification
+The test is intentionally opt-in because it requires PostgreSQL, Ollama,
+Claude CLI, MCP, SSH credentials, and a reachable managed server.
 
-Run:
+## Failure behavior
 
-```powershell
-uv run python -m pytest
-uv run python -m compileall app\core app\capabilities app\runtime app\interfaces app\infrastructure app\composition tools tests app\main.py
-uv run python tools\sync_documentation.py
-```
+Claude, Ollama, MCP, database, SSH, policy, Evidence, and budget failures are
+reported as structured failures and stop the affected operation. The runtime
+does not fabricate a healthy result or fall back to unrestricted execution.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

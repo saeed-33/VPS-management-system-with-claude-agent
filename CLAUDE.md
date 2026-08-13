@@ -1,277 +1,151 @@
-# AI VPS Management - Claude Code Runtime Contract
+# AI VPS Management — Claude Code Runtime Contract
 
-## Current project phase
+## Current gate state
 
-The project is in:
+The runtime program is the **C.14 - Real Claude-Native Orchestration** track,
+now accepted through C.14.12; this document records the post-readiness current
+state rather than a pending implementation plan.
 
 ```text
-Phase C
-C.14 - Real Claude-Native Orchestration
+Phase 4.20: COMPLETE
+C.14.0-C.14.11: COMPLETE
+C.14.11A: PASS
+C.14.12: PASS
+C.14.13: PASS
+C.14.14: PASS
+Phase C: COMPLETE / CLOSED
+Phase 5: NEXT
+automatic_remediation_allowed: false
 ```
 
-Phase 4 autonomous diagnosis capabilities are accepted. Production automatic
-remediation is not authorized.
-
-The current transition is not complete: project MCP capability exposure exists,
-but scheduled production execution still contains Python-owned orchestration
-that must be replaced by a real bounded Claude session before Phase C closes.
-
-## Runtime responsibility split
+## Responsibility split
 
 ```text
 Claude Code
-  = reasoning, sequencing, branching, task decomposition, synthesis
-
-.claude/skills
-  = operational workflow contracts
-
-.claude/agents
-  = bounded intelligent worker contracts
-
-MCP
-  = only normal operational capability interface exposed to Claude
-
-Python application
-  = deterministic execution, validation, persistence, policy, evidence, safety
-
-PostgreSQL
-  = source of truth
+  = supervisory reasoning, sequencing, branching, and synthesis
 
 Ollama
-  = configured LLM provider
+  = operational LLM provider for project-owned analysis/reasoning clients
+
+MCP
+  = bounded Claude-facing project capability surface
+
+Python application
+  = deterministic execution, validation, persistence, policy, evidence,
+    budgets, SSH safety, database access, and Admin/API
 ```
 
 Core rule:
 
 ```text
-Claude decides WHAT/NEXT.
-Python decides WHETHER ALLOWED and HOW TO EXECUTE SAFELY.
+Claude decides WHAT / NEXT.
+Python decides WHETHER ALLOWED and HOW IT IS EXECUTED SAFELY.
 ```
 
-## Fixed product workflow
+## Canonical architecture
 
-Preserve this product-level order:
+```text
+app/core             contracts, configuration, policy
+app/capabilities     monitoring, analysis, investigation, knowledge
+app/runtime/claude  native Claude CLI, AgentJobs, observability
+app/interfaces       Admin HTTP/Web and vps MCP
+app/infrastructure   PostgreSQL, known-hosts SSH, Ollama
+app/composition      dependency wiring and bootstrap
+```
+
+Do not recreate the removed historical trees `app/domain`, `app/admin`,
+`app/mcp`, `app/shared`, or `app/tools`.
+Do not recreate `.claude/commands/` as a duplicate workflow surface.
+
+## Fixed operational workflow
 
 ```text
 periodic monitoring
- -> per-server Claude session
- -> monitoring completion
- -> exact historical report lookup
- -> exact match: reuse stored analysis
- -> otherwise retrieve top similar historical reports
- -> Ollama-backed analysis
- -> issue detection
- -> DB-defined Specialist selection when needed
- -> bounded specialist investigation
- -> evidence-grounded aggregation
- -> final diagnosis
- -> remediation proposal when needed
- -> isolated validation when implemented/available
- -> production action only through Phase 5+ policy/approval contracts
+ -> Claude Code supervisory session
+ -> Ollama model
+ -> vps MCP
+ -> monitoring capability
+ -> persisted report
+ -> exact/similar historical analysis
+ -> persisted analysis
+ -> optional investigation
+ -> dynamic DB-defined Specialists
+ -> Evidence
+ -> Final Diagnosis
+ -> bounded remediation proposal only
 ```
 
-The workflow order is fixed at the product level. Claude owns allowed branch and
-next-step decisions inside that contract once the real runtime path is enabled.
+Do not fabricate current operational facts from historical incidents or
+Knowledge RAG. Current claims require current reports or persisted Evidence.
 
-## Source-of-truth boundaries
+## Agents and Skills
 
-Do not reimplement these inside prompts:
+Agents:
 
 ```text
-monitoring execution
-SSH execution
-report persistence
-Incident RAG
-Knowledge RAG
-embeddings / pgvector / FTS
-dynamic Specialist definitions
-DiagnosticToolRegistry
-DiagnosticPolicyEngine
-Evidence persistence/validation
-budgets
-remediation authorization
-database persistence
-Admin/API control plane
+.claude/agents/server-supervisor.md
+.claude/agents/specialist-worker.md
 ```
 
-Use project MCP tools.
-
-## Dynamic Specialists
-
-Specialists are database-managed definitions.
-
-Do not create hard-coded CPU, Memory, PostgreSQL, Nginx, or similar static Claude
-agent files as the domain source of truth.
-
-A generic Specialist worker may execute:
+Skills:
 
 ```text
-SpecialistDefinition from DB
-+ current task
-+ allowed tool IDs
-+ budgets
-+ current Evidence
-+ retrieved Knowledge
+.claude/skills/monitor-server/SKILL.md
+.claude/skills/analyze-incident/SKILL.md
+.claude/skills/investigate-incident/SKILL.md
+.claude/skills/plan-remediation/SKILL.md
 ```
 
-## Evidence and reasoning
+`server-supervisor` is the main per-server coordinator and may invoke bounded
+project tools. `specialist-worker` is a bounded worker and cannot delegate.
+Domain-specific Specialist truth remains DB-defined and managed through the
+project services, not hard-coded agent files.
 
-Historical incidents and technical documentation are context, not proof of the
-current server state.
+## MCP and permissions
 
-Operational claims about current server state require current report data or
-persisted Evidence returned by project services.
+`.mcp.json` registers the `vps` server through
+`tools/run_project_mcp_server.py`. The project surface contains exactly 24
+tools. Calls are schema-validated, registered, policy-gated, budgeted, and
+structured.
 
-Never fabricate:
+Claude must not use raw SSH, raw SQL, arbitrary shell, unrestricted filesystem
+writes, generic subprocess execution, direct database writes, or any bypass of
+the DiagnosticToolRegistry, DiagnosticPolicyEngine, Specialist permissions,
+budgets, or Evidence validation.
 
-```text
-Evidence IDs
-Knowledge IDs
-Claim IDs
-Conflict IDs
-Investigation IDs
-Report IDs
-Analysis IDs
-Remediation IDs
-```
+Do not use `--dangerously-skip-permissions`. It is not an accepted runtime
+method. Production remediation is not authorized while
+`automatic_remediation_allowed` is `false`.
 
-## Safety invariants
+## Evidence and safety
 
-Claude requests operations. Python authorizes them.
+Evidence IDs, report IDs, investigation IDs, claim IDs, conflict IDs, and
+remediation IDs must come from project services. Unknown or foreign Evidence
+references fail closed. Conflicts remain explicit. Policy DENY results must not
+expose executable commands. SSH must use the configured private key and
+`known_hosts`; command and connection timeouts remain bounded.
 
-Forbidden normal-operation paths:
+## Runtime observability
 
-```text
-unrestricted shell
-raw production SSH
-raw production SQL
-direct database writes
-bypass of DiagnosticToolRegistry
-bypass of DiagnosticPolicyEngine
-bypass of SpecialistDefinition permissions
-bypass of budgets
-bypass of Evidence validation
-production remediation without project authorization
-```
-
-Project LLM reasoning must use the configured Ollama path.
-
-## `.claude` design rule
-
-Keep only runtime artifacts with a concrete responsibility.
-
-```text
-skills
-  operational workflow contracts
-
-agents
-  bounded worker contracts
-
-rules
-  global invariants only
-
-hooks
-  only concrete enforcement/audit hooks
-```
-
-Do not recreate `.claude/commands/` as a duplicate workflow surface.
-
-Do not add placeholder hooks or workflow-specific rules that merely repeat
-skills.
-
-## Current C.14 implementation boundary
-
-C.14.0 and C.14.1 established the architecture and removed duplicated/cosmetic
-Claude surfaces. C.14.2 replaces the workflow-note skills with operational
-contracts grounded in the current project MCP tool surface.
-
-C.14.3 establishes two bounded project agent contracts: `server-supervisor`
-and `specialist-worker`. `server-supervisor` is intended to run as the main
-per-server session agent and may delegate only `specialist-worker` tasks.
-`specialist-worker` cannot delegate further.
-
-The agent and Skill contracts are accepted project runtime specifications.
-C.14.4 applies least-privilege runtime permissions: both runtime agents use
-`permissionMode: dontAsk`, only current MCP capabilities are pre-approved,
-raw operational SSH/SQL paths are denied for Bash and PowerShell, and Phase 5
-remediation execution tools are explicitly denied.
-
-These contracts are still not proof that a real Claude session is executing
-the production workflow. The concrete session runner remains pending.
-
-Before Phase 5, C.14 must still implement and prove:
-
-```text
-least-privilege session/settings permissions
-concrete hooks where justified
-real ClaudeSessionRunner
-Ollama-backed Claude launch
-Claude-owned workflow sequencing
-runtime observability
-runtime acceptance tests
-readiness/safety reevaluation
-```
-
-## Development rule
-
-Before adding a Python high-level workflow branch, ask whether that decision
-belongs to Claude. If Claude can make the decision using structured project
-tools, expose the capability and keep the decision in Claude.
-
-Do not remove existing deterministic orchestration until the real Claude path
-passes equivalence and safety tests.
+Every supervisory run is represented by an AgentJob with Claude session,
+status, turns, tool calls, MCP state, duration, usage, and failure metadata.
+Runtime snapshots persist report, analysis, investigation, Specialist, Evidence,
+conflict, and diagnosis state. Application startup recovers interrupted jobs
+into a deterministic failed state.
 
 ## Required references
 
-Read before changing the transition:
+Read the current canonical documents before changing runtime behavior:
 
 ```text
 docs/PROJECT_STATUS.md
-docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md
-docs/decisions/ADR-018-claude-native-operational-contracts.md
-docs/roadmap/claude-runtime-implementation-plan.md
-docs/roadmap/c14-claude-native-execution-plan.md
+docs/architecture/overview.md
+docs/operations/configuration.md
+docs/operations/claude-runtime.md
+docs/testing/TESTING_STRATEGY.md
+docs/architecture/c14-12-runtime-readiness-gate.md
 ```
 
-## C.14.5 Runtime Hooks
-
-The project has concrete runtime-only Claude hooks:
-
-- `SessionStart` injects runtime contract context for `server-supervisor`.
-- `UserPromptSubmit` blocks a `server-supervisor` prompt when the local
-  C.14 runtime contract is not ready (Ollama provider declaration, project
-  root, MCP wiring, permission mode, agent contracts, and Phase 5 denials).
-- `ConfigChange` blocks project/local settings and Skill changes while the
-  runtime supervisor session is active.
-- `SubagentStart` and `SubagentStop` record minimal lifecycle events for
-  `specialist-worker`.
-- `SessionEnd` records the end of a runtime supervisor session.
-
-The transitional local hook event files are not the authoritative audit store
-and must not contain prompts, tool inputs, tool outputs, credentials, or
-assistant messages. Durable runtime observability remains a later C.14 step.
-
-## C.14.6 Process Session Runner
-
-`SubprocessClaudeSessionRunner` is the concrete bounded process host for one
-Claude session. It owns subprocess creation, project-root enforcement, JSON
-envelope decoding, controlled non-zero failures, timeout/cancellation cleanup,
-and best-effort process-tree termination.
-
-C.14.6 deliberately does not choose the model provider or launcher command.
-The command is supplied through `ClaudeProcessCommandBuilder`. Production
-scheduler/bootstrap wiring remains on the legacy bridge until C.14.7 provides
-and validates the Ollama-backed command builder.
-
-Do not claim that production monitoring is Claude-native merely because the
-process runner exists.
-
-## C.14.7 Ollama-backed Runtime
-
-The real Claude runtime is feature-flagged by `CLAUDE_RUNTIME_ENABLED`.
-When enabled, the scheduler-facing supervisor launches one headless
-`server-supervisor` session per scheduled server through Ollama, with strict
-project MCP loading and a validated JSON output schema.
-
-C.14.7 is not COMPLETE until the operator runs the real smoke successfully.
-Unit tests alone are insufficient for this acceptance gate.
+Phase 5 is the next allowed phase, but do not implement it as part of this
+closeout. Keep `automatic_remediation_allowed` false until its separate gates
+pass.

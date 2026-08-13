@@ -47,9 +47,9 @@ uv run python tools/dev/inspect_investigation.py <INVESTIGATION_ID>
 ```
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

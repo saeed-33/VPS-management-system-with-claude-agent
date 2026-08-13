@@ -74,9 +74,9 @@ Do not enable or manually wire in write-capable actions such as restart, kill, p
 Such capabilities belong to Phase 5 supervised remediation with separate approval and rollback design.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **OPERATIONS**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

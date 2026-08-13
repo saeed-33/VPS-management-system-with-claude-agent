@@ -40,9 +40,9 @@ Not yet implemented: real report routing to Specialists, Specialist LLM reasonin
 Next milestone starts with **4.5 — Investigation Router**.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **HISTORICAL**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

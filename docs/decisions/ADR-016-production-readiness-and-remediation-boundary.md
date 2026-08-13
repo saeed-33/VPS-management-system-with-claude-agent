@@ -60,9 +60,9 @@ Phase 4 may not restart services, kill processes, edit configuration, install/re
 Phase 5 requires a new ADR/contract set for remediation plans, approval, audit, before/after Evidence, verification, and rollback.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **DECISION**
+Document classification: **HISTORICAL_ADR**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

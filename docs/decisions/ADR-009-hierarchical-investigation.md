@@ -77,9 +77,9 @@ Retrieved material must preserve provenance/source identifiers.
 - Remediation requires a separate Phase 5 architecture with stronger permissions, approvals, audit, rollback, and safety controls.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **DECISION**
+Document classification: **HISTORICAL_ADR**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

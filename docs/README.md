@@ -1,115 +1,62 @@
-# Project Documentation
+# Documentation Guide
 
-هذه الوثائق تصف baseline التنفيذ الحالي للمشروع حتى إغلاق Phase 4.17 runtime acceptance.
+<!-- DOC-STATUS: CURRENT -->
 
-## Current implementation status
+This directory contains the current operating truth, accepted decisions, and
+historical milestone records for AI VPS Management.
 
-- Milestone A — Foundation (4.0–4.4): COMPLETED
-- Milestone B — Routing + Knowledge (4.5–4.9): COMPLETED
-- Milestone C — Single Specialist Investigation (4.10–4.14): COMPLETED
-- Milestone D:
-  - 4.15 Server Coordinator: COMPLETED
-  - 4.16 Claude-supervised Parallel Investigation: COMPLETED
-  - 4.17 Dynamic Secondary Specialist Routing: COMPLETED
-  - 4.18 Correlation + Final Diagnosis: NEXT
-- Milestone E — Productization (4.19–4.20): PLANNED
+## Canonical current documents
 
-Reference automated baseline after the latest accepted 4.17 work:
+- [Project status](PROJECT_STATUS.md) — one current gate/status source of truth.
+- [Project structure](PROJECT_STRUCTURE.md) — generated inventory of the actual
+  checkout.
+- [Architecture overview](architecture/overview.md) — current runtime and
+  responsibility boundary.
+- [Current workflows](workflows/current-workflows.md) — operational sequence.
+- [Testing strategy](testing/TESTING_STRATEGY.md) — test layers and acceptance
+  requirements.
+- [Runtime configuration](operations/configuration.md) — active settings and
+  prerequisites.
+- [Running the project](operations/running-project.md) — startup and health
+  checks.
+- [Claude runtime](operations/claude-runtime.md) — Claude/Ollama/MCP contract.
+- [C.14.12 readiness closeout](architecture/c14-12-runtime-readiness-gate.md)
+  — accepted readiness evidence.
+
+## Supporting documents
+
+- `docs/testing/` contains unit, integration, controlled-evaluation, and
+  real-runtime testing references.
+- `docs/operations/` contains configuration, database, startup, and runtime
+  procedures.
+- `docs/architecture/` contains current subsystem references and historical
+  C.14 migration records.
+- `docs/decisions/` contains accepted ADRs. ADRs are preserved decisions and
+  may describe the state that existed when they were accepted.
+- `docs/roadmap/` contains roadmap, phase, and closeout records. Historical
+  milestone records are not current operator instructions.
+
+## Current status at a glance
 
 ```text
-184 passed, 1 warning
+Phase 4.20: COMPLETE
+C.14.0-C.14.11: COMPLETE
+C.14.11A: PASS
+C.14.12: PASS
+C.14.13: PASS
+C.14.14: PASS
+Phase C: COMPLETE / CLOSED
+Phase 5: NEXT
+automatic_remediation_allowed: false
 ```
 
-The warning is the existing Starlette/TestClient deprecation warning and is not a Phase 4.17 functional failure.
-
-## Architecture
-
-- [Architecture Overview](architecture/overview.md)
-- [Target Project Structure](architecture/target-project-structure.md)
-- [Investigation Contracts](architecture/investigation-contracts.md)
-- [Investigation Router](architecture/investigation-router.md)
-- [Investigation Persistence](architecture/investigation-persistence.md)
-- [Specialist Registry](architecture/specialist-registry.md)
-- [Specialist Context Builder](architecture/specialist-context-builder.md)
-- [Specialist Reasoning Agent](architecture/specialist-reasoning-agent.md)
-- [Diagnostic Tool Registry](architecture/diagnostic-tool-registry.md)
-- [Diagnostic Policy Engine](architecture/diagnostic-policy.md)
-- [Evidence Collection](architecture/evidence-collection.md)
-- [Specialist Investigation Loop](architecture/specialist-investigation-loop.md)
-- [Server Coordinator](architecture/server-coordinator.md)
-- [Claude-supervised Investigation Orchestration](architecture/Claude-supervised-investigation-orchestration.md)
-- [Dynamic Secondary Specialist Routing](architecture/dynamic-secondary-specialist-routing.md)
-- [Knowledge Sources](architecture/knowledge-sources.md)
-- [Knowledge Retrieval](architecture/knowledge-retrieval.md)
-
-## Workflows and testing
-
-- [Current Workflows](workflows/current-workflows.md)
-- [Multi-Agent Test Methodology](testing/multi-agent-test-methodology.md)
-- [Testing and Evaluation](testing/testing-and-evaluation.md)
-- [Performance](testing/performance.md)
-
-## Decisions
-
-- [Architecture Decisions](decisions/README.md)
-- [ADR-008: Dynamic Specialists](decisions/ADR-008-dynamic-specialists.md)
-- [ADR-009: Hierarchical Investigation](decisions/ADR-009-hierarchical-investigation.md)
-- [ADR-010: Claude-supervised Orchestration Boundary](decisions/ADR-010-Claude-supervised-orchestration-boundary.md)
-- [ADR-011: Dual RAG and Knowledge Retrieval](decisions/ADR-011-dual-rag-and-knowledge-retrieval.md)
-- [ADR-012: Specialist Reasoning and Provenance](decisions/ADR-012-specialist-reasoning-and-provenance-boundary.md)
-- [ADR-013: Registered Read-Only Diagnostic Tools](decisions/ADR-013-registered-read-only-diagnostic-tools.md)
-- [ADR-014: Claude-supervised Investigation Orchestration](decisions/ADR-014-Claude-supervised-investigation-orchestration.md)
-- [ADR-015: Dynamic Secondary Specialist Routing](decisions/ADR-015-dynamic-secondary-specialist-routing.md)
-- [ADR-016: Production Readiness / Remediation Boundary](decisions/ADR-016-production-readiness-and-remediation-boundary.md)
-- [ADR-017: Claude Code as Supervisory Agent Runtime](decisions/ADR-017-claude-code-supervisory-agent-runtime.md)
-
-## Roadmap
-
-- [Phase 4 Implementation Plan](roadmap/phase-4-implementation-plan.md)
-- [Phase 4.17 Closeout](roadmap/phase-4-17-closeout.md)
-- [Claude Runtime Implementation Plan](roadmap/claude-runtime-implementation-plan.md)
-
-قاعدة التوثيق: كل ملف خارج `roadmap/` يجب أن يصف التنفيذ الحالي الفعلي، لا التصميم المستقبلي المفترض.
-- [Cross-Specialist Correlation](architecture/cross-specialist-correlation.md)
-- [Investigation Read Models](architecture/investigation-read-models.md)
-- [Investigation Runtime Snapshot](architecture/investigation-runtime-snapshot.md)
-- [Investigation Read API](api/investigations.md)
-- [Investigation Administration UI](ui/investigations.md)
-- [Production Readiness Gate](architecture/production-readiness-gate.md)
-- [Phase 4.20 Implementation](roadmap/phase-4-20-implementation.md)
-- [Evaluation Dataset & Runner](architecture/evaluation-dataset-runner.md)
-- [Safety & Failure Injection](architecture/safety-failure-injection.md)
-- [Aggregate Production Readiness](architecture/aggregate-production-readiness.md)
-- [Runtime Sample Expansion](architecture/runtime-sample-expansion.md)
-
-## Phase 4.20 Closeout, Testing, and Structure
-
-- [Phase 4.20 Closeout](roadmap/phase-4-20-closeout.md)
-- [Testing Strategy](testing/TESTING_STRATEGY.md)
-- [Complete Test Catalog](testing/TEST_CATALOG.md)
-- [Linux Random Runtime Scenarios](testing/RUNTIME_SCENARIOS.md)
-- [Project Structure and File Responsibilities](PROJECT_STRUCTURE.md)
-
-## Canonical Current Status
-
-- [Project Status](PROJECT_STATUS.md)
-- [Current Architecture](architecture/overview.md)
-- [Phase 4.20 Closeout](roadmap/phase-4-20-closeout.md)
-- [Testing Strategy](testing/TESTING_STRATEGY.md)
-- [Complete Test Catalog](testing/TEST_CATALOG.md)
-- [Runtime Scenarios](testing/RUNTIME_SCENARIOS.md)
-- [Project Structure](PROJECT_STRUCTURE.md)
-- [Documentation Inventory](DOCUMENTATION_INVENTORY.md)
-- [Documentation Maintenance](DOCUMENTATION_MAINTENANCE.md)
-- [ADR-016 Production Readiness / Remediation Boundary](decisions/ADR-016-production-readiness-and-remediation-boundary.md)
-- [ADR-017 Claude Code Supervisory Agent Runtime](decisions/ADR-017-claude-code-supervisory-agent-runtime.md)
-- [Claude Runtime Implementation Plan](roadmap/claude-runtime-implementation-plan.md)
-- [Running with Claude](operations/claude-runtime.md)
+For the generated classification of every Markdown document, see
+[DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md).
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

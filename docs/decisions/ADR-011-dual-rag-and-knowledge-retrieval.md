@@ -187,9 +187,9 @@ The retrieval architecture does not require redesign to add it.
 - Corpus quality must be evaluated separately from retrieval mechanics.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **DECISION**
+Document classification: **HISTORICAL_ADR**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

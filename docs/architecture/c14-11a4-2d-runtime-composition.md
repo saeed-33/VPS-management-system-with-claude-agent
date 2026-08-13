@@ -16,3 +16,19 @@ The main builder is reduced to composition coordination:
 The Claude-visible MCP contracts and tool names are unchanged. Claude continues
 to decide WHAT/NEXT while Python remains responsible for policy enforcement and
 safe execution.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **HISTORICAL_CLOSEOUT**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

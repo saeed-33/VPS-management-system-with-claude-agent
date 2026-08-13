@@ -147,9 +147,9 @@ Phase 4.18 owns cross-Specialist correlation and final server-level diagnosis.
 It must distinguish confirmed, probable, and unknown conclusions and preserve an Evidence chain for every material claim.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

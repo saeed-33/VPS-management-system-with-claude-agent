@@ -56,9 +56,9 @@ After acceptance, Phase 4.7 is complete. Phase 4.8 begins ingestion,
 parsing, chunking, indexing and retrieval.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

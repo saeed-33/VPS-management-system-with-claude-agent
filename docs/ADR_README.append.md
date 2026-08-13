@@ -20,7 +20,7 @@ Claude Code performs supervisory orchestration through project tools. See
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **REFERENCE**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

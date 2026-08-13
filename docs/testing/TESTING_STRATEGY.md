@@ -1,222 +1,109 @@
 # Testing Strategy
 
-## Purpose
+<!-- DOC-STATUS: CURRENT -->
 
-This project treats testing as a layered engineering system rather than a single `pytest` command.
+Testing must establish implementation, safety, persistence, and runtime truth.
+`pytest` is necessary but is not sufficient for Claude/Ollama/MCP or
+Evidence/policy changes.
 
-The test strategy protects five different properties:
-
-1. **Correctness** — deterministic code produces the expected result.
-2. **Integration integrity** — repositories, services, API, web routes, Claude-supervised orchestration, and persistence remain compatible.
-3. **Runtime validity** — real Ollama, SSH, diagnostic tools, Evidence, correlation, Final Diagnosis, and persistence work together.
-4. **Safety** — Policy, budgets, grounding rules, provider failure handling, and conflict preservation fail closed.
-5. **Operational readiness** — measured observations satisfy the Production Readiness Gate.
-
-Phase 4.20 closed only after the aggregate gate reached:
+## Accepted current baseline
 
 ```text
-ready_for_supervised_operations
+normal full suite:              417 passed, 1 skipped, 1 warning
+architecture suite:              6 passed
+C.14.12 focused suite:          26 passed
+real runtime acceptance:          PASS
+readiness dimensions:          8 / 8 PASS
 ```
 
-Automatic remediation remains explicitly disabled.
+The one warning is the existing Starlette/httpx deprecation warning. Real
+runtime tests are opt-in and require external infrastructure.
 
-## Test pyramid used by the project
+## Test layers
 
-### Layer 1 — Unit and contract tests
-
-Run all deterministic tests:
+### Unit and contract tests
 
 ```powershell
 uv run python -m pytest
 ```
 
-Use this after every code change.
+These cover contracts, configuration, routing, Specialists, retrieval,
+Ollama clients, policy, Evidence, SSH boundaries, persistence, MCP schemas,
+Admin/API wiring, runtime jobs, and observability.
 
-Focused examples:
-
-```powershell
-uv run python -m pytest tests/test_production_readiness_gate.py -v
-uv run python -m pytest tests/test_evaluation_dataset_runner.py -v
-uv run python -m pytest tests/test_persisted_runtime_evaluation.py -v
-uv run python -m pytest tests/test_safety_runtime_evaluation.py -v
-uv run python -m pytest tests/test_aggregate_readiness.py -v
-```
-
-### Layer 2 — API and web integration
-
-The normal pytest suite includes FastAPI API/web tests.
-
-Useful runtime inventories:
+### Architecture tests
 
 ```powershell
-uv run python tools/dev/list_routes.py
+uv run python -m pytest tests/test_architecture_dependencies.py -v
 ```
 
-Investigation read/API/UI acceptance:
+These verify dependency direction and absence of the removed application
+packages.
 
-```powershell
-uv run python tools/acceptance/run_investigation_web_api_acceptance.py --limit 25
-```
-
-### Layer 3 — Deterministic evaluation
-
-Dataset coverage and gate wiring:
-
-```powershell
-uv run python tools/acceptance/run_evaluation_dataset.py
-```
-
-This validates the evaluation dataset. It is not a runtime-quality score.
-
-Controlled safety evaluation:
+### Controlled safety evaluation
 
 ```powershell
 uv run python tools/acceptance/run_safety_runtime_evaluation.py
 ```
 
-This exercises the real routing, Policy, and Ollama client logic with controlled provider transport.
+This runs real routing, policy, registry, parser, retry, timeout, and fail-closed
+logic with deterministic controlled failure transport. It covers routing recall,
+provider resilience, and policy safety.
 
-### Layer 4 — Real runtime acceptance
-
-These tests may contact real Linux servers and/or Ollama. Run them only in a controlled test environment.
-
-The current native acceptance entrypoint is:
+### Persisted runtime evaluation
 
 ```powershell
-uv run python tools/acceptance/smoke_ollama_claude_runtime.py --server-id <server_id>
-uv run python -m pytest tests/real_runtime -q
+uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 100
 ```
 
-The generated `docs/testing/TEST_CATALOG.md` lists the exact tests and tools in
-the current checkout.
+This measures persisted Specialist completion, Evidence grounding, budgets,
+conflict preservation, and final diagnosis grounding from real snapshots.
 
-### Layer 5 — Persisted runtime measurement
-
-Evaluate real persisted Investigation snapshots:
+### Aggregate readiness evaluation
 
 ```powershell
-uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 500
+uv run python tools/acceptance/run_production_readiness_evaluation.py \
+  --server-id <server_id> --limit 100 \
+  --output artifacts/evaluation/c14_12_readiness.json
 ```
 
-This measures:
+The accepted C.14.12 result is 8/8 PASS. Do not regenerate the accepted gate
+from fake data.
 
-```text
-specialist_completion
-evidence_grounding
-budget_compliance
-conflict_preservation
-final_diagnosis_grounding
-```
-
-### Layer 6 — Production Readiness Gate
-
-Aggregate all measured observations:
+### Real runtime acceptance
 
 ```powershell
-uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
+$env:LLM_ENABLED="true"
+$env:LLM_PROVIDER="ollama"
+$env:CLAUDE_RUNTIME_ENABLED="true"
+$env:AI_VPS_REAL_RUNTIME_SERVER_ID="<server_id>"
+$env:AI_VPS_RUN_REAL_RUNTIME_TESTS="1"
+uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
 ```
 
-Expected Phase 4 closeout state:
+This requires native Claude CLI, Ollama and the configured model, PostgreSQL,
+the project MCP server, SSH private key/known_hosts, and a reachable managed
+VPS. It verifies AgentJob/session, MCP, report, analysis, and controlled
+failure/success persistence. It is not run by the normal suite.
 
-```text
-Status: ready_for_supervised_operations
-Automatic remediation: False
-Production Readiness Gate: PASS
-```
+## Required validation order
 
-Machine-readable report:
+For runtime, policy, Evidence, budget, or architecture changes:
 
-```text
-artifacts/evaluation/phase_4_20_readiness.json
-```
+1. focused tests;
+2. architecture tests when boundaries change;
+3. full `pytest`;
+4. controlled safety evaluation;
+5. persisted readiness evaluation;
+6. real runtime acceptance when infrastructure is available.
 
-## Required test sequence before merging
-
-For ordinary code changes:
-
-```text
-1. focused tests for changed module
-2. full pytest
-3. relevant deterministic evaluation/acceptance tool
-4. route inventory when API/web wiring changed
-```
-
-For Investigation/LLM/SSH/Claude-supervised orchestration changes:
-
-```text
-1. focused unit tests
-2. full pytest
-3. controlled safety/runtime acceptance
-4. at least one real runtime acceptance against a disposable Linux test server
-5. persisted-runtime evaluation
-6. aggregate Production Readiness evaluation
-```
-
-For changes to Policy, Evidence validation, budgets, correlation, Final Diagnosis, or write-capable code:
-
-```text
-1. all normal requirements
-2. controlled failure injection
-3. explicit negative tests
-4. verify no unknown Evidence/Knowledge IDs are accepted
-5. verify DENY does not expose an executable command
-6. verify action/round/global budgets cannot be exceeded
-7. verify conflicts are preserved as unknown instead of silently resolved
-8. verify automatic_remediation_allowed remains False
-```
-
-## Test data rules
-
-Evaluation data must be classified as one of:
-
-```text
-DETERMINISTIC FIXTURE
-CONTROLLED FAILURE INJECTION
-REAL RUNTIME
-REAL PERSISTED RUNTIME
-```
-
-Do not label fixture-only results as production measurements.
-
-Controlled findings used to force conflict semantics must be backed by real runtime Evidence when used in persisted runtime acceptance.
-
-## Reproducibility
-
-Random Linux workload scripts support `--seed`. Always record:
-
-```text
-seed
-scenario
-duration
-server
-report/investigation ID
-git commit
-Ollama model/context
-```
-
-A failed random scenario is not actionable unless it can be reproduced or sufficient Evidence was persisted.
-
-## Safety boundary
-
-The Phase 4 test environment may execute only approved diagnostic operations and explicitly safe workload generators.
-
-The random Linux scenario tools in `tools/linux_scenarios/`:
-
-- do not install packages;
-- do not modify firewall rules;
-- do not restart system services;
-- do not change system configuration;
-- do not require root;
-- create temporary files only under a selected temporary directory;
-- cap CPU, memory, disk, duration, and process counts;
-- clean up their own resources.
-
-Do not run workload generators on production servers unless the operator has explicitly accepted the resource impact.
+No test may bypass the Policy Engine, Evidence validation, budgets, known-hosts
+SSH boundary, or automatic-remediation flag.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

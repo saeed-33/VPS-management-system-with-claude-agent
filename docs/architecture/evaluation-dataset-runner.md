@@ -54,9 +54,9 @@ Runtime-backed measurement begins in Phase 4.20.3.
 The next step adds executors that use real or controlled-runtime components to measure actual system behavior and emit observations into the same runner.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

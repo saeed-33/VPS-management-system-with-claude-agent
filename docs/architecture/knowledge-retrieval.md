@@ -44,9 +44,9 @@ directive retrieval will improve when multi-page website crawling is added.
 Phase 4.8.5 injects retrieved chunks into Specialist context.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

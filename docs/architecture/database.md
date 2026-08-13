@@ -34,9 +34,9 @@ Baseline يعتمد على GIN للـFTS، HNSW للـvector، وscope index ي�
 تغيير `EMBEDDING_DIMENSIONS` في البيئة لا يغير `Vector(768)` تلقائيًا؛ تغيير الأبعاد يحتاج migration وإعادة فهرسة.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

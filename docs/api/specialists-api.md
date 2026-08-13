@@ -55,12 +55,14 @@ The admin page is:
 
 It supports create, edit, enable/disable, delete and reload.
 
-Tool IDs can be stored now, but no Tool Registry exists yet. Phase 4.11 will make tool selection capability-aware.
+Tool IDs are validated against the current registered Diagnostic Tool Registry;
+unregistered IDs are rejected. The API does not grant arbitrary shell, SSH, or
+SQL capability.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

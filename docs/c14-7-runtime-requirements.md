@@ -15,3 +15,19 @@ Restart Ollama after changing the value and confirm the active context with `oll
 ## Acceptance gate
 
 A successful monitoring cycle requires `vps` MCP to be connected and must execute at least `mcp__vps__run_monitoring` and `mcp__vps__analyze_report`. A text-only Claude success is not an accepted operational success. Persistence must contain the completed agent job, current report, completed analysis, and any investigation started by the session.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **REFERENCE**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

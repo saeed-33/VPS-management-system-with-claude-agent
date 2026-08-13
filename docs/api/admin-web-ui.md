@@ -63,12 +63,14 @@ Web router يستخدم `include_in_schema=False`، لذلك صفحات HTML ل�
 
 ## Specialists
 
-`/specialists` manages user-defined specialist definitions. Phase 4.3 supports create, edit, enable/disable and delete. It does not execute agents.
+`/specialists` manages user-defined Specialist definitions, including create,
+edit, enable/disable, delete, and bounded tool-ID configuration. It does not
+execute agents directly.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

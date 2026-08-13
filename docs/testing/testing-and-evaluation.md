@@ -4,178 +4,68 @@
 
 ## Current accepted state
 
-Phase 4.20 is complete.
+```text
+Phase 4.20: COMPLETE
+C.14.12 readiness: 8 / 8 PASS
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+## Evaluation sources
+
+Evaluation observations are classified as:
 
 ```text
-Production Readiness Gate: PASS
-Readiness: ready_for_supervised_operations
-Automatic remediation: False
+DETERMINISTIC CONTROLLED EVALUATION
+REAL RUNTIME
+REAL PERSISTED RUNTIME
 ```
 
-Reference regression baseline immediately before documentation closeout:
+Controlled transport is used only to exercise deterministic provider and
+failure behavior. It is not presented as a real runtime observation. The
+C.14.12 artifact combines 30 controlled observations with 50 persisted runtime
+observations and 11 runtime sessions.
 
-```text
-237 passed, 1 warning
-```
+## C.14.12 dimensions
 
-## Testing model
+| Metric | Accepted result | Threshold |
+|---|---:|---:|
+| routing_recall | 10/10, 1.000 PASS | 0.950 |
+| specialist_completion | 10/10, 1.000 PASS | 0.900 |
+| evidence_grounding | 10/10, 1.000 PASS | 1.000 |
+| budget_compliance | 10/10, 1.000 PASS | 1.000 |
+| conflict_preservation | 10/10, 1.000 PASS | 1.000 |
+| final_diagnosis_grounding | 10/10, 1.000 PASS | 1.000 |
+| provider_resilience | 10/10, 1.000 PASS | 0.950 |
+| policy_safety | 10/10, 1.000 PASS | 1.000 |
 
-The project uses six complementary test layers.
+Hard safety dimensions require a complete pass rate and fail closed.
 
-```text
-1. unit / contract
-2. API / web / persistence integration
-3. deterministic evaluation
-4. controlled failure injection
-5. real runtime acceptance
-6. aggregate production-readiness evaluation
-```
-
-Passing `pytest` alone is necessary but not sufficient for Investigation/LLM/SSH changes.
-
-## Unit and contract suite
-
-```powershell
-uv run python -m pytest
-```
-
-The suite covers, among other areas:
-
-```text
-Investigation contracts
-routing
-Specialist registry
-Specialist context
-reasoning contracts
-Ollama compatibility
-Knowledge ingestion/chunking/indexing/retrieval
-Diagnostic Tool Registry
-Policy
-Evidence collection
-Specialist loop
-Server Coordinator
-Claude-supervised parallel orchestration
-dynamic secondary routing
-correlation/conflicts
-Final Diagnosis
-runtime snapshot persistence
-Investigation API/UI
-evaluation dataset
-persisted runtime evaluation
-safety runtime evaluation
-readiness gate
-aggregate readiness
-```
-
-## Deterministic evaluation
-
-Dataset coverage:
-
-```powershell
-uv run python tools/acceptance/run_evaluation_dataset.py
-```
-
-This verifies dataset/gate wiring only.
-
-Safety/runtime controlled evaluation:
+## Commands
 
 ```powershell
 uv run python tools/acceptance/run_safety_runtime_evaluation.py
+uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 100
+uv run python tools/acceptance/run_production_readiness_evaluation.py \
+  --server-id <server_id> --limit 100 \
+  --output artifacts/evaluation/c14_12_readiness.json
 ```
 
-This executes real routing and Policy logic and real Ollama-client parsing/retry/failure behavior through controlled HTTP transport.
+The accepted evidence and latest real session are documented in
+`docs/architecture/c14-12-runtime-readiness-gate.md`.
 
-## Real runtime acceptance
+## Safety interpretation
 
-Real runtime tests may contact Ollama and Linux hosts over SSH.
-
-Current acceptance commands:
-
-```powershell
-uv run python tools/acceptance/smoke_ollama_claude_runtime.py --server-id <server_id>
-uv run python -m pytest tests/real_runtime -q
-```
-
-Use `docs/testing/TEST_CATALOG.md` for the exact tools/tests available in the current checkout.
-
-## Persisted runtime measurement
-
-```powershell
-uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 500
-```
-
-Measured from persisted real snapshots:
-
-```text
-specialist_completion
-evidence_grounding
-budget_compliance
-conflict_preservation
-final_diagnosis_grounding
-```
-
-## Production readiness
-
-```powershell
-uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 500
-```
-
-Current accepted result:
-
-```text
-routing_recall                 PASS
-specialist_completion          PASS
-evidence_grounding             PASS
-budget_compliance              PASS
-conflict_preservation          PASS
-final_diagnosis_grounding      PASS
-provider_resilience            PASS
-policy_safety                  PASS
-```
-
-## Random Linux scenarios
-
-See `RUNTIME_SCENARIOS.md`.
-
-Use seeded workloads on disposable Linux test servers:
-
-```bash
-python3 tools/linux_scenarios/random_linux_workload.py \
-  --scenario random \
-  --seed 20260811 \
-  --duration 20
-```
-
-Always retain seed, scenario, report ID, Investigation ID, commit, and model/context.
-
-## Required merge discipline
-
-Ordinary changes:
-
-```text
-focused tests
-full pytest
-relevant acceptance
-route inventory if API/web changed
-```
-
-Investigation/LLM/SSH/Policy changes:
-
-```text
-focused tests
-full pytest
-controlled safety tests
-real runtime acceptance
-persisted runtime evaluation
-aggregate readiness evaluation
-```
-
-Write-capable Phase 5 work must add separate approval/rollback tests before implementation is considered safe.
+Passing readiness means supervised diagnostic operations are ready. It does
+not authorize automatic restart, process termination, package changes,
+configuration writes, reboot, firewall changes, arbitrary shell, or production
+remediation. Phase 5 requires separate contracts, approvals, sandbox and
+rollback evidence.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

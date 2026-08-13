@@ -46,9 +46,9 @@ uv run python tools/bootstrap_database.py --verify-only
 No API or UI is added in 4.2; those belong to 4.3.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

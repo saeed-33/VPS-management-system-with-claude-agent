@@ -31,9 +31,9 @@ Phase 4.19.1 reads this shape but does not create it.
 Next: Phase 4.19.2 Runtime Snapshot Persistence.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

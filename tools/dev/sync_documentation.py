@@ -20,6 +20,11 @@ HISTORICAL_PATTERNS = (
     "docs/roadmap/phase-4-19-implementation.md",
     "docs/roadmap/phase-4-4-5-to-4-11-closeout.md",
     "docs/roadmap/phase-4-foundation-closeout.md",
+    "docs/roadmap/phase-4-implementation-plan.md",
+    "docs/roadmap/phase-4-20-implementation.md",
+    "docs/roadmap/phase-4-20-closeout.md",
+    "docs/roadmap/claude-runtime-implementation-plan.md",
+    "docs/roadmap/c14-claude-native-execution-plan.md",
 )
 
 REFERENCE_NAMES = {
@@ -27,33 +32,22 @@ REFERENCE_NAMES = {
     "docs/testing/performance.md",
 }
 
-CURRENT_EXPLICIT = {
+CURRENT_CANONICAL = {
     "docs/PROJECT_STATUS.md",
     "docs/PROJECT_STRUCTURE.md",
     "docs/README.md",
     "docs/DOCUMENTATION_MAINTENANCE.md",
     "docs/architecture/overview.md",
+    "docs/architecture/c14-12-runtime-readiness-gate.md",
+    "docs/architecture/target-project-structure.md",
     "docs/testing/TESTING_STRATEGY.md",
     "docs/testing/TEST_CATALOG.md",
     "docs/testing/RUNTIME_SCENARIOS.md",
     "docs/testing/testing-and-evaluation.md",
-    "docs/testing/multi-agent-test-methodology.md",
     "docs/workflows/current-workflows.md",
-    "docs/deployment/production-checklist.md",
-    "docs/deployment/production-deployment.md",
     "docs/operations/running-project.md",
     "docs/operations/claude-runtime.md",
     "docs/operations/configuration.md",
-    "docs/security/security-baseline.md",
-    "docs/api/http-api.md",
-    "docs/api/investigations.md",
-    "docs/ui/investigations.md",
-    "docs/roadmap/phase-4-implementation-plan.md",
-    "docs/roadmap/phase-4-20-implementation.md",
-    "docs/roadmap/phase-4-20-closeout.md",
-    "docs/roadmap/next-phase-multi-agent.md",
-    "docs/roadmap/claude-runtime-implementation-plan.md",
-    "docs/architecture/target-project-structure.md",
 }
 
 
@@ -63,40 +57,85 @@ def rel(path: Path) -> str:
 
 def classify(path: Path) -> str:
     name = rel(path)
+    text = path.read_text(encoding="utf-8")
 
     if name.startswith("docs/decisions/ADR-"):
-        return "DECISION"
+        return "HISTORICAL_ADR"
 
     if name in HISTORICAL_PATTERNS:
-        return "HISTORICAL"
+        return "HISTORICAL_CLOSEOUT"
+
+    if (
+        name.startswith("docs/architecture/c14-")
+        and name
+        != "docs/architecture/c14-12-runtime-readiness-gate.md"
+    ):
+        return "HISTORICAL_CLOSEOUT"
+
+    if name in {
+        "docs/architecture/server-coordinator.md",
+        "docs/architecture/cross-specialist-correlation.md",
+        "docs/architecture/dynamic-secondary-specialist-routing.md",
+        "docs/architecture/investigation-read-models.md",
+        "docs/architecture/investigation-runtime-snapshot.md",
+    }:
+        return "HISTORICAL_CLOSEOUT"
+
+    if (
+        name.startswith("docs/architecture/")
+        and name
+        not in {
+            "docs/architecture/overview.md",
+            "docs/architecture/target-project-structure.md",
+            "docs/architecture/c14-12-runtime-readiness-gate.md",
+            "docs/architecture/database.md",
+            "docs/architecture/diagnostic-policy.md",
+            "docs/architecture/diagnostic-tool-registry.md",
+            "docs/architecture/evidence-collection.md",
+        }
+        and (
+            "**Phase:**" in text
+            or "pending runtime" in text.casefold()
+            or "future execution" in text.casefold()
+        )
+    ):
+        return "HISTORICAL_CLOSEOUT"
 
     if name in REFERENCE_NAMES:
         return "REFERENCE"
 
-    if name in CURRENT_EXPLICIT:
-        return "CURRENT"
+    if name in CURRENT_CANONICAL:
+        return "CURRENT_CANONICAL"
 
-    # Architecture/API/UI/operations/deployment documents describe
-    # implemented subsystems and remain current unless explicitly historical.
+    if name.startswith("docs/testing/"):
+        return "TESTING"
+
+    if name.startswith(
+        (
+            "docs/operations/",
+            "docs/deployment/",
+            "docs/security/",
+        )
+    ):
+        return "OPERATIONS"
+
+    if name.startswith("docs/roadmap/"):
+        return "ROADMAP"
+
+    # Architecture/API/UI documents describe implemented subsystems. They are
+    # current supporting references unless explicitly classified above.
     if name.startswith(
         (
             "docs/architecture/",
             "docs/api/",
             "docs/ui/",
-            "docs/operations/",
-            "docs/deployment/",
-            "docs/security/",
             "docs/workflows/",
-            "docs/testing/",
         )
     ):
-        return "CURRENT"
-
-    if name.startswith("docs/roadmap/"):
-        return "HISTORICAL"
+        return "CURRENT_CANONICAL"
 
     if name.startswith("docs/decisions/"):
-        return "REFERENCE"
+        return "HISTORICAL_ADR"
 
     return "REFERENCE"
 

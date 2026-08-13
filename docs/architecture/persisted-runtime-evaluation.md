@@ -41,9 +41,9 @@ This prevents dataset coverage from being confused with measured runtime quality
 Phase 4.20.4 adds controlled runtime/failure injection for routing, provider resilience, Policy safety, and critical failure behavior.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

@@ -11,23 +11,23 @@ uv run python tools/dev/generate_project_structure.py
 ## Architectural flow
 
 ```text
-Server / Monitoring Profile
+Periodic Monitoring / Scheduler
         ↓
-Monitoring execution
+ClaudeSupervisor
         ↓
-Report
+Native Claude Code CLI + Ollama
         ↓
-Analysis
+vps MCP / bounded project tools
         ↓
-Investigation Router
+Monitoring Report + PostgreSQL persistence
         ↓
-Claude Supervisor
+Exact reuse or similar retrieval + Analysis
         ↓
-Specialist loops + Policy + SSH diagnostic tools
+Optional Investigation + DB-defined Specialists
         ↓
-Evidence
+Policy + budgets + known-hosts SSH + Evidence
         ↓
-Cross-Specialist Correlation
+Correlation + Final Diagnosis
         ↓
 Final Diagnosis + Narrative
         ↓
@@ -79,6 +79,9 @@ Evaluation / Production Readiness Gate
 - `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613503709246600-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/441fc09a-bf67-4791-a77d-834c09f60fdd/1786530242977198700-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/441fc09a-bf67-4791-a77d-834c09f60fdd/1786530243170638300-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/496f737b-deaa-4cd5-bbaf-4f8ca55f6616/1786617434184644900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/496f737b-deaa-4cd5-bbaf-4f8ca55f6616/1786617435545805000-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/496f737b-deaa-4cd5-bbaf-4f8ca55f6616/1786617504462939900-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611641387153000-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611642709469700-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611699912433500-SubagentStart-a6e0db7891b1e5179.json` — Structured configuration or generated data.
@@ -131,6 +134,13 @@ Evaluation / Production Readiness Gate
 - `.claude/runtime-events/a9d6edfc-8c3a-47a0-9143-1b6d45193ef9/1786561434596359500-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/a9d6edfc-8c3a-47a0-9143-1b6d45193ef9/1786561436679515500-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/a9d6edfc-8c3a-47a0-9143-1b6d45193ef9/1786561445480341700-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/aa45953b-181d-4a49-a03e-632d1b39db87/1786616535439901900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/aa45953b-181d-4a49-a03e-632d1b39db87/1786616536825340400-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/aa45953b-181d-4a49-a03e-632d1b39db87/1786616609870273000-SubagentStart-aa5184669ccfb01a3.json` — Structured configuration or generated data.
+- `.claude/runtime-events/aa45953b-181d-4a49-a03e-632d1b39db87/1786616654379288400-SubagentStop-aa5184669ccfb01a3.json` — Structured configuration or generated data.
+- `.claude/runtime-events/aa45953b-181d-4a49-a03e-632d1b39db87/1786616671969431000-SubagentStart-afaeae5109a0747b9.json` — Structured configuration or generated data.
+- `.claude/runtime-events/aa45953b-181d-4a49-a03e-632d1b39db87/1786616700469412500-SubagentStop-afaeae5109a0747b9.json` — Structured configuration or generated data.
+- `.claude/runtime-events/aa45953b-181d-4a49-a03e-632d1b39db87/1786616721629168500-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561380879406700-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561383116863100-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561388312756700-SessionEnd-main.json` — Structured configuration or generated data.
@@ -504,6 +514,7 @@ Evaluation / Production Readiness Gate
 - `tests/test_c14_11a4_3b_investigation_ollama_infrastructure.py` — Pytest coverage for `test_investigation_ollama_adapters_live_in_infrastructure()`, `test_investigation_capability_keeps_contracts_not_ollama_implementations()`, `test_capability_contracts_resolve_provider_adapters_lazily()`.
 - `tests/test_c14_11a4_3c_database_infrastructure_boundary.py` — Pytest coverage for `test_database_core_implementation_lives_in_infrastructure()`, `test_repository_implementations_live_only_in_infrastructure()`, `test_production_composition_uses_infrastructure_repositories()`, `test_shared_database_package_is_removed_after_boundary_closure()`.
 - `tests/test_c14_11a4_3d_database_models_migrations_boundary.py` — Pytest coverage for `test_database_models_live_only_in_infrastructure()`, `test_production_uses_infrastructure_model_imports()`, `test_engine_registers_infrastructure_models()`, `test_migrations_have_one_canonical_owner()`.
+- `tests/test_c14_12_runtime_readiness.py` — Pytest coverage for `test_c14_12_startup_recovers_interrupted_jobs()`, `test_c14_12_mcp_surface_is_bounded_and_stable()`, `test_c14_12_unknown_and_unregistered_tools_fail_closed()`, `test_c14_12_claude_malformed_output_fails_closed()`, `test_c14_12_controlled_policy_and_provider_failures_are_measured()`.
 - `tests/test_c14_7_smoke_schema_init.py` — Pytest coverage for `test_c14_7_smoke_initializes_schema_before_container()`, `test_c14_7_smoke_preserves_direct_project_import_fix()`.
 - `tests/test_c14_7_stream_runtime_evidence.py` — Pytest coverage for `test_stream_json_operational_success_is_evidence_based()`, `test_operational_success_rejects_failed_mcp()`, `test_operational_success_rejects_missing_required_tool()`, `test_result_error_subtype_is_not_accepted()`.
 - `tests/test_c14_8_project_boundary_decomposition.py` — Pytest coverage for `make_boundary()`, `test_c14_8_public_tool_contract_is_unchanged()`, `test_c14_8_project_boundary_is_thin_public_facade()`, `test_c14_8_bounded_modules_own_tool_implementations()`, `test_c14_8_mcp_package_export_is_lazy_and_cycle_free()`.
@@ -604,6 +615,7 @@ Evaluation / Production Readiness Gate
 - `docs/architecture/c14-11a4-3b-investigation-ollama-infrastructure.md` — Project documentation.
 - `docs/architecture/c14-11a4-3c-database-infrastructure-boundary.md` — Project documentation.
 - `docs/architecture/c14-11a4-3d-database-models-migrations-boundary.md` — Project documentation.
+- `docs/architecture/c14-12-runtime-readiness-gate.md` — Project documentation.
 - `docs/architecture/c14-9-claude-native-orchestration.md` — Project documentation.
 - `docs/architecture/cross-specialist-correlation.md` — Project documentation.
 - `docs/architecture/database.md` — Project documentation.
@@ -680,3 +692,19 @@ Evaluation / Production Readiness Gate
 ## Maintenance rule
 
 Regenerate this document whenever files are added, removed, or substantially repurposed. Descriptions are derived from path conventions, module docstrings, and public classes/functions; core files have explicit descriptions in the generator.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **CURRENT_CANONICAL**
+
+Documentation synchronized: **2026-08-13**
+
+Canonical project state:
+
+```text
+Phase 4.20: complete
+readiness: ready_for_supervised_operations
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

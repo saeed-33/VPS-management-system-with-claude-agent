@@ -44,9 +44,9 @@ GET /api/reports/{report_id}/investigations
 Then add list/detail pages based only on the read/API contracts.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **HISTORICAL**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

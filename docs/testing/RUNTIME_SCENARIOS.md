@@ -146,14 +146,11 @@ On the Linux test VM:
 python3 random_linux_workload.py --scenario random --seed 20260811 --duration 30
 ```
 
-While or immediately after the workload is running, from the management project:
-
-```powershell
-# Run normal monitoring through the application.
-# Then inspect the created report/analysis.
-
-uv run python tools/run_server_coordinator_acceptance.py <report_id> --max-specialists 4 --max-rounds 3 --max-actions 12
-```
+While or immediately after the workload is running, from the management
+project, run normal monitoring through the application. Claude Code then uses
+the current `vps` MCP workflow to inspect the created report/analysis and may
+open the persisted Investigation route. The removed Python coordinator
+acceptance path must not be used.
 
 If an Investigation is persisted:
 
@@ -187,9 +184,9 @@ These workloads consume real CPU, memory, disk bandwidth, local sockets, and pro
 Default caps are deliberately conservative, but operators remain responsible for selecting limits appropriate to the VM.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

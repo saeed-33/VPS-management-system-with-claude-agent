@@ -72,9 +72,9 @@ uv run python tools/acceptance/run_production_readiness_evaluation.py --limit 50
 The aggregate gate will then decide whether Phase 4.20 can close as `ready_for_supervised_operations`.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

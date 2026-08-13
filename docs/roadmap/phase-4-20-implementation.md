@@ -62,9 +62,9 @@ Only `ready_for_supervised_operations` closes Phase 4.20.
 Automatic remediation remains out of scope and disabled.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

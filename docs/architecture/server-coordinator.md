@@ -61,9 +61,9 @@ Phase 4.18 must consume multiple Specialist results and accumulated Evidence wit
 Remediation remains outside Phase 4.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **HISTORICAL_CLOSEOUT**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

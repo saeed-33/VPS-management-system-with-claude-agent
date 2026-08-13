@@ -37,7 +37,7 @@ For canonical current state see `docs/PROJECT_STATUS.md`; for test execution see
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **REFERENCE**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

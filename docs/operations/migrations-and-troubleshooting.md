@@ -33,9 +33,9 @@ uv run python -m pytest
 راقب `reuse_index_ms` و`orchestrator_total_ms`. المسار المحسن لا ينبغي أن يولد embedding جديدًا عندما يمكن نسخ retrieval document من المصدر.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **OPERATIONS**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 

@@ -85,9 +85,9 @@ automatic remediation
 Phase 5 must define a separate approval/audit/rollback boundary before any of these are considered.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
+Document classification: **OPERATIONS**
 
-Documentation synchronized: **2026-08-12**
+Documentation synchronized: **2026-08-13**
 
 Canonical project state:
 
