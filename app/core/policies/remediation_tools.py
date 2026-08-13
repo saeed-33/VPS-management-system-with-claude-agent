@@ -70,10 +70,11 @@ def build_default_write_tool_registry() -> NamedWriteToolRegistry:
         (
             NamedWriteTool("start_service", RemediationRisk.MEDIUM.value, 30.0, "stop_service", "active"),
             NamedWriteTool("stop_service", RemediationRisk.HIGH.value, 30.0, "start_service", "inactive"),
-            # A second restart/reload is the bounded compensating operation;
-            # no arbitrary previous command is ever reconstructed.
-            NamedWriteTool("restart_service", RemediationRisk.HIGH.value, 45.0, "restart_service", "active"),
-            NamedWriteTool("reload_service", RemediationRisk.MEDIUM.value, 30.0, "reload_service", "active"),
+            # Repeating restart/reload does not restore a prior known state.
+            # They remain registered actions, but cannot claim rollback support
+            # until a real previous-process/config restoration exists.
+            NamedWriteTool("restart_service", RemediationRisk.HIGH.value, 45.0, None, "active"),
+            NamedWriteTool("reload_service", RemediationRisk.MEDIUM.value, 30.0, None, "active"),
         )
     )
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 from app.core.contracts.remediation import RemediationAction
@@ -17,6 +17,21 @@ class WriteCommandResult:
     stdout: str = ""
     stderr: str = ""
     error: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ServiceStateObservation:
+    state: str
+    stdout: str = ""
+    stderr: str = ""
+    exit_status: int | None = None
+    error: str | None = None
+    metadata: dict = field(default_factory=dict)
+
+
+class ServiceStateEvidenceCollector(Protocol):
+    def collect(self, *, server_id: int, service: str) -> ServiceStateObservation:
+        ...
 
 
 class WriteCommandRunner(Protocol):
@@ -37,6 +52,14 @@ class UnavailableWriteRunner:
 class UnavailableVerificationRunner:
     def verify(self, **_kwargs) -> tuple[bool, dict]:
         return False, {"error": "safe_verification_runner_not_configured"}
+
+
+class UnavailableEvidenceCollector:
+    def collect(self, **_kwargs) -> ServiceStateObservation:
+        return ServiceStateObservation(
+            state="unknown",
+            error="safe_evidence_collector_not_configured",
+        )
 
 
 class _SSHNamedCommandRunner:
@@ -103,17 +126,48 @@ class SSHNamedWriteRunner(_SSHNamedCommandRunner):
 
 class SSHServiceVerifier(_SSHNamedCommandRunner):
     def verify(self, *, server_id: int, action: RemediationAction) -> tuple[bool, dict]:
+        return self.verify_state(
+            server_id=server_id,
+            service=action.target,
+            expected_state="active",
+        )
+
+    def verify_state(self, *, server_id: int, service: str, expected_state: str) -> tuple[bool, dict]:
         # The target was validated by the write registry before reaching this
         # adapter. The read command is fixed and does not accept shell text.
         result = self._run_sync(lambda: self._execute(
             server_id=server_id,
-            command=f"systemctl is-active {action.target}",
+            command=f"systemctl is-active {service}",
             command_name="verify_service_state",
             timeout=30.0,
         ))
-        return result.success and result.stdout.strip() == "active", {
-            "expected": "active",
-            "observed": result.stdout.strip(),
+        observed = result.stdout.strip()
+        return observed == expected_state, {
+            "expected": expected_state,
+            "observed": observed,
             "exit_status": result.exit_status,
             "error": result.error,
         }
+
+
+class SSHServiceStateEvidenceCollector(_SSHNamedCommandRunner):
+    def collect(self, *, server_id: int, service: str) -> ServiceStateObservation:
+        # Evidence collection accepts only the validated service name supplied
+        # by the registered remediation tool. It never accepts shell text.
+        result = self._run_sync(lambda: self._execute(
+            server_id=server_id,
+            command=f"systemctl is-active {service}",
+            command_name="collect_remediation_service_state",
+            timeout=30.0,
+        ))
+        state = result.stdout.strip()
+        if state not in {"active", "inactive", "failed", "activating", "deactivating"}:
+            state = "unknown"
+        return ServiceStateObservation(
+            state=state,
+            stdout=result.stdout,
+            stderr=result.stderr,
+            exit_status=result.exit_status,
+            error=result.error,
+            metadata={"command_name": "collect_remediation_service_state"},
+        )

@@ -6,6 +6,9 @@ from uuid import uuid4
 from sqlalchemy.exc import OperationalError
 
 from app.capabilities.remediation.execution import (
+    ServiceStateEvidenceCollector,
+    ServiceStateObservation,
+    UnavailableEvidenceCollector,
     UnavailableVerificationRunner,
     UnavailableWriteRunner,
     VerificationRunner,
@@ -42,6 +45,7 @@ class RemediationService:
         write_tool_registry: NamedWriteToolRegistry | None = None,
         write_runner: WriteCommandRunner | None = None,
         verification_runner: VerificationRunner | None = None,
+        evidence_collector: ServiceStateEvidenceCollector | None = None,
     ) -> None:
         self._repository = repository
         self._automatic_remediation_allowed = automatic_remediation_allowed
@@ -50,6 +54,7 @@ class RemediationService:
         self._policy = RemediationPolicyEngine(automatic_remediation_allowed=automatic_remediation_allowed)
         self._write_runner = write_runner or UnavailableWriteRunner()
         self._verification_runner = verification_runner or UnavailableVerificationRunner()
+        self._evidence_collector = evidence_collector or UnavailableEvidenceCollector()
 
     def propose_remediation(self, *, investigation_id: str, problem_summary: str,
                             diagnosis_claim_ids: list[str], evidence_ids: list[str]) -> dict:
@@ -156,6 +161,20 @@ class RemediationService:
     def get_latest_execution(self, plan_id: str):
         return self._repository.get_latest_execution_for_plan(plan_id)
 
+    def collect_service_evidence(self, *, plan_id: str, server_id: int,
+                                 service: str, phase: str = "preflight"):
+        plan = self._require_plan(plan_id)
+        self._write_tools.require("start_service").validate(
+            RemediationAction(action_type="start_service", target=service)
+        )
+        evidence = self._collect_evidence(
+            plan=plan, execution_id=None, server_id=server_id,
+            service=service, phase=phase,
+        )
+        if evidence is None:
+            raise ValueError("Project-owned service-state Evidence could not be collected.")
+        return evidence
+
     def list_plans(self, *, limit: int = 100, status: str | None = None):
         return self._repository.list_plans(limit=limit, status=status)
 
@@ -254,7 +273,13 @@ class RemediationService:
             return self._blocked(plan_id, "rollback_not_supported", "A supervised write requires a registered rollback action.")
         key = idempotency_key or f"{plan.plan_id}:{plan.plan_version}:{action.action_id or action.action_type}"
         execution_id = str(uuid4())
-        before_ids = [f"before:{execution_id}"]
+        before_evidence = self._collect_evidence(
+            plan=plan, execution_id=execution_id, server_id=server_id,
+            service=action.target, phase="before",
+        )
+        if before_evidence is None:
+            return self._blocked(plan_id, "before_evidence_unavailable", "Project-owned before Evidence is required before a write.")
+        before_ids = [before_evidence.evidence_id]
         execution = self._repository.create_execution(
             execution_id=execution_id, plan_id=plan.plan_id,
             action_id=action.action_id or action.action_type, server_id=server_id,
@@ -270,7 +295,11 @@ class RemediationService:
         result = self._write_runner.run(server_id=server_id, action=action, command=tool.command_for(action), timeout_seconds=tool.timeout_seconds)
         if not isinstance(result, WriteCommandResult):
             result = WriteCommandResult(**result)
-        after_ids = [f"after:{execution_id}"]
+        after_evidence = self._collect_evidence(
+            plan=plan, execution_id=execution_id, server_id=server_id,
+            service=action.target, phase="after",
+        )
+        after_ids = [after_evidence.evidence_id] if after_evidence is not None else []
         if not result.success:
             self._repository.update_execution(execution.execution_id, status=ExecutionStatus.FAILED.value, after_evidence_ids=after_ids,
                                                exit_status=result.exit_status, stdout=result.stdout, stderr=result.stderr,
@@ -280,9 +309,20 @@ class RemediationService:
             self._audit(plan, "execution_failed", {"execution_id": execution.execution_id, "error": result.error}, actor=actor,
                         runtime_session_id=runtime_session_id, agent_job_id=agent_job_id)
             return {"applied": False, "plan_id": plan_id, "execution_id": execution.execution_id, "blocked_reason": "execution_failed", "message": result.error or "Write execution failed."}
+        if after_evidence is None:
+            self._repository.update_execution(execution.execution_id, status=ExecutionStatus.FAILED.value, after_evidence_ids=[],
+                                              exit_status=result.exit_status or 0, stdout=result.stdout, stderr=result.stderr,
+                                              error="after_evidence_unavailable", completed_at=utc_now())
+            self._repository.update_plan_status(plan_id, RemediationPlanStatus.ROLLBACK_REQUIRED.value,
+                                                execution_status=ExecutionStatus.FAILED.value,
+                                                rollback_status=RollbackStatus.REQUIRED.value)
+            self._audit(plan, "after_evidence_failed", {"execution_id": execution.execution_id}, actor=actor,
+                        runtime_session_id=runtime_session_id, agent_job_id=agent_job_id)
+            return {"applied": False, "plan_id": plan_id, "execution_id": execution.execution_id,
+                    "blocked_reason": "after_evidence_unavailable", "message": "Project-owned after Evidence could not be collected."}
         self._repository.update_execution(execution.execution_id, status=ExecutionStatus.SUCCEEDED.value, after_evidence_ids=after_ids,
                                           exit_status=result.exit_status or 0, stdout=result.stdout, stderr=result.stderr, completed_at=utc_now())
-        verified, details = self._verification_runner.verify(server_id=server_id, action=action)
+        verified, details = self._verify_state(server_id=server_id, action=action, expected_state=tool.expected_effect)
         verification = self._repository.create_verification(
             verification_id=str(uuid4()), execution_id=execution.execution_id,
             status=VerificationStatus.VERIFIED.value if verified else VerificationStatus.FAILED.value,
@@ -302,34 +342,70 @@ class RemediationService:
                                             rollback_status=RollbackStatus.NOT_REQUIRED.value)
         self._audit(plan, "execution_succeeded", {"execution_id": execution.execution_id, "verification_id": verification.verification_id}, actor=actor,
                     runtime_session_id=runtime_session_id, agent_job_id=agent_job_id)
-        return {"applied": True, "plan_id": plan_id, "execution_id": execution.execution_id, "verified": True, "idempotent": False}
+        return {"applied": True, "plan_id": plan_id, "execution_id": execution.execution_id,
+                "verified": True, "idempotent": False, "before_evidence_ids": before_ids,
+                "after_evidence_ids": after_ids}
 
     def rollback(self, *, plan_id: str, execution_id: str, actor: str | None = None, server_id: int | None = None) -> dict:
         plan = self._require_plan(plan_id)
         execution = self._repository.get_execution(execution_id)
         if execution is None or execution.plan_id != plan_id:
             return self._blocked(plan_id, "execution_not_found", "Execution does not belong to this plan.")
+        if execution.status not in {ExecutionStatus.SUCCEEDED.value, ExecutionStatus.FAILED.value}:
+            return self._blocked(plan_id, "execution_not_ready_for_rollback", "Execution is not in a state that permits operator rollback.")
         actions = [RemediationAction.from_dict(action) for action in (plan.proposed_actions or [])]
         if len(actions) != 1:
             return self._blocked(plan_id, "rollback_not_supported", "Rollback requires one registered action.")
         action = actions[0]
         tool = self._write_tools.get(action.action_type)
-        if tool is None or not tool.rollback_action or server_id is None or plan.server_id != server_id:
+        if tool is None or server_id is None or plan.server_id != server_id:
             return self._blocked(plan_id, "rollback_policy_denied", "Rollback requires the registered reverse action and original server.")
-        reverse = RemediationAction(action_type=tool.rollback_action, target=action.target, action_id=f"rollback:{action.action_id or action.action_type}")
+        before_ids = list(execution.before_evidence_ids or [])
+        if len(before_ids) != 1:
+            return self._blocked(plan_id, "rollback_evidence_invalid", "Rollback requires exactly one project-owned before Evidence record.")
+        before = self._repository.get_evidence(before_ids[0])
+        if before is None or not self._evidence_belongs_to(before, plan_id=plan_id, execution_id=execution_id,
+                                                          server_id=server_id, service=action.target):
+            return self._blocked(plan_id, "rollback_evidence_invalid", "Before Evidence is missing, foreign, or has mismatched ownership.")
+        reverse_action_type = self._resolve_state_aware_rollback(action, before.observed_state)
+        if reverse_action_type is None:
+            return self._blocked(plan_id, "rollback_not_supported", "This action has no true prior-state restoration path.")
+        rollback_before = self._collect_evidence(
+            plan=plan, execution_id=execution_id, server_id=server_id,
+            service=action.target, phase="rollback_before",
+        )
+        if rollback_before is None or rollback_before.observed_state != tool.expected_effect:
+            return self._blocked(plan_id, "rollback_state_mismatch", "Current state does not match the verified post-action state.")
+        reverse = RemediationAction(action_type=reverse_action_type, target=action.target, action_id=f"rollback:{action.action_id or action.action_type}")
         reverse_tool = self._write_tools.resolve(reverse)
         result = self._write_runner.run(server_id=server_id, action=reverse, command=reverse_tool.command_for(reverse), timeout_seconds=reverse_tool.timeout_seconds)
         success = result.success if isinstance(result, WriteCommandResult) else bool(result.get("success"))
+        rollback_after = self._collect_evidence(
+            plan=plan, execution_id=execution_id, server_id=server_id,
+            service=action.target, phase="rollback_after",
+        )
+        verified = rollback_after is not None and rollback_after.observed_state == before.observed_state
+        if success:
+            verified, verify_details = self._verify_state(
+                server_id=server_id, action=reverse, expected_state=before.observed_state,
+            )
+        else:
+            verify_details = {"expected": before.observed_state, "skipped": True}
+        success = success and rollback_after is not None and verified
         rollback_status = RollbackStatus.SUCCEEDED.value if success else RollbackStatus.FAILED.value
         rollback = self._repository.create_rollback(
             rollback_id=str(uuid4()), execution_id=execution_id, status=rollback_status,
-            before_evidence_ids=[f"rollback-before:{execution_id}"], after_evidence_ids=[f"rollback-after:{execution_id}"],
-            details={"action_type": reverse.action_type, "error": getattr(result, "error", None)},
+            before_evidence_ids=[rollback_before.evidence_id],
+            after_evidence_ids=[rollback_after.evidence_id] if rollback_after is not None else [],
+            details={"action_type": reverse.action_type, "error": getattr(result, "error", None),
+                     "verification": verify_details, "original_before_state": before.observed_state},
         )
         self._repository.update_plan_status(plan_id, RemediationPlanStatus.ROLLBACK_SUCCEEDED.value if success else RemediationPlanStatus.ROLLBACK_FAILED.value,
                                             rollback_status=rollback_status)
         self._audit(plan, "rollback_succeeded" if success else "rollback_failed", {"rollback_id": rollback.rollback_id}, actor=actor)
-        return {"rolled_back": success, "plan_id": plan_id, "rollback_id": rollback.rollback_id}
+        return {"rolled_back": success, "plan_id": plan_id, "rollback_id": rollback.rollback_id,
+                "before_evidence_ids": [rollback_before.evidence_id],
+                "after_evidence_ids": [rollback_after.evidence_id] if rollback_after is not None else []}
 
     def list_audit_events(self, plan_id: str):
         return self._repository.list_audit_events(plan_id)
@@ -340,6 +416,58 @@ class RemediationService:
     def _blocked(self, plan_id: str, code: str, message: str) -> dict:
         self._repository.update_plan_status(plan_id, RemediationPlanStatus.BLOCKED.value, denial_reason=message)
         return {"applied": False, "plan_id": plan_id, "blocked_reason": code, "message": message}
+
+    def _collect_evidence(self, *, plan, execution_id: str | None, server_id: int,
+                          service: str, phase: str):
+        try:
+            observation = self._evidence_collector.collect(server_id=server_id, service=service)
+        except Exception:
+            return None
+        if not isinstance(observation, ServiceStateObservation):
+            return None
+        if observation.state == "unknown":
+            return None
+        evidence = self._repository.create_evidence(
+            evidence_id=str(uuid4()), plan_id=plan.plan_id, execution_id=execution_id,
+            server_id=server_id, service=service, phase=phase,
+            observed_state=observation.state,
+            metadata={"stdout": observation.stdout, "stderr": observation.stderr,
+                      "exit_status": observation.exit_status, "error": observation.error,
+                      **dict(observation.metadata)},
+        )
+        return evidence
+
+    @staticmethod
+    def _evidence_belongs_to(evidence, *, plan_id: str, execution_id: str,
+                             server_id: int, service: str) -> bool:
+        return (
+            evidence.plan_id == plan_id
+            and evidence.execution_id == execution_id
+            and evidence.server_id == server_id
+            and evidence.service == service
+            and evidence.phase == "before"
+            and evidence.observed_state in {"active", "inactive"}
+        )
+
+    @staticmethod
+    def _resolve_state_aware_rollback(action: RemediationAction, before_state: str) -> str | None:
+        if action.action_type == "start_service" and before_state == "inactive":
+            return "stop_service"
+        if action.action_type == "stop_service" and before_state == "active":
+            return "start_service"
+        # Restart and reload do not restore the prior process/config state.
+        return None
+
+    def _verify_state(self, *, server_id: int, action: RemediationAction,
+                      expected_state: str) -> tuple[bool, dict]:
+        verify_state = getattr(self._verification_runner, "verify_state", None)
+        if callable(verify_state):
+            return verify_state(server_id=server_id, service=action.target, expected_state=expected_state)
+        # Legacy adapters only know how to verify active. Fail closed for an
+        # inactive expected state rather than claiming a false rollback.
+        if expected_state != "active":
+            return False, {"expected": expected_state, "error": "state_aware_verifier_not_configured"}
+        return self._verification_runner.verify(server_id=server_id, action=action)
 
     def _require_plan(self, plan_id: str):
         if not plan_id.strip():

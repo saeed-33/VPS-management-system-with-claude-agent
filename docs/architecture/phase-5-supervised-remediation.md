@@ -26,9 +26,9 @@ production/critical servers. Unknown actions are never executable.
 The additive migration
 `app/infrastructure/database/migrations/step_5_1_supervised_remediation.sql`
 adds plan fingerprint/state columns and creates approval, execution,
-verification, rollback, and audit-event tables. Existing Phase C plans and
-sandbox results are preserved. `tools/bootstrap_database.py` verifies all 22
-required tables.
+verification, rollback, audit-event, and project-owned service-state Evidence
+tables. Existing Phase C plans and sandbox results are preserved.
+`tools/bootstrap_database.py` verifies all 23 required tables.
 
 Every lifecycle boundary writes a project-owned audit event carrying plan,
 server, actor, session/job correlation where available, and structured
@@ -37,9 +37,14 @@ engine exists.
 
 Execution requires a persisted approval ID, matching immutable fingerprint,
 original server ID, unexpired approval, sandbox pass, registered action,
-registered rollback, and available verification. The policy is rechecked
-immediately before execution. A unique idempotency key prevents a second
-write.
+registered rollback, project-owned before/after Evidence, and available
+verification. `start_service` is reversible only when before Evidence proves
+the service was inactive, using `stop_service`; `stop_service` is reversible
+only when before Evidence proves it was active, using `start_service`.
+`restart_service` and `reload_service` have no rollback action because
+repeating either operation does not restore a prior known process/configuration
+state. The policy is rechecked immediately before execution. A unique
+idempotency key prevents a second write.
 
 The production composition uses the existing known-hosts SSH client and
 command executor behind a named-write adapter. Raw SSH, arbitrary shell, and

@@ -91,6 +91,26 @@ CREATE TABLE IF NOT EXISTS remediation_rollbacks (
 CREATE INDEX IF NOT EXISTS ix_remediation_rollbacks_execution_id
     ON remediation_rollbacks (execution_id);
 
+CREATE TABLE IF NOT EXISTS remediation_evidence (
+    id BIGSERIAL PRIMARY KEY,
+    evidence_id VARCHAR(64) NOT NULL UNIQUE,
+    plan_id VARCHAR(64) NOT NULL,
+    execution_id VARCHAR(64),
+    server_id INTEGER NOT NULL,
+    service VARCHAR(128) NOT NULL,
+    phase VARCHAR(30) NOT NULL,
+    observed_state VARCHAR(30) NOT NULL,
+    metadata JSON NOT NULL DEFAULT '{}'::json,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS ix_remediation_evidence_plan_created
+    ON remediation_evidence (plan_id, created_at);
+CREATE INDEX IF NOT EXISTS ix_remediation_evidence_execution_phase
+    ON remediation_evidence (execution_id, phase);
+CREATE INDEX IF NOT EXISTS ix_remediation_evidence_server_service
+    ON remediation_evidence (server_id, service);
+
 CREATE TABLE IF NOT EXISTS remediation_audit_events (
     id INTEGER PRIMARY KEY,
     event_id VARCHAR(64) NOT NULL UNIQUE,

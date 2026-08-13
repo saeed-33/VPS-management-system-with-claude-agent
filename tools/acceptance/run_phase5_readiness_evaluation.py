@@ -35,6 +35,8 @@ def main() -> int:
                 "tests/test_phase5_supervised_remediation.py",
                 "tests/test_phase5_admin_api.py",
                 "tests/test_phase5_readiness.py",
+                "tests/test_project_mcp_remediation_tools.py",
+                "tests/real_runtime/test_phase5_real_supervised_remediation_acceptance.py",
             ],
             cwd=ROOT,
             check=False,

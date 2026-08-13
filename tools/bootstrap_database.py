@@ -38,6 +38,7 @@ EXPECTED_TABLES = {
     "remediation_executions",
     "remediation_verifications",
     "remediation_rollbacks",
+    "remediation_evidence",
     "remediation_audit_events",
 }
 

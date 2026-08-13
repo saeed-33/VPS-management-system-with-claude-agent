@@ -222,7 +222,7 @@ Evaluation / Production Readiness Gate
 - `app/__init__.py` — Python module.
 - `app/capabilities/__init__.py` — Application capabilities: bounded business execution used by interfaces.
 - `app/capabilities/remediation/__init__.py` — Policy-gated remediation proposal and application capabilities.
-- `app/capabilities/remediation/execution.py` — Python module containing class `WriteCommandResult`, class `WriteCommandRunner`, class `VerificationRunner`, class `UnavailableWriteRunner`, class `UnavailableVerificationRunner`.
+- `app/capabilities/remediation/execution.py` — Python module containing class `WriteCommandResult`, class `ServiceStateObservation`, class `ServiceStateEvidenceCollector`, class `WriteCommandRunner`, class `VerificationRunner`.
 - `app/capabilities/remediation/service.py` — Python module containing class `RemediationService`.
 - `app/composition/__init__.py` — Application composition root / dependency container. Exports the canonical wired application container.
 - `app/composition/analysis.py` — Python module containing class `RetrievalComposition`, class `AnalysisInvestigationComposition`, `build_retrieval_composition()`, `build_analysis_investigation_composition()`.
@@ -257,7 +257,7 @@ Evaluation / Production Readiness Gate
 - `app/infrastructure/database/models/monitoring_profile.py` — Python module containing class `MonitoringProfileModel`.
 - `app/infrastructure/database/models/monitoring_report.py` — Python module containing class `MonitoringReportModel`.
 - `app/infrastructure/database/models/profile_command.py` — Python module containing class `MonitoringProfileCommandModel`.
-- `app/infrastructure/database/models/remediation.py` — Python module containing class `RemediationPlanModel`, class `RemediationSandboxResultModel`, class `RemediationApprovalModel`, class `RemediationExecutionModel`, class `RemediationVerificationModel`.
+- `app/infrastructure/database/models/remediation.py` — Python module containing class `RemediationPlanModel`, class `RemediationSandboxResultModel`, class `RemediationApprovalModel`, class `RemediationExecutionModel`, class `RemediationEvidenceModel`.
 - `app/infrastructure/database/models/report_analysis.py` — Python module containing class `AnalysisJobStatus`, class `ReportAnalysisModel`.
 - `app/infrastructure/database/models/report_analysis_source.py` — Python module containing class `ReportAnalysisSourceModel`.
 - `app/infrastructure/database/models/report_retrieval_document.py` — Python module containing class `ReportRetrievalDocumentModel`.
@@ -506,6 +506,7 @@ Evaluation / Production Readiness Gate
 - `tests/conftest.py` — Pytest coverage for the corresponding project behavior.
 - `tests/real_runtime/__init__.py` — Pytest coverage for the corresponding project behavior.
 - `tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py` — Pytest coverage for `test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence()`.
+- `tests/real_runtime/test_phase5_real_supervised_remediation_acceptance.py` — Pytest coverage for `test_phase5_real_supervised_remediation_acceptance()`.
 - `tests/test_admin_system_api.py` — Pytest coverage for class `FakeSupervisor`, class `FakeToolBoundary`, `test_system_runtime_api_exposes_supervisor_and_tools()`.
 - `tests/test_admin_system_web.py` — Pytest coverage for `test_system_runtime_page_is_available()`.
 - `tests/test_agent_job_persistence.py` — Pytest coverage for `test_agent_job_error_messages_are_bounded_to_schema_contract()`.
@@ -573,8 +574,9 @@ Evaluation / Production Readiness Gate
 - `tests/test_ollama_final_synthesis_minimal_contract.py` — Pytest coverage for `test_final_synthesis_uses_minimal_json_mode()`, `test_normal_reasoning_keeps_existing_generation_limits()`.
 - `tests/test_ollama_specialist_reasoning_client.py` — Pytest coverage for `make_response()`, `test_schema_rejection_is_cached_and_json_fallback_succeeds()`, `test_length_retry_uses_compact_retry_instruction()`, `test_final_synthesis_enables_provider_compact_mode()`.
 - `tests/test_persisted_runtime_evaluation.py` — Pytest coverage for `make_detail()`, `by_metric()`, `test_valid_snapshot_emits_five_real_metrics()`, `test_unknown_evidence_fails_grounding()`, `test_budget_overrun_fails()`.
+- `tests/test_phase5_admin_api.py` — Pytest coverage for `test_phase5_admin_routes_are_registered()`, `test_phase5_admin_page_is_operator_review_surface()`.
 - `tests/test_phase5_readiness.py` — Pytest coverage for `test_phase5_gate_requires_all_metrics_and_real_acceptance()`, `test_phase5_gate_passes_only_with_explicit_real_acceptance()`.
-- `tests/test_phase5_supervised_remediation.py` — Pytest coverage for class `FakeWriter`, class `FakeVerifier`, `make_service()`, `make_plan()`, `approve_plan()`.
+- `tests/test_phase5_supervised_remediation.py` — Pytest coverage for class `FakeWriter`, class `FakeVerifier`, class `FakeEvidenceCollector`, `make_service()`, `make_plan()`.
 - `tests/test_production_readiness_gate.py` — Pytest coverage for `observations_for_thresholds()`, `test_gate_requires_minimum_samples()`, `test_all_thresholds_pass_supervised_only()`, `test_hard_safety_failure_blocks()`, `test_policy_failure_blocks()`.
 - `tests/test_project_mcp_analysis_tools.py` — Pytest coverage for class `Analysis`, class `AnalysisRepository`, class `AnalysisOrchestrator`, class `IncidentRetriever`, class `KnowledgeRetriever`.
 - `tests/test_project_mcp_investigation_tools.py` — Pytest coverage for class `Router`, class `PersistedInvestigation`, class `PersistenceService`, class `ReadService`, class `EmptyAnalysisRepository`.

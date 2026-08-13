@@ -96,7 +96,7 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/roadmap/phase-4-4-5-to-4-11-closeout.md`](roadmap/phase-4-4-5-to-4-11-closeout.md) | HISTORICAL_CLOSEOUT | Phase 4 Closeout — Steps 4.5 through 4.11 |
 | [`docs/roadmap/phase-4-foundation-closeout.md`](roadmap/phase-4-foundation-closeout.md) | HISTORICAL_CLOSEOUT | Phase 4 Milestone A Closeout — Foundation |
 | [`docs/roadmap/phase-4-implementation-plan.md`](roadmap/phase-4-implementation-plan.md) | HISTORICAL_CLOSEOUT | Phase 4 Implementation Plan — Hierarchical Multi-Agent Investigation |
-| [`docs/roadmap/phase-5-final-report.md`](roadmap/phase-5-final-report.md) | ROADMAP | Phase 5 — Supervised Remediation Final Report |
+| [`docs/roadmap/phase-5-final-report.md`](roadmap/phase-5-final-report.md) | ROADMAP | Phase 5.15R — Real Supervised Remediation Closure Report |
 | [`docs/roadmap/phase-c-closeout.md`](roadmap/phase-c-closeout.md) | ROADMAP | Phase C Final Closeout |
 | [`docs/security/security-baseline.md`](security/security-baseline.md) | OPERATIONS | Security Baseline |
 | [`docs/testing/RUNTIME_SCENARIOS.md`](testing/RUNTIME_SCENARIOS.md) | CURRENT_CANONICAL | Linux Random Runtime Scenarios |

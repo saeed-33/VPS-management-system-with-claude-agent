@@ -79,9 +79,9 @@ investigation loop.
 
 Do not reproduce that inner reasoning/evidence loop in this agent yet.
 
-Later C.14 MCP/orchestration refactoring may expose smaller deterministic
-capabilities so Claude can own more of the inner Specialist sequencing. Until
-then, this agent remains a bounded wrapper around the accepted project tool.
+The current bounded MCP boundary remains the authoritative capability; this
+agent must not add another MCP orchestration or facade layer. It remains a
+bounded wrapper around the accepted project tool.
 
 ## No nested delegation
 

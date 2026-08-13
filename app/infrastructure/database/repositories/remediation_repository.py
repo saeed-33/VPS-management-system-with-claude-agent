@@ -21,6 +21,7 @@ from app.infrastructure.database.models.remediation import (
     RemediationApprovalModel,
     RemediationAuditEventModel,
     RemediationExecutionModel,
+    RemediationEvidenceModel,
     RemediationPlanModel,
     RemediationRollbackModel,
     RemediationSandboxResultModel,
@@ -289,6 +290,31 @@ class RemediationRepository:
                 return session.scalar(select(RemediationExecutionModel).where(RemediationExecutionModel.idempotency_key == idempotency_key))
             raise ValueError("execution_id or idempotency_key is required.")
 
+    def create_evidence(self, **data) -> RemediationEvidenceModel:
+        model = RemediationEvidenceModel(**data)
+        with self._session_factory() as session:
+            session.add(model)
+            session.commit()
+            session.refresh(model)
+            return model
+
+    def get_evidence(self, evidence_id: str) -> RemediationEvidenceModel | None:
+        with self._session_factory() as session:
+            return session.scalar(
+                select(RemediationEvidenceModel).where(
+                    RemediationEvidenceModel.evidence_id == evidence_id
+                )
+            )
+
+    def list_evidence(self, *, plan_id: str, execution_id: str | None = None) -> list[RemediationEvidenceModel]:
+        with self._session_factory() as session:
+            statement = select(RemediationEvidenceModel).where(
+                RemediationEvidenceModel.plan_id == plan_id
+            ).order_by(RemediationEvidenceModel.created_at.asc(), RemediationEvidenceModel.id.asc())
+            if execution_id is not None:
+                statement = statement.where(RemediationEvidenceModel.execution_id == execution_id)
+            return list(session.scalars(statement).all())
+
     def update_execution(self, execution_id: str, **updates) -> RemediationExecutionModel:
         with self._session_factory() as session:
             model = session.scalar(select(RemediationExecutionModel).where(RemediationExecutionModel.execution_id == execution_id))
@@ -341,6 +367,14 @@ class RemediationRepository:
             session.commit()
             session.refresh(model)
             return model
+
+    def get_rollback(self, rollback_id: str) -> RemediationRollbackModel | None:
+        with self._session_factory() as session:
+            return session.scalar(
+                select(RemediationRollbackModel).where(
+                    RemediationRollbackModel.rollback_id == rollback_id
+                )
+            )
 
     def append_audit_event(self, *, plan_id: str, event_type: str, actor: str | None = None,
                            server_id: int | None = None, runtime_session_id: str | None = None,

@@ -50,6 +50,14 @@ class Settings(BaseSettings):
     claude_runtime_agent: Literal[
         "server-supervisor",
     ] = "server-supervisor"
+
+    # Explicit double-opt-in real Phase 5 acceptance. These values are inert
+    # unless the opt-in test is deliberately selected.
+    real_phase5_acceptance_enabled: bool = False
+    safe_remediation_server_id: int | None = None
+    safe_remediation_server_name: str = ""
+    safe_remediation_service: str = ""
+
     app_name: str = "AI VPS Management"
     debug: bool = True
 

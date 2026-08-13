@@ -27,6 +27,7 @@ from app.capabilities.knowledge.source_service import KnowledgeSourceService
 from app.capabilities.monitoring.profile_service import MonitoringProfileService
 from app.capabilities.remediation.service import RemediationService
 from app.capabilities.remediation.execution import (
+    SSHServiceStateEvidenceCollector,
     SSHNamedWriteRunner,
     SSHServiceVerifier,
 )
@@ -143,6 +144,13 @@ def build_core_services(
             command_timeout_seconds=settings.command_timeout_seconds,
         ),
         verification_runner=SSHServiceVerifier(
+            server_repository=repositories.server_repository,
+            private_key_path=str(settings.default_ssh_private_key_path),
+            known_hosts_path=str(settings.ssh_known_hosts_path),
+            connect_timeout_seconds=settings.ssh_connect_timeout_seconds,
+            command_timeout_seconds=settings.command_timeout_seconds,
+        ),
+        evidence_collector=SSHServiceStateEvidenceCollector(
             server_repository=repositories.server_repository,
             private_key_path=str(settings.default_ssh_private_key_path),
             known_hosts_path=str(settings.ssh_known_hosts_path),
