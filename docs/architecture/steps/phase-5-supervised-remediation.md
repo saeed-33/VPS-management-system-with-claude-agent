@@ -28,8 +28,9 @@ The additive migration
 adds plan fingerprint/state columns and creates approval, execution,
 verification, rollback, audit-event, and project-owned service-state Evidence
 tables. Existing Phase C plans and sandbox results are preserved.
-`tools/bootstrap_database.py` verifies all 24 required tables, including the
-additive Phase 6 `sandbox_validations` table.
+`tools/bootstrap_database.py` verifies all current required tables, including
+the additive Phase 6 `sandbox_validations` and Phase 7 autonomous policy
+tables.
 
 Every lifecycle boundary writes a project-owned audit event carrying plan,
 server, actor, session/job correlation where available, and structured
@@ -57,7 +58,7 @@ tools. Admin provides plan, approval, execution, rollback, and audit views;
 actor identity is explicit because this repository has no authentication/RBAC
 layer.
 
-The public MCP inventory remains 24 tools and public names are unchanged.
+The public MCP inventory remains 25 tools and public names are unchanged; Phase 7 adds only the bounded autonomous attempt capability.
 Phase 5 enriches the existing six remediation tools rather than adding a
 second facade.
 

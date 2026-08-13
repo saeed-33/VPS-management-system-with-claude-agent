@@ -59,6 +59,7 @@ def test_boundary_exposes_grouped_tool_definitions():
         "get_sandbox_result",
         "request_user_approval",
         "apply_approved_remediation",
+        "attempt_autonomous_remediation",
     ]
 
 

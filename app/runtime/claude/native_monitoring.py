@@ -29,6 +29,7 @@ SERVER_SUPERVISOR_ALLOWED_TOOLS = (
     "mcp__vps__get_specialist_definition",
     "mcp__vps__run_specialist",
     "mcp__vps__propose_remediation",
+    "mcp__vps__attempt_autonomous_remediation",
     "Agent(specialist-worker)",
 )
 
@@ -161,4 +162,3 @@ class ClaudeNativeMonitoringRunner:
             "access, or production remediation. "
             "Project tool results and persisted records are authoritative."
         )
-

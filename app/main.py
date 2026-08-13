@@ -18,6 +18,7 @@ from app.interfaces.admin.api import (
     diagnostic_tools_router,
     system_router,
     remediation_router,
+    autonomous_remediation_router,
 )
 from app.interfaces.admin.web import router as web_router
 from app.composition import container
@@ -166,6 +167,7 @@ app.include_router(investigations_router)
 app.include_router(system_router)
 app.include_router(agent_observability_router)
 app.include_router(remediation_router)
+app.include_router(autonomous_remediation_router)
 
 
 @app.get(

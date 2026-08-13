@@ -138,7 +138,7 @@ uv run --no-sync --project ${CLAUDE_PROJECT_DIR:-.} python
 ${CLAUDE_PROJECT_DIR:-.}/tools/run_project_mcp_server.py
 ```
 
-The MCP server is project-scoped and exposes exactly 24 bounded tools.
+The MCP server is project-scoped and exposes exactly 25 bounded tools.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**

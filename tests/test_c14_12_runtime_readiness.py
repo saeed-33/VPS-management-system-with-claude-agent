@@ -38,15 +38,16 @@ def test_c14_12_mcp_surface_is_bounded_and_stable():
     boundary = _boundary()
     definitions = boundary.list_tools()
 
-    assert len(definitions) == 24
+    assert len(definitions) == 25
     expected_bounded_write_ids = {
         "apply_approved_remediation",
         "create_remediation_plan",
         "request_user_approval",
         "run_specialist",
         "start_investigation",
-        "test_remediation_in_sandbox",
-    }
+            "test_remediation_in_sandbox",
+            "attempt_autonomous_remediation",
+        }
     assert {
         item.tool_id
         for item in definitions

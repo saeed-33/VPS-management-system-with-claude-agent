@@ -101,7 +101,7 @@ configured Ollama-compatible transport.
 ### MCP
 
 `.mcp.json` starts `tools/run_project_mcp_server.py` as the `vps` server. The
-server exposes exactly 24 project tools from `app/interfaces/mcp/`. Tool
+server exposes exactly 25 project tools from `app/interfaces/mcp/`. Tool
 schemas, registration, validation, structured errors, and invocation remain
 project-owned. MCP does not expose raw SSH, raw SQL, arbitrary shell,
 unrestricted filesystem writes, or generic subprocess execution.

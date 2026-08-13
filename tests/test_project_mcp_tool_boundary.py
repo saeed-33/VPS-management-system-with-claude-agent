@@ -221,6 +221,7 @@ def test_tool_inventory_is_deliberately_small():
     assert tool_ids == [
         "analyze_report",
         "apply_approved_remediation",
+        "attempt_autonomous_remediation",
         "create_remediation_plan",
         "find_exact_report_match",
         "get_analysis",
@@ -255,6 +256,7 @@ def test_tool_inventory_is_deliberately_small():
     assert read_modes["test_remediation_in_sandbox"] is False
     assert read_modes["request_user_approval"] is False
     assert read_modes["apply_approved_remediation"] is False
+    assert read_modes["attempt_autonomous_remediation"] is False
     assert all(
         read_only
         for tool_id, read_only in read_modes.items()
@@ -265,6 +267,7 @@ def test_tool_inventory_is_deliberately_small():
             "test_remediation_in_sandbox",
             "request_user_approval",
             "apply_approved_remediation",
+            "attempt_autonomous_remediation",
         }
     )
 

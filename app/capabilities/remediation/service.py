@@ -33,6 +33,8 @@ from app.core.contracts.remediation import (
     RollbackStatus,
     VerificationStatus,
 )
+from app.core.contracts.autonomous_remediation import AutonomousAuthorizationStatus
+from app.core.contracts.autonomous_remediation import AutonomousAuthorization
 from app.core.policies.remediation_policy import RemediationPolicyEngine
 from app.core.policies.remediation_risk import RemediationRiskClassifier
 from app.core.policies.remediation_tools import (
@@ -372,17 +374,29 @@ class RemediationService:
     def apply_approved(self, *, plan_id: str, approval_id: str | None = None, approved_by: str | None = None,
                        server_id: int | None = None, actor: str | None = None,
                        idempotency_key: str | None = None, runtime_session_id: str | None = None,
-                       agent_job_id: str | None = None) -> dict:
+                       agent_job_id: str | None = None,
+                       autonomous_authorization: AutonomousAuthorization | None = None) -> dict:
         plan = self._require_plan(plan_id)
         if plan.status == RemediationPlanStatus.SANDBOX_FAILED.value:
             return self._blocked(plan_id, "sandbox_failed", "Failed sandbox validation blocks production application.")
-        if approval_id is None:
+        if autonomous_authorization is not None:
+            if approval_id is not None:
+                return self._blocked(plan_id, "authorization_scope_conflict", "Autonomous authorization cannot be combined with human approval input.")
+            if autonomous_authorization.plan_id != plan.plan_id or autonomous_authorization.plan_fingerprint != plan.plan_fingerprint:
+                return self._blocked(plan_id, "authorization_stale", "Autonomous authorization is not bound to the current plan.")
+            if autonomous_authorization.server_id != server_id:
+                return self._blocked(plan_id, "authorization_stale", "Autonomous authorization is not bound to the requested server.")
+            if autonomous_authorization.status != AutonomousAuthorizationStatus.CONSUMED:
+                return self._blocked(plan_id, "authorization_stale", "Autonomous authorization is not consumed.")
+            if plan.status not in {RemediationPlanStatus.SANDBOX_PASSED.value, RemediationPlanStatus.APPROVED.value}:
+                return self._blocked(plan_id, "plan_not_ready", "Autonomous execution requires a passed sandbox plan.")
+        elif approval_id is None:
             # Legacy callers cannot self-approve. Preserve the historical
             # response shape while requiring the new persisted approval path.
             if plan.risk_level in {RemediationRisk.HIGH.value, RemediationRisk.CRITICAL.value}:
                 return self._blocked(plan_id, "approval_required", "Explicit persisted user approval is required.")
             return self._blocked(plan_id, "policy_denied", "Production remediation requires persisted human approval.")
-        approval = self._repository.get_approval(approval_id)
+        approval = self._repository.get_approval(approval_id) if autonomous_authorization is None else None
         actions = [RemediationAction.from_dict(action) for action in (plan.proposed_actions or [])]
         if server_id is None or plan.server_id is None or server_id != plan.server_id:
             return self._blocked(plan_id, "wrong_or_missing_server", "Execution must target the original approved server.")
@@ -391,14 +405,20 @@ class RemediationService:
             existing = self._repository.get_execution(idempotency_key=early_key)
             if existing is not None:
                 return {"applied": existing.status == ExecutionStatus.SUCCEEDED.value, "idempotent": True, "execution": existing}
-        decision = self._policy.evaluate_execution(
-            plan=plan, approval=approval, requested_server_id=server_id, now=utc_now()
-        )
-        if not decision.allowed:
-            return self._blocked(plan_id, decision.reasons[0] if decision.reasons else "policy_denied", "; ".join(decision.reasons))
+        if autonomous_authorization is None:
+            decision = self._policy.evaluate_execution(
+                plan=plan, approval=approval, requested_server_id=server_id, now=utc_now()
+            )
+            if not decision.allowed:
+                return self._blocked(plan_id, decision.reasons[0] if decision.reasons else "policy_denied", "; ".join(decision.reasons))
         if len(actions) != 1:
             return self._blocked(plan_id, "multiple_actions_require_review", "Only one named action may execute per supervised plan.")
         action = actions[0]
+        if autonomous_authorization is not None and (
+            autonomous_authorization.action_type != action.action_type
+            or autonomous_authorization.target != action.target
+        ):
+            return self._blocked(plan_id, "authorization_stale", "Autonomous authorization is not bound to the current named action.")
         try:
             tool = self._write_tools.resolve(action)
         except ValueError:
@@ -421,7 +441,13 @@ class RemediationService:
             actor=actor or approved_by, runtime_session_id=runtime_session_id,
             agent_job_id=agent_job_id, before_evidence_ids=before_ids,
             after_evidence_ids=[], started_at=utc_now(), exit_status=None,
-            stdout="", stderr="", error=None, execution_metadata={"command_registry": tool.name},
+            stdout="", stderr="", error=None, execution_metadata={
+                "command_registry": tool.name,
+                "autonomous": autonomous_authorization is not None,
+                "authorization_id": autonomous_authorization.authorization_id if autonomous_authorization else None,
+                "policy_id": autonomous_authorization.policy_id if autonomous_authorization else None,
+                "policy_version": autonomous_authorization.policy_version if autonomous_authorization else None,
+            },
         )
         self._repository.update_plan_status(plan_id, RemediationPlanStatus.EXECUTING.value, execution_status=ExecutionStatus.RUNNING.value)
         self._audit(plan, "execution_started", {"execution_id": execution.execution_id, "idempotency_key": key}, actor=actor,
@@ -617,13 +643,17 @@ class RemediationService:
             self._repository.append_audit_event(plan_id=plan.plan_id, event_type=event_type, actor=actor,
                                                 server_id=getattr(plan, "server_id", None),
                                                 runtime_session_id=runtime_session_id,
-                                                agent_job_id=agent_job_id, payload=payload)
+            agent_job_id=agent_job_id, payload=payload)
         except OperationalError:
             # C.14 legacy test databases contain only the two original
             # remediation tables. The Phase 5 migration creates the audit
             # table; do not make legacy read/sandbox behavior unusable while
             # that additive migration is being applied.
             return
+
+    def audit_autonomous(self, *, plan_id: str, event_type: str, payload: dict) -> None:
+        """Append a Phase 7 event through the existing remediation audit sink."""
+        self._audit(self._require_plan(plan_id), event_type, payload, actor="autonomous-policy")
 
     @staticmethod
     def _validate_links(*, diagnosis_claim_ids: list[str], evidence_ids: list[str]) -> None:

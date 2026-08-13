@@ -39,7 +39,7 @@ Claude uses the project `vps` MCP server and an Ollama-backed model. Python
 owns the project capabilities, policy, budgets, Evidence, PostgreSQL
 persistence, known-hosts SSH, AgentJobs, and runtime snapshots.
 
-The runtime exposes exactly 24 project MCP tools. No raw SSH, raw SQL,
+The runtime exposes exactly 25 project MCP tools. No raw SSH, raw SQL,
 arbitrary shell, unrestricted filesystem, or generic subprocess capability is
 exposed to Claude. Automatic remediation remains disabled.
 

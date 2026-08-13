@@ -33,6 +33,9 @@ from app.capabilities.monitoring.profile_service import (
     MonitoringProfileService,
 )
 from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
+from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
+from app.capabilities.remediation.autonomous_execution_service import AutonomousExecutionService
 from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
@@ -102,6 +105,18 @@ def get_project_tool_boundary(
 
 def get_remediation_service() -> RemediationService:
     return container.remediation_service
+
+
+def get_autonomous_policy_service() -> AutonomousPolicyService:
+    return container.autonomous_policy_service
+
+
+def get_autonomous_candidate_service() -> AutonomousCandidateService:
+    return container.autonomous_candidate_service
+
+
+def get_autonomous_execution_service() -> AutonomousExecutionService:
+    return container.autonomous_execution_service
 
 def get_claude_agent_observability_service(
 ) -> ClaudeAgentObservabilityService:

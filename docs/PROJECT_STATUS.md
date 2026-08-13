@@ -20,6 +20,7 @@ Phase 5: COMPLETE / CLOSED
 Phase 5 readiness: 13/13 PASS
 Phase 6: IMPLEMENTED / NOT CLOSED
 Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
+Phase 7: IMPLEMENTED / DISABLED BY DEFAULT
 automatic_remediation_allowed: false
 readiness: BLOCKED_BY_SANDBOX_RUNTIME
 ```
@@ -39,7 +40,7 @@ readiness: BLOCKED_BY_SANDBOX_RUNTIME
 - C.14.0-C.14.11 Claude-native runtime milestones.
 - C.14.11A canonical package consolidation and legacy-tree removal.
 - Native Claude Code supervisory runtime using Ollama.
-- Bounded `vps` MCP server with 24 project tools.
+- Bounded `vps` MCP server with 25 project tools.
 - PostgreSQL persistence for reports, analyses, investigations, evidence, and
   AgentJob/session observability.
 - DB-defined Specialist routing and bounded investigation execution.
@@ -55,6 +56,11 @@ readiness: BLOCKED_BY_SANDBOX_RUNTIME
 - Phase 6 adds a fingerprint-bound isolated validation record and approval
   gate. The native-sandbox runtime requires explicit attestation from WSL2;
   no unsandboxed fallback is permitted.
+- Phase 7 autonomous remediation policies are implemented with additive
+  persistence, deterministic evaluation, single-use authorization, leased
+  reservations, rate/circuit controls, Admin observability, and bounded MCP
+  attempt support. They remain globally disabled by default and have not been
+  subjected to a separate live acceptance campaign.
 
 
 ## C.14.12 readiness acceptance

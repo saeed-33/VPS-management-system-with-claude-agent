@@ -29,6 +29,11 @@ from app.capabilities.investigation.read_service import InvestigationReadService
 from app.capabilities.knowledge.source_service import KnowledgeSourceService
 from app.capabilities.monitoring.profile_service import MonitoringProfileService
 from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
+from app.capabilities.remediation.autonomous_history_service import AutonomousHistoryService
+from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
+from app.capabilities.remediation.autonomous_authorization_service import AutonomousAuthorizationService
+from app.capabilities.remediation.autonomous_execution_service import AutonomousExecutionService
 from app.capabilities.remediation.execution import (
     SSHServiceStateEvidenceCollector,
     SSHNamedWriteRunner,
@@ -61,6 +66,11 @@ class CoreServiceBundle:
     evidence_collection_service: EvidenceCollectionService
     claude_agent_job_service: ClaudeAgentJobService
     remediation_service: RemediationService
+    autonomous_policy_service: AutonomousPolicyService
+    autonomous_history_service: AutonomousHistoryService
+    autonomous_candidate_service: AutonomousCandidateService
+    autonomous_authorization_service: AutonomousAuthorizationService
+    autonomous_execution_service: AutonomousExecutionService
 
 
 def build_core_services(
@@ -169,6 +179,28 @@ def build_core_services(
         ),
         server_repository=repositories.server_repository,
     )
+    autonomous_policy_service = AutonomousPolicyService(
+        repository=repositories.autonomous_remediation_repository,
+    )
+    autonomous_history_service = AutonomousHistoryService(
+        repository=repositories.autonomous_remediation_repository,
+    )
+    autonomous_candidate_service = AutonomousCandidateService(
+        repository=repositories.autonomous_remediation_repository,
+    )
+    autonomous_authorization_service = AutonomousAuthorizationService(
+        repository=repositories.autonomous_remediation_repository,
+    )
+    autonomous_execution_service = AutonomousExecutionService(
+        repository=repositories.autonomous_remediation_repository,
+        remediation_repository=repositories.remediation_repository,
+        remediation_service=remediation_service,
+        policy_service=autonomous_policy_service,
+        history_service=autonomous_history_service,
+        candidate_service=autonomous_candidate_service,
+        authorization_service=autonomous_authorization_service,
+        automatic_remediation_allowed=settings.automatic_remediation_allowed,
+    )
 
     return CoreServiceBundle(
         server_service=server_service,
@@ -191,6 +223,11 @@ def build_core_services(
         evidence_collection_service=evidence_collection_service,
         claude_agent_job_service=claude_agent_job_service,
         remediation_service=remediation_service,
+        autonomous_policy_service=autonomous_policy_service,
+        autonomous_history_service=autonomous_history_service,
+        autonomous_candidate_service=autonomous_candidate_service,
+        autonomous_authorization_service=autonomous_authorization_service,
+        autonomous_execution_service=autonomous_execution_service,
     )
 
 

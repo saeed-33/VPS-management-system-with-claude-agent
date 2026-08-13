@@ -68,7 +68,9 @@ class NamedWriteToolRegistry:
 def build_default_write_tool_registry() -> NamedWriteToolRegistry:
     return NamedWriteToolRegistry(
         (
-            NamedWriteTool("start_service", RemediationRisk.MEDIUM.value, 30.0, "stop_service", "active"),
+            # Phase 7 V1's only autonomous action is this explicitly
+            # allowlisted, low-risk named tool.
+            NamedWriteTool("start_service", RemediationRisk.LOW.value, 30.0, "stop_service", "active"),
             NamedWriteTool("stop_service", RemediationRisk.HIGH.value, 30.0, "start_service", "inactive"),
             # Repeating restart/reload does not restore a prior known state.
             # They remain registered actions, but cannot claim rollback support

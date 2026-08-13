@@ -69,6 +69,7 @@ def build_runtime_composition(
         specialist_investigation_loop=analysis.specialist_investigation_loop,
         specialist_execution_service=services.specialist_execution_service,
         remediation_service=services.remediation_service,
+        autonomous_execution_service=services.autonomous_execution_service,
     )
 
     claude_supervisor_runner = None

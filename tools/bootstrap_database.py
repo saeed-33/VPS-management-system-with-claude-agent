@@ -41,6 +41,11 @@ EXPECTED_TABLES = {
     "remediation_evidence",
     "remediation_audit_events",
     "sandbox_validations",
+    "autonomous_remediation_policies",
+    "autonomous_policy_decisions",
+    "autonomous_authorizations",
+    "autonomous_policy_execution_reservations",
+    "autonomous_policy_runtime_state",
 }
 
 CUSTOM_INDEXES = {

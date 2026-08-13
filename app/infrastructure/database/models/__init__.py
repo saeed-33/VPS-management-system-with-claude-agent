@@ -8,6 +8,11 @@ from app.infrastructure.database.models.agent_job import (
 from app.infrastructure.database.models.remediation import (
     RemediationApprovalModel,
     RemediationAuditEventModel,
+    AutonomousRemediationPolicyModel,
+    AutonomousPolicyDecisionModel,
+    AutonomousAuthorizationModel,
+    AutonomousPolicyExecutionReservationModel,
+    AutonomousPolicyRuntimeStateModel,
     RemediationExecutionModel,
     RemediationEvidenceModel,
     SandboxValidationModel,
@@ -82,4 +87,9 @@ __all__ = [
     "RemediationVerificationModel",
     "RemediationRollbackModel",
     "RemediationAuditEventModel",
+    "AutonomousRemediationPolicyModel",
+    "AutonomousPolicyDecisionModel",
+    "AutonomousAuthorizationModel",
+    "AutonomousPolicyExecutionReservationModel",
+    "AutonomousPolicyRuntimeStateModel",
 ]

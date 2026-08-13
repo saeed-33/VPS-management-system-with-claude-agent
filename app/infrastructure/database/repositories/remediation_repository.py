@@ -297,6 +297,20 @@ class RemediationRepository:
             session.refresh(approval)
             return approval
 
+    def sandbox_evidence_belongs(self, *, validation) -> bool:
+        if validation is None:
+            return False
+        expected = set(validation.before_evidence_ids or ()) | set(validation.after_evidence_ids or ())
+        if not expected:
+            return False
+        with self._session_factory() as session:
+            rows = list(session.scalars(select(RemediationEvidenceModel).where(
+                RemediationEvidenceModel.plan_id == validation.plan_id,
+                RemediationEvidenceModel.execution_id == validation.validation_id,
+                RemediationEvidenceModel.evidence_id.in_(expected),
+            )).all())
+            return {row.evidence_id for row in rows} == expected
+
     def expire_approval(self, approval_id: str) -> RemediationApprovalModel:
         with self._session_factory() as session:
             approval = session.scalar(select(RemediationApprovalModel).where(RemediationApprovalModel.approval_id == approval_id))

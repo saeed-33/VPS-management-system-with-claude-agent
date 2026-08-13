@@ -41,6 +41,9 @@ from app.infrastructure.database.repositories.agent_job_repository import (
 from app.infrastructure.database.repositories.remediation_repository import (
     RemediationRepository,
 )
+from app.infrastructure.database.repositories.autonomous_remediation_repository import (
+    AutonomousRemediationRepository,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -58,6 +61,7 @@ class RepositoryBundle:
     knowledge_document_repository: KnowledgeDocumentRepository
     agent_job_repository: AgentJobRepository
     remediation_repository: RemediationRepository
+    autonomous_remediation_repository: AutonomousRemediationRepository
 
 
 def build_repositories() -> RepositoryBundle:
@@ -100,6 +104,9 @@ def build_repositories() -> RepositoryBundle:
         ),
         remediation_repository=(
             RemediationRepository()
+        ),
+        autonomous_remediation_repository=(
+            AutonomousRemediationRepository()
         ),
     )
 

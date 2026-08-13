@@ -14,7 +14,7 @@ Claude proposal -> Python plan/policy validation
 The native sandbox is an agent-isolation boundary, not authorization. Python
 continues to own target designation, registered actions, Evidence ownership,
 fingerprints, persistence, approval, SSH safety, verification, and cleanup.
-The project MCP surface remains 24 tools; the existing
+The project MCP surface remains 25 tools; the existing
 `test_remediation_in_sandbox` tool accepts an explicit Phase 6 target without
 adding a shell or sandbox escape capability.
 

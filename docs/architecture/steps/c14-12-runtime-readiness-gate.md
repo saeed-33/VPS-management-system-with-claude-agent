@@ -60,7 +60,7 @@ truncated JSON, empty output, HTTP 500, and timeout. Policy tests covered
 unknown tools, unassigned tools, invalid arguments, write/escalation attempts,
 specialist/action/round limits, and approved read-only execution.
 
-The MCP catalog contains exactly 24 tools. No catalog description or schema
+The MCP catalog contains exactly 25 tools. No catalog description or schema
 exposes raw SSH, raw SQL, arbitrary shell, `execute_command`, `database_query`,
 `psql`, unbounded subprocess execution, or unrestricted filesystem writes.
 Bounded non-read-only tools remain explicitly registered and policy-gated.

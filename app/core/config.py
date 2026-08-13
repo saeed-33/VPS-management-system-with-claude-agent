@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     # Explicit double-opt-in real Phase 5 acceptance. These values are inert
     # unless the opt-in test is deliberately selected.
     real_phase5_acceptance_enabled: bool = False
+    automatic_remediation_allowed: bool = False
+    autonomous_remediation_max_risk: Literal["low"] = "low"
+    autonomous_remediation_hard_allowed_actions: str = "start_service"
     safe_remediation_server_id: int | None = None
     safe_remediation_server_name: str = ""
     safe_remediation_service: str = ""

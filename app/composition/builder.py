@@ -49,6 +49,7 @@ def build_container() -> ApplicationContainer:
     knowledge_document_repository = repositories.knowledge_document_repository
     agent_job_repository = repositories.agent_job_repository
     remediation_repository = repositories.remediation_repository
+    autonomous_remediation_repository = repositories.autonomous_remediation_repository
 
     # -------------------------------------------------
     # Shared services
@@ -167,6 +168,7 @@ def build_container() -> ApplicationContainer:
         ),
         agent_job_repository=agent_job_repository,
         remediation_repository=remediation_repository,
+        autonomous_remediation_repository=autonomous_remediation_repository,
         server_service=server_service,
         command_service=command_service,
         monitoring_profile_service=(
@@ -211,6 +213,11 @@ def build_container() -> ApplicationContainer:
             evidence_collection_service
         ),
         remediation_service=remediation_service,
+        autonomous_policy_service=services.autonomous_policy_service,
+        autonomous_history_service=services.autonomous_history_service,
+        autonomous_candidate_service=services.autonomous_candidate_service,
+        autonomous_authorization_service=services.autonomous_authorization_service,
+        autonomous_execution_service=services.autonomous_execution_service,
         specialist_investigation_loop=(
             specialist_investigation_loop
         ),

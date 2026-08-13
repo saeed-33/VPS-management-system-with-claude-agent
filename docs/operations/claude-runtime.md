@@ -11,7 +11,7 @@ Claude Code      supervisory reasoning and sequencing
 Ollama           operational model provider
 server-supervisor main bounded per-server agent
 specialist-worker bounded DB-defined Specialist worker
-vps MCP          24 project capability tools
+vps MCP          25 project capability tools
 Python           execution, policy, evidence, budgets, persistence, safety
 ```
 
@@ -67,7 +67,7 @@ must not bypass project tools, policy, Evidence, or budgets.
 ## MCP
 
 `.mcp.json` registers the `vps` server through
-`tools/run_project_mcp_server.py`. The registry exposes exactly 24 tools in
+`tools/run_project_mcp_server.py`. The registry exposes exactly 25 tools in
 monitoring, reports, retrieval, investigation, Specialists, and bounded
 plan-remediation workflow. Non-read-only tools remain policy-gated and no
 production remediation is automatically applied.

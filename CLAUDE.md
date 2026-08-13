@@ -107,7 +107,7 @@ project services, not hard-coded agent files.
 ## MCP and permissions
 
 `.mcp.json` registers the `vps` server through
-`tools/run_project_mcp_server.py`. The project surface contains exactly 24
+`tools/run_project_mcp_server.py`. The project surface contains exactly 25
 tools. Calls are schema-validated, registered, policy-gated, budgeted, and
 structured.
 

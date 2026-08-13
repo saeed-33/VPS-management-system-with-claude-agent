@@ -611,4 +611,18 @@ class BoundaryDefinitionsMixin:
                 },
                 read_only=False,
             ),
+            ProjectToolDefinition(
+                tool_id="attempt_autonomous_remediation",
+                description=(
+                    "Evaluate and, only when the persisted Python policy "
+                    "gates pass, attempt the bounded start_service action."
+                ),
+                input_schema={
+                    "type": "object",
+                    "properties": {"plan_id": {"type": "string"}},
+                    "required": ["plan_id"],
+                    "additionalProperties": False,
+                },
+                read_only=False,
+            ),
         ]

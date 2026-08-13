@@ -59,6 +59,7 @@ class ProjectMcpToolBoundary(
         specialist_investigation_loop=None,
         specialist_execution_service=None,
         remediation_service=None,
+        autonomous_execution_service=None,
     ) -> None:
         self._server_service = server_service
         self._monitoring_profile_service = (
@@ -101,6 +102,7 @@ class ProjectMcpToolBoundary(
         self._remediation_service = (
             remediation_service
         )
+        self._autonomous_execution_service = autonomous_execution_service
         self._normalizer = ReportNormalizer()
         self._fingerprint_service = (
             ReportFingerprintService()
@@ -139,6 +141,7 @@ class ProjectMcpToolBoundary(
             "get_sandbox_result": self._get_sandbox_result,
             "request_user_approval": self._request_user_approval,
             "apply_approved_remediation": self._apply_approved_remediation,
+            "attempt_autonomous_remediation": self._attempt_autonomous_remediation,
         }
 
     def list_tools(

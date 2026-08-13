@@ -7,6 +7,21 @@ from app.interfaces.mcp.serializers import serialize_value
 
 
 class RemediationToolsMixin:
+    async def _attempt_autonomous_remediation(self, arguments: dict[str, Any]) -> ProjectToolResult:
+        self._require_dependency(self._autonomous_execution_service, "autonomous_execution_service")
+        result = self._autonomous_execution_service.attempt(
+            plan_id=self._required_string(arguments, "plan_id"),
+            actor="claude-autonomous-policy",
+        )
+        outcome = result.get("outcome")
+        return ProjectToolResult(
+            tool_id="attempt_autonomous_remediation",
+            success=outcome == "auto_execute" and bool(result.get("result", {}).get("applied")),
+            data=serialize_value(result),
+            error_code=None if outcome == "auto_execute" and result.get("result", {}).get("applied") else outcome,
+            error_message=None if outcome == "auto_execute" and result.get("result", {}).get("applied") else "Autonomous policy did not authorize a successful execution.",
+        )
+
     async def _propose_remediation(
         self,
         arguments: dict[str, Any],

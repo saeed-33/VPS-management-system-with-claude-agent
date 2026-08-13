@@ -66,6 +66,7 @@ PROJECT_TOOL_GROUPS = (
             "get_sandbox_result",
             "request_user_approval",
             "apply_approved_remediation",
+            "attempt_autonomous_remediation",
         ),
     ),
 )

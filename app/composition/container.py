@@ -4,6 +4,11 @@ from dataclasses import dataclass
 
 from app.interfaces.admin.services.report_pdf_service import ReportPdfService
 from app.interfaces.admin.services.ssh_test_service import SSHTestService
+from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
+from app.capabilities.remediation.autonomous_history_service import AutonomousHistoryService
+from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
+from app.capabilities.remediation.autonomous_authorization_service import AutonomousAuthorizationService
+from app.capabilities.remediation.autonomous_execution_service import AutonomousExecutionService
 from app.capabilities.analysis.analysis_orchestrator import AnalysisOrchestrator
 from app.capabilities.analysis.report_analyzer import ReportAnalyzer
 from app.core.policies.diagnostic_policy import DiagnosticPolicyEngine
@@ -59,6 +64,7 @@ class ApplicationContainer:
     knowledge_document_repository: KnowledgeDocumentRepository
     agent_job_repository: AgentJobRepository
     remediation_repository: RemediationRepository
+    autonomous_remediation_repository: object
 
     server_service: ServerService
     command_service: CommandService
@@ -79,6 +85,11 @@ class ApplicationContainer:
     diagnostic_policy_engine: DiagnosticPolicyEngine
     evidence_collection_service: EvidenceCollectionService
     remediation_service: RemediationService
+    autonomous_policy_service: AutonomousPolicyService
+    autonomous_history_service: AutonomousHistoryService
+    autonomous_candidate_service: AutonomousCandidateService
+    autonomous_authorization_service: AutonomousAuthorizationService
+    autonomous_execution_service: AutonomousExecutionService
     specialist_investigation_loop: SpecialistInvestigationLoop | None
     claude_agent_job_service: ClaudeAgentJobService
     project_mcp_tool_boundary: ProjectMcpToolBoundary

@@ -26,6 +26,7 @@ EXPECTED_ALLOW = {
     "mcp__vps__test_remediation_in_sandbox",
     "mcp__vps__request_user_approval",
     "mcp__vps__apply_approved_remediation",
+    "mcp__vps__attempt_autonomous_remediation",
     "Agent(specialist-worker)",
 }
 
