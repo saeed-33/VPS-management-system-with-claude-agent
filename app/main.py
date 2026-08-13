@@ -62,6 +62,17 @@ async def lifespan(
 
     create_database_tables()
 
+    recovered_jobs = (
+        container.claude_agent_job_service
+        .recover_interrupted_jobs()
+    )
+
+    if recovered_jobs:
+        logger.warning(
+            "Recovered %s interrupted Claude agent job(s).",
+            recovered_jobs,
+        )
+
     scheduler_task = None
 
     if (

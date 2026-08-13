@@ -137,33 +137,51 @@ class PersistedRuntimeEvaluator:
             and item.get("evidence_id")
         }
 
-        referenced = set()
+        referenced: set[str] = set()
+        invalid_references: list[str] = []
 
-        for run in runtime.specialist_runs:
+        def collect_references(
+            source: str,
+            payload: dict,
+        ) -> None:
+            values = payload.get("evidence_ids")
+
+            if values is None:
+                return
+
+            if not isinstance(values, (list, tuple, set)):
+                invalid_references.append(
+                    f"{source}:not-a-list"
+                )
+                return
+
+            for value in values:
+                if not isinstance(value, str) or not value.strip():
+                    invalid_references.append(
+                        f"{source}:{value!r}"
+                    )
+                    continue
+                referenced.add(value.strip())
+
+        for index, run in enumerate(runtime.specialist_runs):
             if isinstance(run, dict):
-                referenced.update(
-                    run.get(
-                        "evidence_ids"
-                    )
-                    or ()
+                collect_references(
+                    f"specialist_runs[{index}]",
+                    run,
                 )
 
-        for claim in runtime.correlated_claims:
+        for index, claim in enumerate(runtime.correlated_claims):
             if isinstance(claim, dict):
-                referenced.update(
-                    claim.get(
-                        "evidence_ids"
-                    )
-                    or ()
+                collect_references(
+                    f"correlated_claims[{index}]",
+                    claim,
                 )
 
-        for conflict in runtime.conflicts:
+        for index, conflict in enumerate(runtime.conflicts):
             if isinstance(conflict, dict):
-                referenced.update(
-                    conflict.get(
-                        "evidence_ids"
-                    )
-                    or ()
+                collect_references(
+                    f"conflicts[{index}]",
+                    conflict,
                 )
 
         final_diagnosis = (
@@ -174,18 +192,64 @@ class PersistedRuntimeEvaluator:
             final_diagnosis,
             dict,
         ):
-            referenced.update(
-                final_diagnosis.get(
-                    "evidence_ids"
-                )
-                or ()
+            collect_references(
+                "final_diagnosis",
+                final_diagnosis,
             )
 
         missing = sorted(
             referenced - evidence_ids
         )
 
-        passed = not missing
+        ownership_errors = []
+        for item in runtime.evidence:
+            if not isinstance(item, dict):
+                continue
+
+            metadata = item.get("metadata")
+            if not isinstance(metadata, dict):
+                continue
+
+            evidence_investigation_id = metadata.get(
+                "investigation_id"
+            )
+            if (
+                evidence_investigation_id is not None
+                and evidence_investigation_id
+                != investigation.investigation_id
+            ):
+                ownership_errors.append(
+                    f"{item.get('evidence_id')}:investigation"
+                )
+
+            evidence_server_id = metadata.get("server_id")
+            if (
+                evidence_server_id is not None
+                and evidence_server_id != investigation.server_id
+            ):
+                ownership_errors.append(
+                    f"{item.get('evidence_id')}:server"
+                )
+
+        passed = not (
+            missing
+            or invalid_references
+            or ownership_errors
+        )
+
+        detail_parts = []
+        if missing:
+            detail_parts.append(
+                "missing=" + ",".join(missing)
+            )
+        if invalid_references:
+            detail_parts.append(
+                "invalid=" + ",".join(invalid_references)
+            )
+        if ownership_errors:
+            detail_parts.append(
+                "ownership=" + ",".join(ownership_errors)
+            )
 
         return EvaluationObservation(
             case_id=(
@@ -204,13 +268,10 @@ class PersistedRuntimeEvaluator:
                 else 0.0
             ),
             details=(
-                "All referenced Evidence IDs "
-                "are persisted."
+                "All referenced Evidence IDs are persisted "
+                "and belong to the runtime context."
                 if passed
-                else (
-                    "Missing Evidence IDs: "
-                    + ", ".join(missing)
-                )
+                else "; ".join(detail_parts)
             ),
             metadata={
                 "investigation_id": (
@@ -221,6 +282,12 @@ class PersistedRuntimeEvaluator:
                 ),
                 "persisted_evidence_count": (
                     len(evidence_ids)
+                ),
+                "invalid_reference_count": len(
+                    invalid_references
+                ),
+                "ownership_error_count": len(
+                    ownership_errors
                 ),
                 "source": "persisted-runtime",
             },

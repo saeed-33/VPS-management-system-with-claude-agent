@@ -106,7 +106,12 @@ class InvestigationRuntimeSnapshotService:
         )
 
         evidence = tuple(
-            self._serialize_evidence(item)
+            self._serialize_evidence(
+                item,
+                investigation_id=state.investigation_id,
+                server_id=state.server_id,
+                report_id=state.report_id,
+            )
             for item in state.evidence
         )
 
@@ -253,17 +258,26 @@ class InvestigationRuntimeSnapshotService:
     def _serialize_evidence(
         self,
         item,
+        *,
+        investigation_id: str,
+        server_id: int,
+        report_id: int,
     ) -> dict:
+        metadata = dict(item.metadata or {})
+        metadata.setdefault(
+            "investigation_id",
+            investigation_id,
+        )
+        metadata.setdefault("server_id", server_id)
+        metadata.setdefault("report_id", report_id)
+
         return {
             "evidence_id": item.evidence_id,
             "kind": item.kind.value,
             "title": item.title,
             "source_id": item.source_id,
             "excerpt": item.excerpt,
-            "metadata": dict(
-                item.metadata
-                or {}
-            ),
+            "metadata": metadata,
         }
 
     def _serialize_claim(

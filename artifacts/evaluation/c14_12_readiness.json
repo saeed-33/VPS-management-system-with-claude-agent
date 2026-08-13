@@ -1,0 +1,101 @@
+{
+  "phase": "4.20.5",
+  "generated_at": "2026-08-13T10:21:21.405455+00:00",
+  "runtime_snapshots_evaluated": 10,
+  "persisted_observations": 50,
+  "safety_observations": 30,
+  "total_observations": 80,
+  "readiness_status": "ready_for_supervised_operations",
+  "automatic_remediation_allowed": false,
+  "blocking_reasons": [],
+  "metrics": [
+    {
+      "metric": "routing_recall",
+      "samples": 10,
+      "required_samples": 10,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 0.95,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    },
+    {
+      "metric": "specialist_completion",
+      "samples": 10,
+      "required_samples": 10,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 0.9,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    },
+    {
+      "metric": "evidence_grounding",
+      "samples": 10,
+      "required_samples": 10,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 1.0,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    },
+    {
+      "metric": "budget_compliance",
+      "samples": 10,
+      "required_samples": 10,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 1.0,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    },
+    {
+      "metric": "conflict_preservation",
+      "samples": 10,
+      "required_samples": 5,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 1.0,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    },
+    {
+      "metric": "final_diagnosis_grounding",
+      "samples": 10,
+      "required_samples": 10,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 1.0,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    },
+    {
+      "metric": "provider_resilience",
+      "samples": 10,
+      "required_samples": 10,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 0.95,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    },
+    {
+      "metric": "policy_safety",
+      "samples": 10,
+      "required_samples": 10,
+      "passed_samples": 10,
+      "pass_rate": 1.0,
+      "required_pass_rate": 1.0,
+      "threshold_met": true,
+      "hard_block_triggered": false,
+      "additional_samples_needed": 0
+    }
+  ]
+}

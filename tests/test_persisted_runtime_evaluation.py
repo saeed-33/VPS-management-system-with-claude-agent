@@ -29,6 +29,9 @@ def make_detail(
     bad_evidence=False,
     bad_budget=False,
     bad_narrative=False,
+    malformed_evidence=False,
+    foreign_evidence=False,
+    foreign_server=False,
 ):
     evidence_id = "e1"
 
@@ -37,6 +40,18 @@ def make_detail(
         if bad_evidence
         else evidence_id
     )
+
+    run_evidence_ids = (
+        [None]
+        if malformed_evidence
+        else [run_evidence_id]
+    )
+
+    evidence_metadata = {}
+    if foreign_evidence:
+        evidence_metadata["investigation_id"] = "other-investigation"
+    if foreign_server:
+        evidence_metadata["server_id"] = 99
 
     narrative_claim_ids = (
         ["unknown"]
@@ -63,13 +78,14 @@ def make_detail(
                     ),
                     "status": "completed",
                     "evidence_ids": [
-                        run_evidence_id
+                        *run_evidence_ids
                     ],
                 },
             ),
             evidence=(
                 {
                     "evidence_id": evidence_id,
+                    "metadata": evidence_metadata,
                 },
             ),
             correlated_claims=(
@@ -228,3 +244,33 @@ def test_unknown_narrative_claim_fails():
         ].passed
         is False
     )
+
+
+def test_malformed_evidence_reference_fails_closed():
+    metrics = by_metric(
+        PersistedRuntimeEvaluator().evaluate(
+            make_detail(malformed_evidence=True)
+        )
+    )
+
+    assert metrics[EvaluationMetric.EVIDENCE_GROUNDING].passed is False
+
+
+def test_foreign_investigation_evidence_fails_closed():
+    metrics = by_metric(
+        PersistedRuntimeEvaluator().evaluate(
+            make_detail(foreign_evidence=True)
+        )
+    )
+
+    assert metrics[EvaluationMetric.EVIDENCE_GROUNDING].passed is False
+
+
+def test_foreign_server_evidence_fails_closed():
+    metrics = by_metric(
+        PersistedRuntimeEvaluator().evaluate(
+            make_detail(foreign_server=True)
+        )
+    )
+
+    assert metrics[EvaluationMetric.EVIDENCE_GROUNDING].passed is False
