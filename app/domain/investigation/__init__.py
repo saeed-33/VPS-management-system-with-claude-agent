@@ -51,7 +51,6 @@ from app.domain.investigation.final_diagnosis_synthesizer import (
     FinalDiagnosisNarrativeOutput,
     FinalDiagnosisSynthesizer,
     OllamaFinalDiagnosisNarrativeClient,
-    OpenAIFinalDiagnosisNarrativeClient,
     create_final_diagnosis_narrative_client,
 )
 from app.domain.investigation.runtime_snapshot_service import (
@@ -77,7 +76,6 @@ __all__ = [
     "InvestigationExecutionResult",
     "InvestigationRuntimeSnapshotService",
     "create_final_diagnosis_narrative_client",
-    "OpenAIFinalDiagnosisNarrativeClient",
     "OllamaFinalDiagnosisNarrativeClient",
     "FinalDiagnosisSynthesizer",
     "FinalDiagnosisNarrativeOutput",

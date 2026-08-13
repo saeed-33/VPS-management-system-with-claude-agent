@@ -1,5 +1,5 @@
 from app.domain.analysis.retrieval.embedding_client import EmbeddingClient
-from app.domain.analysis.retrieval.ollama_embedding_client import OllamaEmbeddingClient
+from app.infrastructure.llm.ollama.embedding_client import OllamaEmbeddingClient
 from app.shared.config import Settings
 
 

@@ -17,10 +17,7 @@ class Settings(BaseSettings):
 
     rag_exact_reuse_enabled: bool = True
 
-    llm_provider: Literal[
-        "openai",
-        "ollama",
-    ] = "ollama"
+    llm_provider: Literal["ollama"] = "ollama"
 
     llm_analysis_timeout_seconds: float = Field(
         default=120.0,
@@ -32,8 +29,6 @@ class Settings(BaseSettings):
         ge=1_000,
     )
 
-    openai_api_key: str | None = None
-    openai_model: str = "gpt-5-mini"
 
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "qwen3:8b"

@@ -1,5 +1,5 @@
-# Backward-compatible application composition facade.
-# New composition code lives under app.composition.
+# Application composition root.
+# This package owns dependency construction and wiring only.
 
 from app.composition.builder import (
     ApplicationContainer,
@@ -7,11 +7,7 @@ from app.composition.builder import (
 )
 
 
-container = build_container()
-
-
 __all__ = [
     "ApplicationContainer",
     "build_container",
-    "container",
 ]

@@ -8,3 +8,9 @@ apply**.py
 .**backup
 .claude/settings.local.json
 .claude/runtime-events/
+*.bak
+*.backup
+*.orig
+*.old
+*.c14-*-backup
+app/.venv/

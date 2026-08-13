@@ -51,11 +51,17 @@ def test_direct_claude_uses_ollama_backend(tmp_path):
     assert env["AI_VPS_LLM_PROVIDER"] == "ollama"
 
 
-def test_bootstrap_uses_direct_claude_settings():
+def test_runtime_composition_uses_direct_claude_settings():
     root = Path(__file__).resolve().parents[1]
-    text = (root / "app/bootstrap.py").read_text(
+    text = (
+        root
+        / "app"
+        / "composition"
+        / "runtime.py"
+    ).read_text(
         encoding="utf-8"
     )
 
     assert "base_url=settings.ollama_base_url" in text
     assert "settings.claude_runtime_executable" in text
+

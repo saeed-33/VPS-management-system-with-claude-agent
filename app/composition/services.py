@@ -1,0 +1,162 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from app.composition.repositories import RepositoryBundle
+from app.domain.investigation.diagnostic_policy import DiagnosticPolicyEngine
+from app.domain.investigation.diagnostic_tools import (
+    DiagnosticToolRegistry,
+    build_default_diagnostic_tool_registry,
+)
+from app.domain.investigation.evidence_collection import EvidenceCollectionService
+from app.domain.investigation.investigation_router import InvestigationRouter
+from app.domain.investigation.persistence_service import InvestigationPersistenceService
+from app.domain.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
+from app.domain.investigation.specialist_registry import SpecialistRegistry
+from app.domain.knowledge.chunker import StructureAwareKnowledgeChunker
+from app.domain.knowledge.chunking_service import KnowledgeChunkingService
+from app.domain.knowledge.ingestion_service import KnowledgeIngestionService
+from app.domain.knowledge.parsers import KnowledgeContentParser
+from app.domain.knowledge.source_loader import KnowledgeSourceLoader
+from app.domain.knowledge.source_registry import KnowledgeSourceRegistry
+from app.runtime.claude.job_service import ClaudeAgentJobService
+from app.shared.config import Settings
+from app.shared.services.command_service import CommandService
+from app.shared.services.investigation_read_service import InvestigationReadService
+from app.shared.services.knowledge_source_service import KnowledgeSourceService
+from app.shared.services.profile_service import MonitoringProfileService
+from app.shared.services.remediation_service import RemediationService
+from app.shared.services.report_service import ReportQueryService
+from app.shared.services.server_service import ServerService
+from app.shared.services.specialist_service import SpecialistDefinitionService
+
+
+@dataclass(slots=True, frozen=True)
+class CoreServiceBundle:
+    server_service: ServerService
+    command_service: CommandService
+    monitoring_profile_service: MonitoringProfileService
+    report_query_service: ReportQueryService
+    specialist_definition_service: SpecialistDefinitionService
+    specialist_registry: SpecialistRegistry
+    investigation_router: InvestigationRouter
+    investigation_persistence_service: InvestigationPersistenceService
+    investigation_read_service: InvestigationReadService
+    investigation_runtime_snapshot_service: InvestigationRuntimeSnapshotService
+    knowledge_source_service: KnowledgeSourceService
+    knowledge_source_registry: KnowledgeSourceRegistry
+    knowledge_ingestion_service: KnowledgeIngestionService
+    knowledge_chunking_service: KnowledgeChunkingService
+    diagnostic_tool_registry: DiagnosticToolRegistry
+    diagnostic_policy_engine: DiagnosticPolicyEngine
+    evidence_collection_service: EvidenceCollectionService
+    claude_agent_job_service: ClaudeAgentJobService
+    remediation_service: RemediationService
+
+
+def build_core_services(
+    repositories: RepositoryBundle,
+    settings: Settings,
+) -> CoreServiceBundle:
+    server_service = ServerService(
+        repository=repositories.server_repository,
+    )
+    command_service = CommandService(
+        command_repository=repositories.command_repository,
+        server_repository=repositories.server_repository,
+    )
+    monitoring_profile_service = MonitoringProfileService(
+        profile_repository=repositories.profile_repository,
+        command_repository=repositories.command_repository,
+        server_repository=repositories.server_repository,
+    )
+    report_query_service = ReportQueryService(
+        repository=repositories.report_repository,
+    )
+    specialist_definition_service = SpecialistDefinitionService(
+        repository=repositories.specialist_definition_repository,
+    )
+    specialist_registry = SpecialistRegistry(
+        repository=repositories.specialist_definition_repository,
+    )
+    investigation_router = InvestigationRouter(
+        specialist_registry=specialist_registry,
+        candidate_limit=12,
+        selection_limit=4,
+    )
+    investigation_persistence_service = InvestigationPersistenceService(
+        repository=repositories.investigation_repository,
+    )
+    investigation_read_service = InvestigationReadService(
+        repository=repositories.investigation_repository,
+    )
+    investigation_runtime_snapshot_service = InvestigationRuntimeSnapshotService(
+        repository=repositories.investigation_repository,
+    )
+    knowledge_source_service = KnowledgeSourceService(
+        repository=repositories.knowledge_source_repository,
+    )
+    knowledge_source_registry = KnowledgeSourceRegistry(
+        repository=repositories.knowledge_source_repository,
+    )
+    knowledge_ingestion_service = KnowledgeIngestionService(
+        source_repository=repositories.knowledge_source_repository,
+        document_repository=repositories.knowledge_document_repository,
+        loader=KnowledgeSourceLoader(),
+        parser=KnowledgeContentParser(),
+    )
+    knowledge_chunking_service = KnowledgeChunkingService(
+        document_repository=repositories.knowledge_document_repository,
+        chunker=StructureAwareKnowledgeChunker(),
+    )
+    diagnostic_tool_registry = build_default_diagnostic_tool_registry()
+    diagnostic_policy_engine = DiagnosticPolicyEngine(
+        registry=diagnostic_tool_registry,
+    )
+    evidence_collection_service = EvidenceCollectionService(
+        server_repository=repositories.server_repository,
+        default_private_key_path=str(
+            settings.default_ssh_private_key_path
+        ),
+        known_hosts_path=str(
+            settings.ssh_known_hosts_path
+        ),
+        connection_timeout_seconds=(
+            settings.ssh_connect_timeout_seconds
+        ),
+    )
+    claude_agent_job_service = ClaudeAgentJobService(
+        repository=repositories.agent_job_repository,
+    )
+    remediation_service = RemediationService(
+        repository=repositories.remediation_repository,
+        automatic_remediation_allowed=False,
+    )
+
+    return CoreServiceBundle(
+        server_service=server_service,
+        command_service=command_service,
+        monitoring_profile_service=monitoring_profile_service,
+        report_query_service=report_query_service,
+        specialist_definition_service=specialist_definition_service,
+        specialist_registry=specialist_registry,
+        investigation_router=investigation_router,
+        investigation_persistence_service=investigation_persistence_service,
+        investigation_read_service=investigation_read_service,
+        investigation_runtime_snapshot_service=investigation_runtime_snapshot_service,
+        knowledge_source_service=knowledge_source_service,
+        knowledge_source_registry=knowledge_source_registry,
+        knowledge_ingestion_service=knowledge_ingestion_service,
+        knowledge_chunking_service=knowledge_chunking_service,
+        diagnostic_tool_registry=diagnostic_tool_registry,
+        diagnostic_policy_engine=diagnostic_policy_engine,
+        evidence_collection_service=evidence_collection_service,
+        claude_agent_job_service=claude_agent_job_service,
+        remediation_service=remediation_service,
+    )
+
+
+__all__ = [
+    "CoreServiceBundle",
+    "build_core_services",
+]

@@ -99,12 +99,19 @@ def test_c14_9_supervisor_fails_closed_when_runtime_disabled():
         )
 
 
-def test_c14_9_bootstrap_has_no_python_orchestration_fallback():
-    text = (
-        ROOT / "app" / "bootstrap.py"
+def test_c14_9_composition_has_no_python_orchestration_fallback():
+    runtime_text = (
+        ROOT / "app" / "composition" / "runtime.py"
     ).read_text(
         encoding="utf-8"
     )
+    analysis_text = (
+        ROOT / "app" / "composition" / "analysis.py"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    combined = runtime_text + "\n" + analysis_text
 
     for legacy_name in (
         "ClaudeSupervisedMonitoringCycle",
@@ -112,14 +119,15 @@ def test_c14_9_bootstrap_has_no_python_orchestration_fallback():
         "ServerCoordinator",
         "AnalysisAgentManager",
     ):
-        assert legacy_name not in text
+        assert legacy_name not in combined
 
-    assert "claude_supervisor_runner = None" in text
-    assert "ClaudeNativeMonitoringRunner(" in text
+    assert "claude_supervisor_runner = None" in runtime_text
+    assert "ClaudeNativeMonitoringRunner(" in runtime_text
 
-    # These are bounded capabilities and intentionally remain.
-    assert "AnalysisOrchestrator(" in text
-    assert "SpecialistInvestigationLoop(" in text
+    assert "AnalysisOrchestrator(" in analysis_text
+    assert "SpecialistInvestigationLoop(" in analysis_text
+
+
 
 
 def test_c14_9_main_has_no_analysis_worker_lifecycle():

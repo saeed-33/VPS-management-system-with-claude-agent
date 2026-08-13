@@ -13,3 +13,4 @@ os.environ.setdefault(
     "./.test/known_hosts",
 )
 os.environ.setdefault("LLM_ENABLED", "false")
+os.environ.setdefault("CLAUDE_RUNTIME_ENABLED", "false")

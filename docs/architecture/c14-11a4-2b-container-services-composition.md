@@ -1,0 +1,13 @@
+# C.14.11A.4.2b — Container and Core Services
+
+This step removes two responsibilities from the main composition builder:
+
+1. `ApplicationContainer` moves to `app/composition/container.py`.
+2. deterministic shared/domain service construction moves to
+   `app/composition/services.py`.
+
+The builder still owns analysis/investigation LLM composition and
+Claude/MCP/scheduler runtime wiring. Those move in the next A.4.2 stages.
+
+Behavior is preserved by aliasing every service bundle member back to the
+same local variable names used by the existing builder.
