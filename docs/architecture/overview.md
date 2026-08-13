@@ -2,9 +2,10 @@
 
 <!-- DOC-STATUS: CURRENT -->
 
-This document describes the implemented Phase C system. The current gate state
-is Phase 4.20 complete, C.14.11A pass, C.14.12 pass, C.14.13 pass, and
-C.14.14 pass. Phase C is closed; Phase 5 is not implemented.
+This document describes the implemented Phase C and Phase 5 system. The
+current gate state is Phase 4.20 complete, C.14.11A pass, C.14.12 pass,
+C.14.13 pass, and C.14.14 pass. Phase C is closed; Phase 5 is implemented but
+not closed because real safe-target acceptance is unavailable.
 
 ## Responsibility invariant
 
@@ -162,7 +163,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 

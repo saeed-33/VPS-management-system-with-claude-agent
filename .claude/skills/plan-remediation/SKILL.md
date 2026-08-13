@@ -1,23 +1,25 @@
 ---
 name: plan-remediation
-description: Produce a grounded remediation proposal from a persisted final diagnosis and Evidence without authorizing or executing production changes. Use only after an investigation has a persisted final diagnosis.
+description: Build and supervise a grounded remediation plan from a persisted final diagnosis and Evidence. Use only after an investigation has a persisted final diagnosis; production writes remain approval-gated.
 argument-hint: "<investigation_id>"
 allowed-tools:
   - mcp__vps__get_investigation
   - mcp__vps__get_investigation_status
   - mcp__vps__get_evidence
   - mcp__vps__propose_remediation
+  - mcp__vps__create_remediation_plan
+  - mcp__vps__test_remediation_in_sandbox
+  - mcp__vps__request_user_approval
+  - mcp__vps__apply_approved_remediation
 ---
 
 # Plan Remediation
 
 ## Purpose
 
-Create a grounded remediation proposal only.
-
-The current Phase C gate does not authorize production remediation, request
-production approval, or execute write-capable actions. Phase 5 introduces the
-accepted write-tool, approval, verification, rollback, and audit contracts.
+Create a grounded, auditable remediation plan and use the supervised Phase 5
+lifecycle. No Claude call itself grants approval; execution requires persisted
+human approval.
 
 ## Input contract
 
@@ -52,26 +54,21 @@ inventing a solution.
    diagnosis_claim_ids
    evidence_ids
    ```
-6. Return the project proposal and explicitly report:
-   ```text
-   production_application_allowed = false
-   ```
+6. If the proposal supports a registered action, call
+   `mcp__vps__create_remediation_plan`.
+7. Call `mcp__vps__test_remediation_in_sandbox` and require a passed result.
+8. Call `mcp__vps__request_user_approval` and return the approval ID and plan
+   fingerprint to the operator. Stop and wait for the human decision.
+9. Only after the operator supplies a persisted human approval ID that is
+   approved, call
+   `mcp__vps__apply_approved_remediation` with the original server ID. Treat
+   the returned execution and verification result as authoritative.
 
 ## Hard boundary
 
-This skill must not call:
-
-```text
-mcp__vps__create_remediation_plan
-mcp__vps__test_remediation_in_sandbox
-mcp__vps__request_user_approval
-mcp__vps__apply_approved_remediation
-```
-
-Those capabilities remain outside this pre-Phase-5 operational skill.
-
-The existing Phase C remediation service is scaffolding; it is not evidence of
-a real isolated sandbox or production write executor.
+This skill must never call raw SSH, arbitrary shell, or an unregistered write
+tool. `apply_approved_remediation` is valid only with a human-created,
+unexpired approval whose fingerprint still matches the immutable plan.
 
 ## Failure behavior
 
@@ -108,6 +105,9 @@ problem_summary
 diagnosis_claim_ids
 evidence_ids
 proposal
-production_application_allowed: false
+approval_required
+approval_id
+execution_id, when executed
+verification_status, when executed
 error_code/error_message, when failed
 ```

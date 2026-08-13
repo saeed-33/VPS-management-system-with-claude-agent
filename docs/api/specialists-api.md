@@ -68,7 +68,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 

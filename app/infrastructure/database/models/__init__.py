@@ -6,8 +6,13 @@ from app.infrastructure.database.models.agent_job import (
     AgentJobModel,
 )
 from app.infrastructure.database.models.remediation import (
+    RemediationApprovalModel,
+    RemediationAuditEventModel,
+    RemediationExecutionModel,
     RemediationPlanModel,
+    RemediationRollbackModel,
     RemediationSandboxResultModel,
+    RemediationVerificationModel,
 )
 from app.infrastructure.database.models.knowledge_source import (
     KnowledgeSourceModel,
@@ -68,4 +73,9 @@ __all__ = [
     "AgentJobModel",
     "RemediationPlanModel",
     "RemediationSandboxResultModel",
+    "RemediationApprovalModel",
+    "RemediationExecutionModel",
+    "RemediationVerificationModel",
+    "RemediationRollbackModel",
+    "RemediationAuditEventModel",
 ]

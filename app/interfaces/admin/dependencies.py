@@ -32,6 +32,7 @@ from app.capabilities.monitoring.server_service import ServerService
 from app.capabilities.monitoring.profile_service import (
     MonitoringProfileService,
 )
+from app.capabilities.remediation.service import RemediationService
 from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
 )
@@ -97,6 +98,10 @@ def get_claude_supervisor() -> ClaudeSupervisor:
 def get_project_tool_boundary(
 ) -> ProjectMcpToolBoundary:
     return container.project_mcp_tool_boundary
+
+
+def get_remediation_service() -> RemediationService:
+    return container.remediation_service
 
 def get_claude_agent_observability_service(
 ) -> ClaudeAgentObservabilityService:

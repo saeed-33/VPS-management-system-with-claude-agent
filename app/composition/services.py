@@ -26,6 +26,10 @@ from app.capabilities.investigation.read_service import InvestigationReadService
 from app.capabilities.knowledge.source_service import KnowledgeSourceService
 from app.capabilities.monitoring.profile_service import MonitoringProfileService
 from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.execution import (
+    SSHNamedWriteRunner,
+    SSHServiceVerifier,
+)
 from app.capabilities.monitoring.report_query_service import ReportQueryService
 from app.capabilities.monitoring.server_service import ServerService
 from app.capabilities.investigation.specialist_service import SpecialistDefinitionService
@@ -131,6 +135,20 @@ def build_core_services(
     remediation_service = RemediationService(
         repository=repositories.remediation_repository,
         automatic_remediation_allowed=False,
+        write_runner=SSHNamedWriteRunner(
+            server_repository=repositories.server_repository,
+            private_key_path=str(settings.default_ssh_private_key_path),
+            known_hosts_path=str(settings.ssh_known_hosts_path),
+            connect_timeout_seconds=settings.ssh_connect_timeout_seconds,
+            command_timeout_seconds=settings.command_timeout_seconds,
+        ),
+        verification_runner=SSHServiceVerifier(
+            server_repository=repositories.server_repository,
+            private_key_path=str(settings.default_ssh_private_key_path),
+            known_hosts_path=str(settings.ssh_known_hosts_path),
+            connect_timeout_seconds=settings.ssh_connect_timeout_seconds,
+            command_timeout_seconds=settings.command_timeout_seconds,
+        ),
     )
 
     return CoreServiceBundle(

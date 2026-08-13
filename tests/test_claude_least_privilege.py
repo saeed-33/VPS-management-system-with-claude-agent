@@ -22,14 +22,17 @@ EXPECTED_ALLOW = {
     "mcp__vps__get_specialist_definition",
     "mcp__vps__run_specialist",
     "mcp__vps__propose_remediation",
-    "Agent(specialist-worker)",
-}
-
-FORBIDDEN_REMEDIATION = {
     "mcp__vps__create_remediation_plan",
     "mcp__vps__test_remediation_in_sandbox",
     "mcp__vps__request_user_approval",
     "mcp__vps__apply_approved_remediation",
+    "Agent(specialist-worker)",
+}
+
+FORBIDDEN_REMEDIATION = {
+    "mcp__vps__raw_ssh",
+    "mcp__vps__raw_shell",
+    "mcp__vps__execute_command",
 }
 
 
@@ -73,7 +76,7 @@ def test_settings_allow_only_current_runtime_capabilities():
     assert set(settings["permissions"]["allow"]) == EXPECTED_ALLOW
 
 
-def test_phase5_execution_tools_are_explicitly_denied():
+def test_raw_remediation_escape_tools_are_explicitly_denied():
     settings = json.loads(read_text(".claude/settings.json"))
     allow = set(settings["permissions"]["allow"])
     deny = set(settings["permissions"]["deny"])
@@ -114,13 +117,14 @@ def test_runtime_agents_use_inherited_model_and_dontask():
         assert fm["permissionMode"] == "dontAsk"
 
 
-def test_server_supervisor_is_proposal_only_for_remediation():
+def test_server_supervisor_uses_supervised_remediation_tools():
     fm = parse_frontmatter(
         read_text(".claude/agents/server-supervisor.md")
     )
     tools = set(fm["tools"])
 
     assert "mcp__vps__propose_remediation" in tools
+    assert "mcp__vps__apply_approved_remediation" in tools
     assert FORBIDDEN_REMEDIATION.isdisjoint(tools)
 
 

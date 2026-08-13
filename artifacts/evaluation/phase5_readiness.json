@@ -1,0 +1,155 @@
+{
+  "automatic_remediation_allowed": false,
+  "blocking_reasons": [
+    "real_supervised_remediation: threshold not met",
+    "real supervised remediation: safe test environment unavailable"
+  ],
+  "focused_test_status": "PASS",
+  "metrics": [
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "proposal_validity",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "risk_classification",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "approval_integrity",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "policy_enforcement",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "write_tool_safety",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "execution_integrity",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "idempotency",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "evidence_completeness",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "verification_correctness",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "rollback_correctness",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "audit_completeness",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "Phase 5 focused contract coverage passed.",
+      "metadata": {},
+      "metric": "mcp_safety",
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
+      "threshold": 1.0
+    },
+    {
+      "critical": true,
+      "denominator": 1,
+      "details": "BLOCKED_BY_SAFE_TEST_ENVIRONMENT",
+      "metadata": {},
+      "metric": "real_supervised_remediation",
+      "numerator": 0,
+      "passed": false,
+      "score": 0.0,
+      "threshold": 1.0
+    }
+  ],
+  "real_acceptance_status": "BLOCKED_BY_SAFE_TEST_ENVIRONMENT",
+  "status": "BLOCKED"
+}

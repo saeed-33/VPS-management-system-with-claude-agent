@@ -46,7 +46,7 @@ C.14.12: PASS
 C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
-Phase 5: NEXT
+Phase 5: IMPLEMENTED / NOT CLOSED
 automatic_remediation_allowed: false
 ```
 
@@ -62,7 +62,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 

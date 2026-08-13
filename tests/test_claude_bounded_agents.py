@@ -66,7 +66,7 @@ def test_server_supervisor_is_main_session_coordinator():
     assert "Agent(specialist-worker)" in tools
     assert "Agent" not in tools
     assert "mcp__vps__run_specialist" not in tools
-    assert "mcp__vps__apply_approved_remediation" not in tools
+    assert "mcp__vps__apply_approved_remediation" in tools
 
     assert set(fm["skills"]) == {
         "monitor-server",

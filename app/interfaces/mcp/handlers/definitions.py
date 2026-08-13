@@ -443,6 +443,10 @@ class BoundaryDefinitionsMixin:
                         "investigation_id": {
                             "type": "string",
                         },
+                        "server_id": {
+                            "type": "integer",
+                            "minimum": 1,
+                        },
                         "title": {
                             "type": "string",
                         },
@@ -497,7 +501,7 @@ class BoundaryDefinitionsMixin:
                     "properties": {
                         "plan_id": {
                             "type": "string",
-                        }
+                        },
                     },
                     "required": ["plan_id"],
                     "additionalProperties": False,
@@ -535,7 +539,15 @@ class BoundaryDefinitionsMixin:
                     "properties": {
                         "plan_id": {
                             "type": "string",
-                        }
+                        },
+                        "expires_in_seconds": {
+                            "type": "integer",
+                            "minimum": 60,
+                            "maximum": 86400,
+                        },
+                        "scope": {
+                            "type": "object",
+                        },
                     },
                     "required": ["plan_id"],
                     "additionalProperties": False,
@@ -556,6 +568,25 @@ class BoundaryDefinitionsMixin:
                             "type": "string",
                         },
                         "approved_by": {
+                            "type": "string",
+                        },
+                        "approval_id": {
+                            "type": "string",
+                        },
+                        "server_id": {
+                            "type": "integer",
+                            "minimum": 1,
+                        },
+                        "actor": {
+                            "type": "string",
+                        },
+                        "idempotency_key": {
+                            "type": "string",
+                        },
+                        "runtime_session_id": {
+                            "type": "string",
+                        },
+                        "agent_job_id": {
                             "type": "string",
                         },
                     },

@@ -15,13 +15,14 @@ C.14.12: PASS
 C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
-Phase 5: NEXT
+Phase 5: IMPLEMENTED / NOT CLOSED
 automatic_remediation_allowed: false
 provider: ollama
 ```
 
-The current readiness state is `ready_for_supervised_operations`. Phase 5
-Supervised Remediation has not started.
+The current readiness state is `blocked_by_safe_test_environment`. Phase 5
+Supervised Remediation is implemented, but real supervised acceptance is
+pending an explicitly safe reversible target.
 
 ## Current architecture
 
@@ -72,10 +73,15 @@ periodic monitoring
  -> dynamic DB-defined Specialists
  -> persisted Evidence
  -> final diagnosis
- -> bounded remediation proposal only
+ -> bounded remediation proposal
+ -> sandbox
+ -> persisted human approval
+ -> registered named write
+ -> verification or rollback
 ```
 
-Production remediation execution is not enabled.
+Automatic remediation execution is not enabled. Human-approved execution is
+available only through the persisted approval and policy gates.
 
 ## Implemented capabilities
 
@@ -89,6 +95,10 @@ Production remediation execution is not enabled.
 - Admin web/API surfaces for operational records;
 - 24 bounded project MCP tools;
 - deterministic and persisted runtime readiness evaluation.
+- supervised remediation lifecycle with named service writes, approval
+  fingerprints, idempotency, verification, rollback, and audit events;
+- Admin remediation review/approval/execution/rollback surface;
+- 13-metric Phase 5 readiness evaluator.
 
 ## Safety model
 
@@ -142,7 +152,9 @@ uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_accepta
 - [Testing strategy](docs/testing/TESTING_STRATEGY.md)
 - [C.14.12 readiness closeout](docs/architecture/c14-12-runtime-readiness-gate.md)
 
-## Current next phase
+## Phase 5 acceptance state
 
-C.14.14 Phase C Closure is complete. Phase 5 — Supervised Remediation is the
-next allowed phase; it has not been implemented by this task.
+C.14.14 Phase C Closure is complete. Phase 5 is implemented but remains
+`PHASE 5 = NOT CLOSED` because the configured servers are offline and no safe
+reversible real-test target is designated. Phase 6 is not started or
+authorized by this task.

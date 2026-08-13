@@ -1,6 +1,123 @@
 {% extends "base.html" %}
 {% block title %}Remediation{% endblock %}
 {% block content %}
-<header class="page-header"><div><h1 class="page-heading">Remediation</h1><p class="page-description">Review proposals and policy-gated remediation outcomes.</p></div></header>
-<section class="content-grid"><article class="panel"><header class="panel-header"><h2 class="panel-title">Safety boundary</h2></header><div class="panel-body"><p>Claude may propose remediation through MCP. Python policy and approval checks decide whether anything can be applied.</p><a class="button button-secondary" href="/reports">Review reports</a></div></article><article class="panel"><header class="panel-header"><h2 class="panel-title">No automatic bypass</h2></header><div class="panel-body"><p>SSH, evidence, approval, and execution remain project-owned capabilities.</p></div></article></section>
+<header class="page-header">
+    <div>
+        <h1 class="page-heading">Supervised Remediation</h1>
+        <p class="page-description">Review grounded plans, approve deliberately, and inspect execution evidence.</p>
+    </div>
+</header>
+
+<section class="content-grid">
+    <article class="panel">
+        <header class="panel-header"><h2 class="panel-title">Pending plans</h2></header>
+        <div class="panel-body">
+            <p id="remediation-loading">Loading persisted plans…</p>
+            <div id="remediation-plans" class="stacked-list"></div>
+        </div>
+    </article>
+    <article class="panel">
+        <header class="panel-header"><h2 class="panel-title">Operator gate</h2></header>
+        <div class="panel-body">
+            <p>Only a persisted, unexpired approval matching the immutable plan fingerprint can authorize a named write.</p>
+            <p>Raw SSH, arbitrary shell, and generic command input are not available from this page or MCP.</p>
+            <div id="remediation-detail" class="muted">Select a plan to inspect its audit trail.</div>
+        </div>
+    </article>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(async function loadRemediation() {
+    const loading = document.getElementById("remediation-loading");
+    const list = document.getElementById("remediation-plans");
+    const detail = document.getElementById("remediation-detail");
+    try {
+        const response = await fetch("/api/remediation");
+        if (!response.ok) throw new Error("Unable to load remediation plans.");
+        const plans = await response.json();
+        loading.remove();
+        if (!plans.length) {
+            list.textContent = "No persisted remediation plans.";
+            return;
+        }
+        for (const plan of plans) {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "button button-secondary";
+            item.style.display = "block";
+            item.style.width = "100%";
+            item.style.marginBottom = "0.5rem";
+            item.textContent = `${plan.plan_id} — ${plan.status} — ${plan.risk_level}`;
+            item.addEventListener("click", async () => {
+                const [planResponse, auditResponse] = await Promise.all([
+                    fetch(`/api/remediation/${encodeURIComponent(plan.plan_id)}`),
+                    fetch(`/api/remediation/${encodeURIComponent(plan.plan_id)}/audit`),
+                ]);
+                const current = await planResponse.json();
+                const audit = await auditResponse.json();
+                detail.replaceChildren();
+                const controls = document.createElement("div");
+                const plan = current.plan;
+                const approval = current.approval;
+                if (approval && approval.status === "pending") {
+                    const approve = document.createElement("button");
+                    approve.className = "button button-primary";
+                    approve.textContent = "Approve exact plan";
+                    approve.addEventListener("click", async () => {
+                        if (["high", "critical"].includes(plan.risk_level) && !window.confirm("Confirm this HIGH/CRITICAL remediation plan exactly as shown?")) return;
+                        const approver = window.prompt("Operator identity:");
+                        if (!approver) return;
+                        await fetch(`/api/remediation/${encodeURIComponent(plan.plan_id)}/approval/${encodeURIComponent(approval.approval_id)}/approve`, {
+                            method: "POST", headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({approver})
+                        });
+                        window.location.reload();
+                    });
+                    controls.appendChild(approve);
+                }
+                if (approval && approval.status === "approved" && plan.server_id && current.execution === null) {
+                    const execute = document.createElement("button");
+                    execute.className = "button button-primary";
+                    execute.textContent = "Execute approved plan";
+                    execute.addEventListener("click", async () => {
+                        if (!window.confirm("Execute the approved named action on the original server?")) return;
+                        const actor = window.prompt("Operator identity:");
+                        if (!actor) return;
+                        await fetch(`/api/remediation/${encodeURIComponent(plan.plan_id)}/execute`, {
+                            method: "POST", headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({approval_id: approval.approval_id, server_id: plan.server_id, actor})
+                        });
+                        window.location.reload();
+                    });
+                    controls.appendChild(execute);
+                }
+                if (current.execution && ["rollback_required", "failed"].includes(plan.status)) {
+                    const rollback = document.createElement("button");
+                    rollback.className = "button button-secondary";
+                    rollback.textContent = "Request registered rollback";
+                    rollback.addEventListener("click", async () => {
+                        if (!window.confirm("Run the registered rollback action and verify it?")) return;
+                        const actor = window.prompt("Operator identity:");
+                        if (!actor) return;
+                        await fetch(`/api/remediation/${encodeURIComponent(plan.plan_id)}/rollback`, {
+                            method: "POST", headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({execution_id: current.execution.execution_id, server_id: plan.server_id, actor})
+                        });
+                        window.location.reload();
+                    });
+                    controls.appendChild(rollback);
+                }
+                detail.appendChild(controls);
+                const pre = document.createElement("pre");
+                pre.textContent = JSON.stringify({plan: current, audit}, null, 2);
+                detail.appendChild(pre);
+            });
+            list.appendChild(item);
+        }
+    } catch (error) {
+        loading.textContent = error.message;
+    }
+})();
+</script>
 {% endblock %}

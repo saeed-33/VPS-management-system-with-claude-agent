@@ -17,6 +17,7 @@ from app.interfaces.admin.api import (
     knowledge_sources_router,
     diagnostic_tools_router,
     system_router,
+    remediation_router,
 )
 from app.interfaces.admin.web import router as web_router
 from app.composition import container
@@ -66,6 +67,17 @@ async def lifespan(
         container.claude_agent_job_service
         .recover_interrupted_jobs()
     )
+
+    recovered_remediation = (
+        container.remediation_service
+        .recover_interrupted_executions()
+    )
+
+    if recovered_remediation:
+        logger.warning(
+            "Marked %s interrupted remediation execution(s) for operator review.",
+            recovered_remediation,
+        )
 
     if recovered_jobs:
         logger.warning(
@@ -153,6 +165,7 @@ app.include_router(diagnostic_tools_router)
 app.include_router(investigations_router)
 app.include_router(system_router)
 app.include_router(agent_observability_router)
+app.include_router(remediation_router)
 
 
 @app.get(

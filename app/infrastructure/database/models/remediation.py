@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     Index,
     Integer,
@@ -43,6 +44,11 @@ class RemediationPlanModel(Base):
         nullable=False,
         index=True,
     )
+    server_id: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+        index=True,
+    )
     title: Mapped[str] = mapped_column(
         String(300),
         nullable=False,
@@ -69,6 +75,16 @@ class RemediationPlanModel(Base):
     risk_level: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
+    )
+    plan_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=1,
+    )
+    plan_fingerprint: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
     )
     rollback_plan: Mapped[str | None] = mapped_column(
         String(4000),
@@ -99,6 +115,46 @@ class RemediationPlanModel(Base):
     )
     denial_reason: Mapped[str | None] = mapped_column(
         String(2000),
+        nullable=True,
+    )
+    approval_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    approval_fingerprint: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+    approval_comment: Mapped[str | None] = mapped_column(
+        String(2000),
+        nullable=True,
+    )
+    approval_scope: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+    approval_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    execution_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    verification_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    rollback_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    runtime_session_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+    agent_job_id: Mapped[str | None] = mapped_column(
+        String(128),
         nullable=True,
     )
     plan_metadata: Mapped[dict] = mapped_column(
@@ -179,3 +235,95 @@ class RemediationSandboxResultModel(Base):
         nullable=False,
         default=utc_now,
     )
+
+
+class RemediationApprovalModel(Base):
+    __tablename__ = "remediation_approvals"
+    __table_args__ = (
+        Index("ix_remediation_approvals_plan_created", "plan_id", "created_at"),
+        Index("ix_remediation_approvals_status", "status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    approval_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    plan_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    plan_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(30), nullable=False)
+    approver: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    comment: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    scope: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class RemediationExecutionModel(Base):
+    __tablename__ = "remediation_executions"
+    __table_args__ = (
+        Index("ix_remediation_executions_plan_created", "plan_id", "created_at"),
+        Index("ix_remediation_executions_status", "status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    execution_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    plan_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    action_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    server_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(30), nullable=False)
+    idempotency_key: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    actor: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    runtime_session_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    agent_job_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    before_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    after_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    exit_status: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    stdout: Mapped[str] = mapped_column(String(12000), nullable=False, default="")
+    stderr: Mapped[str] = mapped_column(String(12000), nullable=False, default="")
+    error: Mapped[str | None] = mapped_column(String(4000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    execution_metadata: Mapped[dict] = mapped_column("metadata", JSON, nullable=False, default=dict)
+
+
+class RemediationVerificationModel(Base):
+    __tablename__ = "remediation_verifications"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    verification_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    execution_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(30), nullable=False)
+    before_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    after_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    details: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class RemediationRollbackModel(Base):
+    __tablename__ = "remediation_rollbacks"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    rollback_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    execution_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(30), nullable=False)
+    before_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    after_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    details: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class RemediationAuditEventModel(Base):
+    __tablename__ = "remediation_audit_events"
+    __table_args__ = (
+        Index("ix_remediation_audit_plan_created", "plan_id", "created_at"),
+        Index("ix_remediation_audit_event_type", "event_type"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    plan_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    event_type: Mapped[str] = mapped_column(String(80), nullable=False)
+    actor: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    server_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    runtime_session_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    agent_job_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)

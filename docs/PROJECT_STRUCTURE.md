@@ -46,6 +46,9 @@ Evaluation / Production Readiness Gate
 - `.claude/agents/specialist-worker.md` — Project documentation.
 - `.claude/rules/evidence-grounding.md` — Project documentation.
 - `.claude/rules/safety.md` — Claude rule file for tool safety, policy boundaries, and prohibited bypasses.
+- `.claude/runtime-events/0a9bc785-5148-4540-9618-418bf37d55be/1786619175929641100-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/0a9bc785-5148-4540-9618-418bf37d55be/1786619177249289000-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/0a9bc785-5148-4540-9618-418bf37d55be/1786619257435037700-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/0cf8343c-ef63-4d30-b705-0d6a5431db43/1786560485437671900-SessionStart-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/0cf8343c-ef63-4d30-b705-0d6a5431db43/1786560487734795200-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/0cf8343c-ef63-4d30-b705-0d6a5431db43/1786560488758377800-SessionEnd-main.json` — Structured configuration or generated data.
@@ -185,10 +188,10 @@ Evaluation / Production Readiness Gate
 - `.claude/runtime-events/fb36fbc7-b59b-4218-9b85-27f9f01a4e78/1786559779451932000-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
 - `.claude/runtime-events/fb36fbc7-b59b-4218-9b85-27f9f01a4e78/1786559780582958100-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/settings.json` — Claude project settings for permissions, tools, and hooks.
-- `.claude/skills/analyze-incident/SKILL.md` — Project documentation.
-- `.claude/skills/investigate-incident/SKILL.md` — Project documentation.
-- `.claude/skills/monitor-server/SKILL.md` — Project documentation.
-- `.claude/skills/plan-remediation/SKILL.md` — Project documentation.
+- `.claude/skills/analyze-incident/SKILL.md` — Claude skill instructions for incident report analysis.
+- `.claude/skills/investigate-incident/SKILL.md` — Claude skill instructions for specialist investigation workflows.
+- `.claude/skills/monitor-server/SKILL.md` — Claude skill instructions for server monitoring tasks.
+- `.claude/skills/plan-remediation/SKILL.md` — Claude skill instructions for remediation planning and validation.
 - `.env` — Project asset.
 - `.env.example` — Example environment variables for local/runtime configuration.
 - `.gitignore` — Project asset.
@@ -219,6 +222,7 @@ Evaluation / Production Readiness Gate
 - `app/__init__.py` — Python module.
 - `app/capabilities/__init__.py` — Application capabilities: bounded business execution used by interfaces.
 - `app/capabilities/remediation/__init__.py` — Policy-gated remediation proposal and application capabilities.
+- `app/capabilities/remediation/execution.py` — Python module containing class `WriteCommandResult`, class `WriteCommandRunner`, class `VerificationRunner`, class `UnavailableWriteRunner`, class `UnavailableVerificationRunner`.
 - `app/capabilities/remediation/service.py` — Python module containing class `RemediationService`.
 - `app/composition/__init__.py` — Application composition root / dependency container. Exports the canonical wired application container.
 - `app/composition/analysis.py` — Python module containing class `RetrievalComposition`, class `AnalysisInvestigationComposition`, `build_retrieval_composition()`, `build_analysis_investigation_composition()`.
@@ -240,6 +244,7 @@ Evaluation / Production Readiness Gate
 - `app/infrastructure/database/migrations/step_4_7_knowledge_sources.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_4_8_0_knowledge_rag_schema.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_4_8_3_knowledge_indexes.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_5_1_supervised_remediation.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_c_10_remediation.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/migrations/step_c_3_agent_jobs.sql` — Database migration/configuration asset.
 - `app/infrastructure/database/models/__init__.py` — Python module.
@@ -252,7 +257,7 @@ Evaluation / Production Readiness Gate
 - `app/infrastructure/database/models/monitoring_profile.py` — Python module containing class `MonitoringProfileModel`.
 - `app/infrastructure/database/models/monitoring_report.py` — Python module containing class `MonitoringReportModel`.
 - `app/infrastructure/database/models/profile_command.py` — Python module containing class `MonitoringProfileCommandModel`.
-- `app/infrastructure/database/models/remediation.py` — Python module containing class `RemediationPlanModel`, class `RemediationSandboxResultModel`.
+- `app/infrastructure/database/models/remediation.py` — Python module containing class `RemediationPlanModel`, class `RemediationSandboxResultModel`, class `RemediationApprovalModel`, class `RemediationExecutionModel`, class `RemediationVerificationModel`.
 - `app/infrastructure/database/models/report_analysis.py` — Python module containing class `AnalysisJobStatus`, class `ReportAnalysisModel`.
 - `app/infrastructure/database/models/report_analysis_source.py` — Python module containing class `ReportAnalysisSourceModel`.
 - `app/infrastructure/database/models/report_retrieval_document.py` — Python module containing class `ReportRetrievalDocumentModel`.
@@ -393,6 +398,7 @@ Evaluation / Production Readiness Gate
 - `tools/acceptance/evaluation/cases.py` — Operator/developer tool exposing class `EvaluationCase`, `default_evaluation_cases()`.
 - `tools/acceptance/evaluation/contracts.py` — Operator/developer tool exposing class `EvaluationMetric`, class `ReadinessStatus`, class `EvaluationObservation`, class `MetricThreshold`.
 - `tools/acceptance/evaluation/persisted_runtime.py` — Operator/developer tool exposing class `PersistedRuntimeEvaluation`, class `PersistedRuntimeEvaluator`.
+- `tools/acceptance/evaluation/phase5_readiness.py` — Operator/developer tool exposing class `Phase5Metric`, class `Phase5Observation`, class `Phase5MetricResult`, class `Phase5ReadinessResult`.
 - `tools/acceptance/evaluation/readiness_gate.py` — Operator/developer tool exposing class `ProductionReadinessGate`.
 - `tools/acceptance/evaluation/runner.py` — Operator/developer tool exposing class `EvaluationCaseResult`, class `EvaluationRunResult`, class `DeterministicEvaluationRunner`, `expected_behavior_executor()`.
 - `tools/acceptance/evaluation/runtime_readiness.py` — Operator/developer tool exposing class `RuntimeReadinessMetric`, class `RuntimeReadinessResult`, class `RuntimeReadinessGate`.
@@ -408,6 +414,7 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/admin/api/investigations.py` — FastAPI API router/module exposing `list_investigations()`, `get_investigation()`, `list_report_investigations()`.
 - `app/interfaces/admin/api/knowledge_sources.py` — FastAPI API router/module exposing `list_knowledge_sources()`, `get_knowledge_source()`, `create_knowledge_source()`, `update_knowledge_source()`.
 - `app/interfaces/admin/api/profiles.py` — FastAPI API router/module exposing `list_profiles()`, `get_profile()`, `create_profile()`, `update_profile()`.
+- `app/interfaces/admin/api/remediation.py` — FastAPI API router/module exposing `list_remediation_plans()`, `get_remediation_plan()`, `get_remediation_audit()`, `request_remediation_approval()`.
 - `app/interfaces/admin/api/reports.py` — FastAPI API router/module exposing `list_reports()`, `get_report()`, `get_report_analysis()`, `get_report_analysis_sources()`.
 - `app/interfaces/admin/api/servers.py` — FastAPI API router/module exposing `list_servers()`, `get_server()`, `create_server()`, `update_server()`.
 - `app/interfaces/admin/api/specialists.py` — FastAPI API router/module exposing `list_specialists()`, `get_specialist()`, `create_specialist()`, `update_specialist()`.
@@ -418,6 +425,7 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/admin/schemas/investigations.py` — API/schema models including class `InvestigationCandidateResponse`, class `InvestigationSummaryResponse`, class `InvestigationRuntimeResponse`, class `InvestigationDetailResponse`.
 - `app/interfaces/admin/schemas/knowledge_sources.py` — API/schema models including class `KnowledgeSourceCreateRequest`, class `KnowledgeSourceUpdateRequest`, class `KnowledgeSourceEnabledRequest`, class `KnowledgeSourceResponse`.
 - `app/interfaces/admin/schemas/profiles.py` — API/schema models including class `MonitoringProfileCreateRequest`, class `MonitoringProfileUpdateRequest`, class `MonitoringProfileResponse`, class `AssignProfileCommandRequest`, class `UpdateProfileCommandRequest`.
+- `app/interfaces/admin/schemas/remediation.py` — API/schema models including class `ApprovalRequest`, class `ApprovalDecisionRequest`, class `ExecuteRemediationRequest`, class `RollbackRemediationRequest`.
 - `app/interfaces/admin/schemas/reports.py` — API/schema models including class `ReportListItemResponse`, class `PaginatedReportsResponse`, class `CommandExecutionResponse`, class `ReportDetailsResponse`, class `ReportAnalysisResponse`.
 - `app/interfaces/admin/schemas/servers.py` — API/schema models including class `ServerCreateRequest`, class `ServerUpdateRequest`, class `ServerResponse`, class `SSHTestResponse`.
 - `app/interfaces/admin/schemas/specialists.py` — API/schema models including class `SpecialistCreateRequest`, class `SpecialistUpdateRequest`, class `SpecialistEnabledRequest`, class `SpecialistResponse`.
@@ -456,6 +464,7 @@ Evaluation / Production Readiness Gate
 - `tools/acceptance/run_evaluation_dataset.py` — Operator/developer tool exposing `main()`.
 - `tools/acceptance/run_investigation_web_api_acceptance.py` — Operator/developer tool exposing `status()`, `main()`.
 - `tools/acceptance/run_persisted_runtime_evaluation.py` — Operator/developer tool exposing `main()`.
+- `tools/acceptance/run_phase5_readiness_evaluation.py` — Operator/developer tool exposing `main()`.
 - `tools/acceptance/run_production_readiness_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/acceptance/run_safety_runtime_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/acceptance/smoke_ollama_claude_runtime.py` — Operator/developer tool exposing `parse_args()`, `jsonable()`, `prepare_database_schema()`, `main_async()`.
@@ -522,7 +531,7 @@ Evaluation / Production Readiness Gate
 - `tests/test_claude_agent_job_persistence.py` — Pytest coverage for `make_repository()`, `make_request()`, `test_job_is_created_from_runtime_request()`, `test_job_completion_preserves_result_observability()`, `test_job_survives_repository_recreation()`.
 - `tests/test_claude_bounded_agents.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_canonical_agent_set_is_two_bounded_roles()`, `test_server_supervisor_is_main_session_coordinator()`, `test_specialist_worker_cannot_delegate_or_remediate()`.
 - `tests/test_claude_code_runtime_configuration.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_project_mcp_server_is_registered_for_claude_code()`, `test_claude_settings_use_enforced_permissions()`, `test_claude_agents_have_frontmatter_and_tools()`.
-- `tests/test_claude_least_privilege.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_settings_allow_only_current_runtime_capabilities()`, `test_phase5_execution_tools_are_explicitly_denied()`, `test_raw_operational_shell_paths_are_denied_for_both_shells()`.
+- `tests/test_claude_least_privilege.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_settings_allow_only_current_runtime_capabilities()`, `test_raw_remediation_escape_tools_are_explicitly_denied()`, `test_raw_operational_shell_paths_are_denied_for_both_shells()`.
 - `tests/test_claude_operational_skills.py` — Pytest coverage for `read_skill()`, `frontmatter()`, `allowed_tools()`, `test_operational_skill_set_is_canonical()`, `test_skills_have_frontmatter_and_exact_intended_tools()`.
 - `tests/test_claude_process_session_runner.py` — Pytest coverage for `request()`, class `ScriptCommandBuilder`, `write_script()`, `test_process_runner_decodes_structured_output()`, `test_process_runner_accepts_result_text_envelope()`.
 - `tests/test_claude_project_mcp_runtime_config.py` — Pytest coverage for `read_json()`, `test_vps_project_mcp_is_explicitly_approved()`, `test_vps_mcp_launch_is_project_root_stable()`.
@@ -564,6 +573,8 @@ Evaluation / Production Readiness Gate
 - `tests/test_ollama_final_synthesis_minimal_contract.py` — Pytest coverage for `test_final_synthesis_uses_minimal_json_mode()`, `test_normal_reasoning_keeps_existing_generation_limits()`.
 - `tests/test_ollama_specialist_reasoning_client.py` — Pytest coverage for `make_response()`, `test_schema_rejection_is_cached_and_json_fallback_succeeds()`, `test_length_retry_uses_compact_retry_instruction()`, `test_final_synthesis_enables_provider_compact_mode()`.
 - `tests/test_persisted_runtime_evaluation.py` — Pytest coverage for `make_detail()`, `by_metric()`, `test_valid_snapshot_emits_five_real_metrics()`, `test_unknown_evidence_fails_grounding()`, `test_budget_overrun_fails()`.
+- `tests/test_phase5_readiness.py` — Pytest coverage for `test_phase5_gate_requires_all_metrics_and_real_acceptance()`, `test_phase5_gate_passes_only_with_explicit_real_acceptance()`.
+- `tests/test_phase5_supervised_remediation.py` — Pytest coverage for class `FakeWriter`, class `FakeVerifier`, `make_service()`, `make_plan()`, `approve_plan()`.
 - `tests/test_production_readiness_gate.py` — Pytest coverage for `observations_for_thresholds()`, `test_gate_requires_minimum_samples()`, `test_all_thresholds_pass_supervised_only()`, `test_hard_safety_failure_blocks()`, `test_policy_failure_blocks()`.
 - `tests/test_project_mcp_analysis_tools.py` — Pytest coverage for class `Analysis`, class `AnalysisRepository`, class `AnalysisOrchestrator`, class `IncidentRetriever`, class `KnowledgeRetriever`.
 - `tests/test_project_mcp_investigation_tools.py` — Pytest coverage for class `Router`, class `PersistedInvestigation`, class `PersistenceService`, class `ReadService`, class `EmptyAnalysisRepository`.
@@ -638,6 +649,7 @@ Evaluation / Production Readiness Gate
 - `docs/architecture/knowledge-sources.md` — Project documentation.
 - `docs/architecture/overview.md` — Project documentation.
 - `docs/architecture/persisted-runtime-evaluation.md` — Project documentation.
+- `docs/architecture/phase-5-supervised-remediation.md` — Project documentation.
 - `docs/architecture/production-readiness-gate.md` — Project documentation.
 - `docs/architecture/runtime-sample-expansion.md` — Project documentation.
 - `docs/architecture/safety-failure-injection.md` — Project documentation.
@@ -679,6 +691,8 @@ Evaluation / Production Readiness Gate
 - `docs/roadmap/phase-4-4-5-to-4-11-closeout.md` — Project documentation.
 - `docs/roadmap/phase-4-foundation-closeout.md` — Project documentation.
 - `docs/roadmap/phase-4-implementation-plan.md` — Project documentation.
+- `docs/roadmap/phase-5-final-report.md` — Project documentation.
+- `docs/roadmap/phase-c-closeout.md` — Project documentation.
 - `docs/security/security-baseline.md` — Project documentation.
 - `docs/testing/RUNTIME_SCENARIOS.md` — Project documentation.
 - `docs/testing/TESTING_STRATEGY.md` — Project documentation.
@@ -702,7 +716,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 

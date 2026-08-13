@@ -54,6 +54,7 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/architecture/knowledge-sources.md`](architecture/knowledge-sources.md) | HISTORICAL_CLOSEOUT | Knowledge Sources Foundation |
 | [`docs/architecture/overview.md`](architecture/overview.md) | CURRENT_CANONICAL | Current Architecture Overview |
 | [`docs/architecture/persisted-runtime-evaluation.md`](architecture/persisted-runtime-evaluation.md) | CURRENT_CANONICAL | Persisted Runtime Evaluation — Phase 4.20.3 |
+| [`docs/architecture/phase-5-supervised-remediation.md`](architecture/phase-5-supervised-remediation.md) | CURRENT_CANONICAL | Phase 5 — Supervised Remediation Architecture |
 | [`docs/architecture/production-readiness-gate.md`](architecture/production-readiness-gate.md) | CURRENT_CANONICAL | Evaluation & Production Readiness Gate — Phase 4.20.1 |
 | [`docs/architecture/runtime-sample-expansion.md`](architecture/runtime-sample-expansion.md) | CURRENT_CANONICAL | Runtime Sample Expansion — Phase 4.20.6 |
 | [`docs/architecture/safety-failure-injection.md`](architecture/safety-failure-injection.md) | CURRENT_CANONICAL | Safety & Failure Injection — Phase 4.20.4 |
@@ -95,6 +96,7 @@ Every Markdown document in `docs/` is classified below.
 | [`docs/roadmap/phase-4-4-5-to-4-11-closeout.md`](roadmap/phase-4-4-5-to-4-11-closeout.md) | HISTORICAL_CLOSEOUT | Phase 4 Closeout — Steps 4.5 through 4.11 |
 | [`docs/roadmap/phase-4-foundation-closeout.md`](roadmap/phase-4-foundation-closeout.md) | HISTORICAL_CLOSEOUT | Phase 4 Milestone A Closeout — Foundation |
 | [`docs/roadmap/phase-4-implementation-plan.md`](roadmap/phase-4-implementation-plan.md) | HISTORICAL_CLOSEOUT | Phase 4 Implementation Plan — Hierarchical Multi-Agent Investigation |
+| [`docs/roadmap/phase-5-final-report.md`](roadmap/phase-5-final-report.md) | ROADMAP | Phase 5 — Supervised Remediation Final Report |
 | [`docs/roadmap/phase-c-closeout.md`](roadmap/phase-c-closeout.md) | ROADMAP | Phase C Final Closeout |
 | [`docs/security/security-baseline.md`](security/security-baseline.md) | OPERATIONS | Security Baseline |
 | [`docs/testing/RUNTIME_SCENARIOS.md`](testing/RUNTIME_SCENARIOS.md) | CURRENT_CANONICAL | Linux Random Runtime Scenarios |
@@ -122,7 +124,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 

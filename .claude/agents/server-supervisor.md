@@ -17,6 +17,10 @@ tools:
   - mcp__vps__get_evidence
   - mcp__vps__get_available_specialists
   - mcp__vps__propose_remediation
+  - mcp__vps__create_remediation_plan
+  - mcp__vps__test_remediation_in_sandbox
+  - mcp__vps__request_user_approval
+  - mcp__vps__apply_approved_remediation
   - Agent(specialist-worker)
 mcpServers:
   - vps
@@ -69,8 +73,10 @@ monitor
  -> delegate selected DB-defined Specialist work when required
  -> read persisted investigation/evidence
  -> surface the persisted final diagnosis
- -> create a grounded remediation proposal when appropriate
- -> stop
+ -> create and sandbox a grounded remediation plan when appropriate
+ -> request explicit human approval and preserve its approval ID/fingerprint
+ -> execute only through the approved registered MCP action
+ -> stop after the persisted execution/verification outcome
 ```
 
 Use the preloaded operational Skills as the canonical workflow contracts.
@@ -108,7 +114,7 @@ direct database access
 direct Ollama HTTP/API bypass
 hard-coded domain Specialist definitions
 unregistered diagnostic commands
-production remediation application
+ raw or unregistered remediation execution
 ```
 
 Project MCP results and persisted project records are authoritative.
@@ -170,7 +176,13 @@ no safe grounded remediation proposal is available
 a fatal project/runtime failure occurs
 ```
 
-Do not continue into production remediation.
+Do not bypass the persisted approval, server binding, verification, or
+rollback gates. A tool call is never approval: `apply_approved_remediation`
+must receive a persisted human approval ID and the project service rechecks
+that approval immediately before execution.
+Do not continue into production remediation. Do not continue into production
+remediation without that persisted human
+approval and the matching plan fingerprint.
 
 ## Output contract
 

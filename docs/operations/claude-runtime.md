@@ -69,7 +69,7 @@ must not bypass project tools, policy, Evidence, or budgets.
 `.mcp.json` registers the `vps` server through
 `tools/run_project_mcp_server.py`. The registry exposes exactly 24 tools in
 monitoring, reports, retrieval, investigation, Specialists, and bounded
-remediation-planning groups. Non-read-only tools remain policy-gated and no
+plan-remediation workflow. Non-read-only tools remain policy-gated and no
 production remediation is automatically applied.
 
 ## Runtime observability
@@ -109,7 +109,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 

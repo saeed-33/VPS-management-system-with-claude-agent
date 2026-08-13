@@ -103,6 +103,7 @@ class RemediationToolsMixin:
                     "rollback_plan"
                 ),
                 plan_id=arguments.get("plan_id"),
+                server_id=arguments.get("server_id"),
             )
         )
 
@@ -209,7 +210,15 @@ class RemediationToolsMixin:
                 plan_id=self._required_string(
                     arguments,
                     "plan_id",
-                )
+                ),
+                expires_in_seconds=int(
+                    arguments.get("expires_in_seconds", 3600)
+                ),
+                scope=(
+                    arguments.get("scope")
+                    if isinstance(arguments.get("scope"), dict)
+                    else None
+                ),
             )
         )
 
@@ -237,9 +246,15 @@ class RemediationToolsMixin:
                     arguments,
                     "plan_id",
                 ),
+                approval_id=arguments.get("approval_id"),
                 approved_by=arguments.get(
                     "approved_by"
                 ),
+                server_id=arguments.get("server_id"),
+                actor=arguments.get("actor"),
+                idempotency_key=arguments.get("idempotency_key"),
+                runtime_session_id=arguments.get("runtime_session_id"),
+                agent_job_id=arguments.get("agent_job_id"),
             )
         )
 

@@ -62,6 +62,10 @@ SKILLS = {
             "mcp__vps__get_investigation_status",
             "mcp__vps__get_evidence",
             "mcp__vps__propose_remediation",
+            "mcp__vps__create_remediation_plan",
+            "mcp__vps__test_remediation_in_sandbox",
+            "mcp__vps__request_user_approval",
+            "mcp__vps__apply_approved_remediation",
         },
         "sections": {
             "## Input contract",
@@ -158,16 +162,16 @@ def test_investigation_skill_preserves_db_specialist_authority():
     assert "Agent(specialist-worker)" in text
 
 
-def test_remediation_skill_is_proposal_only():
+def test_remediation_skill_is_supervised_and_approval_gated():
     text = read_skill("plan-remediation")
     tools = allowed_tools(text)
 
     assert "mcp__vps__propose_remediation" in tools
-    assert "mcp__vps__create_remediation_plan" not in tools
-    assert "mcp__vps__test_remediation_in_sandbox" not in tools
-    assert "mcp__vps__request_user_approval" not in tools
-    assert "mcp__vps__apply_approved_remediation" not in tools
-    assert "production_application_allowed: false" in text
+    assert "mcp__vps__create_remediation_plan" in tools
+    assert "mcp__vps__test_remediation_in_sandbox" in tools
+    assert "mcp__vps__request_user_approval" in tools
+    assert "mcp__vps__apply_approved_remediation" in tools
+    assert "persisted human approval" in text
 
 
 def test_server_supervisor_preloads_canonical_workflow_skills():

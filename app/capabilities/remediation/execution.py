@@ -1,0 +1,119 @@
+from __future__ import annotations
+
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from typing import Protocol
+
+from app.core.contracts.remediation import RemediationAction
+from app.infrastructure.ssh.client import SSHClient, SSHConnectionConfig
+from app.infrastructure.ssh.command_executor import SSHCommandExecutor
+
+
+@dataclass(frozen=True, slots=True)
+class WriteCommandResult:
+    success: bool
+    exit_status: int | None = None
+    stdout: str = ""
+    stderr: str = ""
+    error: str | None = None
+
+
+class WriteCommandRunner(Protocol):
+    def run(self, *, server_id: int, action: RemediationAction, command: str, timeout_seconds: float) -> WriteCommandResult:
+        ...
+
+
+class VerificationRunner(Protocol):
+    def verify(self, *, server_id: int, action: RemediationAction) -> tuple[bool, dict]:
+        ...
+
+
+class UnavailableWriteRunner:
+    def run(self, **_kwargs) -> WriteCommandResult:
+        return WriteCommandResult(success=False, error="safe_write_runner_not_configured")
+
+
+class UnavailableVerificationRunner:
+    def verify(self, **_kwargs) -> tuple[bool, dict]:
+        return False, {"error": "safe_verification_runner_not_configured"}
+
+
+class _SSHNamedCommandRunner:
+    def __init__(self, *, server_repository, private_key_path: str, known_hosts_path: str,
+                 connect_timeout_seconds: float, command_timeout_seconds: float) -> None:
+        self._server_repository = server_repository
+        self._private_key_path = private_key_path
+        self._known_hosts_path = known_hosts_path
+        self._connect_timeout_seconds = connect_timeout_seconds
+        self._command_timeout_seconds = command_timeout_seconds
+
+    def _run_sync(self, coroutine_factory):
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(coroutine_factory())
+        # MCP handlers are async but the domain service deliberately remains
+        # synchronous for compatibility. Isolate the SSH event loop from the
+        # caller's loop; the registered command is still the only command
+        # supplied to this adapter.
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            return executor.submit(lambda: asyncio.run(coroutine_factory())).result()
+
+    async def _execute(self, *, server_id: int, command: str, command_name: str, timeout: float):
+        server = self._server_repository.get_by_id(server_id)
+        if server is None:
+            return WriteCommandResult(success=False, error="server_not_found")
+        config = SSHConnectionConfig(
+            host=server.host,
+            port=server.port,
+            username=server.username,
+            private_key_path=server.private_key_path or self._private_key_path,
+            known_hosts_path=self._known_hosts_path,
+            connect_timeout_seconds=self._connect_timeout_seconds,
+        )
+        try:
+            async with SSHClient(config) as client:
+                result = await SSHCommandExecutor(client).execute(
+                    command_id=None,
+                    command_name=command_name,
+                    command_text=command,
+                    execution_order=1,
+                    timeout_seconds=min(timeout, self._command_timeout_seconds),
+                    fingerprint_strategy="remediation_named_command",
+                    fingerprint_config={"command_name": command_name},
+                )
+            return WriteCommandResult(
+                success=result.success,
+                exit_status=result.exit_status,
+                stdout=result.stdout,
+                stderr=result.stderr,
+                error=result.error_message,
+            )
+        except Exception as exc:
+            return WriteCommandResult(success=False, error=f"{type(exc).__name__}: {exc}")
+
+
+class SSHNamedWriteRunner(_SSHNamedCommandRunner):
+    def run(self, *, server_id: int, action: RemediationAction, command: str, timeout_seconds: float) -> WriteCommandResult:
+        return self._run_sync(lambda: self._execute(
+            server_id=server_id, command=command, command_name=action.action_type, timeout=timeout_seconds
+        ))
+
+
+class SSHServiceVerifier(_SSHNamedCommandRunner):
+    def verify(self, *, server_id: int, action: RemediationAction) -> tuple[bool, dict]:
+        # The target was validated by the write registry before reaching this
+        # adapter. The read command is fixed and does not accept shell text.
+        result = self._run_sync(lambda: self._execute(
+            server_id=server_id,
+            command=f"systemctl is-active {action.target}",
+            command_name="verify_service_state",
+            timeout=30.0,
+        ))
+        return result.success and result.stdout.strip() == "active", {
+            "expected": "active",
+            "observed": result.stdout.strip(),
+            "exit_status": result.exit_status,
+            "error": result.error,
+        }

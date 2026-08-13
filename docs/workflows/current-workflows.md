@@ -17,7 +17,11 @@ periodic monitoring
  -> dynamic DB-defined Specialists
  -> Evidence collection
  -> correlation and Final Diagnosis
- -> bounded remediation proposal only
+ -> bounded remediation proposal
+ -> persisted plan and sandbox validation
+ -> persisted human approval
+ -> registered named write
+ -> verification or rollback
 ```
 
 Claude chooses the next project-tool operation. Python services remain
@@ -66,11 +70,12 @@ validated and budgets are enforced. `automatic_remediation_allowed` remains
 
 ## Phase 5 boundary
 
-Phase C is closed at C.14.14. Phase 5 Supervised Remediation is the next
-allowed phase but is not implemented here. The current workflow may produce a
-bounded remediation proposal, but it does not perform production
-restart, process termination, package change, configuration write, reboot,
-firewall change, or arbitrary shell execution.
+Phase C is closed at C.14.14. Phase 5 Supervised Remediation is implemented but
+not closed because real safe-target acceptance is unavailable. The current
+workflow supports only registered named service actions after a persisted
+human approval, with before/after Evidence, verification, idempotency, and
+rollback gates. Automatic remediation, package changes, configuration writes,
+reboots, firewall changes, and arbitrary shell remain disabled.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
@@ -81,7 +86,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 

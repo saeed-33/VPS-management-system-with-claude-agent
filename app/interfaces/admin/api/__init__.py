@@ -28,6 +28,9 @@ from app.interfaces.admin.api.servers import (
 from app.interfaces.admin.api.profiles import (
     router as profiles_router,
 )
+from app.interfaces.admin.api.remediation import (
+    router as remediation_router,
+)
 
 __all__ = [
     "agent_observability_router",
@@ -40,4 +43,5 @@ __all__ = [
     "knowledge_sources_router",
     "diagnostic_tools_router",
     "system_router",
+    "remediation_router",
 ]

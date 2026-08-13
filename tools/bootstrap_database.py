@@ -32,6 +32,13 @@ EXPECTED_TABLES = {
     "knowledge_sources",
     "knowledge_documents",
     "knowledge_chunks",
+    "remediation_plans",
+    "remediation_sandbox_results",
+    "remediation_approvals",
+    "remediation_executions",
+    "remediation_verifications",
+    "remediation_rollbacks",
+    "remediation_audit_events",
 }
 
 CUSTOM_INDEXES = {

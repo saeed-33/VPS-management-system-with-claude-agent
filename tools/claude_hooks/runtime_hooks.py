@@ -14,11 +14,17 @@ from typing import Any
 RUNTIME_MAIN_AGENT = "server-supervisor"
 RUNTIME_WORKER_AGENT = "specialist-worker"
 
-FORBIDDEN_REMEDIATION_TOOLS = {
+SUPERVISED_REMEDIATION_TOOLS = {
     "mcp__vps__create_remediation_plan",
     "mcp__vps__test_remediation_in_sandbox",
     "mcp__vps__request_user_approval",
     "mcp__vps__apply_approved_remediation",
+}
+
+FORBIDDEN_REMEDIATION_TOOLS = {
+    "mcp__vps__raw_ssh",
+    "mcp__vps__raw_shell",
+    "mcp__vps__execute_command",
 }
 
 REQUIRED_FILES = (
@@ -242,21 +248,24 @@ def _preflight_errors(payload: dict[str, Any]) -> list[str]:
                     "specialist-worker delegation is not pre-approved"
                 )
 
-            missing_denies = (
-                FORBIDDEN_REMEDIATION_TOOLS - deny
-            )
+            missing_denies = FORBIDDEN_REMEDIATION_TOOLS - deny
             if missing_denies:
                 errors.append(
-                    "Phase 5 remediation tools are not fully denied"
+                    "raw remediation escape tools are not fully denied"
                 )
 
-            leaked_allows = (
-                FORBIDDEN_REMEDIATION_TOOLS & allow
-            )
+            leaked_allows = FORBIDDEN_REMEDIATION_TOOLS & allow
             if leaked_allows:
                 errors.append(
-                    "Phase 5 remediation tools appear in allow list"
+                    "raw remediation escape tools appear in allow list"
                 )
+
+            missing_supervised = SUPERVISED_REMEDIATION_TOOLS - allow
+            if missing_supervised:
+                errors.append("supervised remediation tools are not allowed")
+            denied_supervised = SUPERVISED_REMEDIATION_TOOLS & deny
+            if denied_supervised:
+                errors.append("supervised remediation tools are denied")
 
             if settings.get(
                 "disableSkillShellExecution"
@@ -298,8 +307,8 @@ def _session_start(payload: dict[str, Any]) -> dict[str, Any] | None:
                 "AI VPS runtime session detected. "
                 "The project runtime contract requires Ollama, "
                 "project MCP capabilities, DB-defined Specialists, "
-                "evidence-grounded findings, and no production "
-                "remediation in C.14. A blocking preflight runs "
+                "evidence-grounded findings, and supervised remediation "
+                "with persisted human approval. A blocking preflight runs "
                 "before the user/runtime prompt is processed."
             ),
         }
@@ -338,7 +347,8 @@ def _user_prompt_submit(
             "additionalContext": (
                 "AI VPS runtime preflight passed. "
                 "Remain inside the server-supervisor contract. "
-                "Production remediation remains unavailable."
+                "Production writes require an unexpired persisted human "
+                "approval whose plan fingerprint still matches."
             ),
         }
     }

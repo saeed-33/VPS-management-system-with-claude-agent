@@ -76,16 +76,16 @@ SPECIAL = {
     ".claude/rules/safety.md": (
         "Claude rule file for tool safety, policy boundaries, and prohibited bypasses."
     ),
-    ".claude/skills/server-monitoring/SKILL.md": (
+    ".claude/skills/monitor-server/SKILL.md": (
         "Claude skill instructions for server monitoring tasks."
     ),
-    ".claude/skills/incident-analysis/SKILL.md": (
+    ".claude/skills/analyze-incident/SKILL.md": (
         "Claude skill instructions for incident report analysis."
     ),
-    ".claude/skills/specialist-investigation/SKILL.md": (
+    ".claude/skills/investigate-incident/SKILL.md": (
         "Claude skill instructions for specialist investigation workflows."
     ),
-    ".claude/skills/remediation-planning/SKILL.md": (
+    ".claude/skills/plan-remediation/SKILL.md": (
         "Claude skill instructions for remediation planning and validation."
     ),
     "docs/architecture/target-project-structure.md": (

@@ -19,13 +19,13 @@
       "mcp__vps__get_specialist_definition",
       "mcp__vps__run_specialist",
       "mcp__vps__propose_remediation",
-      "Agent(specialist-worker)"
-    ],
-    "deny": [
       "mcp__vps__create_remediation_plan",
       "mcp__vps__test_remediation_in_sandbox",
       "mcp__vps__request_user_approval",
       "mcp__vps__apply_approved_remediation",
+      "Agent(specialist-worker)"
+    ],
+    "deny": [
       "Bash(ssh *)",
       "Bash(scp *)",
       "Bash(sftp *)",
@@ -40,6 +40,9 @@
       "PowerShell(mysql *)",
       "PowerShell(kubectl *)",
       "PowerShell(docker exec *)",
+      "mcp__vps__raw_ssh",
+      "mcp__vps__raw_shell",
+      "mcp__vps__execute_command",
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)"

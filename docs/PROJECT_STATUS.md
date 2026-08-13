@@ -16,9 +16,9 @@ C.14.12: PASS
 C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
-Phase 5: NEXT
+Phase 5: IMPLEMENTED / NOT CLOSED
 automatic_remediation_allowed: false
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 ```
 
 ### State meanings
@@ -42,6 +42,9 @@ readiness: ready_for_supervised_operations
 - DB-defined Specialist routing and bounded investigation execution.
 - Policy, budgets, known-hosts SSH safety, and fail-closed Evidence grounding.
 - R.5 Documentation and Tests: complete.
+- Phase 5 supervised remediation contracts, additive persistence, named write
+  registry, approval fingerprinting, controlled execution, verification,
+  rollback, audit events, Admin API/UI, and Claude workflow integration.
 
 ## C.14.12 readiness acceptance
 
@@ -83,10 +86,11 @@ SAFELY. No active OpenAI or LangGraph runtime exists.
 C.14.14 is accepted. Implementation, architecture, safety, tests, runtime
 evidence, and documentation agree. Phase C is closed.
 
-Phase 5 Supervised Remediation is the next allowed phase, but it has not
-started. Automatic restart, process termination, package changes, configuration
-writes, reboot, firewall changes, arbitrary shell, and production remediation
-remain unauthorized until Phase 5 explicitly adds and accepts those contracts.
+Phase 5 Supervised Remediation is implemented but not closed. The 13-metric
+deterministic readiness matrix passes for repository behavior, while real
+supervised acceptance is blocked because the configured servers are offline
+and no explicitly safe reversible target is designated. Automatic remediation
+remains disabled; no real write was attempted.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
@@ -97,7 +101,7 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: ready_for_supervised_operations
+readiness: blocked_by_safe_test_environment
 automatic_remediation_allowed: false
 ```
 
