@@ -70,7 +70,8 @@ enabled state
    execution capability.
 5. Read `mcp__vps__get_evidence` after the run when Evidence references must be
    verified for the returned result.
-6. Return the structured Specialist result to the parent supervisor.
+6. Return the structured persisted Specialist result and authoritative runtime
+   progress to the parent supervisor.
 
 ## Current C.14 boundary
 
@@ -127,8 +128,10 @@ budget/policy denial returned by project services
 provider failure returned by project services
 ```
 
-Do not retry `run_specialist` automatically. A retry is a parent/session policy
-decision because the call may already have persisted state or consumed budget.
+Do not retry `run_specialist` automatically. The project boundary is
+idempotent for `(investigation_id, specialist_slug)` and will return persisted
+terminal state for a completed Specialist; retry remains a parent/session
+policy decision.
 
 ## Stopping conditions
 

@@ -75,7 +75,7 @@ class OllamaClaudeCommandBuilder:
             "--permission-mode",
             "dontAsk",
             "--allowedTools",
-            "mcp__vps__*",
+            "mcp__vps__*,Agent(specialist-worker)",
             "--setting-sources",
             "project",
             "--strict-mcp-config",

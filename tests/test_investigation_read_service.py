@@ -160,6 +160,33 @@ def test_runtime_snapshot_is_exposed_when_persisted():
     )
 
 
+def test_failed_runtime_snapshot_is_not_reported_as_available():
+    model = Model()
+    model.investigation_metadata = {
+        "runtime_snapshot": {
+            "status": "investigating",
+            "runtime_available": False,
+            "final_diagnosis_available": False,
+            "specialist_runs": [
+                {
+                    "specialist_slug": "nginx",
+                    "status": "failed",
+                }
+            ],
+        }
+    }
+
+    output = InvestigationReadService(
+        Repository(model)
+    ).get("inv-1")
+
+    assert output is not None
+    assert output.runtime_available is False
+    assert output.final_diagnosis_available is False
+    assert output.runtime is not None
+    assert output.runtime.specialist_runs[0]["status"] == "failed"
+
+
 def test_summary_exposes_selected_specialists():
     model = Model()
     model.investigation_metadata = {}

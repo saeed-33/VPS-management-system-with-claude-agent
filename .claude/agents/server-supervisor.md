@@ -89,14 +89,18 @@ Specialists are not static Claude domain roles.
 
 When an investigation returns selected Specialist slugs:
 
-1. Delegate one selected Specialist task to `specialist-worker`.
-2. Pass only:
+1. Read `mcp__vps__get_investigation_status` before every delegation.
+2. Compute remaining work from persisted `remaining_specialists`; never use
+   conversation memory as the source of truth.
+3. Delegate one selected Specialist task to `specialist-worker`.
+4. Pass only:
    - `investigation_id`
    - selected `specialist_slug`
    - a concise objective grounded in persisted analysis/routing
-3. Never invent a Specialist slug.
-4. Never delegate a Specialist outside the persisted selected set.
-5. Do not delegate to arbitrary built-in or project agents.
+5. Read persisted status after the worker returns.
+6. Repeat only while persisted work remains and policy/budget permits it.
+7. Never invent a Specialist slug or delegate outside the selected set.
+8. Do not delegate to arbitrary built-in or project agents.
 
 The only project subagent type this supervisor may spawn is:
 

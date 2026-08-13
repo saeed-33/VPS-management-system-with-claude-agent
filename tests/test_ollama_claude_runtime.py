@@ -36,6 +36,10 @@ def test_direct_claude_uses_ollama_backend(tmp_path):
     assert "launch" not in argv
     assert argv[argv.index("--model") + 1] == "gemma-test"
     assert argv[argv.index("--agent") + 1] == "server-supervisor"
+    assert argv[argv.index("--allowedTools") + 1] == (
+        "mcp__vps__*,Agent(specialist-worker)"
+    )
+    assert "Bash" not in argv[argv.index("--allowedTools") + 1]
     assert argv[argv.index("--output-format") + 1] == "stream-json"
     assert "--verbose" in argv
     assert argv[argv.index("--setting-sources") + 1] == "project"
@@ -64,4 +68,3 @@ def test_runtime_composition_uses_direct_claude_settings():
 
     assert "base_url=settings.ollama_base_url" in text
     assert "settings.claude_runtime_executable" in text
-

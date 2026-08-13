@@ -189,6 +189,7 @@ class InvestigationToolsMixin:
                     for candidate in detail.candidates
                     if candidate.is_selected
                 ],
+                **self._specialist_progress(detail),
             },
         )
 
@@ -382,11 +383,49 @@ class InvestigationToolsMixin:
                 ),
             )
 
-        investigation_actions_used = 0
-        if detail.runtime is not None:
+        execution_service = getattr(
+            self,
+            "_specialist_execution_service",
+            None,
+        )
+        ownership_token = None
+        if execution_service is not None:
+            reservation = execution_service.reserve_with_token(
+                investigation_id=detail.investigation_id,
+                specialist_slug=specialist.slug,
+            )
+            if reservation["status"] == "completed":
+                return ProjectToolResult(
+                    tool_id="run_specialist",
+                    success=True,
+                    data={
+                        "specialist": serialize_specialist_definition(specialist),
+                        "result": reservation.get("run"),
+                        "persisted": True,
+                        "idempotent": True,
+                        "runtime": self._specialist_progress(detail),
+                    },
+                )
+            if reservation["status"] == "in_progress":
+                return ProjectToolResult(
+                    tool_id="run_specialist",
+                    success=False,
+                    error_code="specialist_in_progress",
+                    error_message=(
+                        "This Specialist is already reserved by another "
+                        "worker; read persisted investigation status and retry "
+                        "only if the lease expires."
+                    ),
+                )
+            ownership_token = reservation["ownership_token"]
+            investigation_actions_used = int(reservation.get("actions_used") or 0)
+
+        if execution_service is None and detail.runtime is not None:
             investigation_actions_used = (
                 detail.runtime.actions_used or 0
             )
+        elif execution_service is None:
+            investigation_actions_used = 0
 
         task = SpecialistTask(
             task_id=(
@@ -421,34 +460,48 @@ class InvestigationToolsMixin:
             },
         )
 
-        result = await (
-            self._specialist_investigation_loop.run(
-                task=task,
-                specialist=specialist,
-                investigation_budget=InvestigationBudget(
-                    max_specialists=(
-                        detail.max_specialists
+        try:
+            result = await (
+                self._specialist_investigation_loop.run(
+                    task=task,
+                    specialist=specialist,
+                    investigation_budget=InvestigationBudget(
+                        max_specialists=detail.max_specialists,
+                        max_rounds=detail.max_rounds,
+                        max_actions=detail.max_actions,
                     ),
-                    max_rounds=detail.max_rounds,
-                    max_actions=detail.max_actions,
-                ),
-                detected_domains=(
-                    detail.detected_domains
-                ),
-                initial_analysis_summary=(
-                    analysis.summary
-                ),
-                initial_analysis_issues=tuple(
-                    analysis.issues or []
-                ),
-                allowed_specialist_slugs=tuple(
-                    selected_slugs
-                ),
-                investigation_actions_used=(
-                    investigation_actions_used
-                ),
+                    detected_domains=detail.detected_domains,
+                    initial_analysis_summary=analysis.summary,
+                    initial_analysis_issues=tuple(analysis.issues or []),
+                    allowed_specialist_slugs=tuple(selected_slugs),
+                    investigation_actions_used=investigation_actions_used,
+                )
             )
-        )
+        except Exception as exc:
+            if execution_service is None or ownership_token is None:
+                raise
+            persisted = await execution_service.finalize_failure(
+                task=task,
+                reason=str(exc),
+                selected_specialists=tuple(selected_slugs),
+                ownership_token=ownership_token,
+            )
+            return ProjectToolResult(
+                tool_id="run_specialist",
+                success=False,
+                data={"result": persisted["run"], "runtime": persisted["snapshot"]},
+                error_code="specialist_execution_failed",
+                error_message=str(exc),
+            )
+
+        persisted = None
+        if execution_service is not None and ownership_token is not None:
+            persisted = await execution_service.finalize(
+                task=task,
+                loop_result=result,
+                selected_specialists=tuple(selected_slugs),
+                ownership_token=ownership_token,
+            )
 
         return ProjectToolResult(
             tool_id="run_specialist",
@@ -465,8 +518,47 @@ class InvestigationToolsMixin:
                         result
                     )
                 ),
+                "persisted_result": (
+                    persisted["run"]
+                    if persisted is not None
+                    else None
+                ),
+                "runtime": (
+                    persisted["snapshot"]
+                    if persisted is not None
+                    else None
+                ),
             },
         )
+
+    def _specialist_progress(self, detail):
+        selected = [
+            candidate.specialist_slug
+            for candidate in detail.candidates
+            if candidate.is_selected
+        ]
+        metadata = (
+            detail.runtime.metadata or {}
+            if detail.runtime is not None
+            else {}
+        )
+        completed = list(metadata.get("completed_specialists", ()))
+        failed = list(metadata.get("failed_specialists", ()))
+        terminal = set(completed) | set(failed)
+        return {
+            "selected_specialists": list(metadata.get("selected_specialists", selected)),
+            "completed_specialists": completed,
+            "failed_specialists": failed,
+            "remaining_specialists": list(
+                metadata.get(
+                    "remaining_specialists",
+                    [slug for slug in selected if slug not in terminal],
+                )
+            ),
+            "runtime_available": bool(detail.runtime_available),
+            "final_diagnosis_available": bool(detail.final_diagnosis_available),
+            "status": detail.status,
+        }
 
     def _specialist_by_slug(
         self,

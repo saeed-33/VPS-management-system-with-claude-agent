@@ -12,6 +12,7 @@ from app.capabilities.investigation.evidence_collection import EvidenceCollectio
 from app.capabilities.investigation.investigation_router import InvestigationRouter
 from app.capabilities.investigation.persistence_service import InvestigationPersistenceService
 from app.capabilities.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
+from app.capabilities.investigation.specialist_execution_service import SpecialistExecutionService
 from app.capabilities.investigation.specialist_investigation_loop import SpecialistInvestigationLoop
 from app.capabilities.investigation.specialist_registry import SpecialistRegistry
 from app.capabilities.knowledge.chunking_service import KnowledgeChunkingService
@@ -69,6 +70,7 @@ class ApplicationContainer:
     investigation_persistence_service: InvestigationPersistenceService
     investigation_read_service: InvestigationReadService
     investigation_runtime_snapshot_service: InvestigationRuntimeSnapshotService
+    specialist_execution_service: SpecialistExecutionService
     knowledge_source_service: KnowledgeSourceService
     knowledge_source_registry: KnowledgeSourceRegistry
     knowledge_ingestion_service: KnowledgeIngestionService

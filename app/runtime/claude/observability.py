@@ -263,6 +263,21 @@ class ClaudeAgentObservabilityService:
             "Agent(specialist-worker)",
             "mcp__vps__run_specialist",
         }
+        specialist_mcp_count = sum(
+            1
+            for name in tool_calls
+            if name == "mcp__vps__run_specialist"
+        )
+        specialist_agent_count = sum(
+            1
+            for name in tool_calls
+            if name == "Agent(specialist-worker)"
+        )
+        accepted_specialist_count = usage.get(
+            "accepted_specialist_execution_count",
+        )
+        if not isinstance(accepted_specialist_count, int):
+            accepted_specialist_count = specialist_mcp_count
 
         return {
             "job_id": model.job_id,
@@ -306,10 +321,19 @@ class ClaudeAgentObservabilityService:
                     for item in mcp_servers
                 )
             ),
-            "specialist_delegation_count": sum(
-                1
-                for name in tool_calls
-                if name in specialist_tools
+            # Agent delegation and the bounded MCP call are two observability
+            # events for one worker execution; prefer the accepted MCP count
+            # and never double-count both surfaces.
+            "specialist_delegation_count": (
+                specialist_mcp_count
+                if specialist_mcp_count
+                else specialist_agent_count
+            ),
+            "accepted_specialist_execution_count": accepted_specialist_count,
+            "completed_specialist_slugs": list(
+                usage.get("completed_specialist_slugs", [])
+                if isinstance(usage.get("completed_specialist_slugs", []), list)
+                else []
             ),
             "investigation_started": (
                 "mcp__vps__start_investigation"

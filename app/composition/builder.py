@@ -68,6 +68,7 @@ def build_container() -> ApplicationContainer:
     investigation_persistence_service = services.investigation_persistence_service
     investigation_read_service = services.investigation_read_service
     investigation_runtime_snapshot_service = services.investigation_runtime_snapshot_service
+    specialist_execution_service = services.specialist_execution_service
     knowledge_source_service = services.knowledge_source_service
     knowledge_source_registry = services.knowledge_source_registry
     knowledge_ingestion_service = services.knowledge_ingestion_service
@@ -186,6 +187,7 @@ def build_container() -> ApplicationContainer:
         ),
         investigation_read_service=investigation_read_service,
         investigation_runtime_snapshot_service=investigation_runtime_snapshot_service,
+        specialist_execution_service=specialist_execution_service,
         knowledge_source_service=(
             knowledge_source_service
         ),

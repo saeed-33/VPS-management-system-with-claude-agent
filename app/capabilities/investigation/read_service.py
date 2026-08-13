@@ -75,9 +75,9 @@ class InvestigationReadService:
         runtime = metadata.get(
             "runtime_snapshot"
         )
-        runtime_available = isinstance(
-            runtime,
-            dict,
+        runtime_available = (
+            isinstance(runtime, dict)
+            and bool(runtime.get("runtime_available", True))
         )
         final_available = (
             runtime_available
@@ -124,12 +124,13 @@ class InvestigationReadService:
         raw_runtime = metadata.get(
             "runtime_snapshot"
         )
+        raw_runtime_available = (
+            isinstance(raw_runtime, dict)
+            and bool(raw_runtime.get("runtime_available", True))
+        )
         runtime = (
             self._runtime(raw_runtime)
-            if isinstance(
-                raw_runtime,
-                dict,
-            )
+            if isinstance(raw_runtime, dict)
             else None
         )
 
@@ -163,10 +164,12 @@ class InvestigationReadService:
                 in model.candidates
             ),
             runtime_available=(
-                runtime is not None
+                raw_runtime_available
+                and runtime is not None
             ),
             final_diagnosis_available=(
-                runtime is not None
+                raw_runtime_available
+                and runtime is not None
                 and runtime.final_diagnosis
                 is not None
             ),

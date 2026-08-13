@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
+from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
+from collections.abc import Mapping
 from typing import Any
 
 
@@ -17,8 +18,8 @@ def serialize_value(
 
     if is_dataclass(value):
         return {
-            key: serialize_value(item)
-            for key, item in asdict(value).items()
+            field.name: serialize_value(getattr(value, field.name))
+            for field in fields(value)
         }
 
     if hasattr(value, "__mapper__"):
@@ -35,7 +36,7 @@ def serialize_value(
             for item in value
         ]
 
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return {
             str(key): serialize_value(item)
             for key, item in value.items()

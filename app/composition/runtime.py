@@ -67,6 +67,7 @@ def build_runtime_composition(
         investigation_read_service=services.investigation_read_service,
         specialist_registry=services.specialist_registry,
         specialist_investigation_loop=analysis.specialist_investigation_loop,
+        specialist_execution_service=services.specialist_execution_service,
         remediation_service=services.remediation_service,
     )
 

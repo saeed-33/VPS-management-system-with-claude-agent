@@ -55,14 +55,16 @@ Do not infer an issue solely from historical Knowledge/RAG context.
    without delegating a Specialist.
 4. Treat `selected_specialists` as the current project authorization envelope.
 5. Read the persisted investigation detail/status before delegation.
-6. For each selected Specialist still eligible:
+6. While persisted `remaining_specialists` is non-empty:
    - delegate to `Agent(specialist-worker)`;
    - pass `investigation_id`, selected `specialist_slug`, and a concise
      evidence-grounded objective;
    - do not pass credentials or raw commands.
 7. The worker verifies the DB definition and invokes the current bounded project
    Specialist capability.
-8. If one worker returns a Specialist-local controlled failure, preserve it and
+8. After each worker return, reread persisted status and recompute
+   `remaining_specialists`; never repeat a terminal Specialist. If one worker
+   returns a Specialist-local controlled failure, preserve it and
    continue only when the persisted investigation remains valid and another
    selected Specialist is still authorized.
 9. After delegation, read:

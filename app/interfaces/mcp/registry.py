@@ -57,6 +57,7 @@ class ProjectMcpToolBoundary(
         investigation_read_service=None,
         specialist_registry=None,
         specialist_investigation_loop=None,
+        specialist_execution_service=None,
         remediation_service=None,
     ) -> None:
         self._server_service = server_service
@@ -93,6 +94,9 @@ class ProjectMcpToolBoundary(
         )
         self._specialist_investigation_loop = (
             specialist_investigation_loop
+        )
+        self._specialist_execution_service = (
+            specialist_execution_service
         )
         self._remediation_service = (
             remediation_service

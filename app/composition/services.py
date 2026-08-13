@@ -12,6 +12,9 @@ from app.capabilities.investigation.evidence_collection import EvidenceCollectio
 from app.capabilities.investigation.investigation_router import InvestigationRouter
 from app.capabilities.investigation.persistence_service import InvestigationPersistenceService
 from app.capabilities.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
+from app.capabilities.investigation.specialist_execution_service import SpecialistExecutionService
+from app.capabilities.investigation.correlation import CrossSpecialistCorrelator
+from app.capabilities.investigation.final_diagnosis_synthesizer import FinalDiagnosisSynthesizer
 from app.capabilities.investigation.specialist_registry import SpecialistRegistry
 from app.capabilities.knowledge.chunker import StructureAwareKnowledgeChunker
 from app.capabilities.knowledge.chunking_service import KnowledgeChunkingService
@@ -48,6 +51,7 @@ class CoreServiceBundle:
     investigation_persistence_service: InvestigationPersistenceService
     investigation_read_service: InvestigationReadService
     investigation_runtime_snapshot_service: InvestigationRuntimeSnapshotService
+    specialist_execution_service: SpecialistExecutionService
     knowledge_source_service: KnowledgeSourceService
     knowledge_source_registry: KnowledgeSourceRegistry
     knowledge_ingestion_service: KnowledgeIngestionService
@@ -97,6 +101,12 @@ def build_core_services(
     )
     investigation_runtime_snapshot_service = InvestigationRuntimeSnapshotService(
         repository=repositories.investigation_repository,
+    )
+    specialist_execution_service = SpecialistExecutionService(
+        repository=repositories.investigation_repository,
+        snapshot_service=investigation_runtime_snapshot_service,
+        correlator=CrossSpecialistCorrelator(),
+        synthesizer=FinalDiagnosisSynthesizer(),
     )
     knowledge_source_service = KnowledgeSourceService(
         repository=repositories.knowledge_source_repository,
@@ -171,6 +181,7 @@ def build_core_services(
         investigation_persistence_service=investigation_persistence_service,
         investigation_read_service=investigation_read_service,
         investigation_runtime_snapshot_service=investigation_runtime_snapshot_service,
+        specialist_execution_service=specialist_execution_service,
         knowledge_source_service=knowledge_source_service,
         knowledge_source_registry=knowledge_source_registry,
         knowledge_ingestion_service=knowledge_ingestion_service,
