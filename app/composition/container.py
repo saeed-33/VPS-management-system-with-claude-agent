@@ -42,6 +42,7 @@ from app.capabilities.investigation.read_service import InvestigationReadService
 from app.capabilities.knowledge.source_service import KnowledgeSourceService
 from app.capabilities.monitoring.profile_service import MonitoringProfileService
 from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.issue_fingerprint_service import IssueFingerprintService
 from app.capabilities.monitoring.report_query_service import ReportQueryService
 from app.capabilities.monitoring.server_service import ServerService
 from app.capabilities.investigation.specialist_service import SpecialistDefinitionService
@@ -85,6 +86,7 @@ class ApplicationContainer:
     diagnostic_policy_engine: DiagnosticPolicyEngine
     evidence_collection_service: EvidenceCollectionService
     remediation_service: RemediationService
+    issue_fingerprint_service: IssueFingerprintService
     autonomous_policy_service: AutonomousPolicyService
     autonomous_history_service: AutonomousHistoryService
     autonomous_candidate_service: AutonomousCandidateService

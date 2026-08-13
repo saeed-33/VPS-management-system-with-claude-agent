@@ -89,7 +89,9 @@ class AutonomousRemediationRepository:
             } if execution_ids else set()
             result = {}
             for plan in plans:
-                issue = (plan.plan_metadata or {}).get("issue_fingerprint") or plan.plan_fingerprint
+                issue = (plan.plan_metadata or {}).get("issue_fingerprint")
+                if not isinstance(issue, str) or not issue.strip():
+                    continue
                 for execution in executions:
                     if execution.plan_id != plan.plan_id:
                         continue
@@ -315,7 +317,11 @@ class AutonomousRemediationRepository:
             plans = list(session.scalars(select(RemediationPlanModel)).all())
             plan_ids = {
                 plan.plan_id for plan in plans
-                if (plan.plan_metadata or {}).get("issue_fingerprint", plan.plan_fingerprint) == issue_fingerprint
+                if (
+                    isinstance((plan.plan_metadata or {}).get("issue_fingerprint"), str)
+                    and (plan.plan_metadata or {}).get("issue_fingerprint").strip()
+                    and (plan.plan_metadata or {}).get("issue_fingerprint") == issue_fingerprint
+                )
             }
             executions = list(session.scalars(select(RemediationExecutionModel).where(RemediationExecutionModel.plan_id.in_(plan_ids))).all()) if plan_ids else []
             verified_ids = {item.execution_id for item in session.scalars(select(RemediationVerificationModel).where(RemediationVerificationModel.status == "verified", RemediationVerificationModel.execution_id.in_([e.execution_id for e in executions]))).all()} if executions else set()

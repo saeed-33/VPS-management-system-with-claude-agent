@@ -35,6 +35,22 @@ through the Admin boundary. Claude can call the bounded attempt tool, but it
 cannot create or alter policy, resume a policy, change the global switch, or
 pass a target/action outside the hard allowlist.
 
+## Issue identity versus plan identity
+
+`issue_fingerprint` is derived by Python from the persisted structured
+`correlated_claims` diagnosis fields: normalized claim `title`, `certainty`,
+and normalized sorted `metadata.diagnostic_states`. The payload is versioned
+as `issue-fingerprint-v1`, serialized with stable sorted JSON, and hashed with
+SHA-256. Claim IDs, finding IDs, Evidence IDs, narrative text, confidence,
+timestamps, provider/model/session/job IDs, and plan identity are excluded.
+
+`plan_fingerprint` remains the exact immutable binding for one plan version,
+including its plan ID, server, actions, and Evidence IDs. A missing trusted
+issue fingerprint never falls back to `plan_fingerprint`: Phase 7 returns
+`require_human_approval` with `issue_fingerprint_missing`, while supervised
+remediation remains available. Legacy plans are readable but are excluded
+from autonomous history and candidate aggregation.
+
 The five additive tables are created by
 `app/infrastructure/database/migrations/step_7_1_autonomous_remediation.sql`.
 `tools/bootstrap_database.py --verify-only` is the schema check and reports

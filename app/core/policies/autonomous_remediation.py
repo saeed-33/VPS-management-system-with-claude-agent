@@ -28,6 +28,10 @@ class AutonomousRemediationPolicyEvaluator:
 
         if not context.global_enabled:
             return deny(Code.GLOBAL_AUTONOMY_DISABLED, "Global autonomous remediation is disabled.")
+        if not context.issue_fingerprint:
+            reasons.append(Code.ISSUE_FINGERPRINT_MISSING.value)
+            messages.append("A trusted persisted issue fingerprint is required; supervised remediation remains available.")
+            return self._decision(context, AutonomousDecisionOutcome.REQUIRE_HUMAN_APPROVAL, reasons, messages)
         if context.execution_completed:
             return deny(Code.EXECUTION_ALREADY_COMPLETED, "This autonomous operation already has a terminal execution.")
         if context.execution_in_progress:

@@ -79,6 +79,7 @@ def build_container() -> ApplicationContainer:
     evidence_collection_service = services.evidence_collection_service
     claude_agent_job_service = services.claude_agent_job_service
     remediation_service = services.remediation_service
+    issue_fingerprint_service = services.issue_fingerprint_service
 
     retrieval_composition = build_retrieval_composition(
         repositories,
@@ -213,6 +214,7 @@ def build_container() -> ApplicationContainer:
             evidence_collection_service
         ),
         remediation_service=remediation_service,
+        issue_fingerprint_service=issue_fingerprint_service,
         autonomous_policy_service=services.autonomous_policy_service,
         autonomous_history_service=services.autonomous_history_service,
         autonomous_candidate_service=services.autonomous_candidate_service,

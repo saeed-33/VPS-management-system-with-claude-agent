@@ -87,3 +87,65 @@ def test_reservation_idempotency_and_single_use_authorization():
         assert "not valid" in str(exc)
     else:
         raise AssertionError("Consumed authorization was reusable.")
+
+
+def test_history_and_candidates_group_trusted_issue_across_distinct_plans():
+    from datetime import datetime, timezone
+    from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
+    from app.infrastructure.database.models.remediation import (
+        RemediationExecutionModel,
+        RemediationPlanModel,
+        RemediationVerificationModel,
+    )
+
+    repo = repository()
+    now = datetime.now(timezone.utc)
+    with repo._session_factory() as session:
+        for index in range(3):
+            plan_id = f"trusted-plan-{index}"
+            execution_id = f"trusted-execution-{index}"
+            session.add(RemediationPlanModel(
+                plan_id=plan_id, investigation_id=f"inv-{index}", server_id=4,
+                title="Start service", problem_summary="service inactive",
+                proposed_actions=[{"id": f"action-{index}", "action_type": "start_service", "target": "nginx"}],
+                diagnosis_claim_ids=[f"claim-{index}"], evidence_ids=[f"evidence-{index}"],
+                risk_level="low", plan_version=1, plan_fingerprint=f"plan-fp-{index}",
+                status="succeeded", plan_metadata={"issue_fingerprint": "issue-stable"},
+                created_at=now, updated_at=now,
+            ))
+            session.add(RemediationExecutionModel(
+                execution_id=execution_id, plan_id=plan_id, action_id=f"action-{index}",
+                server_id=4, status="succeeded", idempotency_key=f"key-{index}",
+                before_evidence_ids=[], after_evidence_ids=[], stdout="", stderr="",
+                execution_metadata={}, created_at=now, completed_at=now,
+            ))
+            session.add(RemediationVerificationModel(
+                verification_id=f"verification-{index}", execution_id=execution_id,
+                status="verified", before_evidence_ids=[], after_evidence_ids=[], details={}, created_at=now,
+            ))
+        session.add(RemediationPlanModel(
+            plan_id="legacy-plan", investigation_id="legacy-inv", server_id=4,
+            title="Legacy", problem_summary="legacy", proposed_actions=[{"id": "legacy-action", "action_type": "start_service", "target": "nginx"}],
+            diagnosis_claim_ids=["legacy-claim"], evidence_ids=["legacy-evidence"], risk_level="low",
+            plan_version=1, plan_fingerprint="legacy-plan-fingerprint", status="succeeded", plan_metadata={},
+            created_at=now, updated_at=now,
+        ))
+        session.commit()
+
+    history = repo.history(issue_fingerprint="issue-stable", action_type="start_service", target="nginx")
+    assert history.supervised_execution_count == 3
+    assert history.successful_execution_count == 3
+    assert history.verified_success_count == 3
+    assert history.failed_execution_count == 0
+    assert history.rollback_failure_count == 0
+
+    candidates = repo.candidate_keys()
+    assert list(candidates) == [("issue-stable", "start_service", "nginx")]
+    assert len(candidates[("issue-stable", "start_service", "nginx")]["executions"]) == 3
+
+    policy_candidates = AutonomousCandidateService(repository=repo).list_candidates()
+    assert len(policy_candidates) == 1
+    assert policy_candidates[0].issue_fingerprint == "issue-stable"
+    assert policy_candidates[0].execution_count == 3
+    assert policy_candidates[0].success_rate == 1.0
+    assert policy_candidates[0].reason_codes == ("eligible_for_policy_review",)

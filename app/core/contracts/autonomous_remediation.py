@@ -63,6 +63,7 @@ class AutonomousDecisionReasonCode(StrEnum):
     HARD_DENY = "hard_deny"
     AMBIGUOUS_POLICY_MATCH = "ambiguous_policy_match"
     NO_POLICY_MATCH = "no_policy_match"
+    ISSUE_FINGERPRINT_MISSING = "issue_fingerprint_missing"
 
 
 V1_AUTONOMOUS_ACTIONS = frozenset({"start_service"})

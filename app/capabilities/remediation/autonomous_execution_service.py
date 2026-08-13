@@ -34,7 +34,7 @@ class AutonomousExecutionService:
             raise ValueError("Remediation plan not found.")
         action = self._single_action(plan)
         now = utc_now()
-        issue_fingerprint = str((plan.plan_metadata or {}).get("issue_fingerprint") or plan.plan_fingerprint or "")
+        issue_fingerprint = str((plan.plan_metadata or {}).get("issue_fingerprint") or "")
         matches = self._repository.matching_policies(issue_fingerprint=issue_fingerprint, action_type=action.action_type, target=action.target, server_id=plan.server_id)
         policy_model = matches[0] if len(matches) == 1 else None
         policy = self._policy_service._model_to_contract(policy_model) if policy_model is not None else None

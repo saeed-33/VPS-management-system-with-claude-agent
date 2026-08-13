@@ -57,6 +57,7 @@ class RemediationService:
         evidence_collector: ServiceStateEvidenceCollector | None = None,
         server_repository=None,
         sandbox_runtime=None,
+        issue_fingerprint_service=None,
     ) -> None:
         self._repository = repository
         self._automatic_remediation_allowed = automatic_remediation_allowed
@@ -68,6 +69,7 @@ class RemediationService:
         self._evidence_collector = evidence_collector or UnavailableEvidenceCollector()
         self._server_repository = server_repository
         self._sandbox_runtime = sandbox_runtime or NativeSandboxRuntime()
+        self._issue_fingerprint_service = issue_fingerprint_service
 
     def propose_remediation(self, *, investigation_id: str, problem_summary: str,
                             diagnosis_claim_ids: list[str], evidence_ids: list[str]) -> dict:
@@ -101,6 +103,16 @@ class RemediationService:
         risk_order = {risk: index for index, risk in enumerate(RemediationRisk)}
         if risk_order[requested_risk] > risk_order[effective_risk]:
             effective_risk = requested_risk
+        metadata = {
+            "production_application_allowed": False,
+            "automatic_remediation_allowed": self._automatic_remediation_allowed,
+            "registered_actions": registered,
+        }
+        if self._issue_fingerprint_service is not None:
+            trusted_issue_fingerprint = self._issue_fingerprint_service.derive(investigation_id)
+            if trusted_issue_fingerprint:
+                metadata["issue_fingerprint"] = trusted_issue_fingerprint
+
         return self._repository.create_plan(
             CreateRemediationPlanDTO(
                 plan_id=plan_id or str(uuid4()),
@@ -112,11 +124,7 @@ class RemediationService:
                 evidence_ids=evidence_ids,
                 risk_level=effective_risk.value,
                 rollback_plan=rollback_plan,
-                metadata={
-                    "production_application_allowed": False,
-                    "automatic_remediation_allowed": self._automatic_remediation_allowed,
-                    "registered_actions": registered,
-                },
+                metadata=metadata,
                 server_id=server_id,
             )
         )

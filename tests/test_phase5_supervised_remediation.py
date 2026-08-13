@@ -54,7 +54,15 @@ class FakeEvidenceCollector:
         return ServiceStateObservation(state=state, stdout=state + "\n")
 
 
-def make_service(*, writer=None, verifier=None, evidence_collector=None):
+class FakeIssueFingerprintService:
+    def __init__(self, value="stable-issue"):
+        self.value = value
+
+    def derive(self, investigation_id):
+        return self.value
+
+
+def make_service(*, writer=None, verifier=None, evidence_collector=None, issue_fingerprint_service=None):
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -81,6 +89,7 @@ def make_service(*, writer=None, verifier=None, evidence_collector=None):
         write_runner=writer or FakeWriter(),
         verification_runner=verifier or FakeVerifier(),
         evidence_collector=evidence_collector or FakeEvidenceCollector(),
+        issue_fingerprint_service=issue_fingerprint_service,
     )
 
 
@@ -100,6 +109,19 @@ def make_plan(service, *, action=None, server_id=7):
         evidence_ids=["evidence-1"],
         server_id=server_id,
     )
+
+
+def test_plan_issue_fingerprint_is_trusted_but_plan_fingerprint_remains_distinct():
+    service = make_service(issue_fingerprint_service=FakeIssueFingerprintService())
+    first = make_plan(service)
+    second = service.create_plan(
+        plan_id="phase5-plan-2", investigation_id="inv-1", title="Bounded service action 2",
+        problem_summary="The service needs a controlled restart.",
+        proposed_actions=[{"id": "start-nginx-2", "action_type": "start_service", "target": "nginx", "reason": "Restore the named service."}],
+        diagnosis_claim_ids=["claim-2"], evidence_ids=["evidence-2"], server_id=7,
+    )
+    assert first.plan_metadata["issue_fingerprint"] == second.plan_metadata["issue_fingerprint"]
+    assert first.plan_fingerprint != second.plan_fingerprint
 
 
 def approve_plan(service, plan_id="phase5-plan"):

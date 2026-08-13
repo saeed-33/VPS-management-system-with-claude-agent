@@ -29,6 +29,7 @@ from app.capabilities.investigation.read_service import InvestigationReadService
 from app.capabilities.knowledge.source_service import KnowledgeSourceService
 from app.capabilities.monitoring.profile_service import MonitoringProfileService
 from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.issue_fingerprint_service import IssueFingerprintService
 from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
 from app.capabilities.remediation.autonomous_history_service import AutonomousHistoryService
 from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
@@ -66,6 +67,7 @@ class CoreServiceBundle:
     evidence_collection_service: EvidenceCollectionService
     claude_agent_job_service: ClaudeAgentJobService
     remediation_service: RemediationService
+    issue_fingerprint_service: IssueFingerprintService
     autonomous_policy_service: AutonomousPolicyService
     autonomous_history_service: AutonomousHistoryService
     autonomous_candidate_service: AutonomousCandidateService
@@ -153,6 +155,9 @@ def build_core_services(
     claude_agent_job_service = ClaudeAgentJobService(
         repository=repositories.agent_job_repository,
     )
+    issue_fingerprint_service = IssueFingerprintService(
+        investigation_read_service=investigation_read_service,
+    )
     remediation_service = RemediationService(
         repository=repositories.remediation_repository,
         automatic_remediation_allowed=False,
@@ -178,6 +183,7 @@ def build_core_services(
             command_timeout_seconds=settings.command_timeout_seconds,
         ),
         server_repository=repositories.server_repository,
+        issue_fingerprint_service=issue_fingerprint_service,
     )
     autonomous_policy_service = AutonomousPolicyService(
         repository=repositories.autonomous_remediation_repository,
@@ -222,6 +228,7 @@ def build_core_services(
         diagnostic_policy_engine=diagnostic_policy_engine,
         evidence_collection_service=evidence_collection_service,
         claude_agent_job_service=claude_agent_job_service,
+        issue_fingerprint_service=issue_fingerprint_service,
         remediation_service=remediation_service,
         autonomous_policy_service=autonomous_policy_service,
         autonomous_history_service=autonomous_history_service,

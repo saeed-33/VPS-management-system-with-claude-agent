@@ -79,6 +79,12 @@ def test_global_kill_switch_denies_even_with_valid_policy():
     assert result.reason_codes == ("global_autonomy_disabled",)
 
 
+def test_missing_issue_fingerprint_requires_human_approval():
+    result = AutonomousRemediationPolicyEvaluator().evaluate(context(issue_fingerprint=""))
+    assert result.outcome is AutonomousDecisionOutcome.REQUIRE_HUMAN_APPROVAL
+    assert "issue_fingerprint_missing" in result.reason_codes
+
+
 @pytest.mark.parametrize("action", ["stop_service", "restart_service", "reload_service", "reboot", "raw_command"])
 def test_v1_hard_allowlist_denies_other_actions(action):
     result = AutonomousRemediationPolicyEvaluator().evaluate(
