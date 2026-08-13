@@ -8,8 +8,8 @@ from sqlalchemy.orm import sessionmaker
 
 from app.infrastructure.database.models.specialist_definition import SpecialistDefinitionModel
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.specialists import CreateSpecialistDefinitionDTO, UpdateSpecialistDefinitionDTO
-from app.shared.utils.datetime import utc_now
+from app.core.contracts.specialists import CreateSpecialistDefinitionDTO, UpdateSpecialistDefinitionDTO
+from app.core.utils.datetime import utc_now
 
 _LIST_FIELDS = {"domains", "trigger_hints", "knowledge_topics", "allowed_tool_ids"}
 

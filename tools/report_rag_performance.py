@@ -14,10 +14,10 @@ if project_root_value not in sys.path:
 
 from sqlalchemy import select
 
-from app.shared.database.models.report_analysis import (
+from app.infrastructure.database.models.report_analysis import (
     ReportAnalysisModel,
 )
-from app.shared.database.session import SessionLocal
+from app.infrastructure.database.session import SessionLocal
 
 
 def percentile(values: list[float], pct: float) -> float | None:

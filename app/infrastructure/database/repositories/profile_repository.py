@@ -16,12 +16,12 @@ from app.infrastructure.database.models.server import (
     ServerModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.profiles import (
+from app.core.contracts.profiles import (
     CreateMonitoringProfileDTO,
     MonitoringProfileCommandConfig,
     UpdateMonitoringProfileDTO,
 )
-from app.shared.utils.datetime import utc_now
+from app.core.utils.datetime import utc_now
 
 
 class MonitoringProfileRepository:

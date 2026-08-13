@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from app.tools.project_boundary import ProjectMcpToolBoundary
+from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,7 +32,7 @@ def test_c14_8_public_tool_contract_is_unchanged():
 
 
 def test_c14_8_project_boundary_is_thin_public_facade():
-    path = ROOT / "app" / "tools" / "project_boundary.py"
+    path = ROOT / "app" / "interfaces" / "mcp" / "registry.py"
     tree = ast.parse(path.read_text(encoding="utf-8"))
 
     boundary_class = next(
@@ -64,22 +64,22 @@ def test_c14_8_bounded_modules_own_tool_implementations():
 
     expected_modules = {
         "_run_monitoring": (
-            "app.tools.project_boundary_parts.monitoring"
+            "app.interfaces.mcp.project_boundary_parts.monitoring"
         ),
         "_analyze_report": (
-            "app.tools.project_boundary_parts.analysis"
+            "app.interfaces.mcp.project_boundary_parts.analysis"
         ),
         "_run_specialist": (
-            "app.tools.project_boundary_parts.investigation"
+            "app.interfaces.mcp.project_boundary_parts.investigation"
         ),
         "_create_remediation_plan": (
-            "app.tools.project_boundary_parts.remediation"
+            "app.interfaces.mcp.project_boundary_parts.remediation"
         ),
         "_required_int": (
-            "app.tools.project_boundary_parts.common"
+            "app.interfaces.mcp.project_boundary_parts.common"
         ),
         "_build_definitions": (
-            "app.tools.project_boundary_parts.definitions"
+            "app.interfaces.mcp.project_boundary_parts.definitions"
         ),
     }
 
@@ -90,7 +90,6 @@ def test_c14_8_bounded_modules_own_tool_implementations():
 
 def test_c14_8_mcp_package_export_is_lazy_and_cycle_free():
     from app.mcp import ProjectMcpToolBoundary as PackageBoundary
-    from app.tools.project_boundary import ProjectMcpToolBoundary
+    from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
     assert PackageBoundary is ProjectMcpToolBoundary
-

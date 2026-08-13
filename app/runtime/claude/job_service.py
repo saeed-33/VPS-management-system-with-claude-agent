@@ -10,7 +10,7 @@ from app.runtime.claude.models import (
 from app.infrastructure.database.repositories.agent_job_repository import (
     AgentJobRepository,
 )
-from app.shared.dto.agent_jobs import (
+from app.core.contracts.agent_jobs import (
     CreateAgentJobDTO,
     UpdateAgentJobDTO,
 )

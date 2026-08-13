@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app.domain.knowledge.ingestion_contracts import (
+from app.capabilities.knowledge.ingestion_contracts import (
     KnowledgeDocumentStatus,
     ParsedKnowledgeDocument,
 )
@@ -12,7 +12,7 @@ from app.infrastructure.database.models.knowledge_document import (
     KnowledgeDocumentModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.utils.datetime import utc_now
+from app.core.utils.datetime import utc_now
 
 
 class KnowledgeDocumentRepository:

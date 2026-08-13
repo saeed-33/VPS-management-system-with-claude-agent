@@ -11,7 +11,7 @@ from app.mcp import (
     ProjectMcpToolBoundary,
     ProjectToolCall,
 )
-from app.shared.dto.investigation_read_models import (
+from app.core.contracts.investigation_read_models import (
     InvestigationCandidateReadModel,
     InvestigationDetailReadModel,
     InvestigationRuntimeReadModel,

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Runtime / Policies{% endblock %}
+{% block content %}
+<header class="page-header"><div><h1 class="page-heading">Runtime / Policies</h1><p class="page-description">Claude runtime configuration, Ollama provider, MCP boundary, and scheduler state.</p></div></header>
+<section class="content-grid"><article class="panel"><header class="panel-header"><h2 class="panel-title">Claude Runtime</h2></header><div class="panel-body" id="claude-runtime">Loading</div></article><article class="panel"><header class="panel-header"><h2 class="panel-title">Ollama</h2></header><div class="panel-body" id="ollama-runtime">Loading</div></article><article class="panel"><header class="panel-header"><h2 class="panel-title">MCP / Scheduler</h2></header><div class="panel-body" id="mcp-runtime">Loading</div></article></section>
+{% endblock %}
+{% block scripts %}<script>
+async function loadPolicies() { const p = await apiRequest("/api/system/runtime"); document.getElementById("claude-runtime").textContent = `${p.claude_runtime.enabled ? "enabled" : "disabled"} · ${p.claude_runtime.executable} · ${p.claude_runtime.model || "default"} · ${p.claude_runtime.agent}`; document.getElementById("ollama-runtime").textContent = `${p.ollama.provider} · ${p.ollama.model} · ${p.ollama.base_url}`; document.getElementById("mcp-runtime").textContent = `vps: ${p.mcp.configured ? "configured" : "not configured"} · ${p.mcp.tool_count} tools · scheduler ${p.scheduler.state}`; }
+loadPolicies().catch(error => showToast(error.message, "error"));
+</script>{% endblock %}

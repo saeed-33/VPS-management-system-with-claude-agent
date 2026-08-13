@@ -8,12 +8,12 @@ from app.infrastructure.database.models.remediation import (
     RemediationSandboxResultModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.remediation import (
+from app.core.contracts.remediation import (
     CreateRemediationPlanDTO,
     CreateSandboxResultDTO,
     RemediationPlanStatus,
 )
-from app.shared.utils.datetime import utc_now
+from app.core.utils.datetime import utc_now
 
 
 class RemediationRepository:

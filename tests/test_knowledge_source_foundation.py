@@ -5,7 +5,7 @@ import pytest
 from app.domain.knowledge.source_registry import (
     KnowledgeSourceRegistry,
 )
-from app.shared.dto.knowledge_sources import (
+from app.core.contracts.knowledge_sources import (
     CreateKnowledgeSourceDTO,
 )
 

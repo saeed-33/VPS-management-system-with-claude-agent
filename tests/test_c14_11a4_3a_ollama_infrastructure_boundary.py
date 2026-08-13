@@ -18,19 +18,19 @@ def test_ollama_provider_implementations_live_in_infrastructure():
     assert "import httpx" in embedding
 
 
-def test_domain_factories_use_infrastructure_implementations():
+def test_analysis_capability_factories_use_infrastructure_implementations():
     analysis_factory = (
-        ROOT / "app/domain/analysis/client_factory.py"
+        ROOT / "app/capabilities/analysis/client_factory.py"
     ).read_text(encoding="utf-8")
     embedding_factory = (
-        ROOT / "app/domain/analysis/retrieval/embedding_factory.py"
+        ROOT / "app/capabilities/analysis/retrieval/embedding_factory.py"
     ).read_text(encoding="utf-8")
 
     assert "app.infrastructure.llm.ollama.analysis_client" in analysis_factory
     assert "app.infrastructure.llm.ollama.embedding_client" in embedding_factory
-    assert "app.domain.analysis.ollama_client" not in analysis_factory
+    assert "app.capabilities.analysis.ollama_client" not in analysis_factory
     assert (
-        "app.domain.analysis.retrieval.ollama_embedding_client"
+        "app.capabilities.analysis.retrieval.ollama_embedding_client"
         not in embedding_factory
     )
 

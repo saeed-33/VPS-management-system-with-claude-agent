@@ -14,10 +14,10 @@ from app.runtime.claude.ollama_runtime import OllamaClaudeCommandBuilder
 from app.runtime.claude.runtime import ClaudeRuntimeAdapter
 from app.runtime.claude.session_runner import SubprocessClaudeSessionRunner
 from app.runtime.claude.supervisor import ClaudeSupervisor
-from app.shared.config import Settings
-from app.tools.monitoring.scheduler import MonitoringScheduler
-from app.tools.monitoring.service import MonitoringService
-from app.tools.project_boundary import ProjectMcpToolBoundary
+from app.core.config import Settings
+from app.capabilities.monitoring.scheduler import MonitoringScheduler
+from app.capabilities.monitoring.service import MonitoringService
+from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
 
 @dataclass(slots=True, frozen=True)

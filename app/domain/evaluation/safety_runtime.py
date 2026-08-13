@@ -10,29 +10,29 @@ from app.domain.evaluation.contracts import (
     EvaluationMetric,
     EvaluationObservation,
 )
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     InvestigationBudget,
 )
-from app.domain.investigation.diagnostic_policy import (
+from app.core.policies.diagnostic_policy import (
     DiagnosticPolicyDecision,
     DiagnosticPolicyEngine,
     DiagnosticPolicyReason,
     DiagnosticPolicyRequest,
 )
-from app.domain.investigation.diagnostic_tools import (
+from app.core.policies.diagnostic_tools import (
     DiagnosticParameterKind,
     DiagnosticToolCall,
     DiagnosticToolDefinition,
     DiagnosticToolParameter,
     DiagnosticToolRegistry,
 )
-from app.domain.investigation.investigation_router import (
+from app.capabilities.investigation.investigation_router import (
     InvestigationRouter,
 )
-from app.domain.investigation.specialist_reasoning_client import (
+from app.capabilities.investigation.specialist_reasoning_client import (
     OllamaSpecialistReasoningClient,
 )
-from app.domain.investigation.specialist_registry import (
+from app.capabilities.investigation.specialist_registry import (
     SpecialistRegistrySnapshot,
     SpecialistRuntimeDefinition,
 )

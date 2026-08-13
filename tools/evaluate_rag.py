@@ -17,20 +17,20 @@ if project_root_value not in sys.path:
 
 from sqlalchemy import select, text
 
-from app.domain.analysis.retrieval.structured_compatibility import (
+from app.capabilities.analysis.retrieval.structured_compatibility import (
     StructuredCompatibilityChecker,
 )
-from app.shared.config import settings
-from app.shared.database.models.report_analysis import (
+from app.core.config import settings
+from app.infrastructure.database.models.report_analysis import (
     ReportAnalysisModel,
 )
-from app.shared.database.models.report_analysis_source import (
+from app.infrastructure.database.models.report_analysis_source import (
     ReportAnalysisSourceModel,
 )
-from app.shared.database.models.report_retrieval_document import (
+from app.infrastructure.database.models.report_retrieval_document import (
     ReportRetrievalDocumentModel,
 )
-from app.shared.database.session import SessionLocal
+from app.infrastructure.database.session import SessionLocal
 
 
 @dataclass(slots=True)

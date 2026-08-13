@@ -4,8 +4,8 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import Computed, DateTime, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.shared.database.base import Base
-from app.shared.utils.datetime import utc_now
+from app.infrastructure.database.base import Base
+from app.core.utils.datetime import utc_now
 
 class KnowledgeDocumentModel(Base):
     __tablename__ = "knowledge_documents"

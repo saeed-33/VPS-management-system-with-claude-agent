@@ -6,7 +6,7 @@ from app.domain.evaluation.contracts import (
     EvaluationMetric,
     EvaluationObservation,
 )
-from app.shared.dto.investigation_read_models import (
+from app.core.contracts.investigation_read_models import (
     InvestigationDetailReadModel,
 )
 

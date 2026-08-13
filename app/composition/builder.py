@@ -8,10 +8,10 @@ from app.composition.services import build_core_services
 from app.composition.repositories import build_repositories
 import logging
 
-from app.admin.services.ssh_test_service import (
+from app.interfaces.admin.services.ssh_test_service import (
     SSHTestService,
 )
-from app.shared.config import PROJECT_ROOT, settings
+from app.core.config import PROJECT_ROOT, settings
 
 logger = logging.getLogger(__name__)
 

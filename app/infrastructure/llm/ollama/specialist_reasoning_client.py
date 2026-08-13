@@ -3,10 +3,10 @@ from __future__ import annotations
 import httpx
 from pydantic import ValidationError
 
-from app.domain.investigation.specialist_reasoning_client import (
+from app.core.contracts.specialist_reasoning import (
     SpecialistReasoningClient,
 )
-from app.shared.dto.specialist_reasoning import (
+from app.core.contracts.specialist_reasoning import (
     SpecialistFinalSynthesisOutput,
     SpecialistReasoningOutput,
 )

@@ -10,7 +10,7 @@ import app.domain.analysis as analysis_domain
 import app.domain.investigation as investigation_domain
 import app.runtime.claude as claude_runtime
 from app.runtime.claude.supervisor import ClaudeSupervisor
-from app.tools.monitoring.service import MonitoringService
+from app.capabilities.monitoring.service import MonitoringService
 
 
 ROOT = Path(__file__).resolve().parents[1]

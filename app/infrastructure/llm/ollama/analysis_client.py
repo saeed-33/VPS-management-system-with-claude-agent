@@ -4,10 +4,10 @@ from typing import Any
 
 import httpx
 
-from app.domain.analysis.llm_client import (
+from app.capabilities.analysis.llm_client import (
     LLMAnalysisClient,
 )
-from app.shared.dto.analysis import (
+from app.core.contracts.analysis import (
     ReportAnalysisResult,
 )
 

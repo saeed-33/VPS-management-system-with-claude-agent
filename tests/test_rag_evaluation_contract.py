@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_hybrid_does_not_use_rrf_as_vector_similarity():
     source = (
         ROOT
-        / "app/domain/analysis/retrieval/hybrid_retriever.py"
+        / "app/capabilities/analysis/retrieval/hybrid_retriever.py"
     ).read_text(encoding="utf-8")
 
     assert "vector_score=candidate.vector_score" in source
@@ -18,7 +18,7 @@ def test_hybrid_does_not_use_rrf_as_vector_similarity():
 def test_orchestrator_persists_vector_similarity_not_rrf():
     source = (
         ROOT
-        / "app/domain/analysis/analysis_orchestrator.py"
+        / "app/capabilities/analysis/analysis_orchestrator.py"
     ).read_text(encoding="utf-8")
 
     assert "retrieved_contexts[0].vector_score" in source
@@ -68,5 +68,4 @@ def test_vector_repository_filters_before_limit():
         f"{method_name}: vector distance filter must be applied "
         "before limit within the same repository method"
     )
-
 

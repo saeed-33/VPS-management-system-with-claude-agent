@@ -21,18 +21,27 @@ def test_investigation_ollama_adapters_live_in_infrastructure():
     assert "import httpx" in final
 
 
-def test_domain_keeps_contracts_not_ollama_implementations():
+def test_investigation_capability_keeps_contracts_not_ollama_implementations():
     specialist = (
         ROOT
-        / "app/domain/investigation/specialist_reasoning_client.py"
+        / "app/capabilities/investigation/specialist_reasoning_client.py"
     ).read_text(encoding="utf-8")
     final = (
         ROOT
-        / "app/domain/investigation/final_diagnosis_synthesizer.py"
+        / "app/capabilities/investigation/final_diagnosis_synthesizer.py"
     ).read_text(encoding="utf-8")
 
-    assert "class SpecialistReasoningClient" in specialist
-    assert "class FinalDiagnosisNarrativeClient" in final
+    specialist_contract = (
+        ROOT / "app/core/contracts/specialist_reasoning.py"
+    ).read_text(encoding="utf-8")
+    final_contract = (
+        ROOT / "app/core/contracts/final_diagnosis.py"
+    ).read_text(encoding="utf-8")
+
+    assert "class SpecialistReasoningClient" in specialist_contract
+    assert "class FinalDiagnosisNarrativeClient" in final_contract
+    assert "app.core.contracts.specialist_reasoning" in specialist
+    assert "app.core.contracts.final_diagnosis" in final
 
     assert "class OllamaSpecialistReasoningClient" not in specialist
     assert "class OllamaFinalDiagnosisNarrativeClient" not in final
@@ -47,14 +56,14 @@ def test_domain_keeps_contracts_not_ollama_implementations():
     )
 
 
-def test_legacy_class_names_have_compatibility_getattr():
+def test_capability_contracts_resolve_provider_adapters_lazily():
     specialist = (
         ROOT
-        / "app/domain/investigation/specialist_reasoning_client.py"
+        / "app/capabilities/investigation/specialist_reasoning_client.py"
     ).read_text(encoding="utf-8")
     final = (
         ROOT
-        / "app/domain/investigation/final_diagnosis_synthesizer.py"
+        / "app/capabilities/investigation/final_diagnosis_synthesizer.py"
     ).read_text(encoding="utf-8")
 
     assert any(

@@ -28,7 +28,7 @@ report_analysis_sources
 report_retrieval_documents
 ```
 
-هذه القائمة مأخوذة من `app.shared.database.models`.
+هذه القائمة مأخوذة من `app.infrastructure.database.models`.
 
 ## الفهارس الخاصة بالـRAG
 

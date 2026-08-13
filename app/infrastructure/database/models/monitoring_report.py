@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import (
@@ -15,8 +17,8 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-from app.shared.database.base import Base
-from app.shared.utils.datetime import utc_now
+from app.infrastructure.database.base import Base
+from app.core.utils.datetime import utc_now
 
 
 class MonitoringReportModel(Base):
@@ -106,8 +108,3 @@ class MonitoringReportModel(Base):
         ),
         lazy="selectin",
     )
-
-
-from app.infrastructure.database.models.command_execution import (  # noqa: E402
-    CommandExecutionModel,
-)

@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.admin.api.investigations import router
 from app.admin.dependencies import get_investigation_read_service
-from app.shared.dto.investigation_read_models import (
+from app.core.contracts.investigation_read_models import (
     InvestigationCandidateReadModel,
     InvestigationDetailReadModel,
     InvestigationRuntimeReadModel,

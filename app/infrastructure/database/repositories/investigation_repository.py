@@ -8,7 +8,7 @@ from app.infrastructure.database.models.investigation import (
     InvestigationSpecialistCandidateModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.investigations import PersistInvestigationDTO
+from app.core.contracts.investigations import PersistInvestigationDTO
 
 
 class InvestigationRepository:

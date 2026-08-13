@@ -10,14 +10,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.domain.analysis.retrieval.embedding_factory import (
+from app.capabilities.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.domain.knowledge.indexer import (
+from app.capabilities.knowledge.indexer import (
     KnowledgeIndexer,
 )
 from app.bootstrap import container
-from app.shared.config import settings
+from app.core.config import settings
 
 
 async def run(

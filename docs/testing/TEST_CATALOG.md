@@ -18,12 +18,126 @@ uv run python tools/generate_test_catalog.py
 
 - `test_system_runtime_page_is_available`
 
+### `tests/test_agent_job_persistence.py`
+
+- `test_agent_job_error_messages_are_bounded_to_schema_contract`
+
 ### `tests/test_aggregate_readiness.py`
 
 - `test_aggregate_combines_sources`
 - `test_sample_deficits_are_reported`
 - `test_one_real_runtime_sample_is_not_ready`
 - `test_hard_failure_blocks_when_samples_sufficient`
+
+### `tests/test_architecture_dependencies.py`
+
+- `test_core_has_no_outer_layer_dependencies`
+- `test_capabilities_do_not_depend_on_interfaces_composition_or_runtime`
+- `test_infrastructure_does_not_depend_on_interface_or_runtime_layers`
+- `test_transitional_shared_and_tools_packages_are_absent`
+- `test_application_import_graph_is_acyclic`
+
+### `tests/test_c14_10_claude_observability.py`
+
+- `test_trace_normalizes_runtime_evidence`
+- `test_summary_exposes_failures_tools_and_mcp_health`
+- `test_completed_job_missing_required_tools_is_visible`
+- `test_missing_job_returns_none`
+
+### `tests/test_c14_11_runtime_contract.py`
+
+- `test_c14_11_runtime_allows_mandatory_operational_tools`
+- `test_c14_11_native_prompt_requires_real_mcp_execution`
+
+### `tests/test_c14_11a3_ollama_only_contract.py`
+
+- `test_c14_11a3_removes_legacy_runtime_surfaces`
+- `test_c14_11a3_runtime_dependencies_are_ollama_only`
+- `test_c14_11a3_no_openai_implementation_surfaces_remain`
+- `test_c14_11a3_ollama_implementations_remain`
+
+### `tests/test_c14_11a4_1_composition_boundary.py`
+
+- `test_bootstrap_is_a_small_compatibility_facade`
+- `test_composition_builder_owns_dependency_wiring`
+- `test_composition_package_exists_as_explicit_boundary`
+
+### `tests/test_c14_11a4_2a_repository_composition.py`
+
+- `test_repository_construction_lives_in_repository_composition_module`
+- `test_repository_composition_module_is_not_eager`
+
+### `tests/test_c14_11a4_2b_container_services_composition.py`
+
+- `test_application_container_is_outside_builder`
+- `test_core_service_construction_is_outside_builder`
+- `test_analysis_and_runtime_are_outside_builder`
+
+### `tests/test_c14_11a4_2c_analysis_investigation_composition.py`
+
+- `test_analysis_and_investigation_composition_is_outside_builder`
+- `test_claude_mcp_and_scheduler_wiring_moves_to_runtime_composition`
+
+### `tests/test_c14_11a4_2d_runtime_composition.py`
+
+- `test_runtime_composition_is_outside_builder`
+- `test_runtime_composition_keeps_ollama_claude_contract`
+- `test_builder_is_composition_coordinator_after_a4_2d`
+
+### `tests/test_c14_11a4_3a_ollama_infrastructure_boundary.py`
+
+- `test_ollama_provider_implementations_live_in_infrastructure`
+- `test_analysis_capability_factories_use_infrastructure_implementations`
+- `test_legacy_ollama_modules_are_thin_facades`
+
+### `tests/test_c14_11a4_3b_investigation_ollama_infrastructure.py`
+
+- `test_investigation_ollama_adapters_live_in_infrastructure`
+- `test_investigation_capability_keeps_contracts_not_ollama_implementations`
+- `test_capability_contracts_resolve_provider_adapters_lazily`
+
+### `tests/test_c14_11a4_3c_database_infrastructure_boundary.py`
+
+- `test_database_core_implementation_lives_in_infrastructure`
+- `test_repository_implementations_live_only_in_infrastructure`
+- `test_production_composition_uses_infrastructure_repositories`
+- `test_shared_database_package_is_removed_after_boundary_closure`
+
+### `tests/test_c14_11a4_3d_database_models_migrations_boundary.py`
+
+- `test_database_models_live_only_in_infrastructure`
+- `test_production_uses_infrastructure_model_imports`
+- `test_engine_registers_infrastructure_models`
+- `test_migrations_have_one_canonical_owner`
+
+### `tests/test_c14_7_smoke_schema_init.py`
+
+- `test_c14_7_smoke_initializes_schema_before_container`
+- `test_c14_7_smoke_preserves_direct_project_import_fix`
+
+### `tests/test_c14_7_stream_runtime_evidence.py`
+
+- `test_stream_json_operational_success_is_evidence_based`
+- `test_operational_success_rejects_failed_mcp`
+- `test_operational_success_rejects_missing_required_tool`
+- `test_result_error_subtype_is_not_accepted`
+
+### `tests/test_c14_8_project_boundary_decomposition.py`
+
+- `test_c14_8_public_tool_contract_is_unchanged`
+- `test_c14_8_project_boundary_is_thin_public_facade`
+- `test_c14_8_bounded_modules_own_tool_implementations`
+- `test_c14_8_mcp_package_export_is_lazy_and_cycle_free`
+
+### `tests/test_c14_9_claude_native_orchestration.py`
+
+- `test_c14_9_legacy_python_orchestrators_are_removed`
+- `test_c14_9_monitoring_service_is_execution_only`
+- `test_c14_9_runtime_exports_only_native_claude_orchestration`
+- `test_c14_9_domain_packages_drop_old_orchestration_exports`
+- `test_c14_9_supervisor_fails_closed_when_runtime_disabled`
+- `test_c14_9_composition_has_no_python_orchestration_fallback`
+- `test_c14_9_main_has_no_analysis_worker_lifecycle`
 
 ### `tests/test_claude_agent_job_persistence.py`
 
@@ -33,20 +147,74 @@ uv run python tools/generate_test_catalog.py
 - `test_interrupted_jobs_are_recovered_as_failed`
 - `test_recent_jobs_can_be_filtered_by_status`
 
+### `tests/test_claude_bounded_agents.py`
+
+- `test_canonical_agent_set_is_two_bounded_roles`
+- `test_server_supervisor_is_main_session_coordinator`
+- `test_specialist_worker_cannot_delegate_or_remediate`
+- `test_server_supervisor_has_no_raw_execution_tools`
+- `test_specialist_worker_has_no_raw_execution_tools`
+- `test_investigation_skill_delegates_only_specialist_worker`
+- `test_legacy_agent_files_are_removed`
+
 ### `tests/test_claude_code_runtime_configuration.py`
 
 - `test_project_mcp_server_is_registered_for_claude_code`
 - `test_claude_settings_use_enforced_permissions`
 - `test_claude_agents_have_frontmatter_and_tools`
-- `test_monitoring_supervisor_can_delegate_to_agent`
+- `test_server_supervisor_can_delegate_only_specialist_worker`
+- `test_specialist_worker_cannot_spawn_agents`
+- `test_commands_are_not_a_second_workflow_surface`
+- `test_global_rules_are_invariants_only`
+- `test_placeholder_hooks_are_not_checked_in`
+- `test_active_runtime_instructions_do_not_claim_c1_structure_only`
 
-### `tests/test_claude_multi_specialist_supervision.py`
+### `tests/test_claude_least_privilege.py`
 
-- `test_multi_specialist_supervision_runs_selected_specialists_sequentially`
-- `test_multi_specialist_supervision_respects_max_specialists`
-- `test_multi_specialist_supervision_fails_when_tool_budget_is_exceeded`
-- `test_multi_specialist_supervision_stops_on_tool_failure`
-- `test_multi_specialist_supervision_completes_when_none_selected`
+- `test_settings_allow_only_current_runtime_capabilities`
+- `test_phase5_execution_tools_are_explicitly_denied`
+- `test_raw_operational_shell_paths_are_denied_for_both_shells`
+- `test_skill_inline_shell_execution_is_disabled`
+- `test_runtime_agents_use_inherited_model_and_dontask`
+- `test_server_supervisor_is_proposal_only_for_remediation`
+- `test_specialist_worker_has_no_remediation_tools`
+
+### `tests/test_claude_operational_skills.py`
+
+- `test_operational_skill_set_is_canonical`
+- `test_skills_have_frontmatter_and_exact_intended_tools`
+- `test_skills_define_operational_contract_sections`
+- `test_analysis_skill_never_forces_normal_analysis`
+- `test_investigation_skill_preserves_db_specialist_authority`
+- `test_remediation_skill_is_proposal_only`
+- `test_server_supervisor_preloads_canonical_workflow_skills`
+- `test_specialist_worker_is_not_a_workflow_coordinator`
+- `test_legacy_skill_names_are_removed`
+
+### `tests/test_claude_process_session_runner.py`
+
+- `test_process_runner_decodes_structured_output`
+- `test_process_runner_accepts_result_text_envelope`
+- `test_process_runner_rejects_invalid_json_output`
+- `test_process_runner_returns_controlled_nonzero_failure`
+- `test_process_runner_requires_project_root_cwd`
+- `test_adapter_timeout_terminates_active_process`
+- `test_cancel_by_job_id_terminates_process`
+- `test_command_environment_is_applied_without_prompt_transport`
+- `test_decoder_accepts_strict_batched_event_array`
+- `test_decoder_rejects_event_array_without_final_result`
+- `test_decoder_rejects_event_array_session_mismatch`
+- `test_decoder_surfaces_error_max_turns_result`
+- `test_decoder_counts_tool_use_blocks_from_event_array`
+- `test_decoder_uses_final_assistant_text_when_success_result_omits_result`
+- `test_decoder_rejects_tool_use_message_as_final_text_fallback`
+- `test_decoder_success_event_array_can_use_final_assistant_text`
+- `test_decoder_does_not_use_tool_message_as_final_fallback`
+
+### `tests/test_claude_project_mcp_runtime_config.py`
+
+- `test_vps_project_mcp_is_explicitly_approved`
+- `test_vps_mcp_launch_is_project_root_stable`
 
 ### `tests/test_claude_runtime_adapter.py`
 
@@ -64,13 +232,19 @@ uv run python tools/generate_test_catalog.py
 - `test_runtime_documentation_has_current_verification_commands`
 - `test_r5_status_and_test_catalog_are_documented`
 
-### `tests/test_claude_supervised_monitoring_cycle.py`
+### `tests/test_claude_runtime_hooks.py`
 
-- `test_cycle_executes_fixed_tool_sequence`
-- `test_cycle_persists_successful_job_observability`
-- `test_cycle_stops_and_persists_failure_when_tool_fails`
-- `test_cycle_fails_when_server_has_no_profile`
-- `test_cycle_rejects_invalid_server_id`
+- `test_settings_register_only_concrete_runtime_hooks`
+- `test_hook_handlers_use_cross_platform_exec_form`
+- `test_normal_development_session_is_ignored`
+- `test_runtime_preflight_passes_current_c14_contract`
+- `test_runtime_preflight_blocks_non_ollama_provider`
+- `test_session_start_adds_runtime_context_without_blocking`
+- `test_runtime_config_change_is_blocked`
+- `test_specialist_lifecycle_audit_does_not_store_prompt_or_output`
+- `test_runtime_event_directory_is_gitignored`
+- `test_runtime_preflight_accepts_hardened_project_mcp_command`
+- `test_project_mcp_validation_accepts_hardened_argv`
 
 ### `tests/test_claude_supervisor.py`
 
@@ -292,6 +466,11 @@ uv run python tools/generate_test_catalog.py
 - `test_seed_covers_all_baseline_specialists`
 - `test_each_seed_has_routing_scope`
 
+### `tests/test_ollama_claude_runtime.py`
+
+- `test_direct_claude_uses_ollama_backend`
+- `test_runtime_composition_uses_direct_claude_settings`
+
 ### `tests/test_ollama_context_window.py`
 
 - `test_normal_reasoning_uses_32k_context_and_6144_output`
@@ -422,17 +601,6 @@ uv run python tools/generate_test_catalog.py
 - `test_policy_runtime_emits_ten_passes`
 - `test_provider_runtime_emits_ten_safe_results`
 
-### `tests/test_server_coordinator.py`
-
-- `test_cpu_and_memory_results_are_collected`
-- `test_partial_specialist_failure_preserves_success`
-- `test_no_selected_specialists_completes_without_loop`
-
-### `tests/test_server_coordinator_initial_evidence.py`
-
-- `test_initial_connection_failure_becomes_citable_analysis_evidence`
-- `test_empty_initial_analysis_produces_no_evidence`
-
 ### `tests/test_specialist_context.py`
 
 - `test_context_preserves_knowledge_source_ids`
@@ -532,7 +700,6 @@ uv run python tools/generate_test_catalog.py
 - `tools/run_production_readiness_evaluation.py`
 - `tools/run_project_mcp_server.py`
 - `tools/run_safety_runtime_evaluation.py`
-- `tools/run_server_coordinator_acceptance.py`
 - `tools/run_specialist_investigation.py`
 
 ## Standard commands
@@ -547,58 +714,3 @@ uv run python tools/run_production_readiness_evaluation.py --limit 500
 ```
 
 See `TESTING_STRATEGY.md` for when each layer is required.
-
-<!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
-
-Documentation synchronized: **2026-08-12**
-
-Canonical project state:
-
-```text
-Phase 4.20: complete
-readiness: ready_for_supervised_operations
-automatic_remediation_allowed: false
-```
-
-For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
-<!-- PROJECT-DOC-METADATA:END -->
-
-
-## C.14.2 Operational Skills
-
-- `tests/test_claude_operational_skills.py` validates the canonical Skill set, frontmatter, intended MCP tool grants, operational contract sections, DB-defined Specialist boundary, legacy Skill removal, and proposal-only remediation boundary.
-
-
-## C.14.3 Bounded Agents
-
-- `tests/test_claude_bounded_agents.py` validates the two-agent architecture, main-session-only specialist delegation, model inheritance, DB Specialist authority, absence of nested delegation, no raw execution tools, and the investigation Skill integration.
-
-
-## C.14.4 Least Privilege
-
-- `tests/test_claude_least_privilege.py` validates the exact pre-approved runtime tool set, `dontAsk` agent mode, PowerShell/Bash operational denials, disabled Skill shell execution, and explicit Phase 5 remediation denials.
-
-## C.14.5 Concrete Runtime Hooks
-
-- `tests/test_claude_runtime_hooks.py` validates hook registration, portable
-  exec-form commands, runtime-only preflight behavior, Ollama/provider gating,
-  immutable runtime configuration, Specialist lifecycle event sanitization,
-  and the ignored transient runtime-event directory.
-
-## C.14.6 Concrete ClaudeSessionRunner
-
-- `tests/test_claude_process_session_runner.py` validates the subprocess runner
-  against local child processes: Claude JSON-envelope decoding, structured
-  output forwarding, project-root enforcement, controlled non-zero failures,
-  environment injection, explicit cancellation, and timeout process cleanup.
-  It does not require Ollama or Claude Code to be installed.
-
-## C.14.7 Ollama-backed Claude Runtime
-
-- `tests/test_ollama_claude_runtime.py` validates launcher argv, model/agent
-  inheritance path, strict project MCP configuration, structured output,
-  runtime hook markers, persisted job lifecycle, failure propagation, and the
-  feature-flagged bootstrap switch.
-- `tools/smoke_ollama_claude_runtime.py --server-id <id>` is the required real
-  integration smoke and requires `CLAUDE_RUNTIME_ENABLED=true`.

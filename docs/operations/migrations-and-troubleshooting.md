@@ -1,7 +1,7 @@
 # Migrations and Troubleshooting
 
 ## Migrations
-SQL migrations موجودة في `app/shared/database/migrations/`.
+SQL migrations are stored canonically in `app/infrastructure/database/migrations/`.
 لا تعتبر تعديلات SQLAlchemy models بديلًا عن migration لقاعدة موجودة.
 
 بعد migrations الخاصة بـRAG تحقق من:

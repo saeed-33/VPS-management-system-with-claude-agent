@@ -84,17 +84,17 @@ final synthesis
 provenance validation
 ```
 
-## 7. Claude-supervised multi-Specialist acceptance - Phase C`r`n
-Controlled acceptance may override only initial routing to guarantee two workers while keeping real Claude-supervised coordination, Specialist loops, Policy, SSH, and Tool execution.
+## 7. Claude-supervised multi-Specialist acceptance
+
+The native acceptance keeps Claude coordination, Specialist loops, Policy, SSH,
+and MCP tool execution real. Use the repository acceptance test and the smoke
+entrypoint rather than retired one-off scripts.
 
 Example:
 
 ```powershell
-uv run python tools/run_claude_multi_specialist_acceptance.py 1076 `
-  --specialists linux-cpu,linux-memory `
-  --max-specialists 2 `
-  --max-rounds 2 `
-  --max-actions 8
+uv run python tools/smoke_ollama_claude_runtime.py --server-id <server_id>
+uv run python -m pytest tests/real_runtime -q
 ```
 
 Required invariants:
@@ -117,12 +117,7 @@ There are two distinct acceptance questions.
 ### A. Natural recommendation acceptance
 
 ```powershell
-uv run python tools/run_Claude-supervised_secondary_acceptance.py 1076 `
-  --initial-specialist nginx `
-  --max-specialists 3 `
-  --max-rounds 3 `
-  --max-actions 10 `
-  --require-secondary
+uv run python -m pytest tests/test_c14_10_claude_observability.py -q
 ```
 
 This tests whether the real model naturally recommends another Specialist.
@@ -132,11 +127,7 @@ Failure to recommend does not necessarily prove orchestration failure; it can be
 ### B. Controlled recommendation acceptance
 
 ```powershell
-uv run python tools/run_Claude-supervised_controlled_secondary_acceptance.py 1076 `
-  --initial-specialist nginx `
-  --secondary-specialist systemd-service `
-  --max-rounds 3 `
-  --max-actions 10
+uv run python -m pytest tests/test_specialist_investigation_loop.py -q
 ```
 
 Only the recommendation value is controlled. Primary/secondary Specialist executions and Phase 4.17 Registry/budget validation remain real.

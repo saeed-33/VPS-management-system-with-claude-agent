@@ -9,7 +9,7 @@ def test_c14_7_smoke_initializes_schema_before_container():
     text = SMOKE.read_text(encoding="utf-8")
 
     assert (
-        "from app.shared.database.engine import ("
+        "from app.infrastructure.database.engine import ("
         in text
     )
     assert "create_database_tables," in text

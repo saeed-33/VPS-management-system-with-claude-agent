@@ -10,11 +10,11 @@ from app.infrastructure.database.models.knowledge_source import (
     KnowledgeSourceModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.knowledge_sources import (
+from app.core.contracts.knowledge_sources import (
     CreateKnowledgeSourceDTO,
     UpdateKnowledgeSourceDTO,
 )
-from app.shared.utils.datetime import utc_now
+from app.core.utils.datetime import utc_now
 
 
 class KnowledgeSourceRepository:

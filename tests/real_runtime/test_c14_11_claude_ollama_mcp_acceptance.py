@@ -145,7 +145,7 @@ def test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence():
     from app.runtime.claude.observability import (
         ClaudeAgentObservabilityService,
     )
-    from app.shared.config import settings
+    from app.core.config import settings
 
     server_id = _server_id()
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.admin.api import (
+from app.interfaces.admin.api import (
     agent_observability_router,
     investigations_router,
     commands_router,
@@ -18,13 +18,13 @@ from app.admin.api import (
     diagnostic_tools_router,
     system_router,
 )
-from app.admin.web import router as web_router
+from app.interfaces.admin.web import router as web_router
 from app.bootstrap import container
-from app.shared.config import settings
+from app.core.config import settings
 from app.infrastructure.database.engine import (
     create_database_tables,
 )
-from app.shared.logging import configure_logging
+from app.core.logging import configure_logging
 
 
 configure_logging()
@@ -36,6 +36,7 @@ APP_DIRECTORY = Path(__file__).resolve().parent
 
 WEB_DIRECTORY = (
     APP_DIRECTORY
+    / "interfaces"
     / "admin"
     / "web"
 )
@@ -181,4 +182,3 @@ async def health_check() -> dict:
             ),
         },
     }
-

@@ -13,8 +13,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.shared.database.base import Base
-from app.shared.utils.datetime import utc_now
+from app.infrastructure.database.base import Base
+from app.core.utils.datetime import utc_now
 
 
 class ReportAnalysisSourceModel(Base):

@@ -10,8 +10,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from sqlalchemy import text
 
-from app.shared.config import settings
-from app.shared.database.engine import engine
+from app.core.config import settings
+from app.infrastructure.database.engine import engine
 
 
 def check(name: str, ok: bool, detail: str) -> bool:
@@ -79,10 +79,7 @@ def main() -> int:
         )
     )
 
-    provider_ok = settings.llm_provider in {
-        "ollama",
-        "openai",
-    }
+    provider_ok = settings.llm_provider == "ollama"
 
     results.append(
         check(
@@ -91,20 +88,6 @@ def main() -> int:
             settings.llm_provider,
         )
     )
-
-    if (
-        settings.llm_enabled
-        and settings.llm_provider == "openai"
-    ):
-        results.append(
-            check(
-                "openai-key",
-                bool(settings.openai_api_key),
-                "configured"
-                if settings.openai_api_key
-                else "missing",
-            )
-        )
 
     try:
         with engine.connect() as connection:

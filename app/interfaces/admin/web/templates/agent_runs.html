@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Agent Runs{% endblock %}
+{% block content %}
+<header class="page-header"><div><h1 class="page-heading">Agent Runs</h1><p class="page-description">Persisted Claude sessions, MCP calls, specialist delegation, and outcomes.</p></div></header>
+<section class="panel"><div class="panel-body flush"><div class="table-container"><table class="data-table"><thead><tr><th>Job</th><th>Session</th><th>Status</th><th>Model</th><th>Turns</th><th>Tools</th><th>Duration</th><th>Error</th></tr></thead><tbody id="agent-runs-table"><tr><td colspan="8" class="loading-row">Loading</td></tr></tbody></table></div></div></section>
+{% endblock %}
+{% block scripts %}<script>
+async function loadAgentRuns() {
+    const payload = await apiRequest("/api/agent-observability/jobs?limit=100");
+    const rows = payload.items.map(job => `<tr><td>${escapeHtml(job.job_id)}</td><td>${escapeHtml(job.session_id || "-")}</td><td>${statusBadge(job.status)}</td><td>${escapeHtml(job.provider || "-")}</td><td>${job.turn_count}</td><td>${job.tool_call_count}</td><td>${job.duration_ms ?? "-"}</td><td>${escapeHtml(job.error_message || "-")}</td></tr>`);
+    document.getElementById("agent-runs-table").innerHTML = rows.join("") || '<tr><td colspan="8">No Claude sessions recorded.</td></tr>';
+}
+loadAgentRuns().catch(error => showToast(error.message, "error"));
+</script>{% endblock %}

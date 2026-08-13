@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import (
@@ -16,7 +18,7 @@ from sqlalchemy.orm import (
 )
 from sqlmodel import JSON
 
-from app.shared.database.base import Base
+from app.infrastructure.database.base import Base
 
 
 class CommandExecutionModel(Base):
@@ -120,8 +122,3 @@ class CommandExecutionModel(Base):
             back_populates="executions",
         )
     )
-
-
-from app.infrastructure.database.models.monitoring_report import (  # noqa: E402
-    MonitoringReportModel,
-)

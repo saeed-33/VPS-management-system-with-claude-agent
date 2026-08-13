@@ -25,10 +25,10 @@ def test_project_structure_documents_runtime_files():
         ".mcp.json",
         ".claude/settings.json",
         "app/runtime/claude/supervisor.py",
-        "app/tools/project_boundary.py",
-        "app/tools/catalog.py",
-        "app/admin/api/system.py",
-        "app/admin/web/templates/system.html",
+            "app/interfaces/mcp/registry.py",
+        "app/interfaces/mcp/catalog.py",
+            "app/interfaces/admin/api/system.py",
+            "app/interfaces/admin/web/templates/system.html",
         "docs/operations/claude-runtime.md",
     ]
 

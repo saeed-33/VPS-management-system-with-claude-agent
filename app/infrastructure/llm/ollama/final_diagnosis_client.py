@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import httpx
 
-from app.domain.investigation.final_diagnosis_synthesizer import (
+from app.core.contracts.final_diagnosis import (
     FinalDiagnosisNarrativeClient,
     FinalDiagnosisNarrativeOutput,
 )

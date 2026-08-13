@@ -42,25 +42,126 @@ Evaluation / Production Readiness Gate
 
 ### Repository root / configuration
 
-- `.claude/agents/generic-specialist.md` — Generic Claude specialist role; uses project tools and DB-managed specialist definitions.
-- `.claude/agents/investigation-coordinator.md` — Claude subagent role definition for server-level investigation coordination.
-- `.claude/agents/monitoring-supervisor.md` — Claude subagent role definition for scheduled monitoring supervision.
-- `.claude/commands/analyze.md` — Claude slash command for report analysis and historical retrieval workflow.
-- `.claude/commands/diagnose.md` — Claude slash command for diagnosis synthesis from persisted evidence.
-- `.claude/commands/investigate.md` — Claude slash command for starting and coordinating investigations.
-- `.claude/commands/monitor.md` — Claude slash command for executing the fixed monitoring workflow.
-- `.claude/hooks/README.md` — Documents Claude hook responsibilities and safety checks.
-- `.claude/rules/investigation.md` — Claude rule file for the fixed investigation workflow.
-- `.claude/rules/monitoring.md` — Claude rule file for monitoring workflow constraints.
-- `.claude/rules/rag.md` — Claude rule file for exact reuse, top-3 similarity context, and retrieval grounding.
-- `.claude/rules/remediation.md` — Claude rule file for remediation proposal, sandbox validation, and approval.
+- `.claude/agents/server-supervisor.md` — Project documentation.
+- `.claude/agents/specialist-worker.md` — Project documentation.
+- `.claude/rules/evidence-grounding.md` — Project documentation.
 - `.claude/rules/safety.md` — Claude rule file for tool safety, policy boundaries, and prohibited bypasses.
-- `.claude/rules/specialists.md` — Claude rule file for specialist selection, execution, and aggregation.
+- `.claude/runtime-events/0cf8343c-ef63-4d30-b705-0d6a5431db43/1786560485437671900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/0cf8343c-ef63-4d30-b705-0d6a5431db43/1786560487734795200-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/0cf8343c-ef63-4d30-b705-0d6a5431db43/1786560488758377800-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/182d85b2-0169-462b-b114-090ba0b76ef5/1786529828887678200-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/182d85b2-0169-462b-b114-090ba0b76ef5/1786529829091192200-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/182d85b2-0169-462b-b114-090ba0b76ef5/1786529878855439600-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1a88ca67-5f50-449d-ade5-baad88713e3c/1786559451928869700-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1a88ca67-5f50-449d-ade5-baad88713e3c/1786559454101776000-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1a88ca67-5f50-449d-ade5-baad88713e3c/1786559455124243400-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1c986461-52a8-4899-9749-6be06b171572/1786554868287180900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1c986461-52a8-4899-9749-6be06b171572/1786554868383126200-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1c986461-52a8-4899-9749-6be06b171572/1786554910343848500-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1e7961c1-40d3-43f8-8187-eea4887b1d79/1786560192812893400-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1e7961c1-40d3-43f8-8187-eea4887b1d79/1786560194826237000-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/1e7961c1-40d3-43f8-8187-eea4887b1d79/1786560197203862400-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/21c474ed-427d-488d-9e9c-f7cbb6f810d0/1786561640542215800-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/21c474ed-427d-488d-9e9c-f7cbb6f810d0/1786561642504692600-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/21c474ed-427d-488d-9e9c-f7cbb6f810d0/1786561650977975400-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/32786513-97af-4b85-aec0-2fc30cbfa8ec/1786561582802690200-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/32786513-97af-4b85-aec0-2fc30cbfa8ec/1786561584952420200-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/32786513-97af-4b85-aec0-2fc30cbfa8ec/1786561594744479000-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3bbf0058-2aff-4ba3-85ab-ed238a6cfaf9/1786529369238511600-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3bbf0058-2aff-4ba3-85ab-ed238a6cfaf9/1786529369482626600-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3bbf0058-2aff-4ba3-85ab-ed238a6cfaf9/1786529463260598200-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613260947668900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613262348721400-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613338557715400-SubagentStart-a01cff31db22973a8.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613377949982800-SubagentStop-a01cff31db22973a8.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613395013059400-SubagentStart-a542d0a3c78a6dcab.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613488257107800-SubagentStop-a542d0a3c78a6dcab.json` — Structured configuration or generated data.
+- `.claude/runtime-events/3f87c370-54c4-4e6e-98b1-b0c1e2e2748a/1786613503709246600-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/441fc09a-bf67-4791-a77d-834c09f60fdd/1786530242977198700-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/441fc09a-bf67-4791-a77d-834c09f60fdd/1786530243170638300-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611641387153000-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611642709469700-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611699912433500-SubagentStart-a6e0db7891b1e5179.json` — Structured configuration or generated data.
+- `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611726091641500-SubagentStop-a6e0db7891b1e5179.json` — Structured configuration or generated data.
+- `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611751679880700-SubagentStart-a47a2447f9d1f674a.json` — Structured configuration or generated data.
+- `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611827936170500-SubagentStop-a47a2447f9d1f674a.json` — Structured configuration or generated data.
+- `.claude/runtime-events/4ab70005-db91-421f-bb45-b222d040296d/1786611846621773900-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/554f9f39-1a6d-434e-8f32-f3d06b64bab0/1786556072699345500-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/554f9f39-1a6d-434e-8f32-f3d06b64bab0/1786556074684267400-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/554f9f39-1a6d-434e-8f32-f3d06b64bab0/1786556077079515800-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/589e57b6-1b07-4a86-a743-a9cb333678f2/1786561946372789900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/589e57b6-1b07-4a86-a743-a9cb333678f2/1786561948500069900-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/589e57b6-1b07-4a86-a743-a9cb333678f2/1786562020834311300-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/62d84a89-f841-4e24-9147-30831c013a0a/1786558454771811000-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/62d84a89-f841-4e24-9147-30831c013a0a/1786558456942284700-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/62d84a89-f841-4e24-9147-30831c013a0a/1786558458083240100-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/886d6f04-f45f-4e5b-8375-a4933c70c979/1786610707840533800-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/886d6f04-f45f-4e5b-8375-a4933c70c979/1786610709114362000-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/886d6f04-f45f-4e5b-8375-a4933c70c979/1786610901916952700-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/8a219546-c3db-4c8b-8cf6-bc700d2874d3/1786529721409807200-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/8a219546-c3db-4c8b-8cf6-bc700d2874d3/1786529721807737800-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/8a219546-c3db-4c8b-8cf6-bc700d2874d3/1786529741673125900-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/94974eb3-05bf-4715-a3a2-e143eb4a733a/1786611032819169800-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/94974eb3-05bf-4715-a3a2-e143eb4a733a/1786611034245982900-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/94974eb3-05bf-4715-a3a2-e143eb4a733a/1786611217692650200-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/965c30b7-0b67-4701-91c3-51911fe727de/1786610467031911700-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/965c30b7-0b67-4701-91c3-51911fe727de/1786610468522861900-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/965c30b7-0b67-4701-91c3-51911fe727de/1786610650012653400-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/97d0d99b-8da4-492b-8c00-7c419d9bf192/1786560298323268100-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/97d0d99b-8da4-492b-8c00-7c419d9bf192/1786560300376599600-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/97d0d99b-8da4-492b-8c00-7c419d9bf192/1786560301415211500-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/9afda500-ce9f-49ff-b81c-2be17771fddd/1786553019788822400-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/9afda500-ce9f-49ff-b81c-2be17771fddd/1786553019953679300-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/9afda500-ce9f-49ff-b81c-2be17771fddd/1786553140392711900-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a92dbdae-42de-42db-81a6-bbd70cc9dd3c/1786561247497163300-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a92dbdae-42de-42db-81a6-bbd70cc9dd3c/1786561249345648200-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a92dbdae-42de-42db-81a6-bbd70cc9dd3c/1786561271837378400-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9c888d4-7b27-4cf5-a74f-ddfced973a80/1786611250525791100-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9c888d4-7b27-4cf5-a74f-ddfced973a80/1786611252090473900-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9c888d4-7b27-4cf5-a74f-ddfced973a80/1786611327840042100-SubagentStart-a8cede9993582eb8d.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9c888d4-7b27-4cf5-a74f-ddfced973a80/1786611373539424700-SubagentStop-a8cede9993582eb8d.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9c888d4-7b27-4cf5-a74f-ddfced973a80/1786611406619356100-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9d6edfc-8c3a-47a0-9143-1b6d45193ef9/1786561434596359500-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9d6edfc-8c3a-47a0-9143-1b6d45193ef9/1786561436679515500-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/a9d6edfc-8c3a-47a0-9143-1b6d45193ef9/1786561445480341700-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561380879406700-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561383116863100-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/af8b8be3-a1c3-43e4-8e0c-ebf9dbb5d79d/1786561388312756700-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b6155e84-22e7-4954-9e7b-a240c1cecd3c/1786560231353731200-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b6155e84-22e7-4954-9e7b-a240c1cecd3c/1786560233356393000-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/b6155e84-22e7-4954-9e7b-a240c1cecd3c/1786560234326782500-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c069533c-fa44-496a-9c66-9ad7e0140d39/1786561867173454800-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c069533c-fa44-496a-9c66-9ad7e0140d39/1786561869591595800-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c069533c-fa44-496a-9c66-9ad7e0140d39/1786561880414902200-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c45f1e6f-2b1b-42a6-8887-89b9342921b7/1786554320745556900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c45f1e6f-2b1b-42a6-8887-89b9342921b7/1786554320865332300-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/c45f1e6f-2b1b-42a6-8887-89b9342921b7/1786554341731351700-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/d58777c9-5039-4866-98c0-e95562608b4e/1786561302582877500-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/d58777c9-5039-4866-98c0-e95562608b4e/1786561304406453300-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/d58777c9-5039-4866-98c0-e95562608b4e/1786561326884937600-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/dbb346e4-537a-4f1c-9772-af26200444bf/1786560707369897900-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/dbb346e4-537a-4f1c-9772-af26200444bf/1786560709647204000-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/dbb346e4-537a-4f1c-9772-af26200444bf/1786560710649703300-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/eef24db6-cc57-4795-a998-056281d72e3d/1786554058032813300-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/eef24db6-cc57-4795-a998-056281d72e3d/1786554058314463700-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/eef24db6-cc57-4795-a998-056281d72e3d/1786554102031146700-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f337cb1d-bfd2-4d85-936a-e50821cb00da/1786556323968646500-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f337cb1d-bfd2-4d85-936a-e50821cb00da/1786556325903166100-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f337cb1d-bfd2-4d85-936a-e50821cb00da/1786556326416169100-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f46561df-de7e-42b1-9459-0053b1037ac8/1786558433608568700-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f46561df-de7e-42b1-9459-0053b1037ac8/1786558435953676500-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f46561df-de7e-42b1-9459-0053b1037ac8/1786558436973015600-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f592061b-65ef-4b70-b231-8c5f27843196/1786575445658175700-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f592061b-65ef-4b70-b231-8c5f27843196/1786575450213207400-RuntimePreflightPassed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/f592061b-65ef-4b70-b231-8c5f27843196/1786575564896096000-SessionEnd-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/fb36fbc7-b59b-4218-9b85-27f9f01a4e78/1786559777322083400-SessionStart-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/fb36fbc7-b59b-4218-9b85-27f9f01a4e78/1786559779451932000-RuntimePreflightFailed-main.json` — Structured configuration or generated data.
+- `.claude/runtime-events/fb36fbc7-b59b-4218-9b85-27f9f01a4e78/1786559780582958100-SessionEnd-main.json` — Structured configuration or generated data.
 - `.claude/settings.json` — Claude project settings for permissions, tools, and hooks.
-- `.claude/skills/incident-analysis/SKILL.md` — Claude skill instructions for incident report analysis.
-- `.claude/skills/remediation-planning/SKILL.md` — Claude skill instructions for remediation planning and validation.
-- `.claude/skills/server-monitoring/SKILL.md` — Claude skill instructions for server monitoring tasks.
-- `.claude/skills/specialist-investigation/SKILL.md` — Claude skill instructions for specialist investigation workflows.
+- `.claude/skills/analyze-incident/SKILL.md` — Project documentation.
+- `.claude/skills/investigate-incident/SKILL.md` — Project documentation.
+- `.claude/skills/monitor-server/SKILL.md` — Project documentation.
+- `.claude/skills/plan-remediation/SKILL.md` — Project documentation.
 - `.env` — Project asset.
 - `.env.example` — Example environment variables for local/runtime configuration.
 - `.gitignore` — Project asset.
@@ -88,115 +189,258 @@ Evaluation / Production Readiness Gate
 
 ### Application core
 
-- `app/.python-version` — Project asset.
 - `app/__init__.py` — Python module.
+- `app/admin/__init__.py` — Compatibility facade for :mod:`app.interfaces.admin`.
+- `app/admin/api/__init__.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/agent_observability.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/commands.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/diagnostic_tools.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/investigations.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/knowledge_sources.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/profiles.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/reports.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/servers.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/specialists.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/api/system.py` — Compatibility facade for the canonical Admin API.
+- `app/admin/dependencies.py` — Compatibility facade for the canonical Admin interface.
+- `app/admin/schemas/__init__.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/schemas/commands.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/schemas/investigations.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/schemas/knowledge_sources.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/schemas/profiles.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/schemas/reports.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/schemas/servers.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/schemas/specialists.py` — Compatibility facade for the canonical Admin schemas.
+- `app/admin/services/__init__.py` — Compatibility facade for the canonical Admin services.
+- `app/admin/services/report_pdf_service.py` — Compatibility facade for the canonical Admin services.
+- `app/admin/services/ssh_test_service.py` — Compatibility facade for the canonical Admin services.
+- `app/admin/web/__init__.py` — Compatibility facade for the canonical Admin web interface.
+- `app/admin/web/routes.py` — Compatibility facade for the canonical Admin web interface.
 - `app/bootstrap.py` — Application composition root / dependency container. Builds repositories, services, LLM clients, registries, Policy, coordinators, and shared runtime dependencies.
+- `app/capabilities/__init__.py` — Application capabilities: bounded business execution used by interfaces.
+- `app/capabilities/remediation/__init__.py` — Policy-gated remediation proposal and application capabilities.
+- `app/capabilities/remediation/service.py` — Python module containing class `RemediationService`.
+- `app/composition/__init__.py` — Python module.
+- `app/composition/analysis.py` — Python module containing class `RetrievalComposition`, class `AnalysisInvestigationComposition`, `build_retrieval_composition()`, `build_analysis_investigation_composition()`.
+- `app/composition/builder.py` — Python module containing `build_container()`.
+- `app/composition/container.py` — Python module containing class `ApplicationContainer`.
+- `app/composition/repositories.py` — Python module containing class `RepositoryBundle`, `build_repositories()`.
+- `app/composition/runtime.py` — Python module containing class `RuntimeComposition`, `build_runtime_composition()`.
+- `app/composition/services.py` — Python module containing class `CoreServiceBundle`, `build_core_services()`.
 - `app/domain/__init__.py` — Project domain services and contracts.
+- `app/domain/analysis/__init__.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/analysis_orchestrator.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/client_factory.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/llm_client.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/ollama_client.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/prompts.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/report_analyzer.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/report_serializer.py` — Compatibility facade for the canonical analysis capability.
+- `app/domain/analysis/retrieval/__init__.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/context_builder.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/embedding_client.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/embedding_factory.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/full_text_retriever.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/hybrid_retriever.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/ollama_embedding_client.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/performance_profiler.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/rag_context.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/rag_retriever.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/report_fingerprint.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/report_normalizer.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/retrieval_indexer.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/reuse_policy.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/analysis/retrieval/structured_compatibility.py` — Compatibility facade for canonical analysis retrieval capabilities.
+- `app/domain/investigation/__init__.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/contracts.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/correlation.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/diagnostic_policy.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/diagnostic_tools.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/evidence_collection.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/execution_contracts.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/final_diagnosis_synthesizer.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/investigation_router.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/persistence_service.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/runtime_snapshot_service.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/specialist_context.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/specialist_investigation_loop.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/specialist_reasoning_agent.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/specialist_reasoning_client.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/investigation/specialist_registry.py` — Compatibility facade for the canonical investigation capability.
+- `app/domain/knowledge/__init__.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/chunker.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/chunking_service.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/indexer.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/ingestion_contracts.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/ingestion_service.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/parsers.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/retrieval.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/source_loader.py` — Compatibility facade for the canonical knowledge capability.
+- `app/domain/knowledge/source_registry.py` — Compatibility facade for the canonical knowledge capability.
+- `app/infrastructure/__init__.py` — Infrastructure adapters and external-system implementations.
+- `app/infrastructure/database/__init__.py` — Database infrastructure implementations.
+- `app/infrastructure/database/base.py` — Python module containing class `Base`.
+- `app/infrastructure/database/engine.py` — Python module containing `create_database_tables()`.
+- `app/infrastructure/database/migrations/step_3_10_performance_metrics.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_3_3_full_text_search.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_3_7_hnsw_vector_search.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_3_7_verify_hnsw.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_4_2_specialist_definitions.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_4_6_investigation_persistence.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_4_7_knowledge_sources.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_4_8_0_knowledge_rag_schema.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_4_8_3_knowledge_indexes.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_c_10_remediation.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/migrations/step_c_3_agent_jobs.sql` — Database migration/configuration asset.
+- `app/infrastructure/database/models/__init__.py` — Python module.
+- `app/infrastructure/database/models/agent_job.py` — Python module containing class `AgentJobModel`.
+- `app/infrastructure/database/models/command_execution.py` — Python module containing class `CommandExecutionModel`.
+- `app/infrastructure/database/models/investigation.py` — Python module containing class `InvestigationModel`, class `InvestigationSpecialistCandidateModel`.
+- `app/infrastructure/database/models/knowledge_document.py` — Python module containing class `KnowledgeDocumentModel`, class `KnowledgeChunkModel`.
+- `app/infrastructure/database/models/knowledge_source.py` — Python module containing class `KnowledgeSourceModel`.
+- `app/infrastructure/database/models/monitor_command.py` — Python module containing class `MonitorCommandModel`.
+- `app/infrastructure/database/models/monitoring_profile.py` — Python module containing class `MonitoringProfileModel`.
+- `app/infrastructure/database/models/monitoring_report.py` — Python module containing class `MonitoringReportModel`.
+- `app/infrastructure/database/models/profile_command.py` — Python module containing class `MonitoringProfileCommandModel`.
+- `app/infrastructure/database/models/remediation.py` — Python module containing class `RemediationPlanModel`, class `RemediationSandboxResultModel`.
+- `app/infrastructure/database/models/report_analysis.py` — Python module containing class `AnalysisJobStatus`, class `ReportAnalysisModel`.
+- `app/infrastructure/database/models/report_analysis_source.py` — Python module containing class `ReportAnalysisSourceModel`.
+- `app/infrastructure/database/models/report_retrieval_document.py` — Python module containing class `ReportRetrievalDocumentModel`.
+- `app/infrastructure/database/models/server.py` — Python module containing class `ServerStatus`, class `ServerModel`.
+- `app/infrastructure/database/models/specialist_definition.py` — Python module containing class `SpecialistDefinitionModel`.
+- `app/infrastructure/database/repositories/__init__.py` — Persistence repository module.
+- `app/infrastructure/database/repositories/agent_job_repository.py` — Persistence repository module containing class `AgentJobRepository`.
+- `app/infrastructure/database/repositories/analysis_repository.py` — Persistence repository module containing class `AnalysisRepository`.
+- `app/infrastructure/database/repositories/analysis_source_repository.py` — Persistence repository module containing class `AnalysisSourceRepository`.
+- `app/infrastructure/database/repositories/command_repository.py` — Persistence repository module containing class `CommandRepository`.
+- `app/infrastructure/database/repositories/investigation_repository.py` — Persistence repository module containing class `InvestigationRepository`.
+- `app/infrastructure/database/repositories/knowledge_document_repository.py` — Persistence repository module containing class `KnowledgeDocumentRepository`.
+- `app/infrastructure/database/repositories/knowledge_retrieval_repository.py` — Persistence repository module containing class `KnowledgeSearchRow`, class `KnowledgeRetrievalRepository`.
+- `app/infrastructure/database/repositories/knowledge_source_repository.py` — Persistence repository module containing class `KnowledgeSourceRepository`.
+- `app/infrastructure/database/repositories/profile_repository.py` — Persistence repository module containing class `MonitoringProfileRepository`.
+- `app/infrastructure/database/repositories/remediation_repository.py` — Persistence repository module containing class `RemediationRepository`.
+- `app/infrastructure/database/repositories/report_repository.py` — Persistence repository module containing class `ReportRepository`.
+- `app/infrastructure/database/repositories/retrieval_repository.py` — Persistence repository module containing class `RetrievalRepository`.
+- `app/infrastructure/database/repositories/server_repository.py` — Persistence repository module containing class `ServerRepository`.
+- `app/infrastructure/database/repositories/specialist_definition_repository.py` — Persistence repository module containing class `SpecialistDefinitionRepository`.
+- `app/infrastructure/database/session.py` — Python module containing `get_database_session()`.
+- `app/infrastructure/llm/__init__.py` — LLM infrastructure adapters.
+- `app/infrastructure/llm/ollama/__init__.py` — Ollama infrastructure implementations.
+- `app/infrastructure/llm/ollama/analysis_client.py` — Python module containing class `OllamaAnalysisClient`.
+- `app/infrastructure/llm/ollama/embedding_client.py` — Python module containing class `OllamaEmbeddingClient`.
+- `app/infrastructure/llm/ollama/final_diagnosis_client.py` — Python module containing class `OllamaFinalDiagnosisNarrativeClient`.
+- `app/infrastructure/llm/ollama/specialist_reasoning_client.py` — Python module containing class `OllamaSpecialistReasoningClient`.
+- `app/interfaces/__init__.py` — External adapters for HTTP administration and MCP.
+- `app/interfaces/mcp/__init__.py` — Python module.
+- `app/interfaces/mcp/catalog.py` — Categorizes project tools into monitoring, reports, retrieval, investigation, specialists, and remediation groups.
+- `app/interfaces/mcp/project_boundary_parts/__init__.py` — Python module.
+- `app/interfaces/mcp/project_boundary_parts/analysis.py` — Python module containing class `AnalysisToolsMixin`.
+- `app/interfaces/mcp/project_boundary_parts/common.py` — Python module containing class `BoundaryCommonMixin`.
+- `app/interfaces/mcp/project_boundary_parts/definitions.py` — Python module containing class `BoundaryDefinitionsMixin`.
+- `app/interfaces/mcp/project_boundary_parts/investigation.py` — Python module containing class `InvestigationToolsMixin`.
+- `app/interfaces/mcp/project_boundary_parts/monitoring.py` — Python module containing class `MonitoringToolsMixin`.
+- `app/interfaces/mcp/project_boundary_parts/remediation.py` — Python module containing class `RemediationToolsMixin`.
+- `app/interfaces/mcp/registry.py` — Project tool execution boundary used by Claude through MCP; validates calls, invokes deterministic services, and returns structured results.
+- `app/interfaces/mcp/schemas.py` — Stable MCP request and response contracts exposed to Claude Code.
+- `app/interfaces/mcp/serializers.py` — Python module containing `serialize_value()`, `serialize_server()`, `serialize_profile()`, `serialize_monitoring_report_data()`, `serialize_report_details()`.
+- `app/interfaces/mcp/server.py` — Project-scoped MCP protocol server exposing project tools to Claude Code.
 - `app/main.py` — FastAPI application entry point; registers API/web routers and startup/shutdown behavior.
-- `app/mcp/__init__.py` — Python module.
-- `app/mcp/project_tools.py` — Thin MCP compatibility export for the project tool boundary implemented under app/tools.
-- `app/mcp/schemas.py` — Python module containing class `ProjectToolDefinition`, class `ProjectToolCall`, class `ProjectToolResult`.
-- `app/mcp/serializers.py` — Python module containing `serialize_value()`, `serialize_server()`, `serialize_profile()`, `serialize_monitoring_report_data()`, `serialize_report_details()`.
-- `app/mcp/server.py` — Project-scoped MCP protocol server exposing project tools to Claude Code.
+- `app/mcp/__init__.py` — Compatibility facade for :mod:`app.interfaces.mcp`.
+- `app/mcp/schemas.py` — Compatibility facade for the canonical MCP interface.
+- `app/mcp/serializers.py` — Compatibility facade for the canonical MCP interface.
+- `app/mcp/server.py` — Compatibility facade for the canonical MCP interface.
 - `app/runtime/__init__.py` — Runtime adapters and supervisors.
 
 ### Claude Runtime
 
 - `app/runtime/claude/__init__.py` — Claude runtime module.
-- `app/runtime/claude/exceptions.py` — Claude runtime module containing class `ClaudeRuntimeError`, class `ClaudeStructuredOutputError`, class `ClaudeToolAccessError`.
+- `app/runtime/claude/command.py` — Validated native Claude CLI process command contract.
+- `app/runtime/claude/exceptions.py` — Claude runtime module containing class `ClaudeRuntimeError`, class `ClaudeStructuredOutputError`, class `ClaudeToolAccessError`, class `ClaudeProcessExecutionError`, class `ClaudeProcessOutputError`.
 - `app/runtime/claude/job_service.py` — Claude runtime module containing class `ClaudeAgentJobService`.
 - `app/runtime/claude/models.py` — Claude runtime module containing class `ClaudeJobStatus`, class `ClaudeRuntimeRequest`, class `ClaudeRawResult`, class `ClaudeStructuredOutput`, class `ClaudeRuntimeResult`.
-- `app/runtime/claude/monitoring_cycle.py` — Claude runtime module containing class `ClaudeMonitoringCycleResult`, class `ClaudeSupervisedMonitoringCycle`.
-- `app/runtime/claude/multi_specialist_supervision.py` — Claude runtime module containing class `ClaudeSpecialistRunSummary`, class `ClaudeMultiSpecialistResult`, class `ClaudeMultiSpecialistSupervisor`.
+- `app/runtime/claude/native_monitoring.py` — Claude runtime module containing class `ClaudeNativeMonitoringRunner`.
+- `app/runtime/claude/observability.py` — Claude runtime module containing class `ClaudeAgentObservabilityService`.
+- `app/runtime/claude/ollama_runtime.py` — Claude runtime module containing class `OllamaClaudeCommandBuilder`.
 - `app/runtime/claude/result_parser.py` — Claude runtime module containing class `ClaudeStructuredResultParser`.
 - `app/runtime/claude/runtime.py` — Claude runtime module containing class `ClaudeSessionRunner`, class `ClaudeRuntimeAdapter`.
-- `app/runtime/claude/session.py` — Claude runtime module containing class `ClaudeSessionSnapshot`.
+- `app/runtime/claude/session_runner.py` — Claude runtime module containing class `SubprocessClaudeSessionRunner`.
+- `app/runtime/claude/stream_decoder.py` — Claude runtime module containing class `ClaudeCliJsonDecoder`.
 - `app/runtime/claude/supervisor.py` — Claude runtime module containing class `MonitoringRunner`, class `ClaudeSupervisor`.
 
-### Project Tools
+### Monitoring Capability
 
-- `app/tools/__init__.py` — Project tool implementations exposed to runtimes and APIs.
-- `app/tools/catalog.py` — Categorizes project tools into monitoring, reports, retrieval, investigation, specialists, and remediation groups.
-- `app/tools/investigation/__init__.py` — Investigation routing, state, and evidence tools.
-- `app/tools/project_boundary.py` — Project tool execution boundary used by Claude through MCP; validates calls, invokes deterministic services, and returns structured results.
-- `app/tools/remediation/__init__.py` — Remediation proposal, sandbox validation, and approval tools.
-- `app/tools/reports/__init__.py` — Report tools exposed to Claude through the project MCP boundary.
-- `app/tools/retrieval/__init__.py` — Analysis, incident retrieval, and knowledge retrieval tools.
-- `app/tools/specialists/__init__.py` — Specialist registry and specialist execution tools.
+- `app/capabilities/monitoring/__init__.py` — Server monitoring execution and report construction capabilities.
+- `app/capabilities/monitoring/command_service.py` — Python module containing class `CommandService`.
+- `app/capabilities/monitoring/profile_service.py` — Python module containing class `MonitoringProfileService`.
+- `app/capabilities/monitoring/report_query_service.py` — Python module containing class `ReportQueryService`.
+- `app/capabilities/monitoring/report_service.py` — Python module containing class `ReportService`.
+- `app/capabilities/monitoring/scheduler.py` — Python module containing class `SchedulableServerRecord`, class `MonitoringRunnerProtocol`, class `SchedulerServerRepositoryProtocol`, class `MonitoringScheduler`.
+- `app/capabilities/monitoring/server_service.py` — Python module containing class `ServerService`.
+- `app/capabilities/monitoring/service.py` — Python module containing class `ServerRecord`, class `MonitoringCommandRecord`, class `ServerRepositoryProtocol`, class `MonitoringProfileRepositoryProtocol`, class `ReportRepositoryProtocol`.
 
-### Monitoring Tools
+### SSH Infrastructure
 
-- `app/tools/monitoring/__init__.py` — Monitoring tool module.
-- `app/tools/monitoring/report_service.py` — Monitoring tool module containing class `ReportService`.
-- `app/tools/monitoring/scheduler.py` — Monitoring tool module containing class `SchedulableServerRecord`, class `SchedulerServerRepositoryProtocol`, class `MonitoringScheduler`.
-- `app/tools/monitoring/service.py` — Monitoring tool module containing class `ServerRecord`, class `MonitoringCommandRecord`, class `ServerRepositoryProtocol`, class `MonitoringProfileRepositoryProtocol`, class `ReportRepositoryProtocol`.
-
-### SSH Tools
-
-- `app/tools/ssh/__init__.py` — SSH infrastructure used by the monitoring agent.
-- `app/tools/ssh/client.py` — SSH tool module containing class `SSHConnectionConfig`, class `SSHClient`.
-- `app/tools/ssh/command_executor.py` — SSH tool module containing class `CommandExecutionResult`, class `SSHCommandExecutor`.
+- `app/infrastructure/ssh/__init__.py` — Low-level, policy-neutral SSH transport and command execution.
+- `app/infrastructure/ssh/client.py` — Known-hosts-verified SSH transport with validated private keys.
+- `app/infrastructure/ssh/command_executor.py` — Bounded SSH command execution and result contract.
 
 ### Analysis Domain
 
-- `app/domain/analysis/__init__.py` — Analysis domain module.
-- `app/domain/analysis/analysis_agent_manager.py` — Analysis domain module containing class `AnalysisAgentManager`.
-- `app/domain/analysis/analysis_orchestrator.py` — Analysis domain module containing class `AnalysisOrchestrator`.
-- `app/domain/analysis/client_factory.py` — Analysis domain module containing `create_llm_analysis_client()`.
-- `app/domain/analysis/llm_client.py` — Analysis domain module containing class `LLMAnalysisClient`.
-- `app/domain/analysis/ollama_client.py` — Analysis domain module containing class `OllamaAnalysisClient`.
-- `app/domain/analysis/openai_client.py` — Analysis domain module containing class `OpenAIAnalysisClient`.
-- `app/domain/analysis/prompts.py` — Analysis domain module containing `build_analysis_prompt()`.
-- `app/domain/analysis/report_analyzer.py` — Analysis domain module containing class `ReportAnalyzer`.
-- `app/domain/analysis/report_serializer.py` — Analysis domain module containing class `ReportSerializer`.
-- `app/domain/analysis/retrieval/__init__.py` — Historical analysis retrieval components.
-- `app/domain/analysis/retrieval/context_builder.py` — Analysis domain module containing class `RagContextBuilder`.
-- `app/domain/analysis/retrieval/embedding_client.py` — Analysis domain module containing class `EmbeddingClient`.
-- `app/domain/analysis/retrieval/embedding_factory.py` — Analysis domain module containing `create_embedding_client()`.
-- `app/domain/analysis/retrieval/full_text_retriever.py` — Analysis domain module containing class `FullTextCandidate`, class `FullTextQueryBuilder`, class `FullTextRetriever`.
-- `app/domain/analysis/retrieval/hybrid_retriever.py` — Analysis domain module containing class `_FusionCandidate`, class `HybridRetriever`.
-- `app/domain/analysis/retrieval/ollama_embedding_client.py` — Analysis domain module containing class `OllamaEmbeddingClient`.
-- `app/domain/analysis/retrieval/performance_profiler.py` — Analysis domain module containing class `PerformanceProfile`, `start_profile()`, `record_timing()`, `set_counter()`, `snapshot()`.
-- `app/domain/analysis/retrieval/rag_context.py` — Analysis domain module containing class `RetrievedAnalysisContext`.
-- `app/domain/analysis/retrieval/rag_retriever.py` — Analysis domain module containing class `RagRetriever`.
-- `app/domain/analysis/retrieval/report_fingerprint.py` — Analysis domain module containing class `ReportFingerprintService`.
-- `app/domain/analysis/retrieval/report_normalizer.py` — Analysis domain module containing class `ReportNormalizer`.
-- `app/domain/analysis/retrieval/retrieval_indexer.py` — Analysis domain module containing class `RetrievalIndexer`.
-- `app/domain/analysis/retrieval/reuse_policy.py` — Analysis domain module containing class `AnalysisDecision`, class `AnalysisDecisionResult`, class `AnalysisReusePolicy`.
-- `app/domain/analysis/retrieval/structured_compatibility.py` — Analysis domain module containing class `CompatibilityConflict`, class `CompatibilityResult`, class `StructuredCompatibilityChecker`.
-- `app/domain/analysis/server_analysis_agent.py` — Analysis domain module containing class `AnalysisJob`, class `ServerAnalysisAgent`.
+- `app/capabilities/analysis/__init__.py` — Analysis capability package with lazy public exports.
+- `app/capabilities/analysis/analysis_orchestrator.py` — Analysis domain module containing class `AnalysisOrchestrator`.
+- `app/capabilities/analysis/client_factory.py` — Analysis domain module containing `create_llm_analysis_client()`.
+- `app/capabilities/analysis/llm_client.py` — Analysis domain module containing class `LLMAnalysisClient`.
+- `app/capabilities/analysis/ollama_client.py` — Compatibility facade for the relocated Ollama analysis client.
+- `app/capabilities/analysis/prompts.py` — Analysis domain module containing `build_analysis_prompt()`.
+- `app/capabilities/analysis/report_analyzer.py` — Analysis domain module containing class `ReportAnalyzer`.
+- `app/capabilities/analysis/report_serializer.py` — Analysis domain module containing class `ReportSerializer`.
+- `app/capabilities/analysis/retrieval/__init__.py` — Historical analysis retrieval components.
+- `app/capabilities/analysis/retrieval/context_builder.py` — Analysis domain module containing class `RagContextBuilder`.
+- `app/capabilities/analysis/retrieval/embedding_client.py` — Analysis domain module containing class `EmbeddingClient`.
+- `app/capabilities/analysis/retrieval/embedding_factory.py` — Analysis domain module containing `create_embedding_client()`.
+- `app/capabilities/analysis/retrieval/full_text_retriever.py` — Analysis domain module containing class `FullTextCandidate`, class `FullTextQueryBuilder`, class `FullTextRetriever`.
+- `app/capabilities/analysis/retrieval/hybrid_retriever.py` — Analysis domain module containing class `_FusionCandidate`, class `HybridRetriever`.
+- `app/capabilities/analysis/retrieval/ollama_embedding_client.py` — Compatibility facade for the relocated Ollama embedding client.
+- `app/capabilities/analysis/retrieval/performance_profiler.py` — Analysis domain module containing class `PerformanceProfile`, `start_profile()`, `record_timing()`, `set_counter()`, `snapshot()`.
+- `app/capabilities/analysis/retrieval/rag_context.py` — Analysis domain module containing class `RetrievedAnalysisContext`.
+- `app/capabilities/analysis/retrieval/rag_retriever.py` — Analysis domain module containing class `RagRetriever`.
+- `app/capabilities/analysis/retrieval/report_fingerprint.py` — Analysis domain module containing class `ReportFingerprintService`.
+- `app/capabilities/analysis/retrieval/report_normalizer.py` — Analysis domain module containing class `ReportNormalizer`.
+- `app/capabilities/analysis/retrieval/retrieval_indexer.py` — Analysis domain module containing class `RetrievalIndexer`.
+- `app/capabilities/analysis/retrieval/reuse_policy.py` — Analysis domain module containing class `AnalysisDecision`, class `AnalysisDecisionResult`, class `AnalysisReusePolicy`.
+- `app/capabilities/analysis/retrieval/structured_compatibility.py` — Analysis domain module containing class `CompatibilityConflict`, class `CompatibilityResult`, class `StructuredCompatibilityChecker`.
 
 ### Investigation Domain
 
-- `app/domain/investigation/__init__.py` — Investigation domain module.
-- `app/domain/investigation/contracts.py` — Investigation domain module containing class `InvestigationStatus`, class `SpecialistTaskStatus`, class `EvidenceKind`, class `KnowledgeSourceType`, class `InvestigationBudget`.
-- `app/domain/investigation/correlation.py` — Investigation domain module containing class `DiagnosisCertainty`, class `DiagnosisConflict`, class `CorrelatedDiagnosisClaim`, class `FinalDiagnosis`, class `CrossSpecialistCorrelator`.
-- `app/domain/investigation/diagnostic_policy.py` — Investigation domain module containing class `DiagnosticPolicyDecision`, class `DiagnosticPolicyReason`, class `DiagnosticPolicyRequest`, class `DiagnosticPolicyResult`, class `DiagnosticPolicyEngine`.
-- `app/domain/investigation/diagnostic_tools.py` — Investigation domain module containing class `DiagnosticToolRisk`, class `DiagnosticParameterKind`, class `DiagnosticToolParameter`, class `DiagnosticToolDefinition`, class `DiagnosticToolCall`.
-- `app/domain/investigation/evidence_collection.py` — Investigation domain module containing class `DiagnosticExecutionOutcome`, class `DiagnosticCommandRunner`, class `ServerRecord`, class `ServerRepositoryProtocol`, class `EvidenceCollectionRequest`.
-- `app/domain/investigation/final_diagnosis_synthesizer.py` — Investigation domain module containing class `FinalDiagnosisNarrativeOutput`, class `FinalDiagnosisNarrative`, class `FinalDiagnosisNarrativeClient`, class `OllamaFinalDiagnosisNarrativeClient`, class `OpenAIFinalDiagnosisNarrativeClient`.
-- `app/domain/investigation/investigation_router.py` — Investigation domain module containing class `RoutingReason`, class `SpecialistRoutingMatch`, class `InvestigationRoutingDecision`, class `_IssueSignal`, class `_Candidate`.
-- `app/domain/investigation/persistence_service.py` — Investigation domain module containing class `InvestigationPersistenceService`.
-- `app/domain/investigation/runtime_snapshot_service.py` — Investigation domain module containing class `InvestigationRuntimeSnapshotService`.
-- `app/domain/investigation/server_coordinator.py` — Investigation domain module containing class `ServerCoordinatorSpecialistRun`, class `ServerCoordinatorResult`, class `ServerCoordinator`.
-- `app/domain/investigation/specialist_context.py` — Investigation domain module containing class `SpecialistContextBudget`, class `SpecialistContextSnapshot`, class `SpecialistKnowledgeQueryBuilder`, class `SpecialistContextBuilder`.
-- `app/domain/investigation/specialist_investigation_loop.py` — Investigation domain module containing class `SpecialistLoopStopReason`, class `SpecialistLoopToolDecision`, class `SpecialistLoopRoundTrace`, class `SpecialistInvestigationLoopResult`, class `SpecialistInvestigationLoop`.
-- `app/domain/investigation/specialist_reasoning_agent.py` — Investigation domain module containing class `SpecialistDiagnosticToolRequest`, class `SpecialistReasoningExecution`, class `SpecialistReasoningAgent`.
-- `app/domain/investigation/specialist_reasoning_client.py` — Investigation domain module containing class `SpecialistReasoningClient`, class `OllamaSpecialistReasoningClient`, class `OpenAISpecialistReasoningClient`, `create_specialist_reasoning_client()`.
-- `app/domain/investigation/specialist_registry.py` — Investigation domain module containing class `SpecialistRegistryValidationError`, class `SpecialistRuntimeDefinition`, class `SpecialistDomainMatch`, class `SpecialistRegistrySnapshot`, class `SpecialistRegistry`.
+- `app/capabilities/investigation/__init__.py` — Investigation capability package with lazy public exports.
+- `app/capabilities/investigation/correlation.py` — Investigation domain module containing class `DiagnosisCertainty`, class `DiagnosisConflict`, class `CorrelatedDiagnosisClaim`, class `FinalDiagnosis`, class `CrossSpecialistCorrelator`.
+- `app/capabilities/investigation/evidence_collection.py` — Investigation domain module containing class `DiagnosticExecutionOutcome`, class `DiagnosticCommandRunner`, class `ServerRecord`, class `ServerRepositoryProtocol`, class `EvidenceCollectionRequest`.
+- `app/capabilities/investigation/execution_contracts.py` — Investigation domain module containing class `InvestigationSpecialistRun`, class `InvestigationExecutionResult`.
+- `app/capabilities/investigation/final_diagnosis_synthesizer.py` — Investigation domain module containing class `FinalDiagnosisSynthesizer`, `create_final_diagnosis_narrative_client()`.
+- `app/capabilities/investigation/investigation_router.py` — Investigation domain module containing class `RoutingReason`, class `SpecialistRoutingMatch`, class `InvestigationRoutingDecision`, class `_IssueSignal`, class `_Candidate`.
+- `app/capabilities/investigation/persistence_service.py` — Investigation domain module containing class `InvestigationPersistenceService`.
+- `app/capabilities/investigation/read_service.py` — Investigation domain module containing class `InvestigationReadService`.
+- `app/capabilities/investigation/runtime_snapshot_service.py` — Investigation domain module containing class `InvestigationRuntimeSnapshotService`.
+- `app/capabilities/investigation/specialist_context.py` — Investigation domain module containing class `SpecialistContextBudget`, class `SpecialistContextSnapshot`, class `SpecialistKnowledgeQueryBuilder`, class `SpecialistContextBuilder`.
+- `app/capabilities/investigation/specialist_investigation_loop.py` — Investigation domain module containing class `SpecialistLoopStopReason`, class `SpecialistLoopToolDecision`, class `SpecialistLoopRoundTrace`, class `SpecialistInvestigationLoopResult`, class `SpecialistInvestigationLoop`.
+- `app/capabilities/investigation/specialist_reasoning_agent.py` — Investigation domain module containing class `SpecialistDiagnosticToolRequest`, class `SpecialistReasoningExecution`, class `SpecialistReasoningAgent`.
+- `app/capabilities/investigation/specialist_reasoning_client.py` — Investigation domain module containing `create_specialist_reasoning_client()`.
+- `app/capabilities/investigation/specialist_registry.py` — Investigation domain module containing class `SpecialistRegistryValidationError`, class `SpecialistRuntimeDefinition`, class `SpecialistDomainMatch`, class `SpecialistRegistrySnapshot`, class `SpecialistRegistry`.
+- `app/capabilities/investigation/specialist_service.py` — Investigation domain module containing class `SpecialistDefinitionService`.
 
 ### Knowledge Domain
 
-- `app/domain/knowledge/__init__.py` — Knowledge ingestion, chunking, indexing, retrieval, and source registry.
-- `app/domain/knowledge/chunker.py` — Knowledge domain module containing class `KnowledgeChunkerConfig`, class `_Block`, class `StructureAwareKnowledgeChunker`.
-- `app/domain/knowledge/chunking_service.py` — Knowledge domain module containing class `KnowledgeChunkingService`.
-- `app/domain/knowledge/indexer.py` — Knowledge domain module containing class `KnowledgeIndexingResult`, class `KnowledgeIndexer`.
-- `app/domain/knowledge/ingestion_contracts.py` — Knowledge domain module containing class `KnowledgeDocumentStatus`, class `ParsedKnowledgeDocument`, class `KnowledgeChunkDraft`.
-- `app/domain/knowledge/ingestion_service.py` — Knowledge domain module containing class `KnowledgeIngestionService`.
-- `app/domain/knowledge/parsers.py` — Knowledge domain module containing `normalize_text()`, class `_HTMLTextExtractor`, class `KnowledgeContentParser`.
-- `app/domain/knowledge/retrieval.py` — Knowledge domain module containing class `KnowledgeRetrievalContext`, class `_FusionCandidate`, class `KnowledgeHybridRetriever`.
-- `app/domain/knowledge/source_loader.py` — Knowledge domain module containing class `LoadedKnowledgeContent`, class `KnowledgeSourceLoader`.
-- `app/domain/knowledge/source_registry.py` — Knowledge domain module containing class `KnowledgeSourceRuntimeDefinition`, class `KnowledgeSourceRegistrySnapshot`, class `KnowledgeSourceRegistry`.
+- `app/capabilities/knowledge/__init__.py` — Knowledge capability package with lazy public exports.
+- `app/capabilities/knowledge/chunker.py` — Knowledge domain module containing class `KnowledgeChunkerConfig`, class `_Block`, class `StructureAwareKnowledgeChunker`.
+- `app/capabilities/knowledge/chunking_service.py` — Knowledge domain module containing class `KnowledgeChunkingService`.
+- `app/capabilities/knowledge/indexer.py` — Knowledge domain module containing class `KnowledgeIndexingResult`, class `KnowledgeIndexer`.
+- `app/capabilities/knowledge/ingestion_contracts.py` — Knowledge domain module containing class `KnowledgeDocumentStatus`, class `ParsedKnowledgeDocument`, class `KnowledgeChunkDraft`.
+- `app/capabilities/knowledge/ingestion_service.py` — Knowledge domain module containing class `KnowledgeIngestionService`.
+- `app/capabilities/knowledge/parsers.py` — Knowledge domain module containing `normalize_text()`, class `_HTMLTextExtractor`, class `KnowledgeContentParser`.
+- `app/capabilities/knowledge/retrieval.py` — Knowledge domain module containing class `KnowledgeRetrievalContext`, class `_FusionCandidate`, class `KnowledgeHybridRetriever`.
+- `app/capabilities/knowledge/source_loader.py` — Knowledge domain module containing class `LoadedKnowledgeContent`, class `KnowledgeSourceLoader`.
+- `app/capabilities/knowledge/source_registry.py` — Knowledge domain module containing class `KnowledgeSourceRuntimeDefinition`, class `KnowledgeSourceRegistrySnapshot`, class `KnowledgeSourceRegistry`.
+- `app/capabilities/knowledge/source_service.py` — Knowledge domain module containing class `KnowledgeSourceService`.
 
 ### Evaluation and Production Readiness
 
@@ -212,125 +456,49 @@ Evaluation / Production Readiness Gate
 
 ### Administration API and Web UI
 
-- `app/admin/__init__.py` — Administration interface package.
-- `app/admin/api/__init__.py` — FastAPI API router/module.
-- `app/admin/api/commands.py` — FastAPI API router/module exposing `list_commands()`, `get_command()`, `create_command()`, `update_command()`.
-- `app/admin/api/diagnostic_tools.py` — FastAPI API router/module exposing `list_diagnostic_tools()`.
-- `app/admin/api/investigations.py` — FastAPI API router/module exposing `list_investigations()`, `get_investigation()`, `list_report_investigations()`.
-- `app/admin/api/knowledge_sources.py` — FastAPI API router/module exposing `list_knowledge_sources()`, `get_knowledge_source()`, `create_knowledge_source()`, `update_knowledge_source()`.
-- `app/admin/api/profiles.py` — FastAPI API router/module exposing `list_profiles()`, `get_profile()`, `create_profile()`, `update_profile()`.
-- `app/admin/api/reports.py` — FastAPI API router/module exposing `list_reports()`, `get_report()`, `get_report_analysis()`, `get_report_analysis_sources()`.
-- `app/admin/api/servers.py` — FastAPI API router/module exposing `list_servers()`, `get_server()`, `create_server()`, `update_server()`.
-- `app/admin/api/specialists.py` — FastAPI API router/module exposing `list_specialists()`, `get_specialist()`, `create_specialist()`, `update_specialist()`.
-- `app/admin/api/system.py` — FastAPI API router/module exposing `get_runtime_overview()`.
-- `app/admin/dependencies.py` — Python module containing `get_monitoring_profile_service()`, `get_server_service()`, `get_command_service()`, `get_report_query_service()`, `get_ssh_test_service()`.
-- `app/admin/schemas/__init__.py` — API/schema models.
-- `app/admin/schemas/commands.py` — API/schema models including class `CommandCreateRequest`, class `CommandUpdateRequest`, class `CommandResponse`, class `AssignCommandRequest`, class `UpdateCommandAssignmentRequest`.
-- `app/admin/schemas/investigations.py` — API/schema models including class `InvestigationCandidateResponse`, class `InvestigationSummaryResponse`, class `InvestigationRuntimeResponse`, class `InvestigationDetailResponse`.
-- `app/admin/schemas/knowledge_sources.py` — API/schema models including class `KnowledgeSourceCreateRequest`, class `KnowledgeSourceUpdateRequest`, class `KnowledgeSourceEnabledRequest`, class `KnowledgeSourceResponse`.
-- `app/admin/schemas/profiles.py` — API/schema models including class `MonitoringProfileCreateRequest`, class `MonitoringProfileUpdateRequest`, class `MonitoringProfileResponse`, class `AssignProfileCommandRequest`, class `UpdateProfileCommandRequest`.
-- `app/admin/schemas/reports.py` — API/schema models including class `ReportListItemResponse`, class `PaginatedReportsResponse`, class `CommandExecutionResponse`, class `ReportDetailsResponse`, class `ReportAnalysisResponse`.
-- `app/admin/schemas/servers.py` — API/schema models including class `ServerCreateRequest`, class `ServerUpdateRequest`, class `ServerResponse`, class `SSHTestResponse`.
-- `app/admin/schemas/specialists.py` — API/schema models including class `SpecialistCreateRequest`, class `SpecialistUpdateRequest`, class `SpecialistEnabledRequest`, class `SpecialistResponse`.
-- `app/admin/services/__init__.py` — Service-layer module.
-- `app/admin/services/report_pdf_service.py` — Service-layer module containing class `ReportPdfService`.
-- `app/admin/services/ssh_test_service.py` — Service-layer module containing class `SSHTestResult`, class `SSHTestService`.
-- `app/admin/web/__init__.py` — Python module.
-- `app/admin/web/routes.py` — Python module containing `dashboard_page()`, `servers_page()`, `commands_page()`, `investigations_page()`, `reports_page()`.
-- `app/admin/web/static/css/app.css` — Administration UI stylesheet.
-- `app/admin/web/static/js/app.js` — Administration UI browser-side JavaScript.
-- `app/admin/web/templates/base.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/commands.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/dashboard.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/investigation_details.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/investigations.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/knowledge_sources.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/monitoring_profiles.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/report_details.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/reports.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/servers.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/specialists.html` — Jinja/HTML administration UI template.
-- `app/admin/web/templates/system.html` — Jinja/HTML administration UI template.
-
-### Shared application layer
-
-- `app/shared/__init__.py` — Shared application components.
-- `app/shared/config.py` — Environment-backed application configuration.
-- `app/shared/database/__init__.py` — Python module.
-- `app/shared/database/base.py` — Python module containing class `Base`.
-- `app/shared/database/engine.py` — Python module containing `create_database_tables()`.
-- `app/shared/database/migrations/step_3_10_performance_metrics.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_3_3_full_text_search.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_3_7_hnsw_vector_search.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_3_7_verify_hnsw.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_4_2_specialist_definitions.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_4_6_investigation_persistence.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_4_7_knowledge_sources.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_4_8_0_knowledge_rag_schema.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_4_8_3_knowledge_indexes.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_c_10_remediation.sql` — Database migration/configuration asset.
-- `app/shared/database/migrations/step_c_3_agent_jobs.sql` — Database migration/configuration asset.
-- `app/shared/database/models/__init__.py` — Python module.
-- `app/shared/database/models/agent_job.py` — Python module containing class `AgentJobModel`.
-- `app/shared/database/models/command_execution.py` — Python module containing class `CommandExecutionModel`.
-- `app/shared/database/models/investigation.py` — Python module containing class `InvestigationModel`, class `InvestigationSpecialistCandidateModel`.
-- `app/shared/database/models/knowledge_document.py` — Python module containing class `KnowledgeDocumentModel`, class `KnowledgeChunkModel`.
-- `app/shared/database/models/knowledge_source.py` — Python module containing class `KnowledgeSourceModel`.
-- `app/shared/database/models/monitor_command.py` — Python module containing class `MonitorCommandModel`.
-- `app/shared/database/models/monitoring_profile.py` — Python module containing class `MonitoringProfileModel`.
-- `app/shared/database/models/monitoring_report.py` — Python module containing class `MonitoringReportModel`.
-- `app/shared/database/models/profile_command.py` — Python module containing class `MonitoringProfileCommandModel`.
-- `app/shared/database/models/remediation.py` — Python module containing class `RemediationPlanModel`, class `RemediationSandboxResultModel`.
-- `app/shared/database/models/report_analysis.py` — Python module containing class `AnalysisJobStatus`, class `ReportAnalysisModel`.
-- `app/shared/database/models/report_analysis_source.py` — Python module containing class `ReportAnalysisSourceModel`.
-- `app/shared/database/models/report_retrieval_document.py` — Python module containing class `ReportRetrievalDocumentModel`.
-- `app/shared/database/models/server.py` — Python module containing class `ServerStatus`, class `ServerModel`.
-- `app/shared/database/models/specialist_definition.py` — Python module containing class `SpecialistDefinitionModel`.
-- `app/shared/database/repositories/__init__.py` — Persistence repository module.
-- `app/shared/database/repositories/agent_job_repository.py` — Persistence repository module containing class `AgentJobRepository`.
-- `app/shared/database/repositories/analysis_repository.py` — Persistence repository module containing class `AnalysisRepository`.
-- `app/shared/database/repositories/analysis_source_repository.py` — Persistence repository module containing class `AnalysisSourceRepository`.
-- `app/shared/database/repositories/command_repository.py` — Persistence repository module containing class `CommandRepository`.
-- `app/shared/database/repositories/investigation_repository.py` — Persistence repository module containing class `InvestigationRepository`.
-- `app/shared/database/repositories/knowledge_document_repository.py` — Persistence repository module containing class `KnowledgeDocumentRepository`.
-- `app/shared/database/repositories/knowledge_retrieval_repository.py` — Persistence repository module containing class `KnowledgeSearchRow`, class `KnowledgeRetrievalRepository`.
-- `app/shared/database/repositories/knowledge_source_repository.py` — Persistence repository module containing class `KnowledgeSourceRepository`.
-- `app/shared/database/repositories/profile_repository.py` — Persistence repository module containing class `MonitoringProfileRepository`.
-- `app/shared/database/repositories/remediation_repository.py` — Persistence repository module containing class `RemediationRepository`.
-- `app/shared/database/repositories/report_repository.py` — Persistence repository module containing class `ReportRepository`.
-- `app/shared/database/repositories/retrieval_repository.py` — Persistence repository module containing class `RetrievalRepository`.
-- `app/shared/database/repositories/server_repository.py` — Persistence repository module containing class `ServerRepository`.
-- `app/shared/database/repositories/specialist_definition_repository.py` — Persistence repository module containing class `SpecialistDefinitionRepository`.
-- `app/shared/database/session.py` — Python module containing `get_database_session()`.
-- `app/shared/dto/__init__.py` — Python module.
-- `app/shared/dto/agent_jobs.py` — Python module containing class `CreateAgentJobDTO`, class `UpdateAgentJobDTO`.
-- `app/shared/dto/analysis.py` — Python module containing class `AnalysisHealthStatus`, class `AnalysisSeverity`, class `AnalysisIssue`, class `ReportAnalysisResult`, class `StoredReportAnalysis`.
-- `app/shared/dto/commands.py` — Python module containing class `CreateCommandDTO`, class `UpdateCommandDTO`, class `CommandExecutionConfig`.
-- `app/shared/dto/investigation_read_models.py` — Python module containing class `InvestigationCandidateReadModel`, class `InvestigationSummaryReadModel`, class `InvestigationRuntimeReadModel`, class `InvestigationDetailReadModel`.
-- `app/shared/dto/investigations.py` — Python module containing class `PersistInvestigationCandidateDTO`, class `PersistInvestigationDTO`.
-- `app/shared/dto/knowledge_sources.py` — Python module containing class `CreateKnowledgeSourceDTO`, class `UpdateKnowledgeSourceDTO`.
-- `app/shared/dto/profiles.py` — Python module containing class `CreateMonitoringProfileDTO`, class `UpdateMonitoringProfileDTO`, class `MonitoringProfileCommandConfig`.
-- `app/shared/dto/remediation.py` — Python module containing class `RemediationRisk`, class `RemediationPlanStatus`, class `SandboxResultStatus`, class `CreateRemediationPlanDTO`, class `CreateSandboxResultDTO`.
-- `app/shared/dto/reports.py` — Python module containing class `MonitoringReportStatus`, class `CommandExecutionData`, class `MonitoringReportData`, class `CommandExecutionDTO`, class `ReportListItemDTO`.
-- `app/shared/dto/servers.py` — Python module containing class `CreateServerDTO`, class `UpdateServerDTO`.
-- `app/shared/dto/specialist_reasoning.py` — Python module containing class `SpecialistFindingOutput`, class `SpecialistHypothesisOutput`, class `SpecialistDiagnosticToolRequestOutput`, class `SpecialistReasoningOutput`, class `SpecialistFinalSynthesisOutput`.
-- `app/shared/dto/specialists.py` — Python module containing `validate_specialist_slug()`, class `CreateSpecialistDefinitionDTO`, class `UpdateSpecialistDefinitionDTO`.
-- `app/shared/enums/fingerprint_strategy.py` — Python module containing class `FingerprintStrategy`.
-- `app/shared/exceptions.py` — Python module containing class `ApplicationError`, class `EntityNotFoundError`, class `ServerNotFoundError`, class `CommandNotFoundError`, class `ReportNotFoundError`.
-- `app/shared/logging.py` — Python module containing `configure_logging()`.
-- `app/shared/services/__init__.py` — Service-layer module.
-- `app/shared/services/command_service.py` — Service-layer module containing class `CommandService`.
-- `app/shared/services/investigation_read_service.py` — Service-layer module containing class `InvestigationReadService`.
-- `app/shared/services/knowledge_source_service.py` — Service-layer module containing class `KnowledgeSourceService`.
-- `app/shared/services/profile_service.py` — Service-layer module containing class `MonitoringProfileService`.
-- `app/shared/services/remediation_service.py` — Service-layer module containing class `RemediationService`.
-- `app/shared/services/report_service.py` — Service-layer module containing class `ReportQueryService`.
-- `app/shared/services/server_service.py` — Service-layer module containing class `ServerService`.
-- `app/shared/services/specialist_service.py` — Service-layer module containing class `SpecialistDefinitionService`.
-- `app/shared/utils/__init__.py` — Python module.
-- `app/shared/utils/datetime.py` — Python module containing `utc_now()`.
-- `app/shared/utils/filesystem.py` — Python module.
-- `app/shared/utils/ids.py` — Python module.
+- `app/interfaces/admin/__init__.py` — Administration interface package.
+- `app/interfaces/admin/api/__init__.py` — FastAPI API router/module.
+- `app/interfaces/admin/api/agent_observability.py` — FastAPI API router/module exposing `list_agent_job_traces()`, `get_agent_job_trace()`, `get_agent_observability_summary()`.
+- `app/interfaces/admin/api/commands.py` — FastAPI API router/module exposing `list_commands()`, `get_command()`, `create_command()`, `update_command()`.
+- `app/interfaces/admin/api/diagnostic_tools.py` — FastAPI API router/module exposing `list_diagnostic_tools()`.
+- `app/interfaces/admin/api/investigations.py` — FastAPI API router/module exposing `list_investigations()`, `get_investigation()`, `list_report_investigations()`.
+- `app/interfaces/admin/api/knowledge_sources.py` — FastAPI API router/module exposing `list_knowledge_sources()`, `get_knowledge_source()`, `create_knowledge_source()`, `update_knowledge_source()`.
+- `app/interfaces/admin/api/profiles.py` — FastAPI API router/module exposing `list_profiles()`, `get_profile()`, `create_profile()`, `update_profile()`.
+- `app/interfaces/admin/api/reports.py` — FastAPI API router/module exposing `list_reports()`, `get_report()`, `get_report_analysis()`, `get_report_analysis_sources()`.
+- `app/interfaces/admin/api/servers.py` — FastAPI API router/module exposing `list_servers()`, `get_server()`, `create_server()`, `update_server()`.
+- `app/interfaces/admin/api/specialists.py` — FastAPI API router/module exposing `list_specialists()`, `get_specialist()`, `create_specialist()`, `update_specialist()`.
+- `app/interfaces/admin/api/system.py` — FastAPI API router/module exposing `get_runtime_overview()`.
+- `app/interfaces/admin/dependencies.py` — Python module containing `get_monitoring_profile_service()`, `get_server_service()`, `get_command_service()`, `get_report_query_service()`, `get_ssh_test_service()`.
+- `app/interfaces/admin/schemas/__init__.py` — API/schema models.
+- `app/interfaces/admin/schemas/commands.py` — API/schema models including class `CommandCreateRequest`, class `CommandUpdateRequest`, class `CommandResponse`, class `AssignCommandRequest`, class `UpdateCommandAssignmentRequest`.
+- `app/interfaces/admin/schemas/investigations.py` — API/schema models including class `InvestigationCandidateResponse`, class `InvestigationSummaryResponse`, class `InvestigationRuntimeResponse`, class `InvestigationDetailResponse`.
+- `app/interfaces/admin/schemas/knowledge_sources.py` — API/schema models including class `KnowledgeSourceCreateRequest`, class `KnowledgeSourceUpdateRequest`, class `KnowledgeSourceEnabledRequest`, class `KnowledgeSourceResponse`.
+- `app/interfaces/admin/schemas/profiles.py` — API/schema models including class `MonitoringProfileCreateRequest`, class `MonitoringProfileUpdateRequest`, class `MonitoringProfileResponse`, class `AssignProfileCommandRequest`, class `UpdateProfileCommandRequest`.
+- `app/interfaces/admin/schemas/reports.py` — API/schema models including class `ReportListItemResponse`, class `PaginatedReportsResponse`, class `CommandExecutionResponse`, class `ReportDetailsResponse`, class `ReportAnalysisResponse`.
+- `app/interfaces/admin/schemas/servers.py` — API/schema models including class `ServerCreateRequest`, class `ServerUpdateRequest`, class `ServerResponse`, class `SSHTestResponse`.
+- `app/interfaces/admin/schemas/specialists.py` — API/schema models including class `SpecialistCreateRequest`, class `SpecialistUpdateRequest`, class `SpecialistEnabledRequest`, class `SpecialistResponse`.
+- `app/interfaces/admin/services/__init__.py` — Service-layer module.
+- `app/interfaces/admin/services/report_pdf_service.py` — Service-layer module containing class `ReportPdfService`.
+- `app/interfaces/admin/services/ssh_test_service.py` — Service-layer module containing class `SSHTestResult`, class `SSHTestService`.
+- `app/interfaces/admin/web/__init__.py` — Python module.
+- `app/interfaces/admin/web/routes.py` — Python module containing `dashboard_page()`, `servers_page()`, `commands_page()`, `investigations_page()`, `reports_page()`.
+- `app/interfaces/admin/web/static/css/app.css` — Administration UI stylesheet.
+- `app/interfaces/admin/web/static/js/app.js` — Administration UI browser-side JavaScript.
+- `app/interfaces/admin/web/templates/agent_runs.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/base.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/commands.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/dashboard.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/investigation_details.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/investigations.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/knowledge_sources.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/monitoring_profiles.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/remediation.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/report_details.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/reports.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/runtime_policies.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/servers.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/specialists.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/system.html` — Jinja/HTML administration UI template.
 
 ### Tools and acceptance scripts
 
@@ -338,6 +506,7 @@ Evaluation / Production Readiness Gate
 - `tools/bootstrap_database.py` — Operator/developer tool exposing `connection_kwargs()`, `database_exists()`, `create_database_if_missing()`, `ensure_vector_extension()`.
 - `tools/check_knowledge_source_acceptance.py` — Operator/developer tool exposing `main()`.
 - `tools/chunk_knowledge_document.py` — Operator/developer tool exposing `main()`.
+- `tools/claude_hooks/runtime_hooks.py` — Operator/developer tool exposing `dispatch()`, `main()`.
 - `tools/collect_diagnostic_evidence.py` — Operator/developer tool exposing `parse_args()`, `run()`, `main()`.
 - `tools/evaluate_rag.py` — Operator/developer tool exposing class `EvaluationSummary`, `ratio()`, `fetch_hnsw_index_present()`, `build_document_map()`.
 - `tools/generate_project_structure.py` — Operator/developer tool exposing `should_skip()`, `python_summary()`, `describe()`, `group()`.
@@ -366,25 +535,49 @@ Evaluation / Production Readiness Gate
 - `tools/run_production_readiness_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/run_project_mcp_server.py` — Stdio entrypoint used by .mcp.json to run the project MCP server.
 - `tools/run_safety_runtime_evaluation.py` — Operator/developer tool exposing `run()`, `main()`.
-- `tools/run_server_coordinator_acceptance.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/run_specialist_investigation.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/search_knowledge.py` — Operator/developer tool exposing `run()`, `main()`.
 - `tools/seed_knowledge_sources.py` — Operator/developer tool exposing class `SeedKnowledgeSource`, `create_dto()`, `update_dto()`, `main()`.
 - `tools/seed_specialists.py` — Operator/developer tool exposing `build_create_dto()`, `build_update_dto()`, `main()`.
+- `tools/smoke_ollama_claude_runtime.py` — Operator/developer tool exposing `parse_args()`, `jsonable()`, `prepare_database_schema()`, `main_async()`.
 - `tools/sync_documentation.py` — Operator/developer tool exposing `rel()`, `classify()`, `title()`, `remove_managed_block()`.
 
 ### Tests
 
 - `tests/conftest.py` — Pytest coverage for the corresponding project behavior.
+- `tests/real_runtime/__init__.py` — Pytest coverage for the corresponding project behavior.
+- `tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py` — Pytest coverage for `test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence()`.
 - `tests/test_admin_system_api.py` — Pytest coverage for class `FakeSupervisor`, class `FakeToolBoundary`, `test_system_runtime_api_exposes_supervisor_and_tools()`.
 - `tests/test_admin_system_web.py` — Pytest coverage for `test_system_runtime_page_is_available()`.
+- `tests/test_agent_job_persistence.py` — Pytest coverage for `test_agent_job_error_messages_are_bounded_to_schema_contract()`.
 - `tests/test_aggregate_readiness.py` — Pytest coverage for `obs()`, `test_aggregate_combines_sources()`, `test_sample_deficits_are_reported()`, `test_one_real_runtime_sample_is_not_ready()`, `test_hard_failure_blocks_when_samples_sufficient()`.
+- `tests/test_architecture_dependencies.py` — Pytest coverage for `test_core_has_no_outer_layer_dependencies()`, `test_capabilities_do_not_depend_on_interfaces_composition_or_runtime()`, `test_infrastructure_does_not_depend_on_interface_or_runtime_layers()`, `test_transitional_shared_and_tools_packages_are_absent()`, `test_application_import_graph_is_acyclic()`.
+- `tests/test_c14_10_claude_observability.py` — Pytest coverage for class `FakeRepository`, `make_job()`, `test_trace_normalizes_runtime_evidence()`, `test_summary_exposes_failures_tools_and_mcp_health()`, `test_completed_job_missing_required_tools_is_visible()`.
+- `tests/test_c14_11_runtime_contract.py` — Pytest coverage for `test_c14_11_runtime_allows_mandatory_operational_tools()`, `test_c14_11_native_prompt_requires_real_mcp_execution()`.
+- `tests/test_c14_11a3_ollama_only_contract.py` — Pytest coverage for `test_c14_11a3_removes_legacy_runtime_surfaces()`, `test_c14_11a3_runtime_dependencies_are_ollama_only()`, `test_c14_11a3_no_openai_implementation_surfaces_remain()`, `test_c14_11a3_ollama_implementations_remain()`.
+- `tests/test_c14_11a4_1_composition_boundary.py` — Pytest coverage for `test_bootstrap_is_a_small_compatibility_facade()`, `test_composition_builder_owns_dependency_wiring()`, `test_composition_package_exists_as_explicit_boundary()`.
+- `tests/test_c14_11a4_2a_repository_composition.py` — Pytest coverage for `test_repository_construction_lives_in_repository_composition_module()`, `test_repository_composition_module_is_not_eager()`.
+- `tests/test_c14_11a4_2b_container_services_composition.py` — Pytest coverage for `test_application_container_is_outside_builder()`, `test_core_service_construction_is_outside_builder()`, `test_analysis_and_runtime_are_outside_builder()`.
+- `tests/test_c14_11a4_2c_analysis_investigation_composition.py` — Pytest coverage for `test_analysis_and_investigation_composition_is_outside_builder()`, `test_claude_mcp_and_scheduler_wiring_moves_to_runtime_composition()`.
+- `tests/test_c14_11a4_2d_runtime_composition.py` — Pytest coverage for `test_runtime_composition_is_outside_builder()`, `test_runtime_composition_keeps_ollama_claude_contract()`, `test_builder_is_composition_coordinator_after_a4_2d()`.
+- `tests/test_c14_11a4_3a_ollama_infrastructure_boundary.py` — Pytest coverage for `test_ollama_provider_implementations_live_in_infrastructure()`, `test_analysis_capability_factories_use_infrastructure_implementations()`, `test_legacy_ollama_modules_are_thin_facades()`.
+- `tests/test_c14_11a4_3b_investigation_ollama_infrastructure.py` — Pytest coverage for `test_investigation_ollama_adapters_live_in_infrastructure()`, `test_investigation_capability_keeps_contracts_not_ollama_implementations()`, `test_capability_contracts_resolve_provider_adapters_lazily()`.
+- `tests/test_c14_11a4_3c_database_infrastructure_boundary.py` — Pytest coverage for `test_database_core_implementation_lives_in_infrastructure()`, `test_repository_implementations_live_only_in_infrastructure()`, `test_production_composition_uses_infrastructure_repositories()`, `test_shared_database_package_is_removed_after_boundary_closure()`.
+- `tests/test_c14_11a4_3d_database_models_migrations_boundary.py` — Pytest coverage for `test_database_models_live_only_in_infrastructure()`, `test_production_uses_infrastructure_model_imports()`, `test_engine_registers_infrastructure_models()`, `test_migrations_have_one_canonical_owner()`.
+- `tests/test_c14_7_smoke_schema_init.py` — Pytest coverage for `test_c14_7_smoke_initializes_schema_before_container()`, `test_c14_7_smoke_preserves_direct_project_import_fix()`.
+- `tests/test_c14_7_stream_runtime_evidence.py` — Pytest coverage for `test_stream_json_operational_success_is_evidence_based()`, `test_operational_success_rejects_failed_mcp()`, `test_operational_success_rejects_missing_required_tool()`, `test_result_error_subtype_is_not_accepted()`.
+- `tests/test_c14_8_project_boundary_decomposition.py` — Pytest coverage for `make_boundary()`, `test_c14_8_public_tool_contract_is_unchanged()`, `test_c14_8_project_boundary_is_thin_public_facade()`, `test_c14_8_bounded_modules_own_tool_implementations()`, `test_c14_8_mcp_package_export_is_lazy_and_cycle_free()`.
+- `tests/test_c14_9_claude_native_orchestration.py` — Pytest coverage for `test_c14_9_legacy_python_orchestrators_are_removed()`, `test_c14_9_monitoring_service_is_execution_only()`, `test_c14_9_runtime_exports_only_native_claude_orchestration()`, `test_c14_9_domain_packages_drop_old_orchestration_exports()`, `test_c14_9_supervisor_fails_closed_when_runtime_disabled()`.
 - `tests/test_claude_agent_job_persistence.py` — Pytest coverage for `make_repository()`, `make_request()`, `test_job_is_created_from_runtime_request()`, `test_job_completion_preserves_result_observability()`, `test_job_survives_repository_recreation()`.
+- `tests/test_claude_bounded_agents.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_canonical_agent_set_is_two_bounded_roles()`, `test_server_supervisor_is_main_session_coordinator()`, `test_specialist_worker_cannot_delegate_or_remediate()`.
 - `tests/test_claude_code_runtime_configuration.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_project_mcp_server_is_registered_for_claude_code()`, `test_claude_settings_use_enforced_permissions()`, `test_claude_agents_have_frontmatter_and_tools()`.
-- `tests/test_claude_multi_specialist_supervision.py` — Pytest coverage for class `JobService`, class `ToolBoundary`, `run_supervisor()`, `test_multi_specialist_supervision_runs_selected_specialists_sequentially()`, `test_multi_specialist_supervision_respects_max_specialists()`.
+- `tests/test_claude_least_privilege.py` — Pytest coverage for `read_text()`, `parse_frontmatter()`, `test_settings_allow_only_current_runtime_capabilities()`, `test_phase5_execution_tools_are_explicitly_denied()`, `test_raw_operational_shell_paths_are_denied_for_both_shells()`.
+- `tests/test_claude_operational_skills.py` — Pytest coverage for `read_skill()`, `frontmatter()`, `allowed_tools()`, `test_operational_skill_set_is_canonical()`, `test_skills_have_frontmatter_and_exact_intended_tools()`.
+- `tests/test_claude_process_session_runner.py` — Pytest coverage for `request()`, class `ScriptCommandBuilder`, `write_script()`, `test_process_runner_decodes_structured_output()`, `test_process_runner_accepts_result_text_envelope()`.
+- `tests/test_claude_project_mcp_runtime_config.py` — Pytest coverage for `read_json()`, `test_vps_project_mcp_is_explicitly_approved()`, `test_vps_mcp_launch_is_project_root_stable()`.
 - `tests/test_claude_runtime_adapter.py` — Pytest coverage for `request()`, class `Runner`, `test_bounded_claude_invocation_succeeds()`, `test_timeout_is_returned_as_controlled_result()`, `test_runtime_failure_is_returned_as_controlled_result()`.
 - `tests/test_claude_runtime_documentation.py` — Pytest coverage for `read_doc()`, `test_project_structure_documents_runtime_files()`, `test_runtime_operations_doc_matches_configured_ollama_defaults()`, `test_runtime_documentation_has_current_verification_commands()`, `test_r5_status_and_test_catalog_are_documented()`.
-- `tests/test_claude_supervised_monitoring_cycle.py` — Pytest coverage for class `ToolBoundary`, class `AgentJobService`, `run_cycle()`, `test_cycle_executes_fixed_tool_sequence()`, `test_cycle_persists_successful_job_observability()`.
+- `tests/test_claude_runtime_hooks.py` — Pytest coverage for `read_settings()`, `run_hook()`, `runtime_payload()`, `test_settings_register_only_concrete_runtime_hooks()`, `test_hook_handlers_use_cross_platform_exec_form()`.
 - `tests/test_claude_supervisor.py` — Pytest coverage for class `Runner`, `test_supervisor_delegates_monitoring_cycle()`, `test_supervisor_reports_runtime_status()`.
 - `tests/test_cross_specialist_conflicts.py` — Pytest coverage for `make_state()`, `make_run()`, `wrap()`, `test_explicit_conflicting_states_become_unknown()`, `test_matching_explicit_states_do_not_conflict()`.
 - `tests/test_cross_specialist_correlation.py` — Pytest coverage for `make_state()`, `make_run()`, `wrap()`, `test_live_evidence_high_confidence_is_confirmed()`, `test_live_evidence_lower_confidence_is_probable()`.
@@ -414,6 +607,7 @@ Evaluation / Production Readiness Gate
 - `tests/test_knowledge_source_foundation.py` — Pytest coverage for class `FakeRepository`, `source()`, `test_url_source_requires_uri()`, `test_inline_source_requires_content()`, `test_create_dto_normalizes_scope()`.
 - `tests/test_knowledge_source_loader.py` — Pytest coverage for `test_inline_loader()`, `test_loader_rejects_unknown_source_type()`.
 - `tests/test_knowledge_source_seed.py` — Pytest coverage for `test_seed_slugs_are_unique()`, `test_seed_sources_are_official_https_urls()`, `test_seed_covers_all_baseline_specialists()`, `test_each_seed_has_routing_scope()`.
+- `tests/test_ollama_claude_runtime.py` — Pytest coverage for `test_direct_claude_uses_ollama_backend()`, `test_runtime_composition_uses_direct_claude_settings()`.
 - `tests/test_ollama_context_window.py` — Pytest coverage for `run_request()`, `test_normal_reasoning_uses_32k_context_and_6144_output()`, `test_final_synthesis_uses_32k_context_and_6144_output()`.
 - `tests/test_ollama_final_synthesis_dto.py` — Pytest coverage for `test_final_synthesis_minimal_contract_succeeds()`.
 - `tests/test_ollama_final_synthesis_minimal_contract.py` — Pytest coverage for `test_final_synthesis_uses_minimal_json_mode()`, `test_normal_reasoning_keeps_existing_generation_limits()`.
@@ -432,8 +626,6 @@ Evaluation / Production Readiness Gate
 - `tests/test_route_inventory.py` — Pytest coverage for `test_route_inventory_contains_application_routes()`, `test_web_routes_are_excluded_from_openapi()`, `test_specialists_api_is_in_openapi_inventory()`, `test_health_route_remains_visible()`.
 - `tests/test_runtime_readiness_gate.py` — Pytest coverage for `observations()`, `test_runtime_readiness_gate_passes_full_non_regressing_matrix()`, `test_runtime_readiness_gate_blocks_missing_runtime_case()`, `test_runtime_readiness_gate_blocks_critical_regression()`, `test_runtime_readiness_gate_blocks_critical_score_regression()`.
 - `tests/test_safety_runtime_evaluation.py` — Pytest coverage for `test_routing_runtime_emits_ten_passes()`, `test_policy_runtime_emits_ten_passes()`, `test_provider_runtime_emits_ten_safe_results()`.
-- `tests/test_server_coordinator.py` — Pytest coverage for `specialist()`, class `Registry`, class `LoopOutput`, class `Loop`, `decision()`.
-- `tests/test_server_coordinator_initial_evidence.py` — Pytest coverage for `test_initial_connection_failure_becomes_citable_analysis_evidence()`, `test_empty_initial_analysis_produces_no_evidence()`.
 - `tests/test_specialist_context.py` — Pytest coverage for `specialist()`, `task()`, `knowledge()`, class `Retriever`, `test_context_preserves_knowledge_source_ids()`.
 - `tests/test_specialist_definition_repository.py` — Pytest coverage for `repository()`, `make_specialist()`, `test_create_and_reload()`, `test_slug_is_normalized()`, `test_duplicate_slug_is_rejected()`.
 - `tests/test_specialist_investigation_loop.py` — Pytest coverage for class `ContextBuilder`, class `ReasoningAgent`, class `EvidenceCollector`, `specialist()`, `task()`.
@@ -460,6 +652,19 @@ Evaluation / Production Readiness Gate
 - `docs/api/investigations.md` — Project documentation.
 - `docs/api/specialists-api.md` — Project documentation.
 - `docs/architecture/aggregate-production-readiness.md` — Project documentation.
+- `docs/architecture/c14-10-observability.md` — Project documentation.
+- `docs/architecture/c14-11-real-runtime-tests.md` — Project documentation.
+- `docs/architecture/c14-11a3-legacy-runtime-removal.md` — Project documentation.
+- `docs/architecture/c14-11a4-1-composition-boundary.md` — Project documentation.
+- `docs/architecture/c14-11a4-2a-repository-composition.md` — Project documentation.
+- `docs/architecture/c14-11a4-2b-container-services-composition.md` — Project documentation.
+- `docs/architecture/c14-11a4-2c-analysis-investigation-composition.md` — Project documentation.
+- `docs/architecture/c14-11a4-2d-runtime-composition.md` — Project documentation.
+- `docs/architecture/c14-11a4-3a-ollama-infrastructure-boundary.md` — Project documentation.
+- `docs/architecture/c14-11a4-3b-investigation-ollama-infrastructure.md` — Project documentation.
+- `docs/architecture/c14-11a4-3c-database-infrastructure-boundary.md` — Project documentation.
+- `docs/architecture/c14-11a4-3d-database-models-migrations-boundary.md` — Project documentation.
+- `docs/architecture/c14-9-claude-native-orchestration.md` — Project documentation.
 - `docs/architecture/cross-specialist-correlation.md` — Project documentation.
 - `docs/architecture/database.md` — Project documentation.
 - `docs/architecture/diagnostic-policy.md` — Project documentation.
@@ -490,7 +695,8 @@ Evaluation / Production Readiness Gate
 - `docs/architecture/specialist-investigation-loop.md` — Project documentation.
 - `docs/architecture/specialist-reasoning-agent.md` — Project documentation.
 - `docs/architecture/specialist-registry.md` — Project documentation.
-- `docs/architecture/target-project-structure.md` — Target architecture map for Claude runtime, project tools, domain services, shared layer, MCP, and admin UI.
+- `docs/architecture/target-project-structure.md` — Current architecture map for Claude runtime, capabilities, infrastructure, MCP, and admin UI.
+- `docs/c14-7-runtime-requirements.md` — Project documentation.
 - `docs/decisions/ADR-008-dynamic-specialists.md` — Project documentation.
 - `docs/decisions/ADR-009-hierarchical-investigation.md` — Project documentation.
 - `docs/decisions/ADR-011-dual-rag-and-knowledge-retrieval.md` — Project documentation.
@@ -499,6 +705,7 @@ Evaluation / Production Readiness Gate
 - `docs/decisions/ADR-015-dynamic-secondary-specialist-routing.md` — Project documentation.
 - `docs/decisions/ADR-016-production-readiness-and-remediation-boundary.md` — Project documentation.
 - `docs/decisions/ADR-017-claude-code-supervisory-agent-runtime.md` — Project documentation.
+- `docs/decisions/ADR-018-claude-native-operational-contracts.md` — Project documentation.
 - `docs/decisions/README.md` — Project documentation.
 - `docs/deployment/production-checklist.md` — Project documentation.
 - `docs/deployment/production-deployment.md` — Project documentation.
@@ -509,6 +716,7 @@ Evaluation / Production Readiness Gate
 - `docs/operations/migrations-and-troubleshooting.md` — Project documentation.
 - `docs/operations/running-project.md` — Project documentation.
 - `docs/rag_configuration.md` — Project documentation.
+- `docs/roadmap/c14-claude-native-execution-plan.md` — Project documentation.
 - `docs/roadmap/claude-runtime-implementation-plan.md` — Implementation plan for Claude runtime, tool boundaries, package layout, documentation, and tests.
 - `docs/roadmap/next-phase-multi-agent.md` — Project documentation.
 - `docs/roadmap/phase-4-17-closeout.md` — Project documentation.

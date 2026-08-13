@@ -1,7 +1,2 @@
-"""Compatibility facade for the relocated Ollama analysis client."""
-
-from app.infrastructure.llm.ollama.analysis_client import (
-    OllamaAnalysisClient,
-)
-
-__all__ = ["OllamaAnalysisClient"]
+"""Compatibility facade for the canonical Ollama infrastructure client."""
+from app.infrastructure.llm.ollama.analysis_client import *  # noqa: F401,F403

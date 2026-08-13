@@ -9,7 +9,7 @@ from app.domain.evaluation import (
 from app.domain.evaluation.persisted_runtime import (
     PersistedRuntimeEvaluator,
 )
-from app.shared.dto.investigation_read_models import (
+from app.core.contracts.investigation_read_models import (
     InvestigationCandidateReadModel,
     InvestigationDetailReadModel,
     InvestigationRuntimeReadModel,

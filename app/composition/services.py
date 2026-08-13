@@ -3,32 +3,32 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.composition.repositories import RepositoryBundle
-from app.domain.investigation.diagnostic_policy import DiagnosticPolicyEngine
-from app.domain.investigation.diagnostic_tools import (
+from app.core.policies.diagnostic_policy import DiagnosticPolicyEngine
+from app.core.policies.diagnostic_tools import (
     DiagnosticToolRegistry,
     build_default_diagnostic_tool_registry,
 )
-from app.domain.investigation.evidence_collection import EvidenceCollectionService
-from app.domain.investigation.investigation_router import InvestigationRouter
-from app.domain.investigation.persistence_service import InvestigationPersistenceService
-from app.domain.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
-from app.domain.investigation.specialist_registry import SpecialistRegistry
-from app.domain.knowledge.chunker import StructureAwareKnowledgeChunker
-from app.domain.knowledge.chunking_service import KnowledgeChunkingService
-from app.domain.knowledge.ingestion_service import KnowledgeIngestionService
-from app.domain.knowledge.parsers import KnowledgeContentParser
-from app.domain.knowledge.source_loader import KnowledgeSourceLoader
-from app.domain.knowledge.source_registry import KnowledgeSourceRegistry
+from app.capabilities.investigation.evidence_collection import EvidenceCollectionService
+from app.capabilities.investigation.investigation_router import InvestigationRouter
+from app.capabilities.investigation.persistence_service import InvestigationPersistenceService
+from app.capabilities.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
+from app.capabilities.investigation.specialist_registry import SpecialistRegistry
+from app.capabilities.knowledge.chunker import StructureAwareKnowledgeChunker
+from app.capabilities.knowledge.chunking_service import KnowledgeChunkingService
+from app.capabilities.knowledge.ingestion_service import KnowledgeIngestionService
+from app.capabilities.knowledge.parsers import KnowledgeContentParser
+from app.capabilities.knowledge.source_loader import KnowledgeSourceLoader
+from app.capabilities.knowledge.source_registry import KnowledgeSourceRegistry
 from app.runtime.claude.job_service import ClaudeAgentJobService
-from app.shared.config import Settings
-from app.shared.services.command_service import CommandService
-from app.shared.services.investigation_read_service import InvestigationReadService
-from app.shared.services.knowledge_source_service import KnowledgeSourceService
-from app.shared.services.profile_service import MonitoringProfileService
-from app.shared.services.remediation_service import RemediationService
-from app.shared.services.report_service import ReportQueryService
-from app.shared.services.server_service import ServerService
-from app.shared.services.specialist_service import SpecialistDefinitionService
+from app.core.config import Settings
+from app.capabilities.monitoring.command_service import CommandService
+from app.capabilities.investigation.read_service import InvestigationReadService
+from app.capabilities.knowledge.source_service import KnowledgeSourceService
+from app.capabilities.monitoring.profile_service import MonitoringProfileService
+from app.capabilities.remediation.service import RemediationService
+from app.capabilities.monitoring.report_query_service import ReportQueryService
+from app.capabilities.monitoring.server_service import ServerService
+from app.capabilities.investigation.specialist_service import SpecialistDefinitionService
 
 
 @dataclass(slots=True, frozen=True)

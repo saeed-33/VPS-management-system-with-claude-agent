@@ -9,10 +9,10 @@ from app.runtime.claude import (
     ClaudeRuntimeResult,
     ClaudeStructuredOutput,
 )
-from app.shared.database.models.agent_job import (
+from app.infrastructure.database.models.agent_job import (
     AgentJobModel,
 )
-from app.shared.database.repositories.agent_job_repository import (
+from app.infrastructure.database.repositories.agent_job_repository import (
     AgentJobRepository,
 )
 

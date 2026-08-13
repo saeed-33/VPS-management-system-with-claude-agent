@@ -17,8 +17,8 @@ if PROJECT_ROOT_TEXT not in sys.path:
 
 
 from app.bootstrap import build_container
-from app.shared.config import settings
-from app.shared.database.engine import (
+from app.core.config import settings
+from app.infrastructure.database.engine import (
     create_database_tables,
 )
 

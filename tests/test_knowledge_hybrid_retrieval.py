@@ -3,7 +3,7 @@ import asyncio
 from app.domain.knowledge.retrieval import (
     KnowledgeHybridRetriever,
 )
-from app.shared.database.repositories.knowledge_retrieval_repository import (
+from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
     KnowledgeSearchRow,
 )
 

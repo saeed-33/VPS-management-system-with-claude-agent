@@ -1,7 +1,2 @@
-"""Compatibility facade for the relocated Ollama embedding client."""
-
-from app.infrastructure.llm.ollama.embedding_client import (
-    OllamaEmbeddingClient,
-)
-
-__all__ = ["OllamaEmbeddingClient"]
+"""Compatibility facade for the canonical Ollama infrastructure client."""
+from app.infrastructure.llm.ollama.embedding_client import *  # noqa: F401,F403

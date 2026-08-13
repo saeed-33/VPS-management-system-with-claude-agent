@@ -9,10 +9,10 @@ from app.infrastructure.database.models.report_analysis import (
     ReportAnalysisModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.analysis import (
+from app.core.contracts.analysis import (
     ReportAnalysisResult,
 )
-from app.shared.utils.datetime import utc_now
+from app.core.utils.datetime import utc_now
 
 
 class AnalysisRepository:

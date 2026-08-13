@@ -9,10 +9,19 @@ from app.infrastructure.database.models.agent_job import (
     AgentJobModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.agent_jobs import (
+from app.core.contracts.agent_jobs import (
     CreateAgentJobDTO,
     UpdateAgentJobDTO,
 )
+
+
+_MAX_ERROR_MESSAGE_LENGTH = 2000
+
+
+def _bounded_error_message(value: str | None) -> str | None:
+    if value is None:
+        return None
+    return value[:_MAX_ERROR_MESSAGE_LENGTH]
 
 
 class AgentJobRepository:
@@ -75,7 +84,9 @@ class AgentJobRepository:
             )
             model.completed_at = data.completed_at
             model.error_code = data.error_code
-            model.error_message = data.error_message
+            model.error_message = _bounded_error_message(
+                data.error_message
+            )
             model.turn_count = data.turn_count
             model.tool_call_count = (
                 data.tool_call_count
@@ -175,7 +186,9 @@ class AgentJobRepository:
                     timezone.utc
                 )
                 model.error_code = error_code
-                model.error_message = error_message
+                model.error_message = _bounded_error_message(
+                    error_message
+                )
                 session.add(
                     model
                 )

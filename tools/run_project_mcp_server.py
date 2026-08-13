@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     )
 
 from app.bootstrap import container
-from app.mcp.server import (
+from app.interfaces.mcp.server import (
     ProjectMcpProtocolServer,
     run_stdio_server,
 )

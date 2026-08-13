@@ -108,7 +108,7 @@ Run:
 
 ```powershell
 uv run python -m pytest
-uv run python -m compileall app\admin app\domain app\runtime app\mcp app\shared app\tools tools tests app\bootstrap.py app\main.py
+uv run python -m compileall app\core app\capabilities app\runtime app\interfaces app\infrastructure app\composition app\shared app\domain app\tools tools tests app\bootstrap.py app\main.py
 uv run python tools\sync_documentation.py
 ```
 

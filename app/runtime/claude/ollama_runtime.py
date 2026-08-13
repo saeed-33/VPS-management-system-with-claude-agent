@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from app.runtime.claude.models import ClaudeRuntimeRequest
-from app.runtime.claude.session_runner import ClaudeProcessCommand
+from app.runtime.claude.command import ClaudeProcessCommand
 
 
 class OllamaClaudeCommandBuilder:

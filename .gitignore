@@ -5,12 +5,14 @@ __pycache__/
 .pytest_cache/
 reports/
 apply**.py
-.**backup
+.c14-*/
+.*backup/
 .claude/settings.local.json
 .claude/runtime-events/
 *.bak
 *.backup
 *.orig
 *.old
+*.tmp
 *.c14-*-backup
 app/.venv/

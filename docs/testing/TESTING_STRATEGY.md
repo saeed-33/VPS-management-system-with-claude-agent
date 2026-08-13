@@ -80,18 +80,15 @@ This exercises the real routing, Policy, and Ollama client logic with controlled
 
 These tests may contact real Linux servers and/or Ollama. Run them only in a controlled test environment.
 
-Examples already present in the project may include:
+The current native acceptance entrypoint is:
 
 ```powershell
-uv run python tools/run_server_coordinator_acceptance.py <report_id> --max-specialists 4 --max-rounds 3 --max-actions 12
-uv run python tools/run_Claude-supervised_parallel_acceptance.py <report_id> --specialists linux-cpu,linux-memory --max-specialists 2 --max-rounds 2 --max-actions 8
-uv run python tools/run_Claude-supervised_secondary_acceptance.py <report_id> --initial-specialist nginx --max-specialists 3 --max-rounds 3 --max-actions 10
-uv run python tools/run_correlation_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
-uv run python tools/run_final_diagnosis_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
-uv run python tools/run_persisted_runtime_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
+uv run python tools/smoke_ollama_claude_runtime.py --server-id <server_id>
+uv run python -m pytest tests/real_runtime -q
 ```
 
-Not every checkout is guaranteed to contain every historical acceptance script. The generated `docs/testing/TEST_CATALOG.md` lists what actually exists in the current checkout.
+The generated `docs/testing/TEST_CATALOG.md` lists the exact tests and tools in
+the current checkout.
 
 ### Layer 5 — Persisted runtime measurement
 

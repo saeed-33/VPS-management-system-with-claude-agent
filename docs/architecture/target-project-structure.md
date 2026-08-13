@@ -1,104 +1,59 @@
-# Target Project Structure
+# Current Project Structure and Boundaries
 
-## Goal
-
-The codebase should make Claude the supervisory runtime and keep Python modules
-as tools, domain services, persistence, API, and UI.
-
-## Recommended Structure
+This document describes the implemented local architecture after C.14.11A.
 
 ```text
 app/
-  runtime/
-    claude/
-      supervisor.py
-      session.py
-      runtime.py
-      result_parser.py
-      monitoring_cycle.py
-      multi_specialist_supervision.py
-      job_service.py
-      models.py
-      exceptions.py
-  tools/
-    monitoring/
-    reports/
-    retrieval/
-    investigation/
-    specialists/
-    remediation/
-    ssh/
-  domain/
-    analysis/
-    investigation/
-    knowledge/
-    evaluation/
-  shared/
-    config.py
-    dto/
-    database/
-    services/
-    utils/
-  mcp/
-    schemas.py
-    serializers.py
-    project_tools.py
-    server.py
-  admin/
-    api/
-    services/
-    web/
+├── core/
+│   ├── contracts/
+│   └── policies/
+├── capabilities/
+│   ├── monitoring/
+│   ├── analysis/
+│   ├── investigation/
+│   ├── knowledge/
+│   └── remediation/
+├── runtime/claude/
+├── interfaces/
+│   ├── mcp/
+│   └── admin/
+├── infrastructure/
+│   ├── database/
+│   ├── ssh/
+│   └── llm/ollama/
+├── composition/
+└── domain/evaluation/
 ```
 
-## Responsibilities
+## Responsibility and dependency rules
 
-`app/runtime/claude/` contains the Claude runtime adapter, session execution,
-job tracking, supervisor entrypoint, and Claude-facing workflow prompts.
+- `core` owns provider-neutral contracts, configuration, exceptions, utilities, and fail-closed diagnostic policy. It does not import interfaces, infrastructure, composition, capabilities, or Claude runtime.
+- `capabilities` owns bounded monitoring, analysis/RAG, investigation/evidence, knowledge, and remediation behavior. It does not import interfaces.
+- `runtime/claude` owns native Claude CLI process execution, stream decoding, runtime result interpretation, and `AgentJob` lifecycle. Claude decides workflow order; Python validates and executes every capability.
+- `interfaces/mcp` owns the single MCP registry/protocol server and stable Claude-visible tool names. The `.mcp.json` entrypoint remains `tools/run_project_mcp_server.py`.
+- `interfaces/admin` owns HTTP routes, schemas, Admin services, templates, and static assets. Agent Runs reads the existing `agent_jobs` projection; no duplicate observability model was added.
+- `infrastructure/database` owns SQLAlchemy engine/session/models/repositories. `infrastructure/ssh` is the only package importing `asyncssh`; known-hosts checking, key validation, connection timeout, command timeout, and result semantics remain enforced there.
+- `infrastructure/llm/ollama` owns Ollama-specific clients. Ollama is the only configured provider.
+- `composition` wires the application. It does not implement workflows.
+- `app/shared` has been eliminated; contracts, configuration, exceptions, utilities, and application services now have canonical owners.
 
-`app/tools/` contains deterministic capabilities Claude can call. Tools validate
-input, call domain services, and return structured outputs.
+## Safety boundaries
 
-`app/domain/` contains business logic: analysis, retrieval, investigations,
-specialist contracts, evaluation, and knowledge handling.
+Claude receives only MCP tools with bounded permissions. It has no raw SQL, raw SSH, unrestricted shell, direct database, direct Ollama, or remediation-bypass capability. MCP handlers call Python capabilities; policy, evidence, persistence, and approval remain Python-owned. `No solution found` remains a valid remediation result.
 
-`app/shared/` contains configuration, DTOs, database models, repositories,
-cross-cutting services, and utilities.
+## Compatibility facades
 
-`app/mcp/` exposes project tools to Claude through stable schemas and
-serializers. `app/mcp/server.py` is the stdio MCP protocol surface configured
-from `.mcp.json`.
+Thin facades remain at historical import paths required by existing tests and callers:
 
-`app/admin/` remains the operator control plane for viewing state and approving
-actions.
+- `app/domain/{analysis,investigation,knowledge}` → `app/capabilities` and `app/core`.
+- `app/tools` has been eliminated; MCP catalog and boundary code live under `app/interfaces/mcp`, monitoring and SSH live under their canonical capability/infrastructure packages.
+- `app/admin` and `app/mcp` → `app/interfaces/admin` and `app/interfaces/mcp`.
+- No `app/shared` compatibility layer remains; database, contracts, configuration, and application services have canonical owners.
 
-## Design Rules
+These facades contain no duplicate business implementation. `app/domain/evaluation` remains a single evaluation/readiness implementation rather than a migrated duplicate.
 
-Claude-native coordination should stay in Claude. Python should not reimplement
-planning, delegation, or synthesis when Claude can perform those steps through
-tools.
+## Verification
 
-Tool outputs must be structured, auditable, and persisted when they affect
-operator-visible state.
-
-SSH, SQL, Ollama, and remediation execution must remain behind project tools and
-policy checks.
-
-Operator-facing views must read state through admin APIs and project services.
-They should not encode supervisory workflow order or high-level branch
-decisions.
-
-<!-- PROJECT-DOC-METADATA:BEGIN -->
-Document classification: **CURRENT**
-
-Documentation synchronized: **2026-08-12**
-
-Canonical project state:
-
-```text
-Phase 4.20: complete
-readiness: ready_for_supervised_operations
-automatic_remediation_allowed: false
-```
-
-For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
-<!-- PROJECT-DOC-METADATA:END -->
+- Normal suite: `407 passed, 1 skipped`.
+- Real Claude/Ollama/MCP acceptance: accepted against operational server 2 using native `claude`, Ollama model `gemma4:e4b-it-q4_K_M`, connected `vps` MCP, persisted `AgentJob`, report, analysis, investigation, and observability.
+- The acceptance also exposed and fixed bounded persistence of oversized `agent_jobs.error_message` values without changing the schema.

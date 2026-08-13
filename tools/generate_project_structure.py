@@ -89,7 +89,7 @@ SPECIAL = {
         "Claude skill instructions for remediation planning and validation."
     ),
     "docs/architecture/target-project-structure.md": (
-        "Target architecture map for Claude runtime, project tools, domain services, shared layer, MCP, and admin UI."
+        "Current architecture map for Claude runtime, capabilities, infrastructure, MCP, and admin UI."
     ),
     "docs/operations/claude-runtime.md": (
         "Operational guide for running the API, Ollama, and Claude Code runtime."
@@ -106,23 +106,35 @@ SPECIAL = {
         "Builds repositories, services, LLM clients, registries, "
         "Policy, coordinators, and shared runtime dependencies."
     ),
-    "app/tools/project_boundary.py": (
+    "app/interfaces/mcp/registry.py": (
         "Project tool execution boundary used by Claude through MCP; "
         "validates calls, invokes deterministic services, and returns structured results."
     ),
-    "app/tools/catalog.py": (
+    "app/interfaces/mcp/catalog.py": (
         "Categorizes project tools into monitoring, reports, retrieval, investigation, specialists, and remediation groups."
     ),
-    "app/mcp/project_tools.py": (
-        "Thin MCP compatibility export for the project tool boundary implemented under app/tools."
+    "app/interfaces/mcp/schemas.py": (
+        "Stable MCP request and response contracts exposed to Claude Code."
     ),
-    "app/mcp/server.py": (
+    "app/interfaces/mcp/server.py": (
         "Project-scoped MCP protocol server exposing project tools to Claude Code."
+    ),
+    "app/core/contracts/investigation.py": (
+        "Provider- and infrastructure-independent investigation contracts."
+    ),
+    "app/core/policies/diagnostic_policy.py": (
+        "Fail-closed diagnostic policy enforcement."
+    ),
+    "app/infrastructure/ssh/client.py": (
+        "Known-hosts-verified SSH transport with validated private keys."
+    ),
+    "app/infrastructure/ssh/command_executor.py": (
+        "Bounded SSH command execution and result contract."
     ),
     "tools/run_project_mcp_server.py": (
         "Stdio entrypoint used by .mcp.json to run the project MCP server."
     ),
-    "app/shared/config.py": (
+    "app/core/config.py": (
         "Environment-backed application configuration."
     ),
     "pyproject.toml": (
@@ -458,30 +470,28 @@ def describe(path: Path) -> str:
 
 
 def group(rel: str) -> str:
-    if rel.startswith("app/admin/"):
+    if rel.startswith("app/interfaces/admin/"):
         return "Administration API and Web UI"
     if rel.startswith(
         "app/domain/evaluation/"
     ):
         return "Evaluation and Production Readiness"
     if rel.startswith(
-        "app/domain/investigation/"
+        "app/capabilities/investigation/"
     ):
         return "Investigation Domain"
-    if rel.startswith("app/domain/knowledge/"):
+    if rel.startswith("app/capabilities/knowledge/"):
         return "Knowledge Domain"
-    if rel.startswith("app/domain/analysis/"):
+    if rel.startswith("app/capabilities/analysis/"):
         return "Analysis Domain"
-    if rel.startswith("app/tools/monitoring/"):
-        return "Monitoring Tools"
-    if rel.startswith("app/tools/ssh/"):
-        return "SSH Tools"
-    if rel.startswith("app/tools/"):
-        return "Project Tools"
+    if rel.startswith("app/capabilities/monitoring/"):
+        return "Monitoring Capability"
+    if rel.startswith("app/infrastructure/ssh/"):
+        return "SSH Infrastructure"
     if rel.startswith("app/runtime/claude/"):
         return "Claude Runtime"
-    if rel.startswith("app/shared/"):
-        return "Shared application layer"
+    if rel.startswith("app/core/"):
+        return "Core contracts, policies, and configuration"
     if rel.startswith("app/"):
         return "Application core"
     if rel.startswith("tests/"):
@@ -579,15 +589,13 @@ def main() -> int:
         "Repository root / configuration",
         "Application core",
         "Claude Runtime",
-        "Project Tools",
-        "Monitoring Tools",
-        "SSH Tools",
+        "Monitoring Capability",
+        "SSH Infrastructure",
         "Analysis Domain",
         "Investigation Domain",
         "Knowledge Domain",
         "Evaluation and Production Readiness",
         "Administration API and Web UI",
-        "Shared application layer",
         "Tools and acceptance scripts",
         "Tests",
         "Documentation",

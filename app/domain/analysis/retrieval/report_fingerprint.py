@@ -1,13 +1,2 @@
-import hashlib
-
-
-class ReportFingerprintService:
-    def create(
-        self,
-        normalized_report: str,
-    ) -> str:
-        return hashlib.sha256(
-            normalized_report.encode(
-                "utf-8"
-            )
-        ).hexdigest()
+"""Compatibility facade for canonical analysis retrieval capabilities."""
+from app.capabilities.analysis.retrieval.report_fingerprint import *  # noqa: F401,F403

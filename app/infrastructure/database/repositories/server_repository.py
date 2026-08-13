@@ -7,11 +7,11 @@ from app.infrastructure.database.models.server import (
     ServerModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.servers import (
+from app.core.contracts.servers import (
     CreateServerDTO,
     UpdateServerDTO,
 )
-from app.shared.utils.datetime import utc_now
+from app.core.utils.datetime import utc_now
 
 
 class ServerRepository:

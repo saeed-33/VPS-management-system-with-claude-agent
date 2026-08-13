@@ -11,10 +11,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.domain.investigation.contracts import InvestigationBudget
-from app.domain.investigation.diagnostic_policy import DiagnosticPolicyRequest
-from app.domain.investigation.diagnostic_tools import DiagnosticToolCall
-from app.domain.investigation.evidence_collection import (
+from app.core.contracts.investigation import InvestigationBudget
+from app.core.policies.diagnostic_policy import DiagnosticPolicyRequest
+from app.core.policies.diagnostic_tools import DiagnosticToolCall
+from app.capabilities.investigation.evidence_collection import (
     EvidenceCollectionRequest,
 )
 from app.bootstrap import container

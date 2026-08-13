@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Remediation{% endblock %}
+{% block content %}
+<header class="page-header"><div><h1 class="page-heading">Remediation</h1><p class="page-description">Review proposals and policy-gated remediation outcomes.</p></div></header>
+<section class="content-grid"><article class="panel"><header class="panel-header"><h2 class="panel-title">Safety boundary</h2></header><div class="panel-body"><p>Claude may propose remediation through MCP. Python policy and approval checks decide whether anything can be applied.</p><a class="button button-secondary" href="/reports">Review reports</a></div></article><article class="panel"><header class="panel-header"><h2 class="panel-title">No automatic bypass</h2></header><div class="panel-body"><p>SSH, evidence, approval, and execution remain project-owned capabilities.</p></div></article></section>
+{% endblock %}

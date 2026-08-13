@@ -10,15 +10,15 @@ from app.infrastructure.database.models.profile_command import (
     MonitoringProfileCommandModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.shared.dto.commands import (
+from app.core.contracts.commands import (
     CommandExecutionConfig,
     CreateCommandDTO,
     UpdateCommandDTO,
 )
-from app.shared.exceptions import (
+from app.core.exceptions import (
     CommandAlreadyAssignedError,
 )
-from app.shared.utils.datetime import utc_now
+from app.core.utils.datetime import utc_now
 
 
 class CommandRepository:

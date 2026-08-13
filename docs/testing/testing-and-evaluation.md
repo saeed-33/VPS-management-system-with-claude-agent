@@ -89,15 +89,11 @@ This executes real routing and Policy logic and real Ollama-client parsing/retry
 
 Real runtime tests may contact Ollama and Linux hosts over SSH.
 
-Examples:
+Current acceptance commands:
 
 ```powershell
-uv run python tools/run_server_coordinator_acceptance.py <report_id> --max-specialists 4 --max-rounds 3 --max-actions 12
-uv run python tools/run_Claude-supervised_parallel_acceptance.py <report_id> --specialists linux-cpu,linux-memory --max-specialists 2 --max-rounds 2 --max-actions 8
-uv run python tools/run_Claude-supervised_secondary_acceptance.py <report_id> --initial-specialist nginx --max-specialists 3 --max-rounds 3 --max-actions 10
-uv run python tools/run_correlation_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
-uv run python tools/run_final_diagnosis_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
-uv run python tools/run_persisted_runtime_acceptance.py <report_id> --initial-specialist nginx --secondary-specialist systemd-service --max-rounds 3 --max-actions 10
+uv run python tools/smoke_ollama_claude_runtime.py --server-id <server_id>
+uv run python -m pytest tests/real_runtime -q
 ```
 
 Use `docs/testing/TEST_CATALOG.md` for the exact tools/tests available in the current checkout.

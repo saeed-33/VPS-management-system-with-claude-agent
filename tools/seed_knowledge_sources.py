@@ -10,7 +10,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.bootstrap import container
-from app.shared.dto.knowledge_sources import (
+from app.core.contracts.knowledge_sources import (
     CreateKnowledgeSourceDTO,
     UpdateKnowledgeSourceDTO,
 )

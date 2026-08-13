@@ -4,7 +4,7 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-from app.shared.dto.reports import MonitoringReportData
+from app.core.contracts.reports import MonitoringReportData
 from app.infrastructure.database.models.command_execution import (
     CommandExecutionModel,
 )

@@ -16,7 +16,7 @@
 القالب الأساسي:
 
 ```text
-app/admin/web/templates/base.html
+app/interfaces/admin/web/templates/base.html
 ```
 
 Static files تركب على:
@@ -28,7 +28,7 @@ Static files تركب على:
 من:
 
 ```text
-app/admin/web/static/
+app/interfaces/admin/web/static/
 ```
 
 ## العلاقة مع API

@@ -8,7 +8,7 @@ from app.admin.api.specialists import router
 from app.admin.dependencies import (
     get_specialist_definition_service,
 )
-from app.shared.exceptions import (
+from app.core.exceptions import (
     DuplicateSpecialistDefinitionError,
     SpecialistDefinitionNotFoundError,
 )

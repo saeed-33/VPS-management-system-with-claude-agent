@@ -11,25 +11,25 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.domain.analysis.retrieval.embedding_factory import (
+from app.capabilities.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.domain.investigation.contracts import SpecialistTask
-from app.domain.knowledge.retrieval import (
+from app.core.contracts.investigation import SpecialistTask
+from app.capabilities.knowledge.retrieval import (
     KnowledgeHybridRetriever,
 )
-from app.domain.investigation.specialist_context import (
+from app.capabilities.investigation.specialist_context import (
     SpecialistContextBuilder,
 )
-from app.domain.investigation.specialist_reasoning_agent import (
+from app.capabilities.investigation.specialist_reasoning_agent import (
     SpecialistReasoningAgent,
 )
-from app.domain.investigation.specialist_reasoning_client import (
+from app.capabilities.investigation.specialist_reasoning_client import (
     create_specialist_reasoning_client,
 )
 from app.bootstrap import container
-from app.shared.config import settings
-from app.shared.database.repositories.knowledge_retrieval_repository import (
+from app.core.config import settings
+from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
     KnowledgeRetrievalRepository,
 )
 

@@ -8,7 +8,7 @@
 
 - HTTP API / Admin UI.
 - MonitoringScheduler.
-- AnalysisAgentManager وqueues.
+- Claude native runtime and persisted AgentJob lifecycle.
 - RAG/LLM orchestration.
 - PostgreSQL repositories.
 
@@ -84,7 +84,7 @@ uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 FastAPI lifespan الحالي:
 
 1. ينفذ `create_database_tables()`.
-2. يستعيد pending analysis jobs إن كان AnalysisAgentManager مفعلًا.
+2. يستعيد unfinished AgentJob records when the Claude runtime is enabled.
 3. يبدأ MonitoringScheduler.
 
 عند shutdown:
@@ -128,7 +128,8 @@ Analysis model:  qwen3:8b (default)
 Embedding model: nomic-embed-text
 ```
 
-إذا كان `LLM_PROVIDER=openai` يجب حماية `OPENAI_API_KEY` كسر وليس داخل Git.
+`LLM_PROVIDER=ollama` is the only supported provider. Keep Ollama bound to the
+protected local/runtime network and do not expose it through the Admin API.
 
 ## SSH
 

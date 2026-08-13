@@ -1,9 +1,2 @@
-from app.admin.services.ssh_test_service import (
-    SSHTestResult,
-    SSHTestService,
-)
-
-__all__ = [
-    "SSHTestService",
-    "SSHTestResult",
-]
+"""Compatibility facade for the canonical Admin services."""
+from app.interfaces.admin.services import *  # noqa: F401,F403

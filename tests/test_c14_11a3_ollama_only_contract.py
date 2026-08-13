@@ -25,7 +25,7 @@ def test_c14_11a3_runtime_dependencies_are_ollama_only():
     assert '"langgraph' not in pyproject
 
     config = (
-        ROOT / "app/shared/config.py"
+        ROOT / "app/core/config.py"
     ).read_text(encoding="utf-8")
 
     assert 'Literal["ollama"]' in config
@@ -35,10 +35,10 @@ def test_c14_11a3_runtime_dependencies_are_ollama_only():
 
 def test_c14_11a3_no_openai_implementation_surfaces_remain():
     paths = (
-        ROOT / "app/domain/analysis/client_factory.py",
-        ROOT / "app/domain/investigation/final_diagnosis_synthesizer.py",
-        ROOT / "app/domain/investigation/specialist_reasoning_client.py",
-        ROOT / "app/domain/investigation/__init__.py",
+        ROOT / "app/capabilities/analysis/client_factory.py",
+        ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer.py",
+        ROOT / "app/capabilities/investigation/specialist_reasoning_client.py",
+        ROOT / "app/capabilities/investigation/__init__.py",
     )
 
     joined = "\n".join(
@@ -55,10 +55,10 @@ def test_c14_11a3_no_openai_implementation_surfaces_remain():
 
 def test_c14_11a3_ollama_implementations_remain():
     final_diag = (
-        ROOT / "app/domain/investigation/final_diagnosis_synthesizer.py"
+        ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer.py"
     ).read_text(encoding="utf-8")
     specialist = (
-        ROOT / "app/domain/investigation/specialist_reasoning_client.py"
+        ROOT / "app/capabilities/investigation/specialist_reasoning_client.py"
     ).read_text(encoding="utf-8")
 
     assert "OllamaFinalDiagnosisNarrativeClient" in final_diag

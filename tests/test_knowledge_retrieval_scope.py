@@ -1,6 +1,6 @@
 from sqlalchemy.dialects import postgresql
 
-from app.shared.database.repositories.knowledge_retrieval_repository import (
+from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
     KnowledgeRetrievalRepository,
 )
 

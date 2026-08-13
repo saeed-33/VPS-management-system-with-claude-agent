@@ -1,6 +1,6 @@
 import httpx
 
-from app.domain.analysis.retrieval.embedding_client import EmbeddingClient
+from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
 
 
 class OllamaEmbeddingClient(EmbeddingClient):

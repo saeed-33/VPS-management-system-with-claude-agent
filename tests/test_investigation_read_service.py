@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from app.shared.services.investigation_read_service import (
+from app.capabilities.investigation.read_service import (
     InvestigationReadService,
 )
 

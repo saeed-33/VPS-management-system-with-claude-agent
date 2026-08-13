@@ -3,9 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.shared.database.models.specialist_definition import SpecialistDefinitionModel
-from app.shared.database.repositories.specialist_definition_repository import SpecialistDefinitionRepository
-from app.shared.dto.specialists import CreateSpecialistDefinitionDTO, UpdateSpecialistDefinitionDTO
+from app.infrastructure.database.models.specialist_definition import SpecialistDefinitionModel
+from app.infrastructure.database.repositories.specialist_definition_repository import SpecialistDefinitionRepository
+from app.core.contracts.specialists import CreateSpecialistDefinitionDTO, UpdateSpecialistDefinitionDTO
 
 
 @pytest.fixture()

@@ -8,14 +8,14 @@ from app.mcp import (
     ProjectMcpToolBoundary,
     ProjectToolCall,
 )
-from app.shared.database.models.remediation import (
+from app.infrastructure.database.models.remediation import (
     RemediationPlanModel,
     RemediationSandboxResultModel,
 )
-from app.shared.database.repositories.remediation_repository import (
+from app.infrastructure.database.repositories.remediation_repository import (
     RemediationRepository,
 )
-from app.shared.services.remediation_service import (
+from app.capabilities.remediation.service import (
     RemediationService,
 )
 

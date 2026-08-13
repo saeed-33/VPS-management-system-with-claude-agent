@@ -18,21 +18,21 @@ if str(PROJECT_ROOT) not in sys.path:
         str(PROJECT_ROOT),
     )
 
-from app.domain.analysis.retrieval.embedding_factory import (
+from app.capabilities.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.domain.investigation.contracts import (
+from app.core.contracts.investigation import (
     SpecialistTask,
 )
-from app.domain.knowledge.retrieval import (
+from app.capabilities.knowledge.retrieval import (
     KnowledgeHybridRetriever,
 )
-from app.domain.investigation.specialist_context import (
+from app.capabilities.investigation.specialist_context import (
     SpecialistContextBuilder,
 )
 from app.bootstrap import container
-from app.shared.config import settings
-from app.shared.database.repositories.knowledge_retrieval_repository import (
+from app.core.config import settings
+from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
     KnowledgeRetrievalRepository,
 )
 

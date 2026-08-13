@@ -1,5 +1,5 @@
 from app.mcp import ProjectMcpToolBoundary
-from app.tools.catalog import (
+from app.interfaces.mcp.catalog import (
     PROJECT_TOOL_GROUPS,
     tool_group_for,
 )

@@ -6,7 +6,7 @@ from app.mcp import (
     ProjectMcpToolBoundary,
     ProjectToolCall,
 )
-from app.shared.dto.reports import (
+from app.core.contracts.reports import (
     MonitoringReportData,
     MonitoringReportStatus,
     ReportDetailsDTO,

@@ -1,5 +1,9 @@
 # Phase 4.19 Implementation Notes
 
+> Historical roadmap record. Former Python orchestration names in this file
+> document the migration history only. The current runtime is the native
+> Claude/Ollama/MCP path described in `docs/architecture/overview.md`.
+
 ## 4.19.1 — Investigation Read Models
 
 Create a stable operator-facing read boundary.

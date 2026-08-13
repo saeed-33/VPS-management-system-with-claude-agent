@@ -13,7 +13,7 @@ import psycopg
 from psycopg import sql
 from sqlalchemy import create_engine, text
 
-from app.shared.config import settings
+from app.core.config import settings
 
 
 EXPECTED_TABLES = {
@@ -103,8 +103,8 @@ def ensure_vector_extension() -> None:
 
 def create_model_tables() -> None:
     # Importing this module registers every mapped model in Base.metadata.
-    import app.shared.database.models  # noqa: F401
-    from app.shared.database.base import Base
+    import app.infrastructure.database.models  # noqa: F401
+    from app.infrastructure.database.base import Base
 
     engine = create_engine(
         settings.database_url,

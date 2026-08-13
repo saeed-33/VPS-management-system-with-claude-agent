@@ -10,7 +10,7 @@ from app.domain.investigation.specialist_context import (
 from app.domain.investigation.specialist_reasoning_agent import (
     SpecialistReasoningAgent,
 )
-from app.shared.dto.specialist_reasoning import (
+from app.core.contracts.specialist_reasoning import (
     SpecialistReasoningOutput,
 )
 

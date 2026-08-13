@@ -44,7 +44,6 @@ LLM_PROVIDER=ollama
 LLM_ANALYSIS_TIMEOUT_SECONDS=120
 LLM_MAX_REPORT_CHARACTERS=50000
 OLLAMA_MODEL=qwen3:8b
-OPENAI_MODEL=gpt-5-mini
 ```
 
 Operational decision:
@@ -57,6 +56,12 @@ specialist reasoning, and final synthesis.
 Claude Code supervises orchestration and must invoke project tools that use the
 configured Ollama clients instead of bypassing them.
 
+Local `.env` cleanup note: existing developer machines may still contain
+`OPENAI_API_KEY`, `OPENAI_MODEL`, or
+`LLM_ANALYSIS_QUEUE_SIZE_PER_SERVER`. These values are ignored by the current
+settings contract and should be removed manually from local `.env` files; this
+repository does not edit real environment secrets automatically.
+
 ## Monitoring/SSH
 
 ```text
@@ -65,7 +70,6 @@ DEFAULT_MONITOR_INTERVAL_SECONDS=60
 COMMAND_TIMEOUT_SECONDS=20
 SSH_CONNECT_TIMEOUT_SECONDS=15
 MAX_CONCURRENT_SERVERS=5
-LLM_ANALYSIS_QUEUE_SIZE_PER_SERVER=100
 ```
 
 ## Database

@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.admin.services.report_pdf_service import ReportPdfService
-from app.admin.services.ssh_test_service import SSHTestService
-from app.domain.analysis.analysis_orchestrator import AnalysisOrchestrator
-from app.domain.analysis.report_analyzer import ReportAnalyzer
-from app.domain.investigation.diagnostic_policy import DiagnosticPolicyEngine
-from app.domain.investigation.diagnostic_tools import DiagnosticToolRegistry
-from app.domain.investigation.evidence_collection import EvidenceCollectionService
-from app.domain.investigation.investigation_router import InvestigationRouter
-from app.domain.investigation.persistence_service import InvestigationPersistenceService
-from app.domain.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
-from app.domain.investigation.specialist_investigation_loop import SpecialistInvestigationLoop
-from app.domain.investigation.specialist_registry import SpecialistRegistry
-from app.domain.knowledge.chunking_service import KnowledgeChunkingService
-from app.domain.knowledge.ingestion_service import KnowledgeIngestionService
-from app.domain.knowledge.source_registry import KnowledgeSourceRegistry
+from app.interfaces.admin.services.report_pdf_service import ReportPdfService
+from app.interfaces.admin.services.ssh_test_service import SSHTestService
+from app.capabilities.analysis.analysis_orchestrator import AnalysisOrchestrator
+from app.capabilities.analysis.report_analyzer import ReportAnalyzer
+from app.core.policies.diagnostic_policy import DiagnosticPolicyEngine
+from app.core.policies.diagnostic_tools import DiagnosticToolRegistry
+from app.capabilities.investigation.evidence_collection import EvidenceCollectionService
+from app.capabilities.investigation.investigation_router import InvestigationRouter
+from app.capabilities.investigation.persistence_service import InvestigationPersistenceService
+from app.capabilities.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
+from app.capabilities.investigation.specialist_investigation_loop import SpecialistInvestigationLoop
+from app.capabilities.investigation.specialist_registry import SpecialistRegistry
+from app.capabilities.knowledge.chunking_service import KnowledgeChunkingService
+from app.capabilities.knowledge.ingestion_service import KnowledgeIngestionService
+from app.capabilities.knowledge.source_registry import KnowledgeSourceRegistry
 from app.runtime.claude.job_service import ClaudeAgentJobService
 from app.runtime.claude.supervisor import ClaudeSupervisor
 from app.infrastructure.database.repositories.agent_job_repository import AgentJobRepository
@@ -31,17 +31,17 @@ from app.infrastructure.database.repositories.remediation_repository import Reme
 from app.infrastructure.database.repositories.report_repository import ReportRepository
 from app.infrastructure.database.repositories.server_repository import ServerRepository
 from app.infrastructure.database.repositories.specialist_definition_repository import SpecialistDefinitionRepository
-from app.shared.services.command_service import CommandService
-from app.shared.services.investigation_read_service import InvestigationReadService
-from app.shared.services.knowledge_source_service import KnowledgeSourceService
-from app.shared.services.profile_service import MonitoringProfileService
-from app.shared.services.remediation_service import RemediationService
-from app.shared.services.report_service import ReportQueryService
-from app.shared.services.server_service import ServerService
-from app.shared.services.specialist_service import SpecialistDefinitionService
-from app.tools.monitoring.scheduler import MonitoringScheduler
-from app.tools.monitoring.service import MonitoringService
-from app.tools.project_boundary import ProjectMcpToolBoundary
+from app.capabilities.monitoring.command_service import CommandService
+from app.capabilities.investigation.read_service import InvestigationReadService
+from app.capabilities.knowledge.source_service import KnowledgeSourceService
+from app.capabilities.monitoring.profile_service import MonitoringProfileService
+from app.capabilities.remediation.service import RemediationService
+from app.capabilities.monitoring.report_query_service import ReportQueryService
+from app.capabilities.monitoring.server_service import ServerService
+from app.capabilities.investigation.specialist_service import SpecialistDefinitionService
+from app.capabilities.monitoring.scheduler import MonitoringScheduler
+from app.capabilities.monitoring.service import MonitoringService
+from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
 
 @dataclass(slots=True)

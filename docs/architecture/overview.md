@@ -20,10 +20,10 @@ The accepted Phase 4.20 readiness run measured:
 all 8 readiness metrics passed
 ```
 
-Reference automated regression reference immediately before documentation closeout:
+Reference automated regression result immediately before documentation closeout:
 
 ```text
-237 passed, 1 warning
+407 passed, 1 skipped, 1 warning
 ```
 
 The warning is the existing Starlette/TestClient deprecation warning.
@@ -45,7 +45,9 @@ SSH monitoring commands
       |
 Monitoring Report
       |
-AnalysisAgentManager
+Claude native runtime / AgentJob
+      |
+MCP capability boundary
       |
 AnalysisOrchestrator
       +--> normalization / fingerprint
@@ -151,12 +153,10 @@ policy, Evidence collection, and Ollama-backed Specialist reasoning.
 not a domain Specialist registry and must not duplicate Admin-managed
 Specialist definitions.
 
-`ClaudeMultiSpecialistSupervisor` coordinates multiple selected Specialists
-sequentially through the same MCP boundary. It records an `agent_jobs` entry,
-applies supervisor-level limits for max Specialists, max turns, max tool calls,
-and timeout, then collects structured run summaries. It does not pass one
-Specialist's private runtime state directly into another Specialist; shared
-state must flow through persisted Investigation/Evidence read models and
+The native Claude runtime coordinates selected Specialists through the same MCP
+boundary. It records an `agent_jobs` entry, while Python applies limits for max
+Specialists, turns, tool calls, timeouts, evidence, policy, and persistence.
+Shared state flows through persisted Investigation/Evidence read models and
 project tools.
 
 ## Routing
@@ -360,14 +360,11 @@ to override a safety or policy failure.
 
 ## Claude Supervisor
 
-`ClaudeSupervisor` is the C.12 scheduler-facing runtime boundary. The scheduler
-submits server monitoring work to the Claude monitoring cycle through this
-boundary.
-
-Scheduler iterations delegate to `ClaudeSupervisedMonitoringCycle`; that cycle
-invokes project-owned MCP tools and existing services for monitoring, analysis,
-investigation, Specialists, remediation planning, persistence, policy, and
-Ollama-backed LLM reasoning.
+`ClaudeSupervisor` is the scheduler-facing runtime boundary. The scheduler
+submits server monitoring work to the native Claude runtime through this
+boundary. Claude invokes project-owned MCP tools; Python retains monitoring,
+analysis, investigation, Specialist execution, remediation planning,
+persistence, policy, and Ollama-backed LLM reasoning.
 
 The `/health` endpoint exposes the active Claude supervisor status.
 
@@ -475,8 +472,9 @@ behavior.
 
 ## Project Tool Boundary
 
-The controlled project-tool execution boundary lives under `app/tools/`.
-`app/mcp/` provides schemas, serializers, and compatibility exports for Claude
+The controlled project-tool execution boundary lives under `app/interfaces/mcp/`.
+`app/interfaces/mcp/` provides schemas, serializers, the single registry, and
+the protocol server for Claude. Historical `app/mcp/` imports are facades.
 tool calls.
 
 The initial tool set is deliberately small:
@@ -494,7 +492,7 @@ The boundary calls existing services:
 ```text
 ProjectToolCall
  -> ProjectMcpToolBoundary
- -> app/tools project boundary
+ -> app/interfaces/mcp project boundary
  -> ServerService / MonitoringProfileService / MonitoringService / ReportQueryService
  -> ProjectToolResult
 ```
@@ -525,12 +523,13 @@ The external MCP serving layer is intentionally deferred. C.4 only establishes
 and tests the internal contract boundary that later runtime integration will
 use.
 
-## Claude-Supervised Monitoring Cycle
+## Claude Native Monitoring Runtime
 
-Phase C.5 adds `ClaudeSupervisedMonitoringCycle`:
+The native `ClaudeNativeMonitoringRunner` persists one bounded AgentJob and
+invokes the project MCP boundary:
 
 ```text
-ClaudeSupervisedMonitoringCycle
+ClaudeNativeMonitoringRunner
  -> create agent job
  -> mark job running
  -> get_server_context

@@ -111,7 +111,7 @@ temperature=0
 
 The smaller output budget is intentional for this narrative-only payload; it is separate from Specialist reasoning generation limits.
 
-OpenAI uses parsed structured output with the same narrative schema.
+Ollama uses parsed structured output with the same narrative schema.
 
 ## Next
 
