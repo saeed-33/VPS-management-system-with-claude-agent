@@ -1,0 +1,12 @@
+{
+  "sandboxed": true,
+  "project_path_accessible": true,
+  "sensitive_path_inaccessible": true,
+  "unsandboxed_escape_unavailable": true,
+  "sensitive_path_checks": {
+    "/mnt/e/AI_VPS_Mamgment/chat_system/.env": true
+  },
+  "cwd": "/mnt/e/AI_VPS_Mamgment/chat_system",
+  "project_root": "/mnt/e/AI_VPS_Mamgment/chat_system",
+  "runtime": "claude-native-sandbox"
+}

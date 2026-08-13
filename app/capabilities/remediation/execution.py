@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Protocol
 
 from app.core.contracts.remediation import RemediationAction
@@ -62,6 +65,43 @@ class UnavailableEvidenceCollector:
         )
 
 
+
+_WINDOWS_ABSOLUTE_PATH = re.compile(
+    r"^(?P<drive>[A-Za-z]):[\\/](?P<rest>.+)$"
+)
+
+
+def _resolve_runtime_file_path(value: str) -> str:
+    """
+    Resolve a persisted runtime file path without changing its identity.
+
+    A Windows absolute path stored in the shared database is translated to
+    the equivalent /mnt/<drive>/... path when execution occurs under WSL.
+
+    If no valid translation exists, return the original value so the SSH
+    boundary fails closed with its normal FileNotFoundError.
+    """
+    raw = str(value).strip()
+
+    direct = Path(raw)
+    if direct.is_file():
+        return str(direct)
+
+    if os.getenv("WSL_DISTRO_NAME", "").strip():
+        match = _WINDOWS_ABSOLUTE_PATH.match(raw)
+
+        if match:
+            drive = match.group("drive").lower()
+            rest = match.group("rest").replace("\\", "/")
+
+            translated = Path("/mnt") / drive / rest
+
+            if translated.is_file():
+                return str(translated)
+
+    return raw
+
+
 class _SSHNamedCommandRunner:
     def __init__(self, *, server_repository, private_key_path: str, known_hosts_path: str,
                  connect_timeout_seconds: float, command_timeout_seconds: float) -> None:
@@ -91,8 +131,13 @@ class _SSHNamedCommandRunner:
             host=server.host,
             port=server.port,
             username=server.username,
-            private_key_path=server.private_key_path or self._private_key_path,
-            known_hosts_path=self._known_hosts_path,
+            private_key_path=_resolve_runtime_file_path(
+                server.private_key_path
+                or self._private_key_path
+            ),
+            known_hosts_path=_resolve_runtime_file_path(
+                self._known_hosts_path
+            ),
             connect_timeout_seconds=self._connect_timeout_seconds,
         )
         try:

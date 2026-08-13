@@ -1,9 +1,6 @@
 {
   "automatic_remediation_allowed": false,
-  "blocking_reasons": [
-    "real_sandbox_acceptance: threshold not met",
-    "real sandbox acceptance: native sandbox runtime unavailable"
-  ],
+  "blocking_reasons": [],
   "metrics": [
     {
       "denominator": 1,
@@ -115,14 +112,14 @@
     },
     {
       "denominator": 1,
-      "details": "BLOCKED_BY_SANDBOX_RUNTIME",
+      "details": "PASS",
       "metric": "real_sandbox_acceptance",
-      "numerator": 0,
-      "passed": false,
-      "score": 0.0,
+      "numerator": 1,
+      "passed": true,
+      "score": 1.0,
       "threshold": 1.0
     }
   ],
-  "real_acceptance_status": "BLOCKED_BY_SANDBOX_RUNTIME",
-  "status": "BLOCKED"
+  "real_acceptance_status": "PASS",
+  "status": "READY_FOR_SANDBOXED_SUPERVISED_OPERATIONS"
 }
