@@ -18,17 +18,39 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def _restore_operational_database_env() -> None:
+def _restore_operational_runtime_env() -> None:
     from dotenv import dotenv_values
 
     env_path = Path(__file__).resolve().parents[2] / ".env"
     values = dotenv_values(env_path)
-    required = ("POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD")
-    missing = [key for key in required if not str(values.get(key) or "").strip()]
+
+    required = (
+        "POSTGRES_HOST",
+        "POSTGRES_PORT",
+        "POSTGRES_DB",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "SSH_KNOWN_HOSTS_PATH",
+    )
+    optional = (
+        "DEFAULT_SSH_PRIVATE_KEY_PATH",
+    )
+
+    missing = [
+        key
+        for key in required
+        if not str(values.get(key) or "").strip()
+    ]
     if missing:
-        pytest.fail("REAL_PHASE5_ACCEPTANCE = BLOCKED_BY_SAFE_TEST_ENVIRONMENT: missing " + ", ".join(missing))
-    for key in required:
-        os.environ[key] = str(values[key])
+        pytest.fail(
+            "REAL_PHASE5_ACCEPTANCE = BLOCKED_BY_SAFE_TEST_ENVIRONMENT: missing "
+            + ", ".join(missing)
+        )
+
+    for key in (*required, *optional):
+        value = str(values.get(key) or "").strip()
+        if value:
+            os.environ[key] = value
 
 
 def _safe_target():
@@ -50,7 +72,7 @@ def _safe_target():
 
 
 def test_phase5_real_supervised_remediation_acceptance():
-    _restore_operational_database_env()
+    _restore_operational_runtime_env()
     server_id, expected_name, service_name = _safe_target()
 
     from app.composition import container

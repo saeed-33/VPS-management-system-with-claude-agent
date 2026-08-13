@@ -1,142 +1,160 @@
-# Phase 5.15R — Real Supervised Remediation Closure Report
+# Phase 5 ? Supervised Remediation Final Closure Report
 
-## 1. Starting State
+## Final Decision
 
-- Commit: `ae19705cf8655d6e77aa803fa7b56fcc1e18c40c` (`Phase 5 — Supervised Remediation`).
-- Working tree: clean at start of Phase 5.15R; modified by this run.
-- Prior Phase 5 gate: `PHASE 5 = NOT CLOSED`.
-- Prior normal test baseline: `428 passed, 1 skipped, 1 warning`.
+```text
+PHASE 5 = CLOSED
+REAL_PHASE5_ACCEPTANCE = PASS
+PHASE5_READINESS = 13/13 PASS
+automatic_remediation_allowed = false
+```
 
-## 2. Rollback Semantic Correction
+## Real Acceptance Target
 
-| Tool | rollback_supported | Conditions | Rollback action | Reason |
-|---|---|---|---|---|
-| `start_service` | true only conditionally | Before Evidence proves `inactive` | `stop_service` | Restores the known prior inactive state; an already-active service has no claimed restorative rollback. |
-| `stop_service` | true only conditionally | Before Evidence proves `active` | `start_service` | Restores the known prior active state; an already-inactive service has no claimed restorative rollback. |
-| `restart_service` | false | No prior-state restoration mechanism exists | none | Repeating restart does not restore the prior process/configuration state. |
-| `reload_service` | false | No prior-state restoration mechanism exists | none | Repeating reload does not restore the prior process/configuration state. |
+```text
+server_id: 4
+server_name: phase5-lab
+service: ai-vps-remediation-test.service
+initial_state: inactive
+final_state: inactive
+```
 
-Rollback validates project-owned before Evidence, plan/execution/server/service ownership, current post-action state, and final restored state.
+The server is explicitly designated with `safe-remediation-test` and
+`non-production` safety markers.
 
-## 3. Safe Test Environment
+## Accepted Flow
 
-- Server ID: none designated.
-- Server name: none designated.
-- Safety designation: unavailable. Read-only inspection found only `vm1` and `vm2`; both are offline and neither has the required explicit `safe-remediation-test` and `non-production` designation.
-- Service: none selected; no `SAFE_REMEDIATION_SERVICE` was provided.
-- Initial service state: not collected because no approved target exists.
-- Double opt-in mechanism: `REAL_PHASE5_ACCEPTANCE_ENABLED=true`, exact `SAFE_REMEDIATION_SERVER_ID`, exact `SAFE_REMEDIATION_SERVER_NAME`, valid `SAFE_REMEDIATION_SERVICE`, and both safety markers on the selected server description.
+```text
+inactive
+? Preflight Evidence
+? sandbox validation
+? persisted human approval
+? start_service
+? active
+? verification
+? idempotency check
+? state-aware rollback / stop_service
+? inactive
+? audit verification
+```
 
-No write acceptance was attempted.
+Real acceptance result:
 
-## 4. Focused Safety Test Results
+```text
+status: accepted
+1 passed in 2.54s
+```
 
-`21 passed, 1 skipped` for Phase 5 contracts, Admin/MCP boundaries, readiness checks, rollback state-awareness, approval integrity, policy enforcement, write-tool validation, idempotency, verification, Evidence ownership, and recovery coverage.
+## Acceptance Evidence
 
-The opt-in real acceptance test fails closed when the double-opt-in variables are absent with `REAL_PHASE5_ACCEPTANCE = BLOCKED_BY_SAFE_TEST_ENVIRONMENT`.
+```text
+plan_id:
+phase5-real-ad578aee9c1c459b8ea263e566760c69
 
-## 5. Full Test Results
+fingerprint:
+1701a9f8c4d318a3800d6ccf6f5faff6c0376f71facfede44127aedcf8fef5f4
 
-`433 passed, 2 skipped, 1 warning in 8.65s`.
+approval_id:
+3b513059-a2cf-4173-a98d-a074f387bc8b
 
-The warning is the existing Starlette/httpx TestClient deprecation warning.
+execution_id:
+37ec269f-a977-407f-a4b9-8990b3c311a4
 
-## 6. Real Remediation Plan
+before_evidence_id:
+164b5c4f-bada-4b71-bb72-07d477e76d5b
 
-- Plan ID: not created; no safe target was available.
-- Server: not selected.
-- Action: not executed.
-- Service: not selected.
-- Risk: not evaluated for a real target.
-- Fingerprint: not created.
+after_evidence_id:
+3e26d03c-8c7c-49eb-b3c8-6308b1d58f7b
 
-## 7. Human Approval
+rollback_id:
+9ef81d87-39fe-4b31-a437-5db12891d398
 
-- Approval ID: not created.
-- Status: not applicable.
-- Actor: not applicable.
-- Fingerprint validation: covered by focused tests; not exercised against a real target.
+rollback_before_evidence_id:
+cd5fa759-42ae-4c7a-980f-98a80f20c7bb
 
-## 8. Before Evidence
+rollback_after_evidence_id:
+3021f68f-9421-4ecd-82ca-0bcebcb258fc
+```
 
-No real before Evidence ID exists. The real acceptance path requires project-owned persisted service-state Evidence and refuses to proceed without it.
+The accepted audit trail includes `approval_granted`, `execution_started`,
+`execution_succeeded`, and `rollback_succeeded`.
 
-## 9. Real Controlled Execution
+## Readiness Matrix
 
-- Execution ID: none.
-- Registered write tool: none executed.
-- Result: not attempted.
-- Raw shell confirmation: no raw shell or direct SSH write was used.
+All 13 Phase 5 dimensions pass:
 
-## 10. After Evidence
+```text
+proposal_validity              PASS
+risk_classification            PASS
+approval_integrity             PASS
+policy_enforcement             PASS
+write_tool_safety              PASS
+execution_integrity            PASS
+idempotency                    PASS
+evidence_completeness          PASS
+verification_correctness       PASS
+rollback_correctness           PASS
+audit_completeness             PASS
+mcp_safety                     PASS
+real_supervised_remediation    PASS
 
-No real after Evidence ID exists because execution was correctly blocked before target selection.
+TOTAL: 13/13 PASS
+```
 
-## 11. Verification
+## Closure Repairs
 
-`INCONCLUSIVE` — no safe target was available, so no real write or verification was performed.
+Final acceptance also verified the following repository repairs:
 
-## 12. Idempotency Check
+- Admin SSH connection testing supplies the required fingerprint strategy and
+  fingerprint configuration.
+- `step_5_2_remediation_id_sequences.sql` repairs PostgreSQL auto-generated
+  integer IDs for Phase 5 persistence tables.
+- The real acceptance harness restores operational PostgreSQL and SSH settings
+  from `.env`, avoiding pytest test-only SSH defaults.
 
-Real duplicate apply was not attempted. Sequential duplicate protection remains covered by focused tests and the real test is wired to exercise the same idempotency contract after an approved write.
+## Final Regression
 
-## 13. Real Rollback
+```text
+433 passed
+2 skipped
+1 warning
+7.78s
+```
 
-- Rollback execution ID: none.
-- Registered rollback tool: none executed.
-- Result: not attempted.
+The remaining Starlette TestClient/httpx deprecation warning is not a Phase 5
+closure blocker.
 
-## 14. Final Evidence
+## Architecture Boundary
 
-No real final Evidence ID exists. The acceptance remains blocked rather than claiming restoration without a designated safe target.
+```text
+Claude Code = supervisory reasoning and sequencing
+Ollama      = operational LLM provider
+MCP         = bounded Claude-facing capability surface
+Python      = execution, policy, validation, Evidence, persistence,
+              budgets, SSH safety, and database access
+```
 
-## 15. Audit Trail
+Invariant:
 
-No real lifecycle correlation exists. Focused tests persist and validate plan, approval, execution, verification, rollback, and audit records through the repository.
+```text
+Claude decides WHAT/NEXT.
+Python decides WHETHER ALLOWED and HOW EXECUTED SAFELY.
+```
 
-## 16. Claude / MCP Participation
+The specific real write acceptance was a direct service-layer acceptance. It
+does not claim Claude, Ollama, or MCP participation in that specific write.
 
-The real remediation flow did not involve Claude, Ollama, vps MCP, or an AgentJob/session. Existing Claude/MCP boundaries remain unchanged and the normal 24-tool project MCP surface is preserved.
+## Remaining Non-Blocking Technical Debt
 
-## 17. Phase 5 Readiness Metrics
+- Production-grade multi-user authentication/RBAC remains future work.
+- Root SSH is specific to the isolated acceptance lab, not the intended
+  production privilege model.
+- Automatic remediation remains disabled.
+- The Starlette/httpx TestClient deprecation warning remains.
 
-| Metric | Numerator | Denominator | Score | Threshold | Result |
-|---|---:|---:|---:|---:|---|
-| proposal_validity | 1 | 1 | 1.000 | 1.000 | PASS |
-| risk_classification | 1 | 1 | 1.000 | 1.000 | PASS |
-| approval_integrity | 1 | 1 | 1.000 | 1.000 | PASS |
-| policy_enforcement | 1 | 1 | 1.000 | 1.000 | PASS |
-| write_tool_safety | 1 | 1 | 1.000 | 1.000 | PASS |
-| execution_integrity | 1 | 1 | 1.000 | 1.000 | PASS |
-| idempotency | 1 | 1 | 1.000 | 1.000 | PASS |
-| evidence_completeness | 1 | 1 | 1.000 | 1.000 | PASS |
-| verification_correctness | 1 | 1 | 1.000 | 1.000 | PASS |
-| rollback_correctness | 1 | 1 | 1.000 | 1.000 | PASS |
-| audit_completeness | 1 | 1 | 1.000 | 1.000 | PASS |
-| mcp_safety | 1 | 1 | 1.000 | 1.000 | PASS |
-| real_supervised_remediation | 0 | 1 | 0.000 | 1.000 | FAIL |
+## Next Step
 
-## 18. Automatic Remediation State
-
-`automatic_remediation_allowed = false`
-
-## 19. Remaining Technical Debt
-
-- An explicitly designated non-production lab target with a harmless reversible systemd service is still required.
-- Production-grade multi-user authentication/RBAC is not implemented and is not claimed.
-- Claude participation in the real remediation flow remains unproven because safe real acceptance is blocked.
-
-## 20. Real Acceptance Decision
-
-REAL_PHASE5_ACCEPTANCE = BLOCKED_BY_SAFE_TEST_ENVIRONMENT
-
-## 21. Phase 5 Decision
-
-PHASE 5 = NOT CLOSED
-
-## 22. Next Allowed Step
-
-Designate and verify an explicitly safe reversible test target, then run the opt-in real acceptance. Do not implement Phase 6.
+Phase 6 is now authorized to begin.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **ROADMAP**
@@ -146,8 +164,8 @@ Documentation synchronized: **2026-08-13**
 Canonical project state:
 
 ```text
-Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
 automatic_remediation_allowed: false
 ```
 

@@ -16,9 +16,10 @@ C.14.12: PASS
 C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
-Phase 5: IMPLEMENTED / NOT CLOSED
+Phase 5: COMPLETE / CLOSED
+Phase 5 readiness: 13/13 PASS
 automatic_remediation_allowed: false
-readiness: blocked_by_safe_test_environment
+readiness: READY_FOR_SUPERVISED_OPERATIONS
 ```
 
 ### State meanings
@@ -45,6 +46,11 @@ readiness: blocked_by_safe_test_environment
 - Phase 5 supervised remediation contracts, additive persistence, named write
   registry, approval fingerprinting, controlled execution, verification,
   rollback, audit events, Admin API/UI, and Claude workflow integration.
+
+- Phase 5 real supervised remediation acceptance: PASS on the explicitly
+  designated non-production `phase5-lab` target (server 4).
+- Final Phase 5 regression: `433 passed, 2 skipped, 1 warning`.
+
 
 ## C.14.12 readiness acceptance
 
@@ -86,11 +92,13 @@ SAFELY. No active OpenAI or LangGraph runtime exists.
 C.14.14 is accepted. Implementation, architecture, safety, tests, runtime
 evidence, and documentation agree. Phase C is closed.
 
-Phase 5 Supervised Remediation is implemented but not closed. The 13-metric
-deterministic readiness matrix passes for repository behavior, while real
-supervised acceptance is blocked because the configured servers are offline
-and no explicitly safe reversible target is designated. Automatic remediation
-remains disabled; no real write was attempted.
+Phase 5 Supervised Remediation is complete and closed. The deterministic
+readiness matrix is 13/13 PASS, including real supervised remediation
+acceptance against the explicitly designated non-production `phase5-lab`
+target (server 4). The accepted flow persisted Evidence, human approval,
+controlled execution, verification, idempotency, state-aware rollback, and
+audit events, and restored the dedicated service to its original `inactive`
+state. Automatic remediation remains disabled.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
@@ -101,7 +109,9 @@ Canonical project state:
 
 ```text
 Phase 4.20: complete
-readiness: blocked_by_safe_test_environment
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+readiness: READY_FOR_SUPERVISED_OPERATIONS
 automatic_remediation_allowed: false
 ```
 

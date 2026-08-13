@@ -81,6 +81,11 @@ class SSHTestService:
                     timeout_seconds=(
                         self._command_timeout_seconds
                     ),
+                    fingerprint_strategy="ssh_connection_test",
+                    fingerprint_config={
+                        "command_name": "hostname",
+                        "purpose": "admin_ssh_connectivity_test",
+                    },
                 )
 
             if not result.success:
