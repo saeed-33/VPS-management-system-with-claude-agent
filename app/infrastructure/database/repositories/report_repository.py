@@ -5,13 +5,13 @@ from sqlalchemy.orm import (
 )
 
 from app.shared.dto.reports import MonitoringReportData
-from app.shared.database.models.command_execution import (
+from app.infrastructure.database.models.command_execution import (
     CommandExecutionModel,
 )
-from app.shared.database.models.monitoring_report import (
+from app.infrastructure.database.models.monitoring_report import (
     MonitoringReportModel,
 )
-from app.shared.database.models.server import (
+from app.infrastructure.database.models.server import (
     ServerModel,
 )
 from app.infrastructure.database.session import SessionLocal

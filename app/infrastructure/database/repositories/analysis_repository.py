@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.report_analysis import (
+from app.infrastructure.database.models.report_analysis import (
     AnalysisJobStatus,
     ReportAnalysisModel,
 )

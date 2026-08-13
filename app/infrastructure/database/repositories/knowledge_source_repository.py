@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.knowledge_source import (
+from app.infrastructure.database.models.knowledge_source import (
     KnowledgeSourceModel,
 )
 from app.infrastructure.database.session import SessionLocal

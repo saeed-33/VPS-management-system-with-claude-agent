@@ -1,4 +1,4 @@
-from app.shared.database.models.server import (
+from app.infrastructure.database.models.server import (
     ServerModel,
 )
 from app.infrastructure.database.repositories.server_repository import (

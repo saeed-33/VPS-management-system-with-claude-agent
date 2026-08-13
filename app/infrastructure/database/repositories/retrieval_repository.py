@@ -1,7 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.report_retrieval_document import ReportRetrievalDocumentModel
+from app.infrastructure.database.models.report_retrieval_document import ReportRetrievalDocumentModel
 from app.infrastructure.database.session import SessionLocal
 
 

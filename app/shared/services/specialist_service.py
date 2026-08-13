@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.shared.database.models.specialist_definition import (
+from app.infrastructure.database.models.specialist_definition import (
     SpecialistDefinitionModel,
 )
 from app.infrastructure.database.repositories.specialist_definition_repository import (

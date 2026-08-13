@@ -1,7 +1,7 @@
 from sqlalchemy import delete, select
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.report_analysis_source import (
+from app.infrastructure.database.models.report_analysis_source import (
     ReportAnalysisSourceModel,
 )
 from app.infrastructure.database.session import SessionLocal

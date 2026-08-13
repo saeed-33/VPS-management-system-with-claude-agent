@@ -3,10 +3,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from dataclasses import asdict
 
-from app.shared.database.models.monitor_command import (
+from app.infrastructure.database.models.monitor_command import (
     MonitorCommandModel,
 )
-from app.shared.database.models.profile_command import (
+from app.infrastructure.database.models.profile_command import (
     MonitoringProfileCommandModel,
 )
 from app.infrastructure.database.session import SessionLocal

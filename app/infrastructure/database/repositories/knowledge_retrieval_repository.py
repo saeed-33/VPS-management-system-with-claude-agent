@@ -6,11 +6,11 @@ from sqlalchemy import cast, func, or_, select, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.knowledge_document import (
+from app.infrastructure.database.models.knowledge_document import (
     KnowledgeChunkModel,
     KnowledgeDocumentModel,
 )
-from app.shared.database.models.knowledge_source import (
+from app.infrastructure.database.models.knowledge_source import (
     KnowledgeSourceModel,
 )
 from app.infrastructure.database.session import SessionLocal

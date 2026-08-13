@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.agent_job import (
+from app.infrastructure.database.models.agent_job import (
     AgentJobModel,
 )
 from app.infrastructure.database.session import SessionLocal

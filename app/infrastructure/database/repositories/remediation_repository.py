@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.remediation import (
+from app.infrastructure.database.models.remediation import (
     RemediationPlanModel,
     RemediationSandboxResultModel,
 )

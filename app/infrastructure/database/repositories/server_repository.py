@@ -3,7 +3,7 @@ from dataclasses import asdict
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.server import (
+from app.infrastructure.database.models.server import (
     ServerModel,
 )
 from app.infrastructure.database.session import SessionLocal

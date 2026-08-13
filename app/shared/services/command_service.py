@@ -1,7 +1,7 @@
-from app.shared.database.models.monitor_command import (
+from app.infrastructure.database.models.monitor_command import (
     MonitorCommandModel,
 )
-from app.shared.database.models.profile_command import (
+from app.infrastructure.database.models.profile_command import (
     MonitoringProfileCommandModel,
 )
 from app.infrastructure.database.repositories.command_repository import (

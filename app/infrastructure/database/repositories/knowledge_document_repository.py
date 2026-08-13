@@ -7,7 +7,7 @@ from app.domain.knowledge.ingestion_contracts import (
     KnowledgeDocumentStatus,
     ParsedKnowledgeDocument,
 )
-from app.shared.database.models.knowledge_document import (
+from app.infrastructure.database.models.knowledge_document import (
     KnowledgeChunkModel,
     KnowledgeDocumentModel,
 )

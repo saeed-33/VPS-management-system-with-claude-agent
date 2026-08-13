@@ -3,16 +3,16 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
-from app.shared.database.models.monitor_command import (
+from app.infrastructure.database.models.monitor_command import (
     MonitorCommandModel,
 )
-from app.shared.database.models.monitoring_profile import (
+from app.infrastructure.database.models.monitoring_profile import (
     MonitoringProfileModel,
 )
-from app.shared.database.models.profile_command import (
+from app.infrastructure.database.models.profile_command import (
     MonitoringProfileCommandModel,
 )
-from app.shared.database.models.server import (
+from app.infrastructure.database.models.server import (
     ServerModel,
 )
 from app.infrastructure.database.session import SessionLocal

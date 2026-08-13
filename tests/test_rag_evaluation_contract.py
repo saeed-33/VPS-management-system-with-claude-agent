@@ -1,3 +1,4 @@
+import ast
 from pathlib import Path
 
 
@@ -25,16 +26,47 @@ def test_orchestrator_persists_vector_similarity_not_rrf():
 
 
 def test_vector_repository_filters_before_limit():
-    source = (
+    path = (
         ROOT
-        / "app/shared/database/repositories/retrieval_repository.py"
-    ).read_text(encoding="utf-8")
+        / "app/infrastructure/database/repositories/retrieval_repository.py"
+    )
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
 
     distance_filter = "distance <= maximum_distance"
     limit_call = ".limit(limit)"
 
-    assert distance_filter in source
-    assert source.index(distance_filter) < source.index(
-        limit_call,
-        source.index("def find_similar("),
+    matching_methods = []
+
+    for node in ast.walk(tree):
+        if not isinstance(
+            node,
+            (ast.FunctionDef, ast.AsyncFunctionDef),
+        ):
+            continue
+
+        segment = ast.get_source_segment(source, node)
+
+        if (
+            segment
+            and distance_filter in segment
+        ):
+            matching_methods.append(
+                (node.name, segment)
+            )
+
+    assert len(matching_methods) == 1
+
+    method_name, method_source = matching_methods[0]
+
+    assert distance_filter in method_source
+    assert limit_call in method_source
+    assert (
+        method_source.index(distance_filter)
+        < method_source.index(limit_call)
+    ), (
+        f"{method_name}: vector distance filter must be applied "
+        "before limit within the same repository method"
     )
+
+

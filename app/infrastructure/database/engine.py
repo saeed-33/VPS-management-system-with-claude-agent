@@ -16,6 +16,6 @@ engine = create_engine(
 
 def create_database_tables() -> None:
     # مهم: يجب استيراد جميع Models قبل create_all
-    import app.shared.database.models  # noqa: F401
+    import app.infrastructure.database.models  # noqa: F401
 
     Base.metadata.create_all(engine)
