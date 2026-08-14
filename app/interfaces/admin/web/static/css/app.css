@@ -578,6 +578,49 @@ html[data-theme="dark"] .theme-light-icon {
     gap: 20px;
 }
 
+.admin-table-wrap {
+    overflow-x: auto;
+}
+
+.admin-kv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.admin-kv {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-secondary);
+}
+
+.admin-kv strong,
+.admin-kv span {
+    display: block;
+}
+
+.admin-kv strong {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.admin-kv span {
+    overflow-wrap: anywhere;
+}
+
+.admin-code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.admin-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+}
+
 .panel {
     background: var(--surface);
     border: 1px solid var(--border);

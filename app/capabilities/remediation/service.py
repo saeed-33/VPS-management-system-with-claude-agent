@@ -585,6 +585,13 @@ class RemediationService:
     def list_audit_events(self, plan_id: str):
         return self._repository.list_audit_events(plan_id)
 
+    def list_all_audit_events(
+        self, *, plan_id: str | None = None, event_type: str | None = None, limit: int = 100
+    ):
+        return self._repository.list_all_audit_events(
+            plan_id=plan_id, event_type=event_type, limit=min(max(limit, 1), 500)
+        )
+
     def recover_interrupted_executions(self) -> int:
         return self._repository.mark_interrupted_executions()
 

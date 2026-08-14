@@ -74,6 +74,10 @@ System Runtime
         </div>
     </article>
 </section>
+<section class="content-grid">
+    <article class="panel"><header class="panel-header"><h2 class="panel-title">Safety state</h2></header><div class="panel-body" id="safety-state">Loading</div></article>
+    <article class="panel"><header class="panel-header"><h2 class="panel-title">Admin session security</h2></header><div class="panel-body" id="admin-security-state">Loading</div></article>
+</section>
 
 <section class="panel">
     <header class="panel-header">
@@ -170,6 +174,23 @@ async function loadRuntimeOverview() {
         "runtime-tools-table"
     ).innerHTML =
         rows.join("");
+
+    const safety = payload.safety || {};
+    document.getElementById("safety-state").innerHTML = `
+        <div class="admin-kv-grid">
+            <div class="admin-kv"><strong>Automatic remediation</strong><span>${safety.automatic_remediation_allowed ? "enabled" : "disabled (fail-closed)"}</span></div>
+            <div class="admin-kv"><strong>V1 actions</strong><span>${escapeHtml((safety.v1_allowed_actions || []).join(", "))}</span></div>
+            <div class="admin-kv"><strong>Max risk</strong><span>${escapeHtml(safety.autonomous_max_risk || "—")}</span></div>
+            <div class="admin-kv"><strong>Phase 6 sandbox</strong><span>${safety.phase6_sandbox_required ? "required" : "not required"} · ${safety.phase6_attestation_configured ? "configured" : "not configured"}</span></div>
+        </div>`;
+    const security = payload.admin_security || {};
+    document.getElementById("admin-security-state").innerHTML = `
+        <div class="admin-kv-grid">
+            <div class="admin-kv"><strong>Cookie</strong><span>${escapeHtml(security.session_cookie_name || "—")}</span></div>
+            <div class="admin-kv"><strong>TTL</strong><span>${escapeHtml(String(security.session_ttl_seconds || "—"))} seconds</span></div>
+            <div class="admin-kv"><strong>Secure flag</strong><span>${security.secure_cookie ? "enabled" : "disabled for local HTTP"}</span></div>
+            <div class="admin-kv"><strong>CSRF</strong><span>${escapeHtml(security.csrf || "enabled")}</span></div>
+        </div>`;
 }
 
 loadRuntimeOverview().catch(error => {

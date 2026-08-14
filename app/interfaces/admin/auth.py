@@ -384,6 +384,18 @@ class AdminAuthService:
             )
             session.commit()
 
+    def list_audit_events(self, *, limit: int = 100) -> list[AdminAuthAuditEventModel]:
+        """Return recent authentication and Admin security events for read-only audit views."""
+        bounded_limit = max(1, min(int(limit), 500))
+        with self._session_factory() as session:
+            return list(
+                session.scalars(
+                    select(AdminAuthAuditEventModel)
+                    .order_by(AdminAuthAuditEventModel.created_at.desc())
+                    .limit(bounded_limit)
+                )
+            )
+
     @staticmethod
     def _write_audit(
         session,
@@ -473,6 +485,8 @@ def permission_for_api_request(
         return AdminPermission.REMEDIATION_APPROVE
     if normalized.startswith("/api/autonomous-remediation"):
         if method == "GET":
+            if normalized.startswith("/api/autonomous-remediation/audit"):
+                return AdminPermission.AUDIT_READ
             return AdminPermission.AUTONOMOUS_READ
         if normalized.endswith("/enable"):
             return AdminPermission.AUTONOMOUS_POLICY_ENABLE

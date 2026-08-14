@@ -38,6 +38,23 @@ router = APIRouter(
 )
 
 
+def _safety_designation(server) -> str:
+    """Read the persisted safe-target designation without hostname inference."""
+    designation = str(getattr(server, "description", None) or "").casefold()
+    if "safe-remediation-test" in designation and "non-production" in designation:
+        return "safe_remediation_lab"
+    if "non-production" in designation:
+        return "non_production"
+    if "production" in designation:
+        return "production"
+    return "unclassified"
+
+
+def _server_response(server) -> ServerResponse:
+    response = ServerResponse.model_validate(server)
+    return response.model_copy(update={"safety_designation": _safety_designation(server)})
+
+
 @router.get(
     "",
     response_model=list[ServerResponse],
@@ -47,7 +64,7 @@ def list_servers(
         get_server_service
     ),
 ):
-    return service.list_servers()
+    return [_server_response(item) for item in service.list_servers()]
 
 
 @router.get(
@@ -61,7 +78,7 @@ def get_server(
     ),
 ):
     try:
-        return service.get_server(server_id)
+        return _server_response(service.get_server(server_id))
     except ServerNotFoundError as exc:
         raise HTTPException(
             status_code=404,
@@ -81,11 +98,7 @@ def create_server(
     ),
 ):
     try:
-        return service.create_server(
-            CreateServerDTO(
-                **payload.model_dump()
-            )
-        )
+        return _server_response(service.create_server(CreateServerDTO(**payload.model_dump())))
     except DuplicateServerError as exc:
         raise HTTPException(
             status_code=409,
@@ -110,12 +123,12 @@ def update_server(
     ),
 ):
     try:
-        return service.update_server(
+        return _server_response(service.update_server(
             server_id,
             UpdateServerDTO(
                 **payload.model_dump()
             ),
-        )
+        ))
     except ServerNotFoundError as exc:
         raise HTTPException(
             status_code=404,

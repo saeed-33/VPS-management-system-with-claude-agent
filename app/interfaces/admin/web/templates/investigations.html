@@ -134,12 +134,7 @@
     if (serverId) params.set("server_id", serverId);
 
     try {
-      const response = await fetch("/api/investigations?" + params.toString(), {
-        headers: {"Accept": "application/json"}
-      });
-
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      render(await response.json());
+      render(await apiRequest("/api/investigations?" + params.toString()));
     } catch (error) {
       stateBox.hidden = false;
       stateBox.textContent = "تعذر تحميل التحقيقات: " + error.message;

@@ -362,6 +362,14 @@ class AutonomousExecutionService:
     def list_reservations(self, *, policy_id: str | None = None, plan_id: str | None = None, limit: int = 100):
         return self._repository.list_reservations(policy_id=policy_id, plan_id=plan_id, limit=min(max(limit, 1), 500))
 
+    def list_authorizations(self, *, limit: int = 100):
+        return self._repository.list_authorizations(limit=min(max(limit, 1), 500))
+
+    def list_policy_audit_events(self, *, policy_id: str | None = None, limit: int = 100):
+        return self._repository.list_all_policy_audit_events(
+            policy_id=policy_id, limit=min(max(limit, 1), 500)
+        )
+
     def runtime_state(self, policy_id: str):
         return self._repository.get_runtime_state(policy_id)
 

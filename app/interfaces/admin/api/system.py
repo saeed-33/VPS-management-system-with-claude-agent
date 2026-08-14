@@ -11,6 +11,10 @@ from app.interfaces.mcp.registry import (
     ProjectMcpToolBoundary,
 )
 from app.core.config import settings
+from app.core.contracts.autonomous_remediation import (
+    V1_AUTONOMOUS_ACTIONS,
+    V1_AUTONOMOUS_RISK_CEILING,
+)
 
 
 router = APIRouter(
@@ -85,6 +89,19 @@ async def get_runtime_overview(
             "polling_interval_seconds": (
                 settings.monitor_polling_interval_seconds
             ),
+        },
+        "safety": {
+            "automatic_remediation_allowed": settings.automatic_remediation_allowed,
+            "v1_allowed_actions": sorted(V1_AUTONOMOUS_ACTIONS),
+            "autonomous_max_risk": V1_AUTONOMOUS_RISK_CEILING,
+            "phase6_sandbox_required": settings.phase6_require_wsl2,
+            "phase6_attestation_configured": bool(settings.phase6_native_sandbox_attestation_file),
+        },
+        "admin_security": {
+            "session_cookie_name": settings.admin_session_cookie_name,
+            "session_ttl_seconds": settings.admin_session_ttl_seconds,
+            "secure_cookie": settings.admin_session_secure,
+            "csrf": "enabled",
         },
         "tool_count": sum(
             group["tool_count"]

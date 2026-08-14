@@ -29,6 +29,10 @@ function applyPermissionVisibility() {
         ["[onclick^=\"deleteCommand\"]", "command.write"],
         ["[onclick^=\"toggleProfileStatus\"]", "profile.write"],
         ["[onclick^=\"deleteProfile\"]", "profile.write"],
+        ["[onclick^=\"saveAssignment\"]", "profile.write"],
+        ["[onclick^=\"toggleAssignment\"]", "profile.write"],
+        ["[onclick^=\"removeCommandFromProfile\"]", "profile.write"],
+        ["[onchange^=\"assignProfileToServer\"]", "server.write"],
         ["[onclick^=\"editSource\"]", "knowledge.write"],
         ["[onclick^=\"toggleSource\"]", "knowledge.write"],
         ["[onclick^=\"deleteSource\"]", "knowledge.write"],
@@ -187,7 +191,15 @@ async function apiRequest(
         return null;
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    let data = {};
+    if (responseText) {
+        try {
+            data = JSON.parse(responseText);
+        } catch {
+            data = {detail: responseText};
+        }
+    }
 
     if (!response.ok) {
         const detail =
@@ -195,7 +207,15 @@ async function apiRequest(
                 ? data.detail
                 : JSON.stringify(data.detail || data);
 
-        throw new Error(detail);
+        const error = new Error(detail || `Request failed (${response.status}).`);
+        error.status = response.status;
+        error.payload = data;
+        if (response.status === 401) {
+            showToast("Your Admin session has expired. Please log in again.", "error");
+        } else if (response.status === 403) {
+            showToast("You do not have permission for this operation.", "error");
+        }
+        throw error;
     }
 
     return data;
@@ -251,6 +271,14 @@ function initializeNavigation() {
         "/commands": "أوامر المراقبة",
         "/reports": "تقارير المراقبة",
         "/monitoring-profiles": "ملفات المراقبة",
+        "/autonomous-policies": "Autonomous Policies",
+        "/autonomous-candidates": "Policy Candidates",
+        "/autonomous-history": "Autonomous History",
+        "/autonomous-decisions": "Autonomous Decisions",
+        "/autonomous-runtime": "Autonomous Runtime",
+        "/autonomous-reservations": "Reservations",
+        "/autonomous-authorizations": "Authorizations",
+        "/audit": "Audit / Operations",
         "/system": "System Runtime",
     };
 

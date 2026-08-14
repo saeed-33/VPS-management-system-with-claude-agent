@@ -440,6 +440,7 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/admin/web/routes.py` — Python module containing `dashboard_page()`, `servers_page()`, `commands_page()`, `investigations_page()`, `reports_page()`.
 - `app/interfaces/admin/web/static/css/app.css` — Administration UI stylesheet.
 - `app/interfaces/admin/web/static/js/app.js` — Administration UI browser-side JavaScript.
+- `app/interfaces/admin/web/static/js/autonomous.js` — Shared autonomous/remediation UI helpers.
 - `app/interfaces/admin/web/static/js/commands.js` — Administration UI browser-side JavaScript.
 - `app/interfaces/admin/web/static/js/monitoring_profiles.js` — Administration UI browser-side JavaScript.
 - `app/interfaces/admin/web/static/js/report_details.js` — Administration UI browser-side JavaScript.
@@ -455,7 +456,14 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/admin/web/templates/remediation.html` — Jinja/HTML administration UI template.
 - `app/interfaces/admin/web/templates/report_details.html` — Jinja/HTML administration UI template.
 - `app/interfaces/admin/web/templates/reports.html` — Jinja/HTML administration UI template.
-- `app/interfaces/admin/web/templates/runtime_policies.html` — Jinja/HTML administration UI template.
+- `app/interfaces/admin/web/templates/audit.html` — Jinja/HTML operational and Admin security audit view.
+- `app/interfaces/admin/web/templates/autonomous_authorizations.html` — Jinja/HTML authorization view.
+- `app/interfaces/admin/web/templates/autonomous_candidates.html` — Jinja/HTML policy candidate view.
+- `app/interfaces/admin/web/templates/autonomous_decisions.html` — Jinja/HTML autonomous decision view.
+- `app/interfaces/admin/web/templates/autonomous_history.html` — Jinja/HTML autonomous history view.
+- `app/interfaces/admin/web/templates/autonomous_policies.html` — Jinja/HTML autonomous policy administration UI template.
+- `app/interfaces/admin/web/templates/autonomous_reservations.html` — Jinja/HTML reservation view.
+- `app/interfaces/admin/web/templates/autonomous_runtime.html` — Jinja/HTML runtime and circuit-breaker view.
 - `app/interfaces/admin/web/templates/servers.html` — Jinja/HTML administration UI template.
 - `app/interfaces/admin/web/templates/specialists.html` — Jinja/HTML administration UI template.
 - `app/interfaces/admin/web/templates/system.html` — Jinja/HTML administration UI template.

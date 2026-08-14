@@ -564,3 +564,18 @@ class RemediationRepository:
                 .where(RemediationAuditEventModel.plan_id == plan_id)
                 .order_by(RemediationAuditEventModel.created_at.asc(), RemediationAuditEventModel.id.asc())
             ).all())
+
+    def list_all_audit_events(
+        self, *, plan_id: str | None = None, event_type: str | None = None, limit: int = 100
+    ) -> list[RemediationAuditEventModel]:
+        with self._session_factory() as session:
+            statement = (
+                select(RemediationAuditEventModel)
+                .order_by(RemediationAuditEventModel.created_at.desc())
+                .limit(limit)
+            )
+            if plan_id:
+                statement = statement.where(RemediationAuditEventModel.plan_id == plan_id)
+            if event_type:
+                statement = statement.where(RemediationAuditEventModel.event_type == event_type)
+            return list(session.scalars(statement).all())

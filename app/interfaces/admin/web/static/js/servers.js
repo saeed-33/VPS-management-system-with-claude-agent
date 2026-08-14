@@ -1,5 +1,15 @@
 console.log("Servers page script loaded");
 
+function safetyDesignationLabel(value) {
+    const labels = {
+        safe_remediation_lab: "Safe remediation lab",
+        non_production: "Non-production",
+        production: "Production",
+        unclassified: "Unclassified"
+    };
+    return labels[value] || labels.unclassified;
+}
+
     async function assignProfileToServer(
     serverId,
     selectedValue
@@ -93,6 +103,10 @@ console.log("Servers page script loaded");
                     <td>
                         <span class="table-primary-text">
                             ${escapeHtml(server.name)}
+                        </span>
+
+                        <span class="badge badge-info">
+                            ${escapeHtml(safetyDesignationLabel(server.safety_designation))}
                         </span>
 
                         <span class="table-secondary-text">

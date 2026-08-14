@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 
@@ -208,8 +208,68 @@ async def remediation_page(
 async def runtime_policies_page(
     request: Request,
 ):
-    return templates.TemplateResponse(
-        request=request,
-        name="runtime_policies.html",
-        context={},
-    )
+    return RedirectResponse("/autonomous-runtime", status_code=307)
+
+
+@router.get(
+    "/autonomous-policies",
+    response_class=HTMLResponse,
+)
+async def autonomous_policies_page(request: Request):
+    return templates.TemplateResponse(request=request, name="autonomous_policies.html", context={})
+
+
+@router.get(
+    "/autonomous-candidates",
+    response_class=HTMLResponse,
+)
+async def autonomous_candidates_page(request: Request):
+    return templates.TemplateResponse(request=request, name="autonomous_candidates.html", context={})
+
+
+@router.get(
+    "/autonomous-history",
+    response_class=HTMLResponse,
+)
+async def autonomous_history_page(request: Request):
+    return templates.TemplateResponse(request=request, name="autonomous_history.html", context={})
+
+
+@router.get(
+    "/autonomous-decisions",
+    response_class=HTMLResponse,
+)
+async def autonomous_decisions_page(request: Request):
+    return templates.TemplateResponse(request=request, name="autonomous_decisions.html", context={})
+
+
+@router.get(
+    "/autonomous-runtime",
+    response_class=HTMLResponse,
+)
+async def autonomous_runtime_page(request: Request):
+    return templates.TemplateResponse(request=request, name="autonomous_runtime.html", context={})
+
+
+@router.get(
+    "/autonomous-reservations",
+    response_class=HTMLResponse,
+)
+async def autonomous_reservations_page(request: Request):
+    return templates.TemplateResponse(request=request, name="autonomous_reservations.html", context={})
+
+
+@router.get(
+    "/autonomous-authorizations",
+    response_class=HTMLResponse,
+)
+async def autonomous_authorizations_page(request: Request):
+    return templates.TemplateResponse(request=request, name="autonomous_authorizations.html", context={})
+
+
+@router.get(
+    "/audit",
+    response_class=HTMLResponse,
+)
+async def audit_page(request: Request):
+    return templates.TemplateResponse(request=request, name="audit.html", context={})

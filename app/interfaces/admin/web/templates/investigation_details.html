@@ -258,19 +258,9 @@
     content.hidden = true;
 
     try {
-      const response = await fetch(
-        "/api/investigations/" + encodeURIComponent(investigationId),
-        {headers: {"Accept": "application/json"}}
+      const item = await apiRequest(
+        "/api/investigations/" + encodeURIComponent(investigationId)
       );
-
-      if (response.status === 404) {
-        stateBox.textContent = "التحقيق غير موجود.";
-        return;
-      }
-
-      if (!response.ok) throw new Error("HTTP " + response.status);
-
-      const item = await response.json();
       renderSummary(item);
       renderRuntime(item.runtime);
 

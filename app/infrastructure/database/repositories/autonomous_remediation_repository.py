@@ -353,6 +353,15 @@ class AutonomousRemediationRepository:
         with self._session_factory() as session:
             return session.scalar(select(AutonomousAuthorizationModel).where(AutonomousAuthorizationModel.authorization_id == authorization_id))
 
+    def list_authorizations(self, *, limit: int = 100):
+        with self._session_factory() as session:
+            statement = (
+                select(AutonomousAuthorizationModel)
+                .order_by(AutonomousAuthorizationModel.issued_at.desc())
+                .limit(limit)
+            )
+            return list(session.scalars(statement).all())
+
     def reserve(self, *, idempotency_key: str, owner_token: str, policy_id: str, plan_id: str, plan_fingerprint: str, action_type: str, target: str, server_id: int, now: datetime, lease_seconds: int = 900):
         with self._session_factory() as session:
             # Lock the persisted plan when it exists.  This gives different
@@ -676,6 +685,19 @@ class AutonomousRemediationRepository:
                 .where(AutonomousPolicyAuditEventModel.policy_id == policy_id)
                 .order_by(AutonomousPolicyAuditEventModel.created_at.asc(), AutonomousPolicyAuditEventModel.id.asc())
             ).all())
+
+    def list_all_policy_audit_events(self, *, policy_id: str | None = None, limit: int = 100):
+        with self._session_factory() as session:
+            statement = (
+                select(AutonomousPolicyAuditEventModel)
+                .order_by(AutonomousPolicyAuditEventModel.created_at.desc())
+                .limit(limit)
+            )
+            if policy_id:
+                statement = statement.where(
+                    AutonomousPolicyAuditEventModel.policy_id == policy_id
+                )
+            return list(session.scalars(statement).all())
 
     def history(self, *, issue_fingerprint: str, action_type: str, target: str) -> AutonomousHistorySnapshot:
         with self._session_factory() as session:

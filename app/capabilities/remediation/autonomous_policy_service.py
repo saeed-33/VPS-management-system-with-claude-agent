@@ -35,32 +35,42 @@ class AutonomousPolicyService:
         policy = self._validate(values, policy_id=policy_id, version=current.version + 1)
         return self._repository.update_policy(policy_id, updates=self._model_values(policy), version=policy.version)
 
-    def enable(self, policy_id: str):
+    def enable(self, policy_id: str, *, actor: str = "admin"):
         current = self._require(policy_id)
         result = self._repository.resume_policy(policy_id)
-        self._audit_policy(result, "autonomous_policy_enabled", {"previous_status": current.status})
+        self._audit_policy(result, "autonomous_policy_enabled", {"previous_status": current.status}, actor=actor)
         return result
 
-    def disable(self, policy_id: str):
+    def disable(self, policy_id: str, *, actor: str = "admin"):
         current = self._require(policy_id)
-        return self._repository.update_policy(policy_id, updates={"status": AutonomousPolicyStatus.DISABLED.value}, version=current.version)
+        result = self._repository.update_policy(
+            policy_id, updates={"status": AutonomousPolicyStatus.DISABLED.value}, version=current.version
+        )
+        self._audit_policy(result, "autonomous_policy_disabled", {"previous_status": current.status}, actor=actor)
+        return result
 
-    def suspend(self, policy_id: str, *, reason: str):
+    def suspend(self, policy_id: str, *, reason: str, actor: str = "admin"):
         current = self._require(policy_id)
         result = self._repository.update_policy(policy_id, updates={"status": AutonomousPolicyStatus.SUSPENDED.value}, version=current.version)
-        self._audit_policy(result, "autonomous_policy_suspended", {"reason": reason, "operator": True})
+        self._audit_policy(result, "autonomous_policy_suspended", {"reason": reason, "operator": True}, actor=actor)
         return result
 
-    def resume(self, policy_id: str):
+    def resume(self, policy_id: str, *, actor: str = "admin"):
         current = self._require(policy_id)
         result = self._repository.resume_policy(policy_id)
-        self._audit_policy(result, "autonomous_policy_resumed", {"new_runtime_epoch": True})
+        self._audit_policy(result, "autonomous_policy_resumed", {"new_runtime_epoch": True}, actor=actor)
         return result
 
-    def _audit_policy(self, policy, event_type: str, payload: dict) -> None:
+    def _audit_policy(self, policy, event_type: str, payload: dict, *, actor: str = "admin") -> None:
         append = getattr(self._repository, "append_policy_audit_event", None)
         if append is not None:
-            append(policy_id=policy.policy_id, policy_version=policy.version, event_type=event_type, payload=payload)
+            append(
+                policy_id=policy.policy_id,
+                policy_version=policy.version,
+                event_type=event_type,
+                actor=actor,
+                payload=payload,
+            )
 
     def _require(self, policy_id: str):
         current = self._repository.get_policy(policy_id)

@@ -102,6 +102,7 @@ class ServerResponse(BaseModel):
         from_attributes=True
     )
     monitoring_profile_id: int | None
+    safety_designation: str = "unclassified"
 
 
 class SSHTestResponse(BaseModel):
