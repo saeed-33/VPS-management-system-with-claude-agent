@@ -8,7 +8,7 @@ Admin Web UI and Admin API. It is independent from Claude and MCP.
 Apply the additive migration, then create the first account interactively:
 
 ```bash
-uv run python -m tools.create_admin --username admin
+uv run --no-sync python -m tools.create_admin --username admin
 ```
 
 The command prompts twice for the password and never prints it or creates a
@@ -18,8 +18,10 @@ contain at least 12 characters. Use `--role viewer`, `--role operator`, or
 
 ## Runtime settings
 
-Configure `ADMIN_SESSION_SECRET` to a stable deployment secret. If it is
-empty, the service uses a process-local random secret, which invalidates all
+Configure `ADMIN_SESSION_SECRET` externally as a stable random secret of at
+least 32 characters. Production startup rejects an empty or weak secret and
+requires `ADMIN_SESSION_SECURE=true`. Only explicit `DEBUG=true` local
+development may use the process-local fallback, which invalidates all
 sessions on process restart. `ADMIN_SESSION_TTL_SECONDS` controls expiry,
 `ADMIN_SESSION_COOKIE_NAME` controls the cookie name, and
 `ADMIN_SESSION_SECURE=true` enables the Secure cookie flag for HTTPS.
@@ -69,7 +71,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

@@ -9,6 +9,9 @@ acceptance tests are opt-in and require external infrastructure. See
 - [`test-results.md`](test-results.md): actual current evidence.
 - [`requirements-test-traceability.md`](requirements-test-traceability.md):
   requirement-to-test map.
+- [`../final-acceptance/README.md`](../final-acceptance/README.md): canonical
+  record of final acceptance runs and their evidence; it is separate from this
+  general testing methodology.
 - Existing `TEST_CATALOG.md`, `TESTING_STRATEGY.md`, and
   `testing-and-evaluation.md` remain supporting references.
 

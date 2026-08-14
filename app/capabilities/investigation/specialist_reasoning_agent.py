@@ -20,6 +20,7 @@ from app.capabilities.investigation.specialist_reasoning_client import (
 from app.core.contracts.specialist_reasoning import (
     SpecialistReasoningOutput,
 )
+from app.capabilities.investigation.source_location import extract_source_locations
 
 
 SYSTEM_PROMPT = """You are a read-only infrastructure diagnostic specialist.
@@ -120,6 +121,33 @@ class SpecialistReasoningAgent:
                 "Objective.\n\n"
             )
             + context.rendered_context
+        )
+
+        evidence_ids = tuple(
+            dict.fromkeys(
+                item.evidence_id
+                for item in context.evidence
+            )
+        )
+        user_prompt += (
+            "\n\n## Evidence ID Allowlist\n"
+            "The only valid values for finding.evidence_ids, "
+            "hypothesis.supporting_evidence_ids, and "
+            "hypothesis.contradicting_evidence_ids are the exact opaque "
+            "Evidence IDs listed below. Copy the identifier token only. "
+            "Never copy an Evidence title, observation, excerpt, command, "
+            "status line, hostname, or any other raw text into an Evidence "
+            "ID field. If no listed ID supports a statement, return an empty "
+            "list.\n"
+            "Allowed Evidence IDs: "
+            + (
+                ", ".join(
+                    f"`{value}`"
+                    for value in evidence_ids
+                )
+                if evidence_ids
+                else "(none)"
+            )
         )
 
         if force_final_synthesis:
@@ -397,6 +425,45 @@ class SpecialistReasoningAgent:
         context: SpecialistContextSnapshot,
         dropped_specialist_recommendations: tuple[str, ...] = (),
     ) -> SpecialistResult:
+        evidence_by_id = {
+            item.evidence_id: item
+            for item in context.evidence
+        }
+
+        def finding_metadata(evidence_ids: tuple[str, ...]) -> dict:
+            locations = []
+            for evidence_id in evidence_ids:
+                evidence = evidence_by_id.get(evidence_id)
+                if evidence is None:
+                    continue
+                raw_locations = evidence.metadata.get("code_locations", [])
+                if raw_locations:
+                    for raw_location in raw_locations:
+                        location = dict(raw_location)
+                        location["evidence_ids"] = [evidence_id]
+                        locations.append(location)
+                elif evidence.excerpt:
+                    locations.extend(
+                        item.to_dict()
+                        for item in extract_source_locations(
+                            evidence.excerpt,
+                            evidence_ids=(evidence_id,),
+                        )
+                    )
+            unique = []
+            seen = set()
+            for location in locations:
+                key = (
+                    location.get("file_path"),
+                    location.get("line_number"),
+                    location.get("column_number"),
+                    tuple(location.get("evidence_ids", [])),
+                )
+                if key not in seen:
+                    seen.add(key)
+                    unique.append(dict(location))
+            return {"code_locations": unique} if unique else {}
+
         findings = tuple(
             InvestigationFinding(
                 finding_id=(
@@ -409,6 +476,7 @@ class SpecialistReasoningAgent:
                 knowledge_source_ids=tuple(
                     item.knowledge_source_ids
                 ),
+                metadata=finding_metadata(tuple(item.evidence_ids)),
             )
             for index, item in enumerate(
                 output.findings,

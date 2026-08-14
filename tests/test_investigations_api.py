@@ -81,7 +81,18 @@ def detail():
             ),
             evidence=({"evidence_id": "e1"},),
             correlated_claims=(
-                {"claim_id": "c1", "certainty": "unknown"},
+                {
+                    "claim_id": "c1",
+                    "certainty": "unknown",
+                    "metadata": {
+                        "code_locations": [{
+                            "file_path": "/srv/app/main.py",
+                            "line_number": 42,
+                            "reason": "ValueError: invalid payload",
+                            "evidence_ids": ["e1"],
+                        }],
+                    },
+                },
             ),
             conflicts=({"conflict_id": "conflict-1"},),
             final_diagnosis={"summary": "One conflict."},
@@ -155,6 +166,9 @@ def test_get_investigation_includes_runtime():
         == "One conflict."
     )
     assert payload["runtime"]["narrative"]["used_fallback"] is False
+    location = payload["runtime"]["correlated_claims"][0]["metadata"]["code_locations"][0]
+    assert location["file_path"] == "/srv/app/main.py"
+    assert location["evidence_ids"] == ["e1"]
 
 
 def test_get_missing_investigation_returns_404():

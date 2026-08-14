@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant O as Operator
+    participant UI as Admin UI
+    participant P as Policy
+    participant S as Sandbox
+    participant SSH as Named SSH
+    participant DB as Audit DB
+    O->>UI: review plan
+    UI->>P: validate policy and target
+    P->>S: validate named operation
+    S->>SSH: execute after approval
+    SSH->>DB: persist result
+    DB-->>UI: verification and audit

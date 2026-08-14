@@ -1,0 +1,16 @@
+flowchart LR
+    A[Admin]
+    subgraph S[AI VPS Management System]
+      SV((Manage servers))
+      SP((Manage specialists))
+      P((Manage policies))
+      AU((Review authorizations))
+      L((Recover lease))
+      T((Audit operations))
+    end
+    A --> SV
+    A --> SP
+    A --> P
+    A --> AU
+    A --> L
+    A --> T

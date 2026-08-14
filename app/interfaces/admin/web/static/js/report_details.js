@@ -491,6 +491,11 @@ function renderReportAnalysis(analysis) {
                                         issue.severity
                                     )}
                                 </span>
+                                <span class="badge badge-unknown">
+                                    ${escapeHtml(
+                                        issue.classification || "unclassified"
+                                    )}
+                                </span>
                             </header>
 
                             <p>

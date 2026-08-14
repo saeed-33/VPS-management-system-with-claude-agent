@@ -20,7 +20,9 @@ Phase 5: COMPLETE / CLOSED
 Phase 5 readiness: 13/13 PASS
 Phase 6: IMPLEMENTED / EVIDENCE RECONCILIATION REQUIRED
 Phase 6 readiness: CONFLICTING REPOSITORY RECORDS
-Phase 7: IMPLEMENTED / LIVE ACCEPTANCE RECORD NOT PRESENT
+Phase 7: REAL ACCEPTANCE PASS
+Specialist final E2E: PARTIAL / ACCEPTED NON-BLOCKING LIMITATION
+Deployment security: PASS / PROJECT CLOSURE BLOCKING = NO
 automatic_remediation_allowed: false
 readiness: DETERMINISTIC TESTS PASS; LIVE GATES NOT CLOSED
 ```
@@ -61,8 +63,9 @@ readiness: DETERMINISTIC TESTS PASS; LIVE GATES NOT CLOSED
 - Phase 7 autonomous remediation policies are implemented with additive
   persistence, deterministic evaluation, single-use authorization, leased
   reservations, rate/circuit controls, Admin observability, and bounded MCP
-  attempt support. They remain globally disabled by default. No standalone
-  live acceptance result artifact is present in this repository.
+  attempt support. They remain globally disabled by default. The final real
+  acceptance record is PASS; the Specialist final E2E limitation is accepted
+  and non-blocking.
 
 
 ## C.14.12 readiness acceptance
@@ -114,9 +117,9 @@ audit events, and restored the dedicated service to its original `inactive`
 state. Automatic remediation remains disabled.
 
 Phase 6 Claude-Native Isolated Sandbox Validation is implemented, but its live
-evidence must be reconciled before closure. Phase 7 is implemented, but its
-live acceptance evidence is absent from the repository. See
-`docs/roadmap/deferred-requirements.md` for the explicit evidence gaps.
+evidence must be reconciled before closure. Phase 7 real acceptance is PASS;
+Specialist final E2E is partial with an accepted non-blocking limitation. See
+`docs/roadmap/deferred-requirements.md` for the remaining evidence gaps.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
@@ -130,7 +133,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant E as Evaluator
+    participant A as Authorization
+    participant R as Reservation
+    participant W as Worker
+    participant V as VPS
+    participant F as Finalize
+    E->>A: issue single-use authorization
+    A->>R: reserve briefly
+    R->>W: grant owner token
+    W->>V: execute named operation
+    V-->>F: verification result
+    F->>R: conditional finalize

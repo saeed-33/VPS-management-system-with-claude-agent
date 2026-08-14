@@ -1,0 +1,15 @@
+flowchart TD
+  Start([بدء]) --> Read[قراءة التشخيص والأدلة]
+  Read --> Plan[إنشاء خطة وبصمة]
+  Plan --> Validate{هل اجتازت السياسة والتحقق؟}
+  Validate -- لا --> Reject[رفض وتسجيل السبب]
+  Validate -- نعم --> Approve{هل توجد موافقة؟}
+  Approve -- لا --> Wait[انتظار موافقة المشغل]
+  Wait --> Approve
+  Approve -- نعم --> Execute[تنفيذ مسمى خارج معاملة قاعدة البيانات]
+  Execute --> Verify{هل نجح التحقق؟}
+  Verify -- نعم --> Audit[حفظ النتيجة وسجل التدقيق]
+  Verify -- لا --> Rollback[استعادة آمنة وتسجيل الفشل]
+  Audit --> End([نهاية])
+  Rollback --> End
+  Reject --> End

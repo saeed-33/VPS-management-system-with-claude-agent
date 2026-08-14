@@ -6,6 +6,14 @@ Testing must establish implementation, safety, persistence, and runtime truth.
 `pytest` is necessary but is not sufficient for Claude/Ollama/MCP or
 Evidence/policy changes.
 
+For WSL, use the Linux-filesystem project environment before running these
+commands:
+
+```bash
+export UV_PROJECT_ENVIRONMENT="$HOME/.venvs/chat_system"
+uv sync
+```
+
 ## Accepted current baseline
 
 ```text
@@ -24,7 +32,7 @@ runtime tests are opt-in and require external infrastructure.
 ### Unit and contract tests
 
 ```powershell
-uv run python -m pytest
+uv run --no-sync python -m pytest
 ```
 
 These cover contracts, configuration, routing, Specialists, retrieval,
@@ -34,7 +42,7 @@ Admin/API wiring, runtime jobs, and observability.
 ### Architecture tests
 
 ```powershell
-uv run python -m pytest tests/test_architecture_dependencies.py -v
+uv run --no-sync python -m pytest tests/test_architecture_dependencies.py -v
 ```
 
 These verify dependency direction and absence of the removed application
@@ -43,7 +51,7 @@ packages.
 ### Controlled safety evaluation
 
 ```powershell
-uv run python tools/acceptance/run_safety_runtime_evaluation.py
+uv run --no-sync python tools/acceptance/run_safety_runtime_evaluation.py
 ```
 
 This runs real routing, policy, registry, parser, retry, timeout, and fail-closed
@@ -53,7 +61,7 @@ provider resilience, and policy safety.
 ### Persisted runtime evaluation
 
 ```powershell
-uv run python tools/acceptance/run_persisted_runtime_evaluation.py --limit 100
+uv run --no-sync python tools/acceptance/run_persisted_runtime_evaluation.py --limit 100
 ```
 
 This measures persisted Specialist completion, Evidence grounding, budgets,
@@ -62,7 +70,7 @@ conflict preservation, and final diagnosis grounding from real snapshots.
 ### Aggregate readiness evaluation
 
 ```powershell
-uv run python tools/acceptance/run_production_readiness_evaluation.py \
+uv run --no-sync python tools/acceptance/run_production_readiness_evaluation.py \
   --server-id <server_id> --limit 100 \
   --output artifacts/evaluation/c14_12_readiness.json
 ```
@@ -78,7 +86,7 @@ $env:LLM_PROVIDER="ollama"
 $env:CLAUDE_RUNTIME_ENABLED="true"
 $env:AI_VPS_REAL_RUNTIME_SERVER_ID="<server_id>"
 $env:AI_VPS_RUN_REAL_RUNTIME_TESTS="1"
-uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
+uv run --no-sync python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
 ```
 
 This requires native Claude CLI, Ollama and the configured model, PostgreSQL,
@@ -112,7 +120,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

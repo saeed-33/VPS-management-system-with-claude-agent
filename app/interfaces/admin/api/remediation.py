@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+from datetime import datetime
+from enum import Enum
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.capabilities.remediation.service import RemediationService
@@ -22,13 +27,84 @@ def _actor(request: Request, fallback: str | None) -> str | None:
     return principal.username if principal is not None else fallback
 
 
+def _json_value(value: Any) -> Any:
+    """Serialize JSON-column values without traversing ORM or framework objects."""
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, Mapping):
+        return {str(key): _json_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_value(item) for item in value]
+    return str(value)
+
+
+def _serialize_fields(value: Any, names: tuple[str, ...]) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    return {name: _json_value(getattr(value, name, None)) for name in names}
+
+
+_PLAN_FIELDS = (
+    "id", "plan_id", "investigation_id", "server_id", "title", "problem_summary",
+    "proposed_actions", "diagnosis_claim_ids", "evidence_ids", "risk_level",
+    "plan_version", "plan_fingerprint", "rollback_plan", "status", "sandbox_result_id",
+    "approval_requested_at", "approved_by", "approved_at", "denial_reason",
+    "approval_status", "approval_fingerprint", "approval_comment", "approval_scope",
+    "approval_expires_at", "execution_status", "verification_status", "rollback_status",
+    "runtime_session_id", "agent_job_id", "plan_metadata", "created_at", "updated_at",
+)
+_APPROVAL_FIELDS = (
+    "id", "approval_id", "plan_id", "plan_fingerprint", "status", "approver", "comment",
+    "scope", "expires_at", "created_at", "decided_at",
+)
+_EXECUTION_FIELDS = (
+    "id", "execution_id", "plan_id", "action_id", "server_id", "status", "actor",
+    "runtime_session_id", "agent_job_id", "before_evidence_ids", "after_evidence_ids",
+    "exit_status", "created_at", "started_at", "completed_at",
+)
+_SANDBOX_VALIDATION_FIELDS = (
+    "id", "validation_id", "plan_id", "plan_fingerprint", "server_id", "server_name",
+    "service", "action_type", "action_parameters", "expected_state", "observed_state",
+    "before_evidence_ids", "after_evidence_ids", "verification_status", "status",
+    "started_at", "finished_at", "failure_reason", "validation_metadata", "created_at",
+)
+_AUDIT_FIELDS = (
+    "id", "event_id", "plan_id", "event_type", "actor", "server_id", "runtime_session_id",
+    "agent_job_id", "payload", "created_at",
+)
+
+
+def _serialize_plan(value: Any) -> dict[str, Any] | None:
+    return _serialize_fields(value, _PLAN_FIELDS)
+
+
+def _serialize_approval(value: Any) -> dict[str, Any] | None:
+    return _serialize_fields(value, _APPROVAL_FIELDS)
+
+
+def _serialize_execution(value: Any) -> dict[str, Any] | None:
+    return _serialize_fields(value, _EXECUTION_FIELDS)
+
+
+def _serialize_sandbox_validation(value: Any) -> dict[str, Any] | None:
+    return _serialize_fields(value, _SANDBOX_VALIDATION_FIELDS)
+
+
+def _serialize_audit(value: Any) -> dict[str, Any] | None:
+    return _serialize_fields(value, _AUDIT_FIELDS)
+
+
 @router.get("")
 def list_remediation_plans(
     limit: int = Query(default=100, ge=1, le=500),
     status: str | None = Query(default=None),
     service: RemediationService = Depends(get_remediation_service),
 ):
-    return serialize_value(service.list_plans(limit=limit, status=status))
+    return [_serialize_plan(plan) for plan in service.list_plans(limit=limit, status=status)]
 
 
 @router.get("/{plan_id}")
@@ -40,10 +116,10 @@ def get_remediation_plan(
     if plan is None:
         raise HTTPException(status_code=404, detail="Remediation plan not found.")
     return {
-        "plan": serialize_value(plan),
-        "approval": serialize_value(service.get_approval(plan_id=plan_id)),
-        "execution": serialize_value(service.get_latest_execution(plan_id)),
-        "sandbox_validation": serialize_value(service.get_sandbox_validation(plan_id=plan_id)),
+        "plan": _serialize_plan(plan),
+        "approval": _serialize_approval(service.get_approval(plan_id=plan_id)),
+        "execution": _serialize_execution(service.get_latest_execution(plan_id)),
+        "sandbox_validation": _serialize_sandbox_validation(service.get_sandbox_validation(plan_id=plan_id)),
     }
 
 
@@ -54,7 +130,7 @@ def get_remediation_audit(
 ):
     if service.get_plan(plan_id) is None:
         raise HTTPException(status_code=404, detail="Remediation plan not found.")
-    return serialize_value(service.list_audit_events(plan_id))
+    return [_serialize_audit(event) for event in service.list_audit_events(plan_id)]
 
 
 @router.post("/{plan_id}/approval")

@@ -35,3 +35,9 @@ def test_c14_11_native_prompt_requires_real_mcp_execution():
     assert "Project tool results" in prompt
     assert "persisted records are authoritative" in prompt
     assert "Never use raw SSH" in prompt
+    assert "should_investigate=true" in prompt
+    assert "Agent(specialist-worker)" in prompt
+    assert "investigation_id" in prompt
+    assert "specialist_slug" in prompt
+    assert "both required fields, description and prompt" in prompt
+    assert "Do not stop after investigation creation" in prompt

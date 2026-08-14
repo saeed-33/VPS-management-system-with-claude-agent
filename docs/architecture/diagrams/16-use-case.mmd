@@ -1,0 +1,11 @@
+flowchart LR
+  Operator[المشغل] --> Monitor((مراقبة الخادم))
+  Operator --> Investigate((طلب تحقيق))
+  Operator --> Review((مراجعة التقرير والأدلة))
+  Admin[المدير] --> Approve((موافقة على الخطة))
+  Admin --> Audit((مراجعة التدقيق))
+  System[نظام إدارة VPS] --> Monitor
+  System --> Investigate
+  System --> Review
+  System --> Approve
+  System --> Audit

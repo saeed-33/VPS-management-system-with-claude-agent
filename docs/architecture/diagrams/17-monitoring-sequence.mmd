@@ -1,0 +1,13 @@
+sequenceDiagram
+  actor Operator as المشغل
+  participant UI as لوحة الإدارة
+  participant Monitoring as خدمة المراقبة
+  participant Analysis as خدمة التحليل
+  participant DB as قاعدة البيانات
+  Operator->>UI: اختيار الخادم وطلب المراقبة
+  UI->>Monitoring: تشغيل القراءة المحدودة
+  Monitoring->>DB: حفظ تقرير المراقبة
+  DB-->>Analysis: التقرير والسياق السابق
+  Analysis->>Monitoring: طلب أدلة إضافية عند الحاجة
+  Monitoring->>DB: حفظ التشخيص والأدلة
+  DB-->>UI: عرض النتيجة والمصادر

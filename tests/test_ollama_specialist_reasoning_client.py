@@ -2,6 +2,7 @@ import asyncio
 import json
 
 import httpx
+import pytest
 
 from app.capabilities.investigation.specialist_reasoning_client import (
     OllamaSpecialistReasoningClient,
@@ -215,3 +216,90 @@ def test_final_synthesis_enables_provider_compact_mode():
 
     asyncio.run(client.close())
 
+
+def test_ollama_prompt_rejects_raw_evidence_text_and_requires_exact_ids():
+    calls = []
+
+    async def handler(request):
+        body = json.loads(request.content)
+        calls.append(body)
+        return make_response(
+            200,
+            {
+                "done_reason": "stop",
+                "message": {
+                    "content": json.dumps(VALID_OUTPUT),
+                },
+            },
+            request,
+        )
+
+    client = OllamaSpecialistReasoningClient(
+        base_url="http://ollama.test",
+        model="test-model",
+        timeout_seconds=10,
+    )
+    client._client = httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+        base_url="http://ollama.test",
+    )
+
+    asyncio.run(
+        client.reason(
+            system_prompt="system",
+            user_prompt=(
+                "Current Evidence\n"
+                "evidence_id: evidence-A\n"
+                "excerpt: Active: inactive (dead)\n"
+                "Evidence ID Allowlist: evidence-A"
+            ),
+        )
+    )
+
+    prompt = calls[0]["messages"][1]["content"]
+    assert "exact opaque ID token" in prompt
+    assert "never put observations" in prompt
+    assert "never invent or paraphrase one" in prompt
+
+    asyncio.run(client.close())
+
+
+def test_ollama_invalid_structured_result_fails_closed_after_retry():
+    calls = []
+
+    async def handler(request):
+        calls.append(json.loads(request.content))
+        return make_response(
+            200,
+            {
+                "done_reason": "stop",
+                "message": {
+                    "content": '{"summary":"not complete"',
+                },
+            },
+            request,
+        )
+
+    client = OllamaSpecialistReasoningClient(
+        base_url="http://ollama.test",
+        model="test-model",
+        timeout_seconds=10,
+    )
+    client._client = httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+        base_url="http://ollama.test",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="invalid specialist structured output",
+    ):
+        asyncio.run(
+            client.reason(
+                system_prompt="system",
+                user_prompt="context",
+            )
+        )
+
+    assert len(calls) == 2
+    asyncio.run(client.close())

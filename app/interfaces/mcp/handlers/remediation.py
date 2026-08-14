@@ -119,6 +119,7 @@ class RemediationToolsMixin:
                 ),
                 plan_id=arguments.get("plan_id"),
                 server_id=arguments.get("server_id"),
+                error_classification=arguments.get("error_classification"),
             )
         )
 

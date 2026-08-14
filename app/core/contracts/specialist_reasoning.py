@@ -33,7 +33,13 @@ class SpecialistFindingOutput(BaseModel):
     title: str = Field(min_length=1, max_length=300)
     description: str = Field(min_length=1, max_length=4000)
     confidence: float = Field(ge=0.0, le=1.0)
-    evidence_ids: list[str] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Exact opaque Evidence IDs copied from the supplied Specialist "
+            "Context only; never observations, excerpts, commands, or log text."
+        ),
+    )
     knowledge_source_ids: list[str] = Field(default_factory=list)
 
 
@@ -42,8 +48,20 @@ class SpecialistHypothesisOutput(BaseModel):
 
     statement: str = Field(min_length=1, max_length=3000)
     confidence: float = Field(ge=0.0, le=1.0)
-    supporting_evidence_ids: list[str] = Field(default_factory=list)
-    contradicting_evidence_ids: list[str] = Field(default_factory=list)
+    supporting_evidence_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Exact opaque Evidence IDs copied from the supplied Specialist "
+            "Context only; never observations, excerpts, commands, or log text."
+        ),
+    )
+    contradicting_evidence_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Exact opaque Evidence IDs copied from the supplied Specialist "
+            "Context only; never observations, excerpts, commands, or log text."
+        ),
+    )
 
 
 class SpecialistDiagnosticToolRequestOutput(BaseModel):

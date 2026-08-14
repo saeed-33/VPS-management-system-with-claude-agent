@@ -18,6 +18,7 @@ it got there.
 | Workflows | [`workflows/README.md`](workflows/README.md) | Operational lifecycle flows and fail-closed branches. |
 | Testing strategy | [`testing/README.md`](testing/README.md) | Test layers, environments, and methods. |
 | Test results | [`testing/test-results.md`](testing/test-results.md) | Latest verifiable non-real results and infrastructure checks. |
+| Final acceptance | [`final-acceptance/README.md`](final-acceptance/README.md) | Canonical record of final acceptance runs, evidence, failures, and blockers. |
 | Implementation history | [`process/implementation-history.md`](process/implementation-history.md) | Phase/milestone history kept separate from architecture. |
 | Future work | [`roadmap/future-work.md`](roadmap/future-work.md) | Deferred requirements and post-v1 work. |
 | Technical report | [`report/README.md`](report/README.md) | Arabic DOCX scope, provenance, and validation. |
@@ -44,7 +45,7 @@ As verified on 2026-08-14 in the stable WSL environment:
 
 ```text
 Python: 3.14.7
-Non-real suite: 586 passed, 1 warning
+Non-real suite: 620 passed, 1 warning
 Database: 33/33 tables, pgvector OK, 3/3 custom RAG indexes
 MCP catalog: 25 tools
 Routes: 99 total / 73 OpenAPI / 26 web-only
@@ -54,9 +55,14 @@ Automatic remediation: false by default
 The repository contains a contradiction for Phase 6 live acceptance: the
 machine-readable readiness artifact says `PASS`, while the Phase 6 final
 report and default real test path say `BLOCKED_BY_SANDBOX_RUNTIME`. Phase 7
-implementation is present, but no standalone live acceptance result is stored
-in the repository. This is explicitly tracked in
+real acceptance is recorded as PASS; Specialist final E2E is partial with an
+accepted non-blocking supervisory limitation. This is explicitly tracked in
 [`roadmap/deferred-requirements.md`](roadmap/deferred-requirements.md).
+
+Final acceptance evidence is maintained separately in
+[`final-acceptance/README.md`](final-acceptance/README.md); it records actual
+final project acceptance steps and does not replace the general testing
+methodology in `docs/testing/`.
 
 ## Obsolete or historical claims
 
@@ -77,7 +83,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

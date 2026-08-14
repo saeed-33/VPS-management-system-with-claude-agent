@@ -3,10 +3,12 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 
 import pytest
+from app.core.contracts.servers import UpdateServerDTO
 
 
 RUN_REAL_RUNTIME = (
@@ -26,28 +28,111 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+_WINDOWS_ABSOLUTE_PATH = re.compile(
+    r"^(?P<drive>[A-Za-z]):[\\/](?P<rest>.+)$"
+)
 
-def _restore_operational_database_env() -> None:
+
+def _resolve_acceptance_runtime_path(value: str) -> str:
+    raw = str(value).strip()
+    direct = Path(raw)
+    if direct.is_file():
+        return str(direct)
+
+    if os.getenv("WSL_DISTRO_NAME", "").strip():
+        match = _WINDOWS_ABSOLUTE_PATH.match(raw)
+        if match:
+            translated = (
+                Path("/mnt")
+                / match.group("drive").lower()
+                / match.group("rest").replace("\\", "/")
+            )
+            if translated.is_file():
+                return str(translated)
+
+    return raw
+
+
+class _AcceptanceServerRepository:
+    """Add only WSL path normalization around the real repository."""
+
+    def __init__(self, delegate):
+        self._delegate = delegate
+
+    def get_by_id(self, server_id):
+        server = self._delegate.get_by_id(server_id)
+        if server is not None and server.private_key_path:
+            server.private_key_path = _resolve_acceptance_runtime_path(
+                server.private_key_path
+            )
+        return server
+
+    def __getattr__(self, name):
+        return getattr(self._delegate, name)
+
+
+def _install_acceptance_ssh_path_normalization(container) -> None:
+    repository = _AcceptanceServerRepository(
+        container.server_repository
+    )
+    container.monitoring_service._server_repository = repository
+    if container.evidence_collection_service is not None:
+        container.evidence_collection_service._server_repository = repository
+
+
+def _normalize_persisted_server_key_path(
+    repository,
+    *,
+    server_id: int,
+):
+    server = repository.get_by_id(server_id)
+    if server is None or not server.private_key_path:
+        return lambda: None
+
+    original = server.private_key_path
+    normalized = _resolve_acceptance_runtime_path(original)
+    if normalized == original:
+        return lambda: None
+
+    repository.update(
+        server_id,
+        UpdateServerDTO(private_key_path=normalized),
+    )
+
+    def restore() -> None:
+        repository.update(
+            server_id,
+            UpdateServerDTO(private_key_path=original),
+        )
+
+    return restore
+
+
+
+def _restore_operational_database_env(
+    *,
+    env_path: Path | None = None,
+) -> None:
     # Real-runtime acceptance must use the application's operational DB.
-    # Normal pytest configuration may inject isolated POSTGRES_* test
-    # values into os.environ. Environment variables override Pydantic's
-    # .env source, so restore only PostgreSQL settings from the project
-    # .env before importing app.composition.
+    # Explicit process values are authoritative. The project .env is only a
+    # fallback for values absent from the process environment. This function
+    # runs before importing app.composition so cached settings see the final
+    # effective environment.
     from dotenv import dotenv_values
 
     project_root = (
         Path(__file__).resolve().parents[2]
     )
-    env_path = project_root / ".env"
+    resolved_env_path = env_path or (project_root / ".env")
 
-    if not env_path.is_file():
+    if not resolved_env_path.is_file():
         pytest.fail(
             "Real-runtime acceptance requires the project .env file "
-            f"for operational PostgreSQL settings: {env_path}"
+            f"for operational PostgreSQL settings: {resolved_env_path}"
         )
 
     values = dotenv_values(
-        env_path
+        resolved_env_path
     )
 
     keys = (
@@ -73,9 +158,9 @@ def _restore_operational_database_env() -> None:
         )
 
     for key in keys:
-        os.environ[key] = str(
-            values[key]
-        )
+        if str(os.environ.get(key) or "").strip():
+            continue
+        os.environ[key] = str(values[key])
 
 def _server_id() -> int:
     raw = os.getenv(
@@ -104,7 +189,9 @@ def _server_id() -> int:
     return value
 
 
-def test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence():
+def test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence(
+    request: pytest.FixtureRequest,
+):
     # Imports are intentionally inside the opt-in test so the normal
     # unit-test suite does not bootstrap the operational runtime.
     _restore_operational_database_env()
@@ -147,7 +234,15 @@ def test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence():
     )
     from app.core.config import settings
 
+    _install_acceptance_ssh_path_normalization(container)
+
     server_id = _server_id()
+    request.addfinalizer(
+        _normalize_persisted_server_key_path(
+            container.server_repository,
+            server_id=server_id,
+        )
+    )
 
     if not settings.claude_runtime_enabled:
         pytest.fail(

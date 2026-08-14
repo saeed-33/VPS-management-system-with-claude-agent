@@ -35,6 +35,7 @@ from app.core.contracts.remediation import (
 )
 from app.core.contracts.autonomous_remediation import AutonomousAuthorizationStatus
 from app.core.contracts.autonomous_remediation import AutonomousAuthorization
+from app.core.contracts.analysis import ErrorClassification
 from app.core.policies.remediation_policy import RemediationPolicyEngine
 from app.core.policies.remediation_risk import RemediationRiskClassifier
 from app.core.policies.remediation_tools import (
@@ -91,7 +92,8 @@ class RemediationService:
     def create_plan(self, *, investigation_id: str, title: str, problem_summary: str,
                     proposed_actions: list[dict], diagnosis_claim_ids: list[str], evidence_ids: list[str],
                     risk_level: str = RemediationRisk.MEDIUM.value, rollback_plan: str | None = None,
-                    plan_id: str | None = None, server_id: int | None = None):
+                    plan_id: str | None = None, server_id: int | None = None,
+                    error_classification: str | None = None):
         self._validate_links(diagnosis_claim_ids=diagnosis_claim_ids, evidence_ids=evidence_ids)
         self._validate_actions(proposed_actions)
         action_models = [RemediationAction.from_dict(action) for action in proposed_actions]
@@ -108,6 +110,10 @@ class RemediationService:
             "automatic_remediation_allowed": self._automatic_remediation_allowed,
             "registered_actions": registered,
         }
+        if error_classification is not None:
+            metadata["error_classification"] = ErrorClassification(
+                error_classification
+            ).value
         if self._issue_fingerprint_service is not None:
             trusted_issue_fingerprint = self._issue_fingerprint_service.derive(investigation_id)
             if trusted_issue_fingerprint:

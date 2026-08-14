@@ -21,8 +21,15 @@ class AnalysisSeverity(StrEnum):
     CRITICAL = "critical"
 
 
+class ErrorClassification(StrEnum):
+    NORMAL = "normal"
+    DANGEROUS = "dangerous"
+    SENSITIVE = "sensitive"
+
+
 class AnalysisIssue(BaseModel):
     severity: AnalysisSeverity
+    classification: ErrorClassification | None = None
 
     title: str = Field(
         min_length=1,

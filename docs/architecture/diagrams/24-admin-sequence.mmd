@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant A as Admin
+    participant B as Browser
+    participant S as Server Session
+    participant P as Policy API
+    participant DB as Database
+    A->>B: submit decision
+    B->>S: check session
+    S->>P: check role and CSRF
+    P->>DB: save decision and audit
+    DB-->>P: result
+    P-->>B: structured response

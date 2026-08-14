@@ -1,7 +1,7 @@
 # Autonomous Remediation Operations
 
 1. Apply `app/infrastructure/database/migrations/step_7_1_autonomous_remediation.sql`.
-2. Run `uv run python tools/bootstrap_database.py --verify-only` and require
+2. Run `uv run --no-sync python tools/bootstrap_database.py --verify-only` and require
    `Tables: 33/33` and `Schema verification: PASS` after the additive Admin
    authentication migration has been applied.
 3. Keep `AUTOMATIC_REMEDIATION_ALLOWED=false` until a named low-risk policy,
@@ -35,7 +35,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

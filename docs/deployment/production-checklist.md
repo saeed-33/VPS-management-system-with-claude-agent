@@ -2,7 +2,8 @@
 
 <!-- DOC-STATUS: CURRENT -->
 
-This checklist applies to the current Phase 4 system, which is approved only for supervised diagnostic operations.
+This checklist applies to the current supervised and explicitly policy-gated
+remediation system. Automatic remediation remains disabled by default.
 
 ## Required state
 
@@ -11,6 +12,25 @@ Production Readiness Gate = PASS
 readiness = ready_for_supervised_operations
 automatic_remediation_allowed = false
 ```
+
+## Deployment security configuration
+
+- `DEBUG=false` in production; local `DEBUG=true` is explicit development only.
+- `ADMIN_SESSION_SECRET` is supplied externally, stable across restarts, and
+  at least 32 characters; it is never committed, logged, or shown in the UI.
+- `ADMIN_SESSION_SECURE=true` is set when served through HTTPS.
+- Internet traffic terminates at an HTTPS reverse proxy, which forwards only
+  to the internal FastAPI listener (`127.0.0.1:8000` or an approved private
+  interface). Do not expose direct Uvicorn without firewall/proxy controls.
+- PostgreSQL is private/internal only; database credentials are external
+  configuration and the application user has only required database access.
+- Ollama listens on localhost/private network only and is not Internet-facing.
+- MCP is internal/project-scoped and remains a bounded 25-tool surface.
+- SSH private keys and `known_hosts` are provisioned outside the repository;
+  host-key verification remains enabled.
+- Automatic remediation is false until an operator explicitly enables a
+  reviewed policy; backups, log permissions, and credential rotation are
+  verified operationally.
 
 ## Application
 
@@ -67,11 +87,10 @@ Production Readiness Gate: PASS
 
 ## Operational restrictions
 
-The Phase 4 system is read-only diagnostic automation.
-
-Do not enable or manually wire in write-capable actions such as restart, kill, package changes, configuration writes, firewall changes, or reboot.
-
-Such capabilities belong to Phase 5 supervised remediation with separate approval and rollback design.
+Do not enable or manually wire in unregistered write-capable actions such as
+restart, kill, package changes, configuration writes, firewall changes, or
+reboot. Phase 5/6/7 write paths remain bounded by registration, approval,
+sandbox, rollback, Evidence, and policy gates.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **OPERATIONS**

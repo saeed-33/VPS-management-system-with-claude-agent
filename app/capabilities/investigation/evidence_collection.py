@@ -6,6 +6,7 @@ from time import perf_counter
 from typing import Protocol
 
 from app.core.contracts.investigation import EvidenceKind, EvidenceReference
+from app.capabilities.investigation.source_location import extract_source_locations
 from app.core.policies.diagnostic_policy import DiagnosticPolicyResult
 from app.infrastructure.ssh import SSHError
 from app.infrastructure.ssh.client import SSHClient, SSHConnectionConfig
@@ -204,6 +205,32 @@ class EvidenceCollectionService:
             limit=output_limit_chars,
         )
 
+        locations = extract_source_locations(
+            excerpt,
+            evidence_ids=(request.evidence_id,),
+        )
+        metadata = {
+            "server_id": request.server_id,
+            "specialist_slug": policy.specialist_slug,
+            "tool_id": policy.tool_id,
+            "command_text": command_text,
+            "success": outcome.success,
+            "exit_status": outcome.exit_status,
+            "error_message": outcome.error_message,
+            "started_at": outcome.started_at.isoformat(),
+            "finished_at": outcome.finished_at.isoformat(),
+            "duration_ms": outcome.duration_ms,
+            "timeout_seconds": timeout_seconds,
+            "output_limit_chars": output_limit_chars,
+            "stdout_chars": len(outcome.stdout),
+            "stderr_chars": len(outcome.stderr),
+            "excerpt_truncated": truncated,
+            "risk": policy.metadata.get("risk"),
+            "requires_sudo": policy.metadata.get("requires_sudo"),
+        }
+        if locations:
+            metadata["code_locations"] = [item.to_dict() for item in locations]
+
         return EvidenceReference(
             evidence_id=request.evidence_id,
             kind=EvidenceKind.COMMAND_RESULT,
@@ -213,27 +240,7 @@ class EvidenceCollectionService:
             ),
             source_id=request.server_id,
             excerpt=excerpt,
-            metadata={
-                "server_id": request.server_id,
-                "specialist_slug": policy.specialist_slug,
-                "tool_id": policy.tool_id,
-                "command_text": command_text,
-                "success": outcome.success,
-                "exit_status": outcome.exit_status,
-                "error_message": outcome.error_message,
-                "started_at": outcome.started_at.isoformat(),
-                "finished_at": outcome.finished_at.isoformat(),
-                "duration_ms": outcome.duration_ms,
-                "timeout_seconds": timeout_seconds,
-                "output_limit_chars": output_limit_chars,
-                "stdout_chars": len(outcome.stdout),
-                "stderr_chars": len(outcome.stderr),
-                "excerpt_truncated": truncated,
-                "risk": policy.metadata.get("risk"),
-                "requires_sudo": policy.metadata.get(
-                    "requires_sudo"
-                ),
-            },
+            metadata=metadata,
         )
 
     @staticmethod

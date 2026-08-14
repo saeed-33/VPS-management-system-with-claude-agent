@@ -59,6 +59,7 @@ class AutonomousExecutionService:
             plan_ready=plan.status in {RemediationPlanStatus.SANDBOX_PASSED.value, RemediationPlanStatus.APPROVED.value},
             ambiguous_policy_match=ambiguous_policy_match,
             sandbox_evidence_valid=sandbox_evidence_valid,
+            error_classification=(plan.plan_metadata or {}).get("error_classification"),
         )
         decision = self._evaluator.evaluate(context)
         self._repository.create_decision(decision, history=self._history_dict(history), metadata={"policy_status": policy.status.value if policy else None})

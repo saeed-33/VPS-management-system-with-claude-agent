@@ -9,7 +9,7 @@ import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import StrEnum
-from urllib.parse import quote, urlsplit
+from urllib.parse import parse_qs, quote, urlsplit
 
 from fastapi import Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -565,8 +565,16 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
                 )
             return Response("Forbidden", status_code=403, media_type="text/plain")
 
+        supplied_csrf = request.headers.get("x-csrf-token") or request.query_params.get("csrf_token")
+        if supplied_csrf is None and request.headers.get("content-type", "").split(";", 1)[0].strip().lower() == "application/x-www-form-urlencoded":
+            try:
+                form_values = parse_qs((await request.body()).decode("utf-8"), keep_blank_values=True)
+                supplied_csrf = form_values.get("csrf_token", [None])[0]
+            except UnicodeDecodeError:
+                supplied_csrf = None
+
         if request.method in {"POST", "PUT", "PATCH", "DELETE"} and not self._auth_service.csrf_valid(
-            raw_token, request.headers.get("x-csrf-token") or request.query_params.get("csrf_token")
+            raw_token, supplied_csrf
         ):
             return JSONResponse({"detail": "CSRF validation failed."}, status_code=403) if is_api else Response(
                 "CSRF validation failed.", status_code=403, media_type="text/plain"

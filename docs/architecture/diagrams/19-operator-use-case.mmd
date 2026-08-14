@@ -1,0 +1,16 @@
+flowchart LR
+    O[Operator]
+    subgraph S[AI VPS Management System]
+      M((Monitor VPS))
+      R((Review reports))
+      I((Request investigation))
+      E((Review Evidence))
+      A((Approve plan))
+      X((Run supervised fix))
+    end
+    O --> M
+    O --> R
+    O --> I
+    O --> E
+    O --> A
+    O --> X

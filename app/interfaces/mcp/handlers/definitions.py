@@ -477,6 +477,14 @@ class BoundaryDefinitionsMixin:
                         "rollback_plan": {
                             "type": "string",
                         },
+                        "error_classification": {
+                            "type": "string",
+                            "enum": [
+                                "normal",
+                                "dangerous",
+                                "sensitive",
+                            ],
+                        },
                     },
                     "required": [
                         "investigation_id",

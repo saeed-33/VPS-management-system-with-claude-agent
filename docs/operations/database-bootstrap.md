@@ -43,7 +43,7 @@ ix_retrieval_embedding_hnsw_cosine
 ## تنفيذ
 
 ```powershell
-uv run python tools/bootstrap_database.py
+uv run --no-sync python tools/bootstrap_database.py
 ```
 
 ## صلاحيات PostgreSQL
@@ -56,7 +56,7 @@ uv run python tools/bootstrap_database.py
 في الإنتاج يفضل أن ينشئ DBA القاعدة والامتداد ثم يشغل مستخدم التطبيق:
 
 ```powershell
-uv run python tools/bootstrap_database.py --skip-create-database
+uv run --no-sync python tools/bootstrap_database.py --skip-create-database
 ```
 
 ## عدم إسقاط البيانات
@@ -85,7 +85,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

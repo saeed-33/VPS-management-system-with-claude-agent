@@ -206,6 +206,10 @@
         ["Confidence", item.confidence],
         ["Specialists", (item.specialist_slugs || []).join(", ")],
         ["Evidence", (item.evidence_ids || []).join(", ")],
+        ["Code locations", (item.metadata && item.metadata.code_locations || []).map(
+          (location) => location.file_path + ":" + location.line_number
+            + (location.column_number ? ":" + location.column_number : "")
+        ).join(", ") || "—"],
         ["Description", item.description]
       ]
     ), "لا توجد Claims محفوظة.");

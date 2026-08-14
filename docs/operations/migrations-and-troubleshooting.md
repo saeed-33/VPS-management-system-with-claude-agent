@@ -14,7 +14,7 @@ SQL migrations are stored canonically in `app/infrastructure/database/migrations
 ## pytest: No module named app
 استخدم:
 ```powershell
-uv run python -m pytest
+uv run --no-sync python -m pytest
 ```
 
 ## Similarity غير منطقية في UI
@@ -44,7 +44,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

@@ -64,7 +64,8 @@ class Settings(BaseSettings):
     phase6_require_wsl2: bool = True
 
     app_name: str = "AI VPS Management"
-    debug: bool = True
+    # Production-safe default. Local development may explicitly set DEBUG=true.
+    debug: bool = False
 
     postgres_host: str = "127.0.0.1"
 
@@ -184,6 +185,29 @@ class Settings(BaseSettings):
                 "equal to RAG_TOP_K because only "
                 "vector-qualified candidates may enter "
                 "the LLM context."
+            )
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_admin_deployment_security(self) -> "Settings":
+        secret = self.admin_session_secret.strip()
+
+        if self.debug:
+            if secret and len(secret) < 32:
+                raise ValueError(
+                    "ADMIN_SESSION_SECRET must be at least 32 characters when provided."
+                )
+            return self
+
+        if len(secret) < 32:
+            raise ValueError(
+                "Production requires ADMIN_SESSION_SECRET with at least 32 characters."
+            )
+
+        if not self.admin_session_secure:
+            raise ValueError(
+                "Production requires ADMIN_SESSION_SECURE=true behind HTTPS."
             )
 
         return self

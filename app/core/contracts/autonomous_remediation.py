@@ -64,6 +64,8 @@ class AutonomousDecisionReasonCode(StrEnum):
     AMBIGUOUS_POLICY_MATCH = "ambiguous_policy_match"
     NO_POLICY_MATCH = "no_policy_match"
     ISSUE_FINGERPRINT_MISSING = "issue_fingerprint_missing"
+    DANGEROUS_ERROR_CLASSIFICATION = "dangerous_error_classification"
+    SENSITIVE_ERROR_CLASSIFICATION = "sensitive_error_classification"
 
 
 V1_AUTONOMOUS_ACTIONS = frozenset({"start_service"})
@@ -237,3 +239,4 @@ class AutonomousEvaluationContext:
     plan_ready: bool = True
     ambiguous_policy_match: bool = False
     sandbox_evidence_valid: bool = False
+    error_classification: str | None = None

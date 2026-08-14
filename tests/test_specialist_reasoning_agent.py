@@ -3,6 +3,8 @@ import asyncio
 import pytest
 
 from app.core.contracts.investigation import (
+    EvidenceKind,
+    EvidenceReference,
     KnowledgeSourceReference,
     KnowledgeSourceType,
 )
@@ -46,7 +48,14 @@ def context():
         knowledge_query="nginx proxy 502",
         initial_analysis_summary=None,
         initial_analysis_issues=(),
-        evidence=(),
+        evidence=(
+            EvidenceReference(
+                evidence_id="evidence-A",
+                kind=EvidenceKind.COMMAND_RESULT,
+                title="Service status",
+                excerpt="Active: inactive (dead)",
+            ),
+        ),
         incidents=(),
         knowledge_chunks=(),
         knowledge_sources=(
@@ -199,3 +208,66 @@ def test_prompt_has_no_tool_execution_request():
 
     assert "read-only" in client.system_prompt
     assert "performed any external action" in client.system_prompt
+
+
+def test_prompt_lists_exact_evidence_id_allowlist_without_raw_observation():
+    client = Client(valid_output())
+
+    asyncio.run(
+        SpecialistReasoningAgent(client=client).reason(
+            context=context()
+        )
+    )
+
+    assert "Allowed Evidence IDs: `evidence-A`" in client.user_prompt
+    assert "Never copy an Evidence title" in client.user_prompt
+    assert "Active: inactive (dead)" not in client.user_prompt.split(
+        "## Evidence ID Allowlist",
+        1,
+    )[1]
+
+
+def test_raw_log_text_in_evidence_id_field_fails_closed():
+    output = valid_output()
+    output.findings[0].evidence_ids = [
+        "Active: inactive (dead)",
+    ]
+
+    with pytest.raises(ValueError, match="unknown evidence IDs"):
+        asyncio.run(
+            SpecialistReasoningAgent(client=Client(output)).reason(
+                context=context()
+            )
+        )
+
+
+def test_evidence_from_another_context_fails_closed():
+    output = valid_output()
+    output.findings[0].evidence_ids = ["evidence-other-context"]
+
+    with pytest.raises(ValueError, match="unknown evidence IDs"):
+        asyncio.run(
+            SpecialistReasoningAgent(client=Client(output)).reason(
+                context=context()
+            )
+        )
+
+
+def test_duplicate_evidence_ids_follow_existing_aggregate_deduplication():
+    output = valid_output()
+    output.findings[0].evidence_ids = [
+        "evidence-A",
+        "evidence-A",
+    ]
+
+    execution = asyncio.run(
+        SpecialistReasoningAgent(client=Client(output)).reason(
+            context=context()
+        )
+    )
+
+    assert execution.result.findings[0].evidence_ids == (
+        "evidence-A",
+        "evidence-A",
+    )
+    assert execution.result.evidence_ids == ("evidence-A",)

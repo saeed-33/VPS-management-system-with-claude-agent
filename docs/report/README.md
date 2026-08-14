@@ -15,6 +15,10 @@ The report is accompanied by editable Mermaid sources under
 
 Download the final report: [سعيد بقدونس — التقرير التقني](سعيد_بقدونس_هندسة_برمجيات_وذكاء_صنعي_Safe_Autonomous_AI_Agent_VPS.docx).
 
+Final acceptance runs and accepted limitations are recorded in the canonical
+[`docs/final-acceptance/README.md`](../final-acceptance/README.md). The report
+does not replace those acceptance records.
+
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
 
@@ -25,9 +29,9 @@ Canonical project state:
 ```text
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-Phase 6: implemented / evidence reconciliation required
-Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 6: implemented / accepted / closed
+Phase 6 readiness: PASS
+Phase 7: implemented / current-worktree live acceptance PASS
 automatic_remediation_allowed: false
 ```
 

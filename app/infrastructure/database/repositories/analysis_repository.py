@@ -10,8 +10,10 @@ from app.infrastructure.database.models.report_analysis import (
 )
 from app.infrastructure.database.session import SessionLocal
 from app.core.contracts.analysis import (
+    AnalysisIssue,
     ReportAnalysisResult,
 )
+from app.core.policies.error_classification import classify_issue, classify_result
 from app.core.utils.datetime import utc_now
 
 
@@ -121,6 +123,8 @@ class AnalysisRepository:
         finished_at: datetime,
         duration_ms: float,
     ) -> None:
+        result = classify_result(result)
+
         with self._session_factory() as session:
             model = session.get(
                 ReportAnalysisModel,
@@ -375,9 +379,14 @@ class AnalysisRepository:
                 source_analysis.health_status
             ),
             summary=source_analysis.summary,
-            issues=list(
-                source_analysis.issues or []
-            ),
+            issues=[
+                (
+                    parsed := AnalysisIssue.model_validate(issue)
+                ).model_copy(
+                    update={"classification": classify_issue(parsed)}
+                ).model_dump(mode="json")
+                for issue in (source_analysis.issues or [])
+            ],
             positive_findings=list(
                 source_analysis.positive_findings
                 or []

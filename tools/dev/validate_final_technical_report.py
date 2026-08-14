@@ -20,7 +20,7 @@ def main() -> int:
         media = [name for name in names if name.startswith("word/media/")]
     doc = Document(str(REPORT))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    required = ["الخلاصة", "الفصل الأول: مواصفات المتطلبات البرمجية (SRS)", "الفصل الثاني: تحليل المتطلبات (SRA)", "الفصل الثالث: تصميم النظام (SD)", "الفصل الرابع: التنفيذ والاختبارات", "الخاتمة التقنية"]
+    required = ["الخلاصة", "Abstract", "مقدمة عامة", "الفصل الأول: التعريف بالمشروع والمتطلبات", "الفصل الثالث: الدراسة التحليلية", "الفصل الرابع: الدراسة التصميمية", "الفصل الخامس: التنفيذ والاختبارات", "الفصل السادس: الواجهات والاختبار", "الخاتمة والآفاق المستقبلية"]
     missing = [item for item in required if item not in headings]
     assert not missing, missing
     assert len(doc.tables) >= 6

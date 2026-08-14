@@ -247,6 +247,7 @@ class CrossSpecialistCorrelator:
                 in claim.evidence_ids
             )
         )
+        code_locations = self._code_locations_from_claims(claims)
 
         return FinalDiagnosis(
             investigation_id=(
@@ -285,6 +286,7 @@ class CrossSpecialistCorrelator:
                 "conflict_count": len(
                     conflicts
                 ),
+                "code_locations": code_locations,
             },
         )
 
@@ -438,6 +440,8 @@ class CrossSpecialistCorrelator:
                 DiagnosisCertainty.UNKNOWN
             )
 
+        code_locations = self._code_locations(items)
+
         return (
             CorrelatedDiagnosisClaim(
                 claim_id=(
@@ -477,10 +481,51 @@ class CrossSpecialistCorrelator:
                     "conflict": (
                         conflict is not None
                     ),
+                    "code_locations": code_locations,
                 },
             ),
             conflict,
         )
+
+    @staticmethod
+    def _code_locations_from_claims(claims) -> list[dict]:
+        locations = []
+        seen = set()
+        for claim in claims:
+            for location in (claim.metadata or {}).get("code_locations", []):
+                key = (
+                    location.get("file_path"),
+                    location.get("line_number"),
+                    location.get("column_number"),
+                    tuple(location.get("evidence_ids", [])),
+                )
+                if key not in seen:
+                    seen.add(key)
+                    locations.append(dict(location))
+        return locations
+
+    @staticmethod
+    def _code_locations(items) -> list[dict]:
+        locations = []
+        seen = set()
+        for _, finding in items:
+            for location in (finding.metadata or {}).get("code_locations", []):
+                location_evidence_ids = tuple(location.get("evidence_ids", []))
+                if any(
+                    evidence_id not in finding.evidence_ids
+                    for evidence_id in location_evidence_ids
+                ):
+                    continue
+                key = (
+                    location.get("file_path"),
+                    location.get("line_number"),
+                    location.get("column_number"),
+                    tuple(location.get("evidence_ids", [])),
+                )
+                if key not in seen:
+                    seen.add(key)
+                    locations.append(dict(location))
+        return locations
 
     def _correlation_key(
         self,

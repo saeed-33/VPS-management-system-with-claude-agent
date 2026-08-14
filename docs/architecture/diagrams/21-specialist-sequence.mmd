@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant O as Operator
+    participant API as API
+    participant R as InvestigationRouter
+    participant L as SpecialistInvestigationLoop
+    participant E as EvidenceCollectionService
+    participant DB as PostgreSQL
+    O->>API: request investigation
+    API->>R: select specialists
+    R->>L: run bounded tools
+    L->>E: collect Evidence
+    E->>DB: persist evidence and result
+    DB-->>API: diagnosis references
+    API-->>O: investigation status

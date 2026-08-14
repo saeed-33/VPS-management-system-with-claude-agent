@@ -163,7 +163,15 @@ def make_diagnosis():
         conflict_count=0,
         evidence_ids=("e1",),
         specialist_slugs=("nginx",),
-        metadata={},
+        metadata={
+            "code_locations": [{
+                "file_path": "/srv/app/main.py",
+                "line_number": 42,
+                "reason": "ValueError: invalid payload",
+                "source": "python_traceback",
+                "evidence_ids": ["e1"],
+            }],
+        },
     )
 
 
@@ -198,6 +206,7 @@ def test_build_snapshot_serializes_runtime():
         ]
         == "confirmed"
     )
+    assert snapshot["final_diagnosis"]["metadata"]["code_locations"][0]["evidence_ids"] == ["e1"]
 
 
 def test_persist_preserves_existing_metadata():

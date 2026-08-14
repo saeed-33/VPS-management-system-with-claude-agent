@@ -3,9 +3,9 @@
 <!-- DOC-STATUS: CURRENT_CANONICAL -->
 
 Run date: **2026-08-14**  
-Environment: stable WSL project environment with
-`UV_PROJECT_ENVIRONMENT=$HOME/.venvs/chat_system`  
-Python: **3.14.7**  
+Environment: isolated project environment outside the repository; WSL remains
+the documented stable environment
+Python: **3.14.3**
 pytest: **8.4.2**  
 Warning: one existing Starlette/httpx deprecation warning.
 
@@ -17,7 +17,8 @@ Exact command:
 uv run --no-sync python -m pytest -q -o addopts="" --ignore=tests/real_runtime
 ```
 
-Result: **586 passed, 0 failed, 0 skipped, 1 warning in 24.48s**.
+Result: **620 passed, 0 failed, 0 skipped, 1 warning**. The equivalent full
+collection reports four opt-in real-runtime skips.
 
 The command was not run with live real-runtime tests. No live SSH or
 destructive remediation was executed for documentation.
@@ -37,10 +38,11 @@ destructive remediation was executed for documentation.
 ## Live evidence status
 
 The normal run excludes `tests/real_runtime`. Phase 5 real acceptance is
-recorded in project history as passed. Phase 6 live status is contradictory
-between the JSON artifact and final report. Phase 7 live acceptance is not
-represented by a committed result artifact. These are documentation evidence
-gaps, not claims of runtime failure.
+recorded as passed. Phase 6 live status remains contradictory between the JSON
+artifact and final report. Phase 7 real acceptance is recorded as PASS in
+`docs/final-acceptance/`; Specialist final E2E remains partial with an accepted
+non-blocking limitation. These are acceptance dispositions, not claims of
+runtime failure.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
@@ -54,7 +56,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

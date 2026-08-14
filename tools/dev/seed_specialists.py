@@ -57,6 +57,10 @@ SPECIALISTS = [
             "steal time",
             "cpu saturation",
         ],
+        "allowed_tool_ids": [
+            "process-top-cpu",
+            "vmstat-sample",
+        ],
         "priority": 20,
         "max_rounds": 2,
         "max_actions": 4,
@@ -98,6 +102,11 @@ SPECIALISTS = [
             "process rss",
             "page cache",
         ],
+        "allowed_tool_ids": [
+            "process-top-memory",
+            "memory-summary",
+            "vmstat-sample",
+        ],
         "priority": 20,
         "max_rounds": 2,
         "max_actions": 4,
@@ -138,6 +147,11 @@ SPECIALISTS = [
             "inode exhaustion",
             "linux block io",
             "storage latency",
+        ],
+        "allowed_tool_ids": [
+            "disk-filesystems",
+            "disk-path",
+            "disk-inodes",
         ],
         "priority": 25,
         "max_rounds": 2,
@@ -181,6 +195,12 @@ SPECIALISTS = [
             "socket troubleshooting",
             "connection timeout",
         ],
+        "allowed_tool_ids": [
+            "network-listeners",
+            "network-sockets",
+            "network-route",
+            "network-connect",
+        ],
         "priority": 25,
         "max_rounds": 2,
         "max_actions": 5,
@@ -219,6 +239,11 @@ SPECIALISTS = [
             "systemd dependencies",
             "service failure",
         ],
+        "allowed_tool_ids": [
+            "systemd-status",
+            "systemd-failed",
+            "journal-unit",
+        ],
         "priority": 20,
         "max_rounds": 2,
         "max_actions": 4,
@@ -255,6 +280,10 @@ SPECIALISTS = [
             "process states",
             "proc filesystem",
             "process resource usage",
+        ],
+        "allowed_tool_ids": [
+            "process-top-cpu",
+            "process-top-memory",
         ],
         "priority": 30,
         "max_rounds": 2,
@@ -295,6 +324,9 @@ SPECIALISTS = [
             "postgresql connections",
             "postgresql logging",
         ],
+        "allowed_tool_ids": [
+            "postgres-ready",
+        ],
         "priority": 15,
         "max_rounds": 3,
         "max_actions": 5,
@@ -333,6 +365,12 @@ SPECIALISTS = [
             "nginx tls",
             "reverse proxy",
             "http gateway errors",
+        ],
+        "allowed_tool_ids": [
+            "nginx-config-test",
+            "nginx-version",
+            "network-listeners",
+            "systemd-status",
         ],
         "priority": 15,
         "max_rounds": 3,
@@ -374,6 +412,10 @@ SPECIALISTS = [
             "container resources",
             "docker logs",
         ],
+        "allowed_tool_ids": [
+            "docker-ps",
+            "network-listeners",
+        ],
         "priority": 20,
         "max_rounds": 3,
         "max_actions": 5,
@@ -393,7 +435,7 @@ def build_create_dto(
         domains=definition["domains"],
         trigger_hints=definition["trigger_hints"],
         knowledge_topics=definition["knowledge_topics"],
-        allowed_tool_ids=[],
+        allowed_tool_ids=definition["allowed_tool_ids"],
         priority=definition["priority"],
         max_rounds=definition["max_rounds"],
         max_actions=definition["max_actions"],
@@ -415,7 +457,7 @@ def build_update_dto(
         domains=definition["domains"],
         trigger_hints=definition["trigger_hints"],
         knowledge_topics=definition["knowledge_topics"],
-        allowed_tool_ids=[],
+        allowed_tool_ids=definition["allowed_tool_ids"],
         priority=definition["priority"],
         max_rounds=definition["max_rounds"],
         max_actions=definition["max_actions"],
@@ -523,8 +565,8 @@ def main() -> int:
 
     print()
     print(
-        "Note: allowed_tool_ids are intentionally empty "
-        "until Phase 4.11 builds the Diagnostic Tool Registry."
+        "Note: allowed_tool_ids reference the registered, "
+        "read-only Diagnostic Tool Registry."
     )
 
     return 0

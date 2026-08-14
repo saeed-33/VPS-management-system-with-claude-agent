@@ -18,7 +18,9 @@ C.14.14: PASS
 Phase C: COMPLETE / CLOSED
 Phase 5: COMPLETE / CLOSED
 Phase 6: IMPLEMENTED / LIVE ACCEPTANCE EVIDENCE REQUIRES RECONCILIATION
-Phase 7: IMPLEMENTED / LIVE ACCEPTANCE EVIDENCE NOT PRESENT IN REPOSITORY
+Phase 7: REAL ACCEPTANCE PASS / SAFE AUTONOMOUS PATH REVALIDATED
+Specialist final E2E: PARTIAL / ACCEPTED NON-BLOCKING LIMITATION
+Deployment security: PASS / PROJECT CLOSURE BLOCKING = NO
 automatic_remediation_allowed: false
 provider: ollama
 ```
@@ -26,8 +28,10 @@ provider: ollama
 Phase 5 is closed. Phase 6 is implemented and has passing deterministic
 coverage, but the repository contains conflicting live-acceptance records and
 must not be described as closed until that evidence is reconciled. Phase 7 is
-implemented and fail-closed, but no standalone live acceptance result is
-stored in the repository. Automatic remediation remains disabled by default.
+implemented and fail-closed; its real acceptance record is in
+[`docs/final-acceptance/01-final-phase7-real-acceptance.md`](docs/final-acceptance/01-final-phase7-real-acceptance.md).
+The Specialist final E2E limitation is accepted and non-blocking. Automatic
+remediation remains disabled by default.
 
 ## Current architecture
 
@@ -141,16 +145,31 @@ closed. Automatic remediation remains disabled.
 
 ## Prerequisites and configuration
 
-Required operational services are Python 3.14+, `uv`, PostgreSQL, Ollama with
-the configured model, native Claude Code CLI for live runtime work, and a
-managed VPS configuration with an SSH private key and `known_hosts` file.
-Required settings are loaded from process environment first and `.env` as a
-fallback. Do not store secrets in Git.
+For basic Admin UI/API startup, install Python 3.14+, `uv`, PostgreSQL with
+the `pgvector` extension, and Git. Configure PostgreSQL settings, the external
+Admin session-secret requirements, and readable SSH key/`known_hosts` paths in
+`.env`; access to a managed SSH target is only needed for monitoring. Ollama,
+a selected model, native Claude Code CLI, a managed VPS, and WSL2 are needed
+for optional real agent, Specialist, and native-sandbox acceptance workflows,
+not merely to open the Admin UI.
 
-The important settings include `POSTGRES_*`, `OLLAMA_BASE_URL`,
-`OLLAMA_MODEL`, `DEFAULT_SSH_PRIVATE_KEY_PATH`, `SSH_KNOWN_HOSTS_PATH`,
-`LLM_PROVIDER=ollama`, `CLAUDE_RUNTIME_ENABLED`, and the explicit safety
-switch `AUTOMATIC_REMEDIATION_ALLOWED` (default `false`).
+Settings are loaded from process environment first and `.env` as a fallback.
+Copy `.env.example` to `.env`, keep secrets out of Git, and classify settings
+as follows:
+
+- Basic startup: `POSTGRES_*`, `ADMIN_SESSION_SECRET` when `DEBUG=false`,
+  `ADMIN_SESSION_SECURE`, SSH path settings, and the local `DEBUG` choice.
+- Optional capability: `LLM_ENABLED`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, and
+  retrieval/embedding settings.
+- Real acceptance only: `CLAUDE_RUNTIME_ENABLED`, native `claude`, a managed
+  server, SSH trust material for that server, WSL2 native-sandbox attestation,
+  and explicit opt-in environment variables.
+
+Automatic remediation is disabled by default through
+`AUTOMATIC_REMEDIATION_ALLOWED=false`. Production requires a stable external
+`ADMIN_SESSION_SECRET` of at least 32 characters and
+`ADMIN_SESSION_SECURE=true` behind HTTPS. Local HTTP development may explicitly
+use `DEBUG=true` and `ADMIN_SESSION_SECURE=false`.
 
 See [runtime configuration](docs/operations/configuration.md) and
 [startup operations](docs/operations/running-project.md) for exact settings.
@@ -159,16 +178,26 @@ See [runtime configuration](docs/operations/configuration.md) and
 
 ```powershell
 uv sync
-uv run python tools/bootstrap_database.py
-uv run python tools/bootstrap_database.py --verify-only
-uv run uvicorn app.main:app --reload
+uv run --no-sync python tools/bootstrap_database.py
+uv run --no-sync python tools/dev/seed_specialists.py
+uv run --no-sync python tools/bootstrap_database.py --verify-only
+uv run --no-sync uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-The bootstrap creates the PostgreSQL database when authorized, enables
-pgvector, creates SQLAlchemy tables and RAG indexes, and verifies the expected
-33 tables and three custom RAG indexes. Additive SQL migrations are under
-`app/infrastructure/database/migrations/`; they are applied by the project
-database migration procedure before verification.
+The bootstrap is the canonical fresh-database setup command: when authorized,
+it creates the PostgreSQL database, enables pgvector, creates the current
+SQLAlchemy tables and RAG indexes, and verifies 33 tables and three custom RAG
+indexes. The SQL files under `app/infrastructure/database/migrations/` are
+additive upgrade/reference records; there is no separate generic migration
+runner. Use `--verify-only` for a read-only schema check and
+`--skip-create-database` when a DBA already created the database.
+
+The Specialist seed is idempotent. Re-run it without options to create missing
+definitions, or use `--update-existing` when intentionally refreshing matching
+definitions.
+
+For WSL, use the Linux-filesystem environment documented below. Do not create
+the project environment under `/mnt/e`.
 
 ## Ollama, Claude Code, and MCP
 
@@ -186,7 +215,7 @@ Start the application with the Uvicorn command above, then open
 `http://127.0.0.1:8000/login`. Bootstrap the first Admin account with:
 
 ```powershell
-uv run python tools/create_admin.py --username <name> --role admin
+uv run --no-sync python -m tools.create_admin --username <name> --role admin
 ```
 
 The command prompts for the password. Admin roles are `viewer`, `operator`,
@@ -198,9 +227,7 @@ current `/autonomous-runtime` screen.
 
 ```powershell
 uv sync
-uv run python tools/bootstrap_database.py
-uv run uvicorn app.main:app --reload
-uv run python -m pytest
+uv run --no-sync python -m pytest
 ```
 
 For the stable WSL test environment:
@@ -208,7 +235,16 @@ For the stable WSL test environment:
 ```bash
 export UV_PROJECT_ENVIRONMENT="$HOME/.venvs/chat_system"
 uv sync
-uv run python -m pytest -q --ignore=tests/real_runtime
+uv run --no-sync python -m pytest -q --ignore=tests/real_runtime
+```
+
+Use the same WSL environment for documented startup checks:
+
+```bash
+export UV_PROJECT_ENVIRONMENT="$HOME/.venvs/chat_system"
+uv run --no-sync python tools/bootstrap_database.py
+uv run --no-sync python tools/dev/seed_specialists.py
+uv run --no-sync uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 Health check: `http://127.0.0.1:8000/health`.
@@ -227,12 +263,13 @@ $env:LLM_PROVIDER="ollama"
 $env:CLAUDE_RUNTIME_ENABLED="true"
 $env:AI_VPS_REAL_RUNTIME_SERVER_ID="<server_id>"
 $env:AI_VPS_RUN_REAL_RUNTIME_TESTS="1"
-uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
+uv run --no-sync python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
 ```
 
 ## Documentation
 
 - [Current project status](docs/PROJECT_STATUS.md)
+- [Final acceptance records](docs/final-acceptance/README.md)
 - [Canonical documentation map](docs/README.md)
 - [Architecture overview](docs/architecture/overview.md)
 - [Canonical architecture](docs/architecture/README.md)
@@ -249,9 +286,10 @@ uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_accepta
 - [C.14.12 readiness closeout](docs/architecture/steps/c14-12-runtime-readiness-gate.md)
 - [Arabic technical report](docs/report/سعيد_بقدونس_هندسة_برمجيات_وذكاء_صنعي_Safe_Autonomous_AI_Agent_VPS.docx)
 
-## Phase 6 acceptance state
+## Acceptance state
 
 Phase 5 is complete and closed on the designated non-production lab. Phase 6
-and Phase 7 live-acceptance evidence must be reconciled from repository
-records before they are reported as closed. Automatic remediation remains
-disabled.
+remains implemented with live-evidence reconciliation required. Phase 7 real
+acceptance is PASS; Specialist final E2E is PARTIAL with an accepted,
+non-blocking supervisory timeout limitation. Deployment security is PASS and
+automatic remediation remains disabled by default.

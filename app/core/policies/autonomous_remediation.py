@@ -38,6 +38,16 @@ class AutonomousRemediationPolicyEvaluator:
             return deny(Code.EXECUTION_IN_PROGRESS, "This autonomous operation is already reserved.")
         if not context.plan_ready:
             return deny(Code.HARD_DENY, "The remediation plan is not in an executable state.")
+        if context.error_classification == "dangerous":
+            return deny(
+                Code.DANGEROUS_ERROR_CLASSIFICATION,
+                "Dangerous classified errors require supervised approval.",
+            )
+        if context.error_classification == "sensitive":
+            return deny(
+                Code.SENSITIVE_ERROR_CLASSIFICATION,
+                "Sensitive classified errors require supervised approval.",
+            )
         if context.action_type not in V1_AUTONOMOUS_ACTIONS:
             return deny(Code.HARD_DENY, "The action is outside the Phase 7 V1 hard allowlist.")
         if context.risk != V1_AUTONOMOUS_RISK_CEILING:
@@ -119,4 +129,9 @@ class AutonomousRemediationPolicyEvaluator:
             issue_fingerprint=context.issue_fingerprint, server_id=context.server_id,
             action_type=context.action_type, target=context.target,
             evaluated_at=context.now,
+            metadata=(
+                {"error_classification": context.error_classification}
+                if context.error_classification
+                else {}
+            ),
         )

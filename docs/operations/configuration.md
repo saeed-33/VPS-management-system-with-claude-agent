@@ -14,6 +14,7 @@ These settings must be supplied for a normal application instance:
 POSTGRES_DB
 POSTGRES_USER
 POSTGRES_PASSWORD
+ADMIN_SESSION_SECRET (required when DEBUG=false)
 DEFAULT_SSH_PRIVATE_KEY_PATH
 SSH_KNOWN_HOSTS_PATH
 ```
@@ -37,7 +38,7 @@ The application uses PostgreSQL through `psycopg`, SQLModel/SQLAlchemy,
 `pgvector`, and the repository layer. Prepare a new database with:
 
 ```powershell
-uv run python tools/bootstrap_database.py
+uv run --no-sync python tools/bootstrap_database.py
 ```
 
 ## SSH and monitoring
@@ -110,9 +111,15 @@ Vector retrieval is required when assisted or full-text retrieval is enabled.
 
 ```text
 APP_NAME=AI VPS Management
-DEBUG=true
+DEBUG=false
+ADMIN_SESSION_SECRET=<external random secret, at least 32 characters>
+ADMIN_SESSION_SECURE=true
 PDF_FONT_PATH=<optional project font path>
 ```
+
+For local HTTP development only, set `DEBUG=true` and
+`ADMIN_SESSION_SECURE=false`; production must use `DEBUG=false`, a stable
+externally supplied session secret, and HTTPS.
 
 ## Test-only and acceptance-only settings
 
@@ -128,6 +135,16 @@ AI_VPS_REAL_RUNTIME_SERVER_ID=<managed server id>
 The real test also requires `LLM_ENABLED=true`, `LLM_PROVIDER=ollama`,
 `CLAUDE_RUNTIME_ENABLED=true`, Ollama, Claude CLI, PostgreSQL, MCP, and a
 reachable managed server.
+
+Configuration classes:
+
+- Basic startup: `POSTGRES_*`, `ADMIN_SESSION_SECRET` when `DEBUG=false`,
+  `ADMIN_SESSION_SECURE`, `DEFAULT_SSH_PRIVATE_KEY_PATH`, and
+  `SSH_KNOWN_HOSTS_PATH`.
+- Optional capability: `LLM_ENABLED`, Ollama model/base URL, retrieval, and
+  embedding settings.
+- Real acceptance only: Claude runtime flags, managed-server identity, live
+  SSH trust material, WSL2 sandbox attestation, and opt-in acceptance flags.
 
 ## MCP configuration
 
@@ -152,7 +169,7 @@ Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
 Phase 6: implemented / evidence reconciliation required
 Phase 6 readiness: conflicting repository records
-Phase 7: implemented / live acceptance record not present
+Phase 7: real acceptance PASS; Specialist final E2E partial and accepted
 automatic_remediation_allowed: false
 ```
 

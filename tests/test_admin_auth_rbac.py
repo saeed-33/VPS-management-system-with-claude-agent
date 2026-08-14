@@ -143,6 +143,58 @@ def test_login_success_failure_logout_and_web_redirect(auth_app):
     assert client.get("/servers", follow_redirects=False).status_code == 303
 
 
+@pytest.mark.parametrize(
+    ("username", "password"),
+    (
+        ("viewer", "ViewerPassword123!"),
+        ("operator", "OperatorPassword123!"),
+        ("admin", "AdminPassword123!"),
+    ),
+)
+def test_logout_form_csrf_revokes_session_and_clears_cookie(auth_app, username, password):
+    app, service, session_factory = auth_app
+    client = TestClient(app)
+    csrf = login(client, service, username, password)
+    raw_token = client.cookies.get(service.cookie_name)
+    assert raw_token
+
+    missing = client.post("/logout", data={}, follow_redirects=False)
+    assert missing.status_code == 403
+    assert client.get("/servers").status_code == 200
+
+    invalid = client.post(
+        "/logout", data={"csrf_token": "invalid"}, follow_redirects=False
+    )
+    assert invalid.status_code == 403
+    assert client.get("/servers").status_code == 200
+
+    logged_out = client.post(
+        "/logout", data={"csrf_token": csrf}, follow_redirects=False
+    )
+    assert logged_out.status_code == 303
+    assert logged_out.headers["location"] == "/login"
+    assert "Max-Age=0" in logged_out.headers["set-cookie"]
+    assert f"{service.cookie_name}={raw_token}" not in logged_out.headers["set-cookie"]
+    assert raw_token not in logged_out.text
+
+    with session_factory() as session:
+        model = session.scalar(
+            select(AdminSessionModel).where(
+                AdminSessionModel.session_digest == service._digest(raw_token)
+            )
+        )
+        assert model is not None
+        assert model.revoked_at is not None
+    assert client.get("/servers", follow_redirects=False).status_code == 303
+
+
+def test_unauthenticated_logout_is_safe(auth_app):
+    app, _service, _session_factory = auth_app
+    response = TestClient(app).post("/logout", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=%2Flogout"
+
+
 def test_api_authentication_and_csrf_fail_closed(auth_app):
     app, service, _session_factory = auth_app
     client = TestClient(app)
