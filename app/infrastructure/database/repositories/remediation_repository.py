@@ -28,6 +28,7 @@ from app.infrastructure.database.models.remediation import (
     RemediationVerificationModel,
     SandboxValidationModel,
 )
+from app.infrastructure.database.models.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
 
 
@@ -152,6 +153,106 @@ class RemediationRepository:
             session.commit()
             session.refresh(model)
             return model
+
+    def finalize_sandbox_validation(self, **data) -> SandboxValidationModel:
+        """Persist validation and promote only the exact current plan on a valid pass."""
+        with self._session_factory() as session:
+            plan = session.scalar(
+                select(RemediationPlanModel)
+                .where(RemediationPlanModel.plan_id == data["plan_id"])
+                .with_for_update()
+            )
+            if plan is None:
+                raise ValueError(f"Remediation plan not found: {data['plan_id']}")
+
+            status = data.get("status")
+            if status == "passed":
+                reason = self._sandbox_pass_invalid_reason(plan=plan, data=data, session=session)
+                if reason is not None:
+                    data = dict(data)
+                    data["status"] = "stale" if reason == "plan_fingerprint_changed" else "failed"
+                    data["failure_reason"] = reason
+                elif plan.status in {
+                    RemediationPlanStatus.PROPOSED.value,
+                    RemediationPlanStatus.SANDBOX_FAILED.value,
+                    RemediationPlanStatus.SANDBOX_PASSED.value,
+                }:
+                    plan.status = RemediationPlanStatus.SANDBOX_PASSED.value
+                    session.add(plan)
+
+            model = SandboxValidationModel(**data)
+            session.add(model)
+            session.commit()
+            session.refresh(model)
+            return model
+
+    @staticmethod
+    def _sandbox_pass_invalid_reason(*, plan, data: dict, session) -> str | None:
+        """Return a fail-closed reason unless a passed validation binds to its plan."""
+        if data.get("plan_fingerprint") != plan.plan_fingerprint:
+            return "plan_fingerprint_changed"
+        if data.get("server_id") != plan.server_id:
+            return "sandbox_server_mismatch"
+        server = session.scalar(select(ServerModel).where(ServerModel.id == data["server_id"]))
+        if server is None or server.name != data.get("server_name"):
+            return "sandbox_server_name_mismatch"
+        if data.get("verification_status") != "verified":
+            return "sandbox_verification_not_verified"
+
+        actions = plan.proposed_actions or []
+        if len(actions) != 1:
+            return "exactly_one_registered_action_required"
+        action = actions[0]
+        action_type = str(action.get("action_type") or action.get("type") or action.get("tool") or "")
+        target = str(action.get("target") or action.get("service") or "")
+        if data.get("action_type") != action_type:
+            return "sandbox_action_mismatch"
+        if data.get("service") != target:
+            return "sandbox_target_mismatch"
+        if data.get("action_parameters") != (action.get("parameters") or {}):
+            return "sandbox_action_parameters_mismatch"
+        if not data.get("before_evidence_ids") or not data.get("after_evidence_ids"):
+            return "sandbox_evidence_incomplete"
+
+        metadata = data.get("validation_metadata") or {}
+        if (
+            not metadata.get("runtime")
+            or metadata.get("runtime_available") is not True
+            or not isinstance(metadata.get("runtime_evidence"), dict)
+        ):
+            return "native_sandbox_runtime_evidence_missing"
+
+        before_ids = list(data["before_evidence_ids"])
+        after_ids = list(data["after_evidence_ids"])
+        expected_ids = set(before_ids) | set(after_ids)
+        if len(expected_ids) != len(before_ids) + len(after_ids):
+            return "sandbox_evidence_ids_overlap"
+        rows = list(session.scalars(
+            select(RemediationEvidenceModel).where(
+                RemediationEvidenceModel.plan_id == plan.plan_id,
+                RemediationEvidenceModel.execution_id == data["validation_id"],
+                RemediationEvidenceModel.evidence_id.in_(expected_ids),
+            )
+        ).all())
+        rows_by_id = {row.evidence_id: row for row in rows}
+        if set(rows_by_id) != expected_ids:
+            return "sandbox_evidence_ownership_invalid"
+        if any(
+            row.server_id != data["server_id"] or row.service != data["service"]
+            for row in rows
+        ):
+            return "sandbox_evidence_binding_mismatch"
+        if any(not row.observed_state for row in rows):
+            return "sandbox_evidence_state_missing"
+        if any(rows_by_id[item].phase != "sandbox_before" for item in before_ids):
+            return "sandbox_before_evidence_invalid"
+        if any(rows_by_id[item].phase != "sandbox_after" for item in after_ids):
+            return "sandbox_after_evidence_invalid"
+        if any(rows_by_id[item].observed_state not in {"active", "inactive"} for item in before_ids):
+            return "sandbox_before_evidence_state_invalid"
+        if any(rows_by_id[item].observed_state != data.get("expected_state") for item in after_ids):
+            return "sandbox_after_evidence_state_invalid"
+        return None
 
     def get_sandbox_validation(self, validation_id: str) -> SandboxValidationModel | None:
         try:

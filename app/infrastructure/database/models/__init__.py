@@ -13,6 +13,7 @@ from app.infrastructure.database.models.remediation import (
     AutonomousAuthorizationModel,
     AutonomousPolicyExecutionReservationModel,
     AutonomousPolicyRuntimeStateModel,
+    AutonomousPolicyAuditEventModel,
     RemediationExecutionModel,
     RemediationEvidenceModel,
     SandboxValidationModel,
@@ -92,4 +93,5 @@ __all__ = [
     "AutonomousAuthorizationModel",
     "AutonomousPolicyExecutionReservationModel",
     "AutonomousPolicyRuntimeStateModel",
+    "AutonomousPolicyAuditEventModel",
 ]

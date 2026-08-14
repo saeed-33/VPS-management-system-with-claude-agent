@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -53,6 +55,51 @@ def test_policy_version_updates_and_status_changes_are_persisted():
     assert enabled.version == 2
     assert enabled.status == "enabled"
     assert enabled.name == "p1-updated"
+
+
+def test_reservation_lookup_by_idempotency_key_preserves_persisted_binding():
+    repo = repository()
+    now = datetime.now(timezone.utc)
+    created = repo.reserve(
+        idempotency_key="replay-key", owner_token="worker-1", policy_id="p1",
+        plan_id="plan-1", plan_fingerprint="fingerprint-1", action_type="start_service",
+        target="nginx", server_id=4, now=now,
+    )
+
+    found = repo.get_reservation_by_idempotency_key("replay-key")
+
+    assert found.reservation_id == created.reservation_id
+    assert found.plan_id == "plan-1"
+    assert found.plan_fingerprint == "fingerprint-1"
+    assert found.server_id == 4
+    assert found.action_type == "start_service"
+    assert found.target == "nginx"
+
+
+def test_matching_policies_returns_structural_matches_across_statuses_and_scope():
+    repo = repository()
+
+    def add(policy_id, *, status=AutonomousPolicyStatus.ENABLED, fingerprint="fp", target="nginx", servers=(4,)):
+        repo.create_policy(AutonomousRemediationPolicy(
+            policy_id=policy_id, name=policy_id, description="test", status=status,
+            version=1, issue_fingerprint=fingerprint, allowed_action_type="start_service",
+            allowed_target_pattern=target, allowed_server_ids=servers,
+        ))
+
+    add("enabled")
+    add("disabled", status=AutonomousPolicyStatus.DISABLED)
+    add("suspended", status=AutonomousPolicyStatus.SUSPENDED)
+    add("other-fingerprint", fingerprint="other")
+    add("other-target", target="other.service")
+    add("other-server", servers=(9,))
+
+    matches = repo.matching_policies(
+        issue_fingerprint="fp", action_type="start_service", target="nginx", server_id=4,
+    )
+
+    assert {item.policy_id for item in matches} == {"enabled", "disabled", "suspended"}
+    assert repo.get_policy("disabled").status == AutonomousPolicyStatus.DISABLED.value
+    assert repo.get_policy("suspended").status == AutonomousPolicyStatus.SUSPENDED.value
 
 
 def test_reservation_idempotency_and_single_use_authorization():

@@ -108,11 +108,15 @@ def test_successful_validation_persists_evidence_and_allows_approval():
         plan_id=plan.plan_id, target_server_id=4, target_server_name="phase6-lab", target_service="ai-vps-remediation-test.service"
     )
     assert result.status == SandboxValidationStatus.PASSED.value
+    assert service.get_plan(plan.plan_id).status == "sandbox_passed"
     assert result.plan_fingerprint == plan.plan_fingerprint
     assert len(result.before_evidence_ids) == 1
     assert len(result.after_evidence_ids) == 1
     approval = service.request_approval(plan_id=plan.plan_id)
     assert approval.plan_fingerprint == plan.plan_fingerprint
+    approved = service.approve(approval_id=approval.approval_id, approver="phase6-test")
+    assert approved.status == "approved"
+    assert service.get_plan(plan.plan_id).status == "approved"
 
 
 def test_action_or_verification_failure_blocks_approval():
@@ -122,6 +126,7 @@ def test_action_or_verification_failure_blocks_approval():
         plan_id=plan.plan_id, target_server_id=4, target_server_name="phase6-lab", target_service="ai-vps-remediation-test.service"
     )
     assert result.status == SandboxValidationStatus.FAILED.value
+    assert service.get_plan(plan.plan_id).status != "sandbox_passed"
     with pytest.raises(ValueError, match="must pass"):
         service.request_approval(plan_id=plan.plan_id)
 
@@ -136,6 +141,123 @@ def test_changed_fingerprint_marks_validation_stale_and_blocks_approval():
     with pytest.raises(ValueError, match="stale"):
         service.request_approval(plan_id=plan.plan_id)
     assert service.get_sandbox_validation(result.validation_id).status == SandboxValidationStatus.STALE.value
+
+
+def test_stale_successful_validation_cannot_promote_changed_plan():
+    service = make_service()
+    plan = make_plan(service)
+    validation_id = "stale-validation"
+    before = service._repository.create_evidence(
+        evidence_id="stale-before", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="ai-vps-remediation-test.service", phase="sandbox_before",
+        observed_state="inactive", metadata={},
+    )
+    after = service._repository.create_evidence(
+        evidence_id="stale-after", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="ai-vps-remediation-test.service", phase="sandbox_after",
+        observed_state="active", metadata={},
+    )
+    service._repository.update_plan_status(plan.plan_id, plan.status, plan_fingerprint="new-fingerprint")
+
+    result = service._repository.finalize_sandbox_validation(
+        validation_id=validation_id, plan_id=plan.plan_id, plan_fingerprint=plan.plan_fingerprint,
+        server_id=4, server_name="phase6-lab", service="ai-vps-remediation-test.service",
+        action_type="start_service", action_parameters={}, expected_state="active",
+        observed_state="active", before_evidence_ids=[before.evidence_id],
+        after_evidence_ids=[after.evidence_id], verification_status="verified", status="passed",
+        started_at=datetime.now(), finished_at=datetime.now(), failure_reason=None,
+        validation_metadata={"runtime": "claude-native-sandbox", "runtime_evidence": {"test": True}},
+    )
+
+    assert result.status == SandboxValidationStatus.STALE.value
+    assert service.get_plan(plan.plan_id).status != "sandbox_passed"
+
+
+def test_unverified_validation_cannot_promote_plan():
+    service = make_service()
+    plan = make_plan(service)
+    validation_id = "unverified-validation"
+    before = service._repository.create_evidence(
+        evidence_id="unverified-before", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="ai-vps-remediation-test.service", phase="sandbox_before",
+        observed_state="inactive", metadata={},
+    )
+    after = service._repository.create_evidence(
+        evidence_id="unverified-after", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="ai-vps-remediation-test.service", phase="sandbox_after",
+        observed_state="active", metadata={},
+    )
+
+    result = service._repository.finalize_sandbox_validation(
+        validation_id=validation_id, plan_id=plan.plan_id, plan_fingerprint=plan.plan_fingerprint,
+        server_id=4, server_name="phase6-lab", service="ai-vps-remediation-test.service",
+        action_type="start_service", action_parameters={}, expected_state="active",
+        observed_state="active", before_evidence_ids=[before.evidence_id],
+        after_evidence_ids=[after.evidence_id], verification_status="inconclusive", status="passed",
+        started_at=datetime.now(), finished_at=datetime.now(), failure_reason=None,
+        validation_metadata={"runtime": "claude-native-sandbox", "runtime_evidence": {"test": True}},
+    )
+
+    assert result.status == SandboxValidationStatus.FAILED.value
+    assert service.get_plan(plan.plan_id).status != "sandbox_passed"
+
+
+def test_mismatched_action_and_target_cannot_promote_plan():
+    service = make_service()
+    plan = make_plan(service)
+    validation_id = "mismatch-validation"
+    before = service._repository.create_evidence(
+        evidence_id="mismatch-before", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="other.service", phase="sandbox_before",
+        observed_state="inactive", metadata={},
+    )
+    after = service._repository.create_evidence(
+        evidence_id="mismatch-after", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="other.service", phase="sandbox_after",
+        observed_state="active", metadata={},
+    )
+
+    result = service._repository.finalize_sandbox_validation(
+        validation_id=validation_id, plan_id=plan.plan_id, plan_fingerprint=plan.plan_fingerprint,
+        server_id=4, server_name="phase6-lab", service="other.service",
+        action_type="stop_service", action_parameters={}, expected_state="active",
+        observed_state="active", before_evidence_ids=[before.evidence_id],
+        after_evidence_ids=[after.evidence_id], verification_status="verified", status="passed",
+        started_at=datetime.now(), finished_at=datetime.now(), failure_reason=None,
+        validation_metadata={"runtime": "claude-native-sandbox", "runtime_evidence": {"test": True}},
+    )
+
+    assert result.status == SandboxValidationStatus.FAILED.value
+    assert service.get_plan(plan.plan_id).status != "sandbox_passed"
+
+
+def test_mismatched_server_cannot_promote_plan():
+    service = make_service()
+    plan = make_plan(service)
+    validation_id = "server-mismatch-validation"
+    before = service._repository.create_evidence(
+        evidence_id="server-mismatch-before", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="ai-vps-remediation-test.service", phase="sandbox_before",
+        observed_state="inactive", metadata={},
+    )
+    after = service._repository.create_evidence(
+        evidence_id="server-mismatch-after", plan_id=plan.plan_id, execution_id=validation_id,
+        server_id=4, service="ai-vps-remediation-test.service", phase="sandbox_after",
+        observed_state="active", metadata={},
+    )
+
+    result = service._repository.finalize_sandbox_validation(
+        validation_id=validation_id, plan_id=plan.plan_id, plan_fingerprint=plan.plan_fingerprint,
+        server_id=99, server_name="other-lab", service="ai-vps-remediation-test.service",
+        action_type="start_service", action_parameters={}, expected_state="active",
+        observed_state="active", before_evidence_ids=[before.evidence_id],
+        after_evidence_ids=[after.evidence_id], verification_status="verified", status="passed",
+        started_at=datetime.now(), finished_at=datetime.now(), failure_reason=None,
+        validation_metadata={"runtime": "claude-native-sandbox", "runtime_evidence": {"test": True}},
+    )
+
+    assert result.status == SandboxValidationStatus.FAILED.value
+    assert service.get_plan(plan.plan_id).status != "sandbox_passed"
 
 
 def test_restart_and_reload_cannot_be_validated_without_restoration():

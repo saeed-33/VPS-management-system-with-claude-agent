@@ -11,6 +11,7 @@ from app.core.contracts.autonomous_remediation import (
     AutonomousRemediationPolicy,
 )
 from app.core.policies.autonomous_remediation import AutonomousRemediationPolicyEvaluator
+from app.capabilities.remediation.autonomous_execution_service import AutonomousExecutionService
 
 
 NOW = datetime(2026, 8, 14, tzinfo=timezone.utc)
@@ -100,10 +101,82 @@ def test_missing_policy_requires_human_approval():
     assert result.reason_codes == ("no_policy_match",)
 
 
+def test_non_ready_plan_cannot_auto_execute_even_with_passed_sandbox():
+    result = AutonomousRemediationPolicyEvaluator().evaluate(context(plan_ready=False))
+    assert result.outcome is AutonomousDecisionOutcome.DENY
+    assert "hard_deny" in result.reason_codes
+
+
 def test_ambiguous_policy_match_denies():
     result = AutonomousRemediationPolicyEvaluator().evaluate(context(policy=None, ambiguous_policy_match=True))
     assert result.outcome is AutonomousDecisionOutcome.DENY
     assert result.reason_codes == ("ambiguous_policy_match",)
+
+
+@pytest.mark.parametrize(
+    ("statuses", "selected_status", "ambiguous"),
+    [
+        ((AutonomousPolicyStatus.ENABLED,), AutonomousPolicyStatus.ENABLED, False),
+        ((AutonomousPolicyStatus.ENABLED, AutonomousPolicyStatus.DISABLED), AutonomousPolicyStatus.ENABLED, False),
+        ((AutonomousPolicyStatus.ENABLED, AutonomousPolicyStatus.SUSPENDED), AutonomousPolicyStatus.ENABLED, False),
+        ((AutonomousPolicyStatus.ENABLED, AutonomousPolicyStatus.ENABLED), None, True),
+        ((AutonomousPolicyStatus.DISABLED,), AutonomousPolicyStatus.DISABLED, False),
+        ((AutonomousPolicyStatus.SUSPENDED,), AutonomousPolicyStatus.SUSPENDED, False),
+        ((), None, False),
+    ],
+)
+def test_policy_selection_is_status_aware(statuses, selected_status, ambiguous):
+    matches = [SimpleNamespace(status=status) for status in statuses]
+
+    selected, actual_ambiguous = AutonomousExecutionService._select_policy(matches)
+
+    assert actual_ambiguous is ambiguous
+    assert (selected.status if selected is not None else None) == selected_status
+
+
+def test_enabled_policy_precedence_allows_evaluation_with_inactive_history():
+    selected, ambiguous = AutonomousExecutionService._select_policy([
+        SimpleNamespace(status=AutonomousPolicyStatus.ENABLED),
+        SimpleNamespace(status=AutonomousPolicyStatus.DISABLED),
+    ])
+
+    result = AutonomousRemediationPolicyEvaluator().evaluate(
+        context(ambiguous_policy_match=ambiguous)
+    )
+
+    assert selected.status is AutonomousPolicyStatus.ENABLED
+    assert result.outcome is AutonomousDecisionOutcome.AUTO_EXECUTE
+
+
+def test_multiple_enabled_policies_fail_closed_in_evaluator():
+    selected, ambiguous = AutonomousExecutionService._select_policy([
+        SimpleNamespace(status=AutonomousPolicyStatus.ENABLED),
+        SimpleNamespace(status=AutonomousPolicyStatus.ENABLED),
+    ])
+
+    result = AutonomousRemediationPolicyEvaluator().evaluate(
+        context(policy=None, ambiguous_policy_match=ambiguous)
+    )
+
+    assert selected is None
+    assert result.outcome is AutonomousDecisionOutcome.DENY
+    assert result.reason_codes == ("ambiguous_policy_match",)
+
+
+def test_single_inactive_policy_preserves_explicit_deny_semantics():
+    for status, reason in (
+        (AutonomousPolicyStatus.DISABLED, "policy_disabled"),
+        (AutonomousPolicyStatus.SUSPENDED, "policy_suspended"),
+    ):
+        selected, ambiguous = AutonomousExecutionService._select_policy([
+            SimpleNamespace(status=status),
+        ])
+        result = AutonomousRemediationPolicyEvaluator().evaluate(
+            context(policy=policy(status=status), ambiguous_policy_match=ambiguous)
+        )
+        assert selected.status is status
+        assert result.outcome is AutonomousDecisionOutcome.DENY
+        assert result.reason_codes == (reason,)
 
 
 def test_sandbox_mismatch_and_stale_are_denied():

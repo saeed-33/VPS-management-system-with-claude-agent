@@ -46,6 +46,7 @@ EXPECTED_TABLES = {
     "autonomous_authorizations",
     "autonomous_policy_execution_reservations",
     "autonomous_policy_runtime_state",
+    "autonomous_policy_audit_events",
 }
 
 CUSTOM_INDEXES = {

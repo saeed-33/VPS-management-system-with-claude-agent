@@ -36,7 +36,7 @@ class AutonomousExecutionService:
         now = utc_now()
         issue_fingerprint = str((plan.plan_metadata or {}).get("issue_fingerprint") or "")
         matches = self._repository.matching_policies(issue_fingerprint=issue_fingerprint, action_type=action.action_type, target=action.target, server_id=plan.server_id)
-        policy_model = matches[0] if len(matches) == 1 else None
+        policy_model, ambiguous_policy_match = self._select_policy(matches)
         policy = self._policy_service._model_to_contract(policy_model) if policy_model is not None else None
         history = self._history_service.snapshot(issue_fingerprint=issue_fingerprint, action_type=action.action_type, target=action.target)
         counts = self._repository.execution_counts(policy_id=policy.policy_id, now=now) if policy else {"hour": 0, "day": 0, "last": None}
@@ -57,7 +57,7 @@ class AutonomousExecutionService:
             consecutive_failures=int(runtime.consecutive_failures if runtime else 0),
             execution_completed=False, execution_in_progress=bool(reservations and reservations[0].status in {"reserved", "in_progress"}),
             plan_ready=plan.status in {RemediationPlanStatus.SANDBOX_PASSED.value, RemediationPlanStatus.APPROVED.value},
-            ambiguous_policy_match=len(matches) > 1,
+            ambiguous_policy_match=ambiguous_policy_match,
             sandbox_evidence_valid=sandbox_evidence_valid,
         )
         decision = self._evaluator.evaluate(context)
@@ -69,7 +69,55 @@ class AutonomousExecutionService:
         })
         return decision, plan, action, policy, sandbox, history
 
+    @staticmethod
+    def _select_policy(matches):
+        """Select one policy deterministically after exact structural matching.
+
+        Enabled policies are the only policies that can create autonomous
+        ambiguity. Disabled and suspended policies remain selectable when no
+        enabled policy exists so the evaluator can preserve their explicit
+        deny semantics. Unknown statuses fail closed as ambiguity.
+        """
+        enabled = []
+        inactive = []
+        unknown = []
+        for policy in matches:
+            status = getattr(policy.status, "value", policy.status)
+            if status == AutonomousPolicyStatus.ENABLED.value:
+                enabled.append(policy)
+            elif status in {
+                AutonomousPolicyStatus.DISABLED.value,
+                AutonomousPolicyStatus.SUSPENDED.value,
+            }:
+                inactive.append(policy)
+            else:
+                unknown.append(policy)
+
+        if len(enabled) == 1:
+            return enabled[0], False
+        if len(enabled) > 1:
+            return None, True
+        if len(inactive) == 1 and not unknown:
+            return inactive[0], False
+        if not inactive and not unknown:
+            return None, False
+        return None, True
+
     def attempt(self, *, plan_id: str, actor: str = "autonomous-policy", idempotency_key: str | None = None):
+        plan = self._remediation_repository.get_plan(plan_id)
+        if plan is None:
+            raise ValueError("Remediation plan not found.")
+        action = self._single_action(plan)
+
+        existing = None
+        if idempotency_key is not None:
+            existing = self._repository.get_reservation_by_idempotency_key(idempotency_key)
+            if existing is not None and not self._reservation_lease_stale(existing, now=utc_now()):
+                return self._replay_existing_reservation(
+                    existing=existing, plan=plan, action=action, idempotency_key=idempotency_key,
+                )
+        stale_existing = existing if existing is not None and self._reservation_lease_stale(existing, now=utc_now()) else None
+
         decision, plan, action, policy, sandbox, history = self.evaluate(plan_id=plan_id)
         if decision.outcome == AutonomousDecisionOutcome.REQUIRE_HUMAN_APPROVAL:
             if sandbox is None or sandbox.status != "passed":
@@ -80,36 +128,103 @@ class AutonomousExecutionService:
             return {"outcome": decision.outcome.value, "decision": decision}
 
         key = idempotency_key or f"autonomous:{policy.policy_id}:{plan.plan_id}:{plan.plan_fingerprint}:{action.action_type}:{action.target}"
+        if stale_existing is None:
+            candidate = self._repository.get_reservation_by_idempotency_key(key)
+            if candidate is not None and self._reservation_lease_stale(candidate, now=utc_now()):
+                stale_existing = candidate
         owner_token = str(uuid4())
         reservation = self._repository.reserve(
             idempotency_key=key, owner_token=owner_token, policy_id=policy.policy_id, plan_id=plan.plan_id,
             plan_fingerprint=plan.plan_fingerprint, action_type=action.action_type, target=action.target,
             server_id=plan.server_id, now=utc_now(),
         )
+        if not self._reservation_matches(
+            reservation=reservation, plan=plan, action=action, idempotency_key=key,
+        ):
+            return {
+                "outcome": "deny",
+                "error": "idempotency_reservation_binding_mismatch",
+                "reservation": self._reservation_view(reservation),
+            }
+        if stale_existing is not None:
+            self._audit(plan_id, "autonomous_reservation_recovered", {
+                "reservation_id": reservation.reservation_id,
+                "idempotency_key": reservation.idempotency_key,
+                "owner_token_replaced": reservation.owner_token == owner_token,
+                "authorization_id": reservation.authorization_id,
+                "execution_id": reservation.execution_id,
+            })
         self._audit(plan_id, "autonomous_execution_reserved", {
             "reservation_id": reservation.reservation_id, "idempotency_key": reservation.idempotency_key,
             "policy_id": policy.policy_id, "decision_id": decision.decision_id,
         })
         if reservation.status == "completed":
-            return {"outcome": decision.outcome.value, "decision": decision, "idempotent": True, "reservation": self._reservation_view(reservation)}
+            return self._replay_existing_reservation(
+                existing=reservation, plan=plan, action=action, idempotency_key=key,
+                decision=decision,
+            )
+        if reservation.status == "failed":
+            if stale_existing is not None:
+                runtime = self._record_runtime(
+                    policy, decision, False, reservation.execution_id,
+                    failure_key=reservation.execution_id or reservation.reservation_id,
+                )
+                self._audit(plan_id, "autonomous_execution_failed", {
+                    "reservation_id": reservation.reservation_id,
+                    "execution_id": reservation.execution_id,
+                    "recovered": True,
+                    "consecutive_failures": getattr(runtime, "consecutive_failures", None),
+                })
+            return {
+                "outcome": "deny",
+                "decision": decision,
+                "error": "idempotency_reservation_not_replayable",
+                "reservation": self._reservation_view(reservation),
+            }
         if reservation.status != "reserved":
-            return {"outcome": "in_progress", "decision": decision, "reservation": self._reservation_view(reservation)}
+            return {
+                "outcome": "in_progress", "idempotent": True,
+                "decision": decision, "reservation": self._reservation_view(reservation),
+            }
 
         try:
-            authorization = self._authorization_service.issue(decision=decision, sandbox_validation_id=sandbox.validation_id)
-            self._audit(plan_id, "autonomous_authorization_issued", {
-                "authorization_id": authorization.authorization_id, "decision_id": decision.decision_id,
-                "sandbox_validation_id": authorization.sandbox_validation_id,
-            })
-            self._repository.update_reservation_authorization(reservation.reservation_id, owner_token=owner_token, authorization_id=authorization.authorization_id)
+            authorization = None
+            if reservation.authorization_id:
+                loader = getattr(self._authorization_service, "get", None)
+                if loader is None:
+                    raise ValueError("authorization_stale:recovery_loader_missing")
+                authorization = loader(reservation.authorization_id)
+                if authorization.status != "valid":
+                    raise ValueError("authorization_stale:recovery")
+            else:
+                authorization = self._authorization_service.issue(decision=decision, sandbox_validation_id=sandbox.validation_id)
+                self._audit(plan_id, "autonomous_authorization_issued", {
+                    "authorization_id": authorization.authorization_id, "decision_id": decision.decision_id,
+                    "sandbox_validation_id": authorization.sandbox_validation_id,
+                })
+                self._repository.update_reservation_authorization(reservation.reservation_id, owner_token=owner_token, authorization_id=authorization.authorization_id)
             authorization = self._authorization_service.consume(authorization.authorization_id)
             self._audit(plan_id, "autonomous_authorization_consumed", {"authorization_id": authorization.authorization_id})
             current_plan = self._remediation_repository.get_plan(plan_id)
             current_policy_model = self._repository.get_policy(policy.policy_id)
             current_sandbox = self._remediation_repository.get_sandbox_validation(sandbox.validation_id)
-            if current_plan is None or current_plan.plan_fingerprint != authorization.plan_fingerprint:
-                raise ValueError("authorization_stale:plan_fingerprint")
-            if current_policy_model is None or current_policy_model.version != authorization.policy_version or current_policy_model.status != "enabled":
+            if current_plan is None or (
+                authorization.policy_id != decision.policy_id
+                or authorization.policy_version != decision.policy_version
+                or authorization.decision_id != decision.decision_id
+                or authorization.plan_id != current_plan.plan_id
+                or authorization.plan_fingerprint != current_plan.plan_fingerprint
+                or authorization.server_id != current_plan.server_id
+                or authorization.action_type != action.action_type
+                or authorization.target != action.target
+            ):
+                raise ValueError("authorization_stale:binding")
+            if (
+                current_policy_model is None
+                or current_policy_model.policy_id != authorization.policy_id
+                or current_policy_model.version != authorization.policy_version
+                or current_policy_model.status != "enabled"
+            ):
                 raise ValueError("authorization_stale:policy_version")
             if current_sandbox is None or current_sandbox.plan_fingerprint != authorization.plan_fingerprint or current_sandbox.status != "passed":
                 raise ValueError("authorization_stale:sandbox")
@@ -126,19 +241,114 @@ class AutonomousExecutionService:
                 outcome["autonomous_rollback"] = rollback
             success = bool(outcome.get("applied"))
             self._repository.finalize_reservation(reservation.reservation_id, owner_token=owner_token, status="completed" if success else "failed", execution_id=outcome.get("execution_id"))
-            self._record_runtime(policy, decision, success, outcome.get("execution_id"))
+            self._record_runtime(
+                policy, decision, success, outcome.get("execution_id"),
+                failure_key=outcome.get("execution_id") or reservation.reservation_id,
+            )
             self._audit(plan_id, "autonomous_execution_finalized", {
                 "reservation_id": reservation.reservation_id, "execution_id": outcome.get("execution_id"),
                 "success": success,
             })
+            if not success:
+                self._audit(plan_id, "autonomous_execution_failed", {
+                    "reservation_id": reservation.reservation_id,
+                    "execution_id": outcome.get("execution_id"),
+                    "blocked_reason": outcome.get("blocked_reason"),
+                    "rollback": outcome.get("autonomous_rollback"),
+                })
             return {"outcome": "auto_execute", "decision": decision, "authorization_id": authorization.authorization_id, "result": outcome}
         except Exception as exc:
             self._repository.finalize_reservation(reservation.reservation_id, owner_token=owner_token, status="failed")
-            self._record_runtime(policy, decision, False, None)
+            self._record_runtime(
+                policy, decision, False, None,
+                failure_key=reservation.reservation_id,
+            )
             self._audit(plan_id, "autonomous_execution_failed", {
                 "reservation_id": reservation.reservation_id, "error": str(exc),
             })
             return {"outcome": "deny", "decision": decision, "authorization_id": locals().get("authorization", None).authorization_id if locals().get("authorization") else None, "error": str(exc)}
+
+    def _replay_existing_reservation(self, *, existing, plan, action, idempotency_key: str, decision=None):
+        """Return an exact reservation replay without evaluation or re-execution."""
+        if not self._reservation_matches(
+            reservation=existing, plan=plan, action=action, idempotency_key=idempotency_key,
+        ):
+            return {
+                "outcome": "deny",
+                "error": "idempotency_reservation_binding_mismatch",
+                "reservation": self._reservation_view(existing),
+            }
+        if existing.status in {"reserved", "in_progress"}:
+            return {
+                "outcome": "in_progress",
+                "idempotent": True,
+                "reservation": self._reservation_view(existing),
+            }
+        if existing.status != "completed":
+            return {
+                "outcome": "deny",
+                "error": "idempotency_reservation_not_replayable",
+                "reservation": self._reservation_view(existing),
+            }
+        if not existing.execution_id:
+            return {
+                "outcome": "deny",
+                "error": "completed_reservation_missing_execution",
+                "reservation": self._reservation_view(existing),
+            }
+        execution = self._remediation_repository.get_execution(
+            execution_id=existing.execution_id,
+        )
+        if execution is None or not self._execution_matches(
+            execution=execution, reservation=existing, plan=plan, action=action,
+        ):
+            return {
+                "outcome": "deny",
+                "error": "completed_reservation_execution_binding_mismatch",
+                "reservation": self._reservation_view(existing),
+            }
+        response = {
+            "outcome": decision.outcome.value if decision is not None else "auto_execute",
+            "idempotent": True,
+            "reservation": self._reservation_view(existing),
+            "execution": execution,
+            "execution_id": execution.execution_id,
+        }
+        if decision is not None:
+            response["decision"] = decision
+        return response
+
+    @staticmethod
+    def _reservation_lease_stale(reservation, *, now) -> bool:
+        if reservation.status not in {"reserved", "in_progress"}:
+            return False
+        expires_at = getattr(reservation, "expires_at", None)
+        if expires_at is None:
+            return False
+        if expires_at.tzinfo is None and now.tzinfo is not None:
+            expires_at = expires_at.replace(tzinfo=now.tzinfo)
+        return expires_at <= now
+
+    @staticmethod
+    def _reservation_matches(*, reservation, plan, action, idempotency_key: str) -> bool:
+        return (
+            reservation.idempotency_key == idempotency_key
+            and reservation.plan_id == plan.plan_id
+            and reservation.plan_fingerprint == plan.plan_fingerprint
+            and reservation.server_id == plan.server_id
+            and reservation.action_type == action.action_type
+            and reservation.target == action.target
+        )
+
+    @staticmethod
+    def _execution_matches(*, execution, reservation, plan, action) -> bool:
+        return (
+            execution.execution_id == reservation.execution_id
+            and execution.idempotency_key == reservation.idempotency_key
+            and execution.plan_id == plan.plan_id
+            and execution.server_id == plan.server_id
+            and execution.action_id == (action.action_id or action.action_type)
+        )
 
     def candidates(self):
         return self._candidate_service.list_candidates()
@@ -172,18 +382,87 @@ class AutonomousExecutionService:
             "status": reservation.status,
             "policy_id": reservation.policy_id,
             "plan_id": reservation.plan_id,
+            "plan_fingerprint": reservation.plan_fingerprint,
+            "server_id": reservation.server_id,
+            "action_type": reservation.action_type,
+            "target": reservation.target,
             "authorization_id": reservation.authorization_id,
             "execution_id": reservation.execution_id,
         }
 
-    def _record_runtime(self, policy, decision, success: bool, execution_id: str | None):
-        current = self._repository.get_runtime_state(policy.policy_id)
-        failures = 0 if success else int(current.consecutive_failures) + 1
-        updates = {"last_execution_at": utc_now(), "consecutive_failures": failures}
-        if not success and policy.auto_suspend_on_failure:
-            updates.update({"suspended_at": utc_now(), "suspension_reason": "execution_failure", "triggering_execution_id": execution_id, "triggering_decision_id": decision.decision_id})
-            self._policy_service.suspend(policy.policy_id, reason="execution_failure")
-        self._repository.update_runtime_state(policy.policy_id, **updates)
+    def _record_runtime(
+        self, policy, decision, success: bool, execution_id: str | None,
+        *, failure_key: str | None = None,
+    ):
+        """Record one terminal result with DB-side dedupe and breaker trip.
+
+        The SSH/MCP call has already ended before this method runs.  The
+        repository transaction therefore stays short and can safely lock the
+        policy/runtime rows while concurrent workers finalize the same result.
+        """
+        if success:
+            recorder = getattr(self._repository, "record_autonomous_success", None)
+            if recorder is not None:
+                try:
+                    return recorder(policy_id=policy.policy_id, policy_version=getattr(decision, "policy_version", None))
+                except OperationalError:
+                    # Legacy unit schemas may omit the additive Phase 7
+                    # policy table; retain their runtime-only compatibility.
+                    pass
+            return self._repository.update_runtime_state(
+                policy.policy_id, last_execution_at=utc_now(), consecutive_failures=0,
+                triggering_execution_id=None, triggering_decision_id=None,
+            )
+
+        recorder = getattr(self._repository, "record_autonomous_failure", None)
+        if recorder is None:
+            current = self._repository.get_runtime_state(policy.policy_id)
+            return self._repository.update_runtime_state(
+                policy.policy_id, last_execution_at=utc_now(),
+                consecutive_failures=int(current.consecutive_failures) + 1,
+                suspended_at=utc_now() if getattr(policy, "auto_suspend_on_failure", False) else None,
+                suspension_reason="execution_failure" if getattr(policy, "auto_suspend_on_failure", False) else None,
+                triggering_execution_id=execution_id or failure_key,
+                triggering_decision_id=getattr(decision, "decision_id", None),
+            )
+
+        try:
+            runtime, counted, tripped, stale_policy = recorder(
+                policy_id=policy.policy_id,
+                policy_version=getattr(decision, "policy_version", None),
+                failure_key=failure_key or execution_id or getattr(decision, "decision_id", None),
+                decision_id=getattr(decision, "decision_id", None),
+                execution_id=execution_id,
+            )
+        except OperationalError:
+            current = self._repository.get_runtime_state(policy.policy_id)
+            return self._repository.update_runtime_state(
+                policy.policy_id, last_execution_at=utc_now(),
+                consecutive_failures=int(current.consecutive_failures) + 1,
+                triggering_execution_id=execution_id or failure_key,
+                triggering_decision_id=getattr(decision, "decision_id", None),
+            )
+        if counted:
+            self._audit(decision.plan_id, "autonomous_runtime_failure_recorded", {
+                "policy_id": policy.policy_id,
+                "policy_version": getattr(decision, "policy_version", None),
+                "failure_key": failure_key or execution_id,
+                "execution_id": execution_id,
+                "consecutive_failures": runtime.consecutive_failures,
+            })
+        if tripped:
+            self._audit(decision.plan_id, "autonomous_circuit_breaker_tripped", {
+                "policy_id": policy.policy_id,
+                "policy_version": getattr(decision, "policy_version", None),
+                "consecutive_failures": runtime.consecutive_failures,
+                "threshold": getattr(policy, "max_consecutive_failures", 1),
+            })
+            self._audit(decision.plan_id, "autonomous_policy_suspended", {
+                "policy_id": policy.policy_id,
+                "policy_version": getattr(decision, "policy_version", None),
+                "reason": "consecutive_failure_threshold",
+            })
+        return runtime
 
     @staticmethod
     def _single_action(plan):

@@ -27,12 +27,12 @@ ACTION_TYPE = "start_service"
 ACCEPTANCE_ACTOR = "phase7-real-acceptance"
 
 
-def _load_operational_runtime_env() -> None:
-    """Load only the existing operational connection settings from .env."""
+def _load_operational_runtime_env(env_path: Path | None = None) -> None:
+    """Load operational settings, preserving explicit process environment values."""
     from dotenv import dotenv_values
 
-    env_path = Path(__file__).resolve().parents[2] / ".env"
-    values = dotenv_values(env_path)
+    resolved_env_path = env_path or Path(__file__).resolve().parents[2] / ".env"
+    values = dotenv_values(resolved_env_path)
     required = (
         "POSTGRES_HOST",
         "POSTGRES_PORT",
@@ -41,17 +41,21 @@ def _load_operational_runtime_env() -> None:
         "POSTGRES_PASSWORD",
         "SSH_KNOWN_HOSTS_PATH",
     )
-    missing = [key for key in required if not str(values.get(key) or "").strip()]
+    for key in (*required, "DEFAULT_SSH_PRIVATE_KEY_PATH"):
+        current = str(os.environ.get(key) or "").strip()
+        if current:
+            continue
+
+        fallback = str(values.get(key) or "").strip()
+        if fallback:
+            os.environ[key] = fallback
+
+    missing = [key for key in required if not str(os.environ.get(key) or "").strip()]
     if missing:
         pytest.fail(
             "PHASE7_REAL_ACCEPTANCE = BLOCKED_BY_SAFE_TEST_ENVIRONMENT: missing "
             + ", ".join(missing)
         )
-
-    for key in (*required, "DEFAULT_SSH_PRIVATE_KEY_PATH"):
-        value = str(values.get(key) or "").strip()
-        if value:
-            os.environ[key] = value
 
 
 def _require_acceptance_environment() -> None:
@@ -407,6 +411,31 @@ def _assert_supervised_execution(container, plan, approval, label: str):
     return execution, rollback
 
 
+def _assert_history_delta(baseline, current) -> None:
+    """Require exactly three new clean supervised executions over the baseline."""
+    assert current.supervised_execution_count == baseline.supervised_execution_count + 3
+    assert current.successful_execution_count == baseline.successful_execution_count + 3
+    assert current.verified_success_count == baseline.verified_success_count + 3
+    assert current.failed_execution_count == baseline.failed_execution_count
+    assert current.verification_failure_count == baseline.verification_failure_count
+    assert current.rollback_failure_count == baseline.rollback_failure_count
+
+
+def _assert_candidate_delta(baseline, current) -> None:
+    """Require candidate counts to include three new successes without new failures."""
+    baseline_execution_count = baseline.execution_count if baseline else 0
+    baseline_verified_success_count = baseline.verified_success_count if baseline else 0
+    baseline_failure_count = baseline.failure_count if baseline else 0
+    baseline_rollback_failure_count = baseline.rollback_failure_count if baseline else 0
+    assert current.execution_count == baseline_execution_count + 3
+    assert current.verified_success_count == baseline_verified_success_count + 3
+    assert current.failure_count == baseline_failure_count
+    assert current.rollback_failure_count == baseline_rollback_failure_count
+    assert current.success_rate == (
+        (current.execution_count - current.failure_count) / current.execution_count
+    )
+
+
 def _restore_active_plans(container, plan_ids: list[str]) -> list[str]:
     """Use only the bounded project rollback path during failure cleanup."""
     errors = []
@@ -462,6 +491,21 @@ def test_phase7_real_autonomous_remediation_acceptance():
     result = None
     try:
         investigation_id, claim_id, evidence_id, issue_fingerprint = _persist_acceptance_investigation(container)
+        baseline_history = container.autonomous_execution_service.history(
+            issue_fingerprint=issue_fingerprint,
+            action_type=ACTION_TYPE,
+            target=SERVICE_NAME,
+        )
+        baseline_candidate = next(
+            (
+                item
+                for item in container.autonomous_candidate_service.list_candidates()
+                if item.issue_fingerprint == issue_fingerprint
+                and item.action_type == ACTION_TYPE
+                and item.target == SERVICE_NAME
+            ),
+            None,
+        )
 
         supervised_plans = []
         for index in range(1, 4):
@@ -496,12 +540,7 @@ def test_phase7_real_autonomous_remediation_acceptance():
             action_type=ACTION_TYPE,
             target=SERVICE_NAME,
         )
-        assert history.supervised_execution_count == 3
-        assert history.successful_execution_count == 3
-        assert history.verified_success_count == 3
-        assert history.failed_execution_count == 0
-        assert history.verification_failure_count == 0
-        assert history.rollback_failure_count == 0
+        _assert_history_delta(baseline_history, history)
 
         candidates = container.autonomous_candidate_service.list_candidates()
         candidate = next(
@@ -515,11 +554,7 @@ def test_phase7_real_autonomous_remediation_acceptance():
             None,
         )
         assert candidate is not None
-        assert candidate.execution_count == 3
-        assert candidate.verified_success_count == 3
-        assert candidate.failure_count == 0
-        assert candidate.rollback_failure_count == 0
-        assert candidate.success_rate == 1.0
+        _assert_candidate_delta(baseline_candidate, candidate)
         assert "eligible_for_policy_review" in candidate.reason_codes
 
         policy = container.autonomous_policy_service.create(

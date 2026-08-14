@@ -37,7 +37,9 @@ class AutonomousPolicyService:
 
     def enable(self, policy_id: str):
         current = self._require(policy_id)
-        return self._repository.update_policy(policy_id, updates={"status": AutonomousPolicyStatus.ENABLED.value}, version=current.version)
+        result = self._repository.resume_policy(policy_id)
+        self._audit_policy(result, "autonomous_policy_enabled", {"previous_status": current.status})
+        return result
 
     def disable(self, policy_id: str):
         current = self._require(policy_id)
@@ -45,11 +47,20 @@ class AutonomousPolicyService:
 
     def suspend(self, policy_id: str, *, reason: str):
         current = self._require(policy_id)
-        return self._repository.update_policy(policy_id, updates={"status": AutonomousPolicyStatus.SUSPENDED.value}, version=current.version)
+        result = self._repository.update_policy(policy_id, updates={"status": AutonomousPolicyStatus.SUSPENDED.value}, version=current.version)
+        self._audit_policy(result, "autonomous_policy_suspended", {"reason": reason, "operator": True})
+        return result
 
     def resume(self, policy_id: str):
         current = self._require(policy_id)
-        return self._repository.update_policy(policy_id, updates={"status": AutonomousPolicyStatus.ENABLED.value}, version=current.version)
+        result = self._repository.resume_policy(policy_id)
+        self._audit_policy(result, "autonomous_policy_resumed", {"new_runtime_epoch": True})
+        return result
+
+    def _audit_policy(self, policy, event_type: str, payload: dict) -> None:
+        append = getattr(self._repository, "append_policy_audit_event", None)
+        if append is not None:
+            append(policy_id=policy.policy_id, policy_version=policy.version, event_type=event_type, payload=payload)
 
     def _require(self, policy_id: str):
         current = self._repository.get_policy(policy_id)

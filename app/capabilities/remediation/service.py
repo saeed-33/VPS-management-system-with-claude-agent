@@ -257,7 +257,11 @@ class RemediationService:
             check = runtime_check or self._sandbox_runtime.check()
             if not check.available:
                 raise ValueError(f"native_sandbox_unavailable:{check.reason}")
-            base["validation_metadata"] = {"runtime": check.runtime, "runtime_evidence": check.evidence}
+            base["validation_metadata"] = {
+                "runtime": check.runtime,
+                "runtime_available": check.available,
+                "runtime_evidence": check.evidence,
+            }
             self._audit(plan, "sandbox_validation_started", {"validation_id": validation_id})
             before = self._collect_evidence(plan=plan, execution_id=validation_id, server_id=target_server_id,
                                              service=target_service, phase="sandbox_before")
@@ -312,7 +316,10 @@ class RemediationService:
 
     def _finish_sandbox_validation(self, plan, data: dict, event_type: str | None):
         data["finished_at"] = utc_now()
-        model = self._repository.create_sandbox_validation(**data)
+        model = self._repository.finalize_sandbox_validation(**data)
+        if data.get("status") == SandboxValidationStatus.PASSED.value and model.status != SandboxValidationStatus.PASSED.value:
+            event = "sandbox_validation_stale" if model.status == SandboxValidationStatus.STALE.value else "sandbox_validation_failed"
+            self._audit(plan, event, {"validation_id": model.validation_id, "reason": model.failure_reason})
         if event_type:
             self._audit(plan, event_type, {"validation_id": model.validation_id})
         return model

@@ -51,10 +51,10 @@ issue fingerprint never falls back to `plan_fingerprint`: Phase 7 returns
 remediation remains available. Legacy plans are readable but are excluded
 from autonomous history and candidate aggregation.
 
-The five additive tables are created by
+The six additive tables are created by
 `app/infrastructure/database/migrations/step_7_1_autonomous_remediation.sql`.
 `tools/bootstrap_database.py --verify-only` is the schema check and reports
-29/29 tables in the current project database.
+30/30 tables in the current project database.
 
 ## Deterministic gates
 
@@ -67,3 +67,11 @@ rollback-failure rates, cooldown/rate limits, and no circuit-breaker pause.
 Missing policy falls back to human approval only when the safety baseline is
 present. Missing or failed sandbox, ambiguous policy, stale binding, and all
 hard-deny conditions remain denied.
+
+V1 uses a consecutive-failure circuit breaker with a default threshold of
+one and `auto_suspend_on_failure=true`. The terminal execution path records
+the failure atomically with runtime state and policy suspension; the
+reservation is not held open during SSH, verification, or rollback. A
+successful execution resets the runtime count only in an enabled operator
+epoch. Operator resume is explicit, durable, and audited; changing the
+global switch never resumes a suspended policy.

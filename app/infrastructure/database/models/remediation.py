@@ -506,3 +506,22 @@ class AutonomousPolicyRuntimeStateModel(Base):
     triggering_execution_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     triggering_decision_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+
+class AutonomousPolicyAuditEventModel(Base):
+    """Durable audit record for operator-level autonomous policy changes."""
+
+    __tablename__ = "autonomous_policy_audit_events"
+    __table_args__ = (
+        Index("ix_autonomous_policy_audit_policy_created", "policy_id", "created_at"),
+        Index("ix_autonomous_policy_audit_event_type", "event_type"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    policy_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    policy_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    event_type: Mapped[str] = mapped_column(String(80), nullable=False)
+    actor: Mapped[str] = mapped_column(String(120), nullable=False, default="admin")
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)

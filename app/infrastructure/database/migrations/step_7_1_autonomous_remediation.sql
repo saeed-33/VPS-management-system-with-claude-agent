@@ -90,3 +90,19 @@ CREATE TABLE IF NOT EXISTS autonomous_policy_runtime_state (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_autonomous_runtime_policy ON autonomous_policy_runtime_state(policy_id);
+
+-- Policy-level events have no remediation plan foreign key. Execution events
+-- remain in remediation_audit_events; these records cover operator actions
+-- such as resume/enable and preserve the policy epoch independently.
+CREATE TABLE IF NOT EXISTS autonomous_policy_audit_events (
+    id BIGSERIAL PRIMARY KEY,
+    event_id VARCHAR(64) NOT NULL UNIQUE,
+    policy_id VARCHAR(64) NOT NULL,
+    policy_version INTEGER NOT NULL,
+    event_type VARCHAR(80) NOT NULL,
+    actor VARCHAR(120) NOT NULL DEFAULT 'admin',
+    payload JSON NOT NULL DEFAULT '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_autonomous_policy_audit_policy_created ON autonomous_policy_audit_events(policy_id, created_at);
+CREATE INDEX IF NOT EXISTS ix_autonomous_policy_audit_event_type ON autonomous_policy_audit_events(event_type);

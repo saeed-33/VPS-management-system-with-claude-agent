@@ -36,6 +36,10 @@ class AutonomousAuthorizationService:
             consumed_at=getattr(consumed, "consumed_at", utc_now()),
         )
 
+    def get(self, authorization_id: str) -> AutonomousAuthorization:
+        """Load an existing authorization for crash recovery without issuing another one."""
+        return self._authorization_by_id(authorization_id)
+
     def _authorization_by_id(self, authorization_id: str) -> AutonomousAuthorization:
         model = self._repository.get_authorization(authorization_id)
         if model is None:
