@@ -230,6 +230,7 @@ async function loadProfileEditor(profile) {
                     <button
                         type="button"
                         class="button button-primary"
+                        data-required-permission="profile.write"
                         onclick="assignCommandToProfile()"
                     >
                         إضافة
@@ -245,6 +246,7 @@ async function loadProfileEditor(profile) {
                             ? "button-warning"
                             : "button-success"
                     } button-sm"
+                    data-required-permission="profile.write"
                     onclick="toggleProfileStatus(
                         ${profile.id},
                         ${profile.enabled}
@@ -260,6 +262,7 @@ async function loadProfileEditor(profile) {
                 <button
                     type="button"
                     class="button button-danger button-sm"
+                    data-required-permission="profile.write"
                     onclick="deleteProfile(${profile.id})"
                 >
                     حذف الملف

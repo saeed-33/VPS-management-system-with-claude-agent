@@ -20,7 +20,8 @@ from app.interfaces.admin.api import (
     remediation_router,
     autonomous_remediation_router,
 )
-from app.interfaces.admin.web import router as web_router
+from app.interfaces.admin.auth import AdminAuthMiddleware, AdminAuthService
+from app.interfaces.admin.web import auth_router, router as web_router
 from app.composition import container
 from app.core.config import settings
 from app.infrastructure.database.engine import (
@@ -145,6 +146,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+admin_auth_service = AdminAuthService()
+app.state.admin_auth_service = admin_auth_service
+app.add_middleware(
+    AdminAuthMiddleware,
+    auth_service=admin_auth_service,
+)
+
 
 app.mount(
     "/static",
@@ -155,6 +163,7 @@ app.mount(
 )
 
 
+app.include_router(auth_router)
 app.include_router(web_router)
 app.include_router(servers_router)
 app.include_router(commands_router)

@@ -51,10 +51,12 @@ issue fingerprint never falls back to `plan_fingerprint`: Phase 7 returns
 remediation remains available. Legacy plans are readable but are excluded
 from autonomous history and candidate aggregation.
 
-The six additive tables are created by
+The six additive autonomous tables are created by
 `app/infrastructure/database/migrations/step_7_1_autonomous_remediation.sql`.
+The three additive Admin authentication tables are created by
+`app/infrastructure/database/migrations/step_8_1_admin_auth.sql`.
 `tools/bootstrap_database.py --verify-only` is the schema check and reports
-30/30 tables in the current project database.
+33/33 tables in the current project database.
 
 ## Deterministic gates
 

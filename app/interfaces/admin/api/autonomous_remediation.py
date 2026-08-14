@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
 from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
@@ -19,10 +19,18 @@ from app.interfaces.mcp.serializers import serialize_value
 router = APIRouter(prefix="/api/autonomous-remediation", tags=["autonomous-remediation"])
 
 
+def _actor(request: Request, fallback: str) -> str:
+    principal = getattr(request.state, "admin_user", None)
+    return principal.username if principal is not None else fallback
+
+
 @router.post("/policies")
-def create_policy(payload: AutonomousPolicyRequest, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+def create_policy(request: Request, payload: AutonomousPolicyRequest, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
     try:
-        return serialize_value(service.create(**payload.model_dump()))
+        values = payload.model_dump()
+        values["created_by"] = _actor(request, values.get("created_by", "admin"))
+        values["updated_by"] = values["created_by"]
+        return serialize_value(service.create(**values))
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -41,9 +49,11 @@ def get_policy(policy_id: str, service: AutonomousPolicyService = Depends(get_au
 
 
 @router.patch("/policies/{policy_id}")
-def update_policy(policy_id: str, payload: AutonomousPolicyUpdateRequest, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+def update_policy(policy_id: str, request: Request, payload: AutonomousPolicyUpdateRequest, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
     try:
-        return serialize_value(service.update(policy_id, **payload.model_dump(exclude_none=True)))
+        updates = payload.model_dump(exclude_none=True)
+        updates["updated_by"] = _actor(request, updates.get("updated_by", "admin"))
+        return serialize_value(service.update(policy_id, **updates))
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

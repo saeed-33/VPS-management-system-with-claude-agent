@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.capabilities.remediation.service import RemediationService
 from app.interfaces.admin.dependencies import get_remediation_service
@@ -15,6 +15,11 @@ from app.interfaces.mcp.serializers import serialize_value
 
 
 router = APIRouter(prefix="/api/remediation", tags=["remediation"])
+
+
+def _actor(request: Request, fallback: str | None) -> str | None:
+    principal = getattr(request.state, "admin_user", None)
+    return principal.username if principal is not None else fallback
 
 
 @router.get("")
@@ -81,6 +86,7 @@ def validate_remediation_in_sandbox(
 def approve_remediation(
     plan_id: str,
     approval_id: str,
+    request: Request,
     payload: ApprovalDecisionRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
@@ -88,7 +94,7 @@ def approve_remediation(
         existing = service.get_approval(approval_id)
         if existing is None or existing.plan_id != plan_id:
             raise ValueError("Approval does not belong to this plan.")
-        approval = service.approve(approval_id=approval_id, approver=payload.approver, comment=payload.comment, scope=payload.scope)
+        approval = service.approve(approval_id=approval_id, approver=_actor(request, payload.approver), comment=payload.comment, scope=payload.scope)
         return serialize_value(approval)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -98,6 +104,7 @@ def approve_remediation(
 def reject_remediation(
     plan_id: str,
     approval_id: str,
+    request: Request,
     payload: ApprovalDecisionRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
@@ -105,7 +112,7 @@ def reject_remediation(
         existing = service.get_approval(approval_id)
         if existing is None or existing.plan_id != plan_id:
             raise ValueError("Approval does not belong to this plan.")
-        approval = service.reject(approval_id=approval_id, approver=payload.approver, comment=payload.comment)
+        approval = service.reject(approval_id=approval_id, approver=_actor(request, payload.approver), comment=payload.comment)
         return serialize_value(approval)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -114,11 +121,14 @@ def reject_remediation(
 @router.post("/{plan_id}/execute")
 def execute_remediation(
     plan_id: str,
+    request: Request,
     payload: ExecuteRemediationRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
     try:
-        outcome = service.apply_approved(plan_id=plan_id, **payload.model_dump())
+        values = payload.model_dump()
+        values["actor"] = _actor(request, values["actor"])
+        outcome = service.apply_approved(plan_id=plan_id, **values)
         if not outcome.get("applied"):
             raise HTTPException(status_code=409, detail=outcome)
         return serialize_value(outcome)
@@ -131,11 +141,14 @@ def execute_remediation(
 @router.post("/{plan_id}/rollback")
 def rollback_remediation(
     plan_id: str,
+    request: Request,
     payload: RollbackRemediationRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
     try:
-        outcome = service.rollback(plan_id=plan_id, **payload.model_dump())
+        values = payload.model_dump()
+        values["actor"] = _actor(request, values["actor"])
+        outcome = service.rollback(plan_id=plan_id, **values)
         if not outcome.get("rolled_back"):
             raise HTTPException(status_code=409, detail=outcome)
         return serialize_value(outcome)

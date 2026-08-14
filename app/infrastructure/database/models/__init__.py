@@ -5,6 +5,11 @@ from app.infrastructure.database.models.knowledge_document import (
 from app.infrastructure.database.models.agent_job import (
     AgentJobModel,
 )
+from app.infrastructure.database.models.admin_auth import (
+    AdminAuthAuditEventModel,
+    AdminSessionModel,
+    AdminUserModel,
+)
 from app.infrastructure.database.models.remediation import (
     RemediationApprovalModel,
     RemediationAuditEventModel,
@@ -79,6 +84,9 @@ __all__ = [
     "KnowledgeDocumentModel",
     "KnowledgeChunkModel",
     "AgentJobModel",
+    "AdminUserModel",
+    "AdminSessionModel",
+    "AdminAuthAuditEventModel",
     "RemediationPlanModel",
     "RemediationSandboxResultModel",
     "RemediationApprovalModel",

@@ -2,7 +2,8 @@
 
 1. Apply `app/infrastructure/database/migrations/step_7_1_autonomous_remediation.sql`.
 2. Run `uv run python tools/bootstrap_database.py --verify-only` and require
-   `Tables: 30/30` and `Schema verification: PASS`.
+   `Tables: 33/33` and `Schema verification: PASS` after the additive Admin
+   authentication migration has been applied.
 3. Keep `AUTOMATIC_REMEDIATION_ALLOWED=false` until a named low-risk policy,
    explicit service target, rollback path, and verified supervised history are
    reviewed by an operator.

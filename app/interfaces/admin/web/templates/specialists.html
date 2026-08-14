@@ -39,6 +39,7 @@
         <form
             id="specialist-form"
             class="form-grid"
+            data-required-permission="specialist.write"
         >
             <input
                 id="specialist-id"
@@ -413,6 +414,7 @@ function renderSpecialists() {
                     <button
                         class="button button-secondary button-sm"
                         type="button"
+                        data-required-permission="specialist.write"
                         onclick="editSpecialist(${item.id})"
                     >
                         تعديل
@@ -421,6 +423,7 @@ function renderSpecialists() {
                     <button
                         class="button button-secondary button-sm"
                         type="button"
+                        data-required-permission="specialist.write"
                         onclick="toggleSpecialist(${item.id}, ${!item.enabled})"
                     >
                         ${item.enabled ? "تعطيل" : "تفعيل"}
@@ -429,6 +432,7 @@ function renderSpecialists() {
                     <button
                         class="button button-secondary button-sm"
                         type="button"
+                        data-required-permission="specialist.write"
                         onclick="deleteSpecialist(${item.id})"
                     >
                         حذف

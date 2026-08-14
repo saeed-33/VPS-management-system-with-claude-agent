@@ -33,7 +33,7 @@
     </header>
 
     <div class="panel-body">
-        <form id="server-form" class="form-grid">
+        <form id="server-form" class="form-grid" data-required-permission="server.write">
             <div class="form-group">
                 <label for="server-name" class="form-label">
                     اسم السيرفر
@@ -180,6 +180,7 @@
         <form
             id="edit-server-form"
             class="modal-body form-grid"
+            data-required-permission="server.write"
         >
             <input
                 id="edit-server-id"

@@ -142,6 +142,17 @@ class Settings(BaseSettings):
 
     database_echo: bool = False
 
+    # Admin authentication is intentionally independent from Claude/MCP.
+    # An empty secret creates a process-local secret, which invalidates all
+    # sessions after restart; deployments should configure a stable secret.
+    admin_session_secret: str = ""
+    admin_session_cookie_name: str = "admin_session"
+    admin_session_ttl_seconds: int = Field(
+        default=8 * 60 * 60,
+        ge=300,
+    )
+    admin_session_secure: bool = False
+
     @model_validator(mode="after")
     def validate_rag_policy(self) -> "Settings":
         if (

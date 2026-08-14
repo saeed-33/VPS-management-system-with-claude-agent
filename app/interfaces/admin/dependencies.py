@@ -1,3 +1,5 @@
+from fastapi import Request
+
 from app.runtime.claude.observability import (
     ClaudeAgentObservabilityService,
 )
@@ -38,6 +40,11 @@ from app.capabilities.remediation.autonomous_candidate_service import Autonomous
 from app.capabilities.remediation.autonomous_execution_service import AutonomousExecutionService
 from app.infrastructure.database.repositories.analysis_repository import (
     AnalysisRepository,
+)
+from app.interfaces.admin.auth import (
+    AdminAuthService,
+    AdminPrincipal,
+    get_admin_principal,
 )
 
 
@@ -117,6 +124,14 @@ def get_autonomous_candidate_service() -> AutonomousCandidateService:
 
 def get_autonomous_execution_service() -> AutonomousExecutionService:
     return container.autonomous_execution_service
+
+
+def get_admin_auth_service(request: Request) -> AdminAuthService:
+    return request.app.state.admin_auth_service
+
+
+def get_current_admin(request: Request) -> AdminPrincipal:
+    return get_admin_principal(request)
 
 def get_claude_agent_observability_service(
 ) -> ClaudeAgentObservabilityService:

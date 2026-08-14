@@ -164,6 +164,7 @@ console.log("Servers page script loaded");
                         <div class="table-actions">
     <button
         class="button button-secondary button-sm"
+        data-required-permission="server.write"
         onclick="openEditServerModal(${server.id})"
     >
         تعديل
@@ -174,6 +175,7 @@ console.log("Servers page script loaded");
                         ? "button-warning"
                         : "button-success"
                     } button-sm"
+        data-required-permission="monitoring.control"
         onclick="toggleMonitoring(
             ${server.id},
             ${server.monitor_enabled}
@@ -187,6 +189,7 @@ console.log("Servers page script loaded");
 
     <button
         class="button button-secondary button-sm"
+        data-required-permission="monitoring.control"
         onclick="testServer(${server.id})"
     >
         اختبار SSH
@@ -194,6 +197,7 @@ console.log("Servers page script loaded");
 
     <button
         class="button button-danger button-sm"
+        data-required-permission="server.write"
         onclick="deleteServer(${server.id})"
     >
         حذف

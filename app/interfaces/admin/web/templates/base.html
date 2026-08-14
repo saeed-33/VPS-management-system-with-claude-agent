@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="light">
+{% set admin_user = request.state.admin_user|default(None) %}
+{% set admin_csrf_token = request.state.admin_csrf_token|default("") %}
 <head>
     <meta charset="UTF-8">
 
@@ -11,6 +13,11 @@
     <meta
         name="description"
         content="AI VPS Management Dashboard"
+    >
+
+    <meta
+        name="csrf-token"
+        content="{{ admin_csrf_token }}"
     >
 
     <title>
@@ -324,9 +331,18 @@
                     </span>
 
                     <div class="profile-details">
-                        <strong>Administrator</strong>
-                        <small>System Owner</small>
+                        <strong>{{ admin_user.username if admin_user else "Unauthenticated" }}</strong>
+                        <small>{{ admin_user.role if admin_user else "Login required" }}</small>
                     </div>
+
+                    {% if admin_user %}
+                    <form method="post" action="/logout" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="{{ admin_csrf_token }}">
+                        <button class="button button-secondary button-sm" type="submit">Logout</button>
+                    </form>
+                    {% else %}
+                    <a class="button button-secondary button-sm" href="/login">Login</a>
+                    {% endif %}
                 </div>
             </div>
         </header>
@@ -341,6 +357,14 @@
     id="toast-container"
     class="toast-container"
 ></div>
+
+<script>
+window.ADMIN_CONTEXT = {{ {
+    "username": admin_user.username if admin_user else None,
+    "role": admin_user.role if admin_user else None,
+    "permissions": (admin_user.permissions | list) if admin_user else []
+} | tojson }};
+</script>
 
 <script src="/static/js/app.js"></script>
 

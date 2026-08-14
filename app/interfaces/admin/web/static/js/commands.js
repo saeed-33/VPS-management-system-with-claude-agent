@@ -202,6 +202,7 @@ function renderCommandRow(command) {
                     <button
                         type="button"
                         class="button button-secondary button-sm"
+                        data-required-permission="command.write"
                         onclick="openEditCommandModal(${command.id})"
                     >
                         تعديل
@@ -214,6 +215,7 @@ function renderCommandRow(command) {
                                 ? "button-warning"
                                 : "button-success"
                         } button-sm"
+                        data-required-permission="command.write"
                         onclick="toggleCommand(
                             ${command.id},
                             ${command.enabled}
@@ -229,6 +231,7 @@ function renderCommandRow(command) {
                     <button
                         type="button"
                         class="button button-danger button-sm"
+                        data-required-permission="command.write"
                         onclick="deleteCommand(${command.id})"
                     >
                         حذف

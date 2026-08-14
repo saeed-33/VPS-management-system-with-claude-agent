@@ -1,5 +1,51 @@
 console.log("Global app.js loaded");
 
+const adminContext =
+    window.ADMIN_CONTEXT || {
+        permissions: []
+    };
+
+function hasAdminPermission(permission) {
+    return (adminContext.permissions || []).includes(permission);
+}
+
+function applyPermissionVisibility() {
+    document
+        .querySelectorAll("[data-required-permission]")
+        .forEach(element => {
+            if (!hasAdminPermission(element.dataset.requiredPermission)) {
+                element.hidden = true;
+                element.setAttribute("aria-hidden", "true");
+            }
+        });
+
+    const dynamicPermissionSelectors = [
+        ["[onclick^=\"openEditServerModal\"]", "server.write"],
+        ["[onclick^=\"toggleMonitoring\"]", "monitoring.control"],
+        ["[onclick^=\"testServer\"]", "monitoring.control"],
+        ["[onclick^=\"deleteServer\"]", "server.write"],
+        ["[onclick^=\"openEditCommandModal\"]", "command.write"],
+        ["[onclick^=\"toggleCommand\"]", "command.write"],
+        ["[onclick^=\"deleteCommand\"]", "command.write"],
+        ["[onclick^=\"toggleProfileStatus\"]", "profile.write"],
+        ["[onclick^=\"deleteProfile\"]", "profile.write"],
+        ["[onclick^=\"editSource\"]", "knowledge.write"],
+        ["[onclick^=\"toggleSource\"]", "knowledge.write"],
+        ["[onclick^=\"deleteSource\"]", "knowledge.write"],
+        ["[onclick^=\"editSpecialist\"]", "specialist.write"],
+        ["[onclick^=\"toggleSpecialist\"]", "specialist.write"],
+        ["[onclick^=\"deleteSpecialist\"]", "specialist.write"]
+    ];
+    dynamicPermissionSelectors.forEach(([selector, permission]) => {
+        if (!hasAdminPermission(permission)) {
+            document.querySelectorAll(selector).forEach(element => {
+                element.hidden = true;
+                element.setAttribute("aria-hidden", "true");
+            });
+        }
+    });
+}
+
 const htmlElement = document.documentElement;
 const sidebar = document.getElementById("sidebar");
 const sidebarOverlay =
@@ -121,6 +167,16 @@ async function apiRequest(
             ...(options.headers || {})
         }
     };
+
+    const method = (requestOptions.method || "GET").toUpperCase();
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+        const csrf = document.querySelector(
+            'meta[name="csrf-token"]'
+        )?.content;
+        if (csrf) {
+            requestOptions.headers["X-CSRF-Token"] = csrf;
+        }
+    }
 
     const response = await fetch(
         url,
@@ -258,3 +314,12 @@ window.formatDuration = formatDuration;
 window.statusBadge = statusBadge;
 window.showToast = showToast;
 window.apiRequest = apiRequest;
+window.hasAdminPermission = hasAdminPermission;
+window.applyPermissionVisibility = applyPermissionVisibility;
+
+applyPermissionVisibility();
+
+new MutationObserver(applyPermissionVisibility).observe(
+    document.documentElement,
+    {childList: true, subtree: true}
+);
