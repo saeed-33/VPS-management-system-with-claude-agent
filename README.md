@@ -1,9 +1,10 @@
 # AI VPS Management
 
-AI-assisted Linux VPS monitoring, investigation, and supervised diagnostic
-operations. The application collects reports over verified SSH, persists
-analysis and evidence in PostgreSQL, and exposes a bounded project MCP surface
-to Claude Code.
+`Safe Autonomous AI Agent for VPS Management` is an operational platform for
+monitoring Linux VPS instances, investigating incidents, producing grounded
+diagnoses, and applying only registered, policy-controlled remediation.
+Claude Code supplies supervisory reasoning; Python remains authoritative for
+validation, permissions, persistence, Evidence, SSH safety, and execution.
 
 ## Current status
 
@@ -16,14 +17,17 @@ C.14.13: PASS
 C.14.14: PASS
 Phase C: COMPLETE / CLOSED
 Phase 5: COMPLETE / CLOSED
-Phase 6: IMPLEMENTED / NOT CLOSED
+Phase 6: IMPLEMENTED / LIVE ACCEPTANCE EVIDENCE REQUIRES RECONCILIATION
+Phase 7: IMPLEMENTED / LIVE ACCEPTANCE EVIDENCE NOT PRESENT IN REPOSITORY
 automatic_remediation_allowed: false
 provider: ollama
 ```
 
-Phase 5 is accepted and closed. Phase 6 is implemented but its readiness is
-`blocked_by_sandbox_runtime` until real WSL2 Claude-native sandbox evidence is
-available. Automatic remediation remains disabled.
+Phase 5 is closed. Phase 6 is implemented and has passing deterministic
+coverage, but the repository contains conflicting live-acceptance records and
+must not be described as closed until that evidence is reconciled. Phase 7 is
+implemented and fail-closed, but no standalone live acceptance result is
+stored in the repository. Automatic remediation remains disabled by default.
 
 ## Current architecture
 
@@ -45,7 +49,7 @@ Claude decides WHAT / NEXT.
 Python decides WHETHER ALLOWED and HOW IT IS EXECUTED SAFELY.
 ```
 
-Canonical application packages are:
+Canonical application packages and responsibilities are:
 
 ```text
 app/core             contracts, configuration, policy, and safety rules
@@ -54,6 +58,28 @@ app/runtime/claude   native Claude session, jobs, and observability
 app/interfaces       Admin HTTP/Web and project MCP interfaces
 app/infrastructure   PostgreSQL, SSH, and Ollama adapters
 app/composition      dependency wiring and application bootstrap
+```
+
+The repository also contains `app/infrastructure/llm/ollama` for operational
+LLM/embedding adapters, `app/infrastructure/ssh` for known-hosts SSH and
+bounded named command execution, and `app/infrastructure/database` for the
+PostgreSQL engine, models, repositories, and additive migrations.
+
+## Repository tree
+
+```text
+app/core                         contracts, settings, policies, safety
+app/capabilities                 monitoring, analysis, knowledge, investigation, remediation
+app/runtime/claude               Claude sessions, jobs, parsing, observability
+app/interfaces/admin             authenticated Admin API, Web UI, RBAC
+app/interfaces/mcp               bounded Claude-facing MCP catalog and handlers
+app/infrastructure/database      PostgreSQL models, repositories, migrations
+app/infrastructure/ssh           known-hosts client and bounded command executor
+app/infrastructure/llm/ollama    Ollama analysis, diagnosis, specialist, embedding adapters
+app/composition                  dependency container and runtime wiring
+tests                            unit, integration, security, recovery, UI, real opt-in tests
+tools                            bootstrap, readiness, route, MCP, seed, and acceptance tools
+docs                             canonical documentation, ADRs, operations, and report
 ```
 
 Historical production trees `app/domain`, `app/admin`, `app/mcp`,
@@ -95,7 +121,7 @@ available only through the persisted approval and policy gates.
 - known-hosts-verified SSH diagnostics;
 - Claude AgentJob/session observability and restart recovery;
 - Admin web/API surfaces for operational records;
-- 24 bounded project MCP tools;
+- 25 bounded project MCP tools;
 - deterministic and persisted runtime readiness evaluation.
 - supervised remediation lifecycle with named service writes, approval
   fingerprints, idempotency, verification, rollback, and audit events;
@@ -113,15 +139,60 @@ validated, policy-gated, budgeted, and return structured results. Unknown tools,
 invalid Evidence references, provider failures, and missing approvals fail
 closed. Automatic remediation remains disabled.
 
-## Runtime requirements
+## Prerequisites and configuration
 
 Required operational services are Python 3.14+, `uv`, PostgreSQL, Ollama with
-the configured model, native Claude Code CLI, and a managed VPS configuration
-with an SSH private key and `known_hosts` file. The project MCP server is
-launched by `.mcp.json` through `tools/run_project_mcp_server.py`.
+the configured model, native Claude Code CLI for live runtime work, and a
+managed VPS configuration with an SSH private key and `known_hosts` file.
+Required settings are loaded from process environment first and `.env` as a
+fallback. Do not store secrets in Git.
+
+The important settings include `POSTGRES_*`, `OLLAMA_BASE_URL`,
+`OLLAMA_MODEL`, `DEFAULT_SSH_PRIVATE_KEY_PATH`, `SSH_KNOWN_HOSTS_PATH`,
+`LLM_PROVIDER=ollama`, `CLAUDE_RUNTIME_ENABLED`, and the explicit safety
+switch `AUTOMATIC_REMEDIATION_ALLOWED` (default `false`).
 
 See [runtime configuration](docs/operations/configuration.md) and
 [startup operations](docs/operations/running-project.md) for exact settings.
+
+## Database, migrations, and startup
+
+```powershell
+uv sync
+uv run python tools/bootstrap_database.py
+uv run python tools/bootstrap_database.py --verify-only
+uv run uvicorn app.main:app --reload
+```
+
+The bootstrap creates the PostgreSQL database when authorized, enables
+pgvector, creates SQLAlchemy tables and RAG indexes, and verifies the expected
+33 tables and three custom RAG indexes. Additive SQL migrations are under
+`app/infrastructure/database/migrations/`; they are applied by the project
+database migration procedure before verification.
+
+## Ollama, Claude Code, and MCP
+
+Ollama is the only configured operational LLM provider. The default analysis
+model is `qwen3:8b` and the default embedding model is `nomic-embed-text`;
+the deployment may override them. Claude Code is an optional supervisory
+runtime and uses the project `vps` MCP server. `.mcp.json` launches
+`tools/run_project_mcp_server.py`; the server exposes exactly 25 registered
+bounded tools. Claude is not given raw SSH, SQL, arbitrary shell, or
+unrestricted filesystem capabilities.
+
+## Admin UI
+
+Start the application with the Uvicorn command above, then open
+`http://127.0.0.1:8000/login`. Bootstrap the first Admin account with:
+
+```powershell
+uv run python tools/create_admin.py --username <name> --role admin
+```
+
+The command prompts for the password. Admin roles are `viewer`, `operator`,
+and `admin`; the backend enforces permissions, CSRF, session expiry, and
+audit events. `/runtime-policies` is only a compatibility redirect to the
+current `/autonomous-runtime` screen.
 
 ## Development and testing
 
@@ -132,9 +203,23 @@ uv run uvicorn app.main:app --reload
 uv run python -m pytest
 ```
 
+For the stable WSL test environment:
+
+```bash
+export UV_PROJECT_ENVIRONMENT="$HOME/.venvs/chat_system"
+uv sync
+uv run python -m pytest -q --ignore=tests/real_runtime
+```
+
 Health check: `http://127.0.0.1:8000/health`.
 
-The real Claude/Ollama/MCP acceptance is opt-in:
+Real Claude/Ollama/MCP, Phase 5, Phase 6, and Phase 7 acceptance tests are
+opt-in and require external infrastructure, a designated non-production
+target, and explicit environment variables. Do not run them against
+production. The normal suite does not execute live SSH or destructive
+remediation.
+
+Example Claude runtime opt-in:
 
 ```powershell
 $env:LLM_ENABLED="true"
@@ -148,19 +233,25 @@ uv run python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_accepta
 ## Documentation
 
 - [Current project status](docs/PROJECT_STATUS.md)
+- [Canonical documentation map](docs/README.md)
 - [Architecture overview](docs/architecture/overview.md)
+- [Canonical architecture](docs/architecture/README.md)
+- [Functional requirements](docs/requirements/functional-requirements.md)
+- [Measurable NFRs](docs/requirements/non-functional-requirements.md)
+- [Use cases](docs/use-cases/use-cases.md)
 - [Project structure](docs/PROJECT_STRUCTURE.md)
 - [Current workflows](docs/workflows/current-workflows.md)
 - [Runtime configuration](docs/operations/configuration.md)
 - [Running the project](docs/operations/running-project.md)
 - [Claude runtime](docs/operations/claude-runtime.md)
 - [Testing strategy](docs/testing/TESTING_STRATEGY.md)
-- [C.14.12 readiness closeout](docs/architecture/c14-12-runtime-readiness-gate.md)
+- [Current test results](docs/testing/test-results.md)
+- [C.14.12 readiness closeout](docs/architecture/steps/c14-12-runtime-readiness-gate.md)
+- [Arabic technical report](docs/report/سعيد_بقدونس_هندسة_برمجيات_وذكاء_صنعي_Safe_Autonomous_AI_Agent_VPS.docx)
 
 ## Phase 6 acceptance state
 
-Phase 5 is complete and closed on the explicitly designated non-production
-`phase5-lab` target. Phase 6 is implemented but remains `PHASE 6 = NOT CLOSED`
-until the opt-in Claude-native sandbox acceptance produces real WSL2 runtime
-attestation and completes the safe validation flow. Automatic remediation
-remains disabled.
+Phase 5 is complete and closed on the designated non-production lab. Phase 6
+and Phase 7 live-acceptance evidence must be reconciled from repository
+records before they are reported as closed. Automatic remediation remains
+disabled.

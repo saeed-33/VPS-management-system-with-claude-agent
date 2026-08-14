@@ -10,7 +10,7 @@ Canonical project status is recorded in:
 docs/PROJECT_STATUS.md
 docs/architecture/overview.md
 docs/PROJECT_STRUCTURE.md
-docs/architecture/c14-12-runtime-readiness-gate.md
+docs/architecture/steps/c14-12-runtime-readiness-gate.md
 artifacts/evaluation/c14_12_readiness.json
 ```
 
@@ -53,15 +53,16 @@ The documentation audit checks:
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-13**
+Documentation synchronized: **2026-08-14**
 
 Canonical project state:
 
 ```text
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-Phase 6: implemented / not closed
-Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
+Phase 6: implemented / evidence reconciliation required
+Phase 6 readiness: conflicting repository records
+Phase 7: implemented / live acceptance record not present
 automatic_remediation_allowed: false
 ```
 

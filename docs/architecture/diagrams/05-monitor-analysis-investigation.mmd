@@ -1,0 +1,9 @@
+flowchart LR
+  T[Scheduler/manual trigger] --> Mon[MonitoringService]
+  Mon --> R[(MonitoringReport)]
+  R --> An[AnalysisOrchestrator]
+  An -->|healthy/reuse| End[Persisted analysis]
+  An -->|requires investigation| I[InvestigationRouter]
+  I --> L[SpecialistInvestigationLoop]
+  L --> E[EvidenceCollectionService]
+  E --> F[Final diagnosis]

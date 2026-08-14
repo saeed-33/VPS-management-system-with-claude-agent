@@ -1,0 +1,14 @@
+flowchart TB
+  Core[app/core contracts policies config]
+  Cap[app/capabilities monitoring analysis knowledge investigation remediation]
+  Runtime[app/runtime/claude]
+  Interfaces[app/interfaces/admin and app/interfaces/mcp]
+  Infra[app/infrastructure database ssh llm/ollama]
+  Compose[app/composition]
+  Interfaces --> Cap
+  Runtime --> Interfaces
+  Cap --> Core
+  Cap --> Infra
+  Compose --> Runtime
+  Compose --> Cap
+  Compose --> Infra

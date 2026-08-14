@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant E as Evaluator
+  participant A as AuthorizationService
+  participant R as ReservationRepository
+  participant X as Existing named executor
+  participant V as Verify/rollback
+  E->>E: policy/history/Evidence/sandbox gates
+  E-->>A: AUTO_EXECUTE decision
+  A-->>E: single-use authorization
+  E->>R: atomic reservation(idempotency key, lease)
+  E->>X: execute outside DB transaction
+  X-->>V: result
+  V-->>E: verified/rollback result
+  E->>R: owner-token conditional finalize

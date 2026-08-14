@@ -1,0 +1,9 @@
+stateDiagram-v2
+  [*] --> Enabled
+  Enabled --> Enabled: verified success / reset failures
+  Enabled --> Suspended: terminal failure threshold
+  Suspended --> Suspended: future evaluation denied
+  Suspended --> Enabled: explicit operator resume / new epoch
+  Enabled --> Recovery: expired lease reconciliation
+  Recovery --> Enabled: same binding reclaimed
+  Recovery --> Suspended: recovery/rollback failure

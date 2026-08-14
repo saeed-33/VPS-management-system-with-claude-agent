@@ -18,11 +18,11 @@ C.14.14: PASS
 Phase C: COMPLETE / CLOSED
 Phase 5: COMPLETE / CLOSED
 Phase 5 readiness: 13/13 PASS
-Phase 6: IMPLEMENTED / NOT CLOSED
-Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
-Phase 7: IMPLEMENTED / DISABLED BY DEFAULT
+Phase 6: IMPLEMENTED / EVIDENCE RECONCILIATION REQUIRED
+Phase 6 readiness: CONFLICTING REPOSITORY RECORDS
+Phase 7: IMPLEMENTED / LIVE ACCEPTANCE RECORD NOT PRESENT
 automatic_remediation_allowed: false
-readiness: BLOCKED_BY_SANDBOX_RUNTIME
+readiness: DETERMINISTIC TESTS PASS; LIVE GATES NOT CLOSED
 ```
 
 ### State meanings
@@ -55,12 +55,14 @@ readiness: BLOCKED_BY_SANDBOX_RUNTIME
 - Final Phase 5 regression: `433 passed, 2 skipped, 1 warning`.
 - Phase 6 adds a fingerprint-bound isolated validation record and approval
   gate. The native-sandbox runtime requires explicit attestation from WSL2;
-  no unsandboxed fallback is permitted.
+  no unsandboxed fallback is permitted. The repository contains a conflicting
+  readiness JSON (`real_acceptance_status=PASS`) and final report/default test
+  path (`BLOCKED_BY_SANDBOX_RUNTIME`), so the live gate is not declared closed.
 - Phase 7 autonomous remediation policies are implemented with additive
   persistence, deterministic evaluation, single-use authorization, leased
   reservations, rate/circuit controls, Admin observability, and bounded MCP
-  attempt support. They remain globally disabled by default and have not been
-  subjected to a separate live acceptance campaign.
+  attempt support. They remain globally disabled by default. No standalone
+  live acceptance result artifact is present in this repository.
 
 
 ## C.14.12 readiness acceptance
@@ -111,22 +113,24 @@ controlled execution, verification, idempotency, state-aware rollback, and
 audit events, and restored the dedicated service to its original `inactive`
 state. Automatic remediation remains disabled.
 
-Phase 6 Claude-Native Isolated Sandbox Validation is implemented but not
-closed. The deterministic 13-dimension gate is blocked until a real native
-sandbox runtime attestation and safe validation acceptance are available.
+Phase 6 Claude-Native Isolated Sandbox Validation is implemented, but its live
+evidence must be reconciled before closure. Phase 7 is implemented, but its
+live acceptance evidence is absent from the repository. See
+`docs/roadmap/deferred-requirements.md` for the explicit evidence gaps.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-13**
+Documentation synchronized: **2026-08-14**
 
 Canonical project state:
 
 ```text
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-Phase 6: implemented / not closed
-Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
+Phase 6: implemented / evidence reconciliation required
+Phase 6 readiness: conflicting repository records
+Phase 7: implemented / live acceptance record not present
 automatic_remediation_allowed: false
 ```
 

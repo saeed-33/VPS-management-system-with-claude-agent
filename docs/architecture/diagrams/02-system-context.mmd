@@ -1,0 +1,8 @@
+flowchart TB
+  Admin[Admin UI user] --> System[AI VPS Management]
+  Claude[Claude Code] --> System
+  System --> VPS[Managed Linux VPS]
+  System --> PG[(PostgreSQL)]
+  System --> Ollama[Ollama]
+  System --> Sandbox[WSL2 native Sandbox]
+  System --> MCP[Project MCP boundary]

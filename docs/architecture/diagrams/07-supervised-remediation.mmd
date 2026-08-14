@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant D as Diagnosis
+  participant P as RemediationService
+  participant S as Sandbox
+  participant H as Human Admin
+  participant X as Named write executor
+  D->>P: create immutable plan/fingerprint
+  P->>S: validate exact plan/target
+  S-->>P: Before/After Evidence + verification
+  P->>H: request exact approval
+  H-->>P: approve or reject
+  P->>X: execute registered action
+  X-->>P: execution result
+  P->>P: verify or registered rollback

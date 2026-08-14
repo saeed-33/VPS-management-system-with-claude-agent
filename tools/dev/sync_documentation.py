@@ -25,6 +25,10 @@ HISTORICAL_PATTERNS = (
     "docs/roadmap/phase-4-20-closeout.md",
     "docs/roadmap/claude-runtime-implementation-plan.md",
     "docs/roadmap/c14-claude-native-execution-plan.md",
+    "docs/roadmap/phase-5-final-report.md",
+    "docs/roadmap/phase-6-final-report.md",
+    "docs/roadmap/phase-6-implementation.md",
+    "docs/roadmap/phase-c-closeout.md",
 )
 
 REFERENCE_NAMES = {
@@ -48,6 +52,42 @@ CURRENT_CANONICAL = {
     "docs/operations/running-project.md",
     "docs/operations/claude-runtime.md",
     "docs/operations/configuration.md",
+    "docs/architecture/README.md",
+    "docs/architecture/system-overview.md",
+    "docs/architecture/component-architecture.md",
+    "docs/architecture/agent-runtime-architecture.md",
+    "docs/architecture/capability-architecture.md",
+    "docs/architecture/security-architecture.md",
+    "docs/architecture/data-architecture.md",
+    "docs/architecture/admin-ui-architecture.md",
+    "docs/architecture/deployment-architecture.md",
+    "docs/requirements/README.md",
+    "docs/requirements/functional-requirements.md",
+    "docs/requirements/non-functional-requirements.md",
+    "docs/requirements/specification-compliance.md",
+    "docs/requirements/traceability-matrix.md",
+    "docs/use-cases/README.md",
+    "docs/use-cases/use-cases.md",
+    "docs/workflows/README.md",
+    "docs/workflows/monitoring-analysis.md",
+    "docs/workflows/investigation-specialists.md",
+    "docs/workflows/supervised-remediation.md",
+    "docs/workflows/sandbox-validation.md",
+    "docs/workflows/autonomous-remediation.md",
+    "docs/workflows/admin-auth-rbac.md",
+    "docs/workflows/incident-lifecycle.md",
+    "docs/testing/README.md",
+    "docs/testing/testing-strategy.md",
+    "docs/testing/test-environments.md",
+    "docs/testing/security-testing.md",
+    "docs/testing/concurrency-recovery-testing.md",
+    "docs/testing/real-acceptance-testing.md",
+    "docs/testing/ui-rbac-testing.md",
+    "docs/testing/requirements-test-traceability.md",
+    "docs/testing/test-results.md",
+    "docs/process/README.md",
+    "docs/process/implementation-history.md",
+    "docs/report/README.md",
 }
 
 
@@ -70,6 +110,12 @@ def classify(path: Path) -> str:
         and name
         != "docs/architecture/c14-12-runtime-readiness-gate.md"
     ):
+        return "HISTORICAL_CLOSEOUT"
+
+    if name == "docs/architecture/steps/c14-12-runtime-readiness-gate.md":
+        return "CURRENT_CANONICAL"
+
+    if name.startswith("docs/architecture/steps/"):
         return "HISTORICAL_CLOSEOUT"
 
     if name in {
@@ -170,8 +216,13 @@ def metadata_block(
     *,
     classification: str,
 ) -> str:
+    historical_banner = (
+        "> Historical document — not current architecture.\n"
+        if classification.startswith("HISTORICAL")
+        else ""
+    )
     return f"""
-{BEGIN}
+{historical_banner}{BEGIN}
 Document classification: **{classification}**
 
 Documentation synchronized: **{TODAY}**
@@ -181,8 +232,9 @@ Canonical project state:
 ```text
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-Phase 6: implemented / not closed
-Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
+Phase 6: implemented / evidence reconciliation required
+Phase 6 readiness: conflicting repository records
+Phase 7: implemented / live acceptance record not present
 automatic_remediation_allowed: false
 ```
 

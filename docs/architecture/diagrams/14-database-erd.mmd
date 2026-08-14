@@ -1,0 +1,15 @@
+erDiagram
+  servers ||--o{ monitoring_reports : has
+  monitoring_profiles ||--o{ monitoring_reports : selects
+  monitoring_reports ||--o| report_analyses : analyzed
+  investigations ||--o{ investigation_specialist_candidates : selects
+  specialist_definitions ||--o{ investigation_specialist_candidates : defines
+  investigations ||--o{ remediation_plans : grounds
+  remediation_plans ||--o{ remediation_approvals : requires
+  remediation_plans ||--o{ remediation_executions : runs
+  remediation_plans ||--o{ remediation_evidence : owns
+  autonomous_remediation_policies ||--o{ autonomous_policy_decisions : evaluates
+  autonomous_policy_decisions ||--o{ autonomous_authorizations : authorizes
+  autonomous_remediation_policies ||--o{ autonomous_policy_execution_reservations : reserves
+  admin_users ||--o{ admin_sessions : owns
+  admin_users ||--o{ admin_auth_audit_events : audits

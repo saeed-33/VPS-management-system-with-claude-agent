@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant R as InvestigationRouter
+  participant L as SpecialistInvestigationLoop
+  participant G as DiagnosticPolicy
+  participant X as Registered read-only tools
+  participant E as EvidenceCollectionService
+  R->>L: selected DB-defined Specialists
+  L->>G: evaluate specialist/action/budgets
+  G-->>L: allow or fail closed
+  L->>X: bounded tool calls
+  X-->>L: structured observations
+  L->>E: collect observations and provenance
+  E-->>L: Evidence IDs
+  L-->>R: persisted loop result and Evidence

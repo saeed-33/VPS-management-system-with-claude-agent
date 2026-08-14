@@ -1,0 +1,9 @@
+flowchart TD
+  Plan[Plan fingerprint] --> Target[Persisted safe target markers]
+  Target --> Attest[Native Sandbox attestation]
+  Attest -->|fail| Deny[Fail closed]
+  Attest -->|pass| Before[Collect Before Evidence]
+  Before --> Run[Run registered validation action]
+  Run --> After[Collect After Evidence]
+  After --> Verify[Verify and restore]
+  Verify --> Persist[Persist validation/audit]

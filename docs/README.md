@@ -1,71 +1,83 @@
-# Documentation Guide
+# Documentation Map
 
-<!-- DOC-STATUS: CURRENT -->
+<!-- DOC-STATUS: CURRENT_CANONICAL -->
 
-This directory contains the current operating truth, accepted decisions, and
-historical milestone records for AI VPS Management.
+This is the canonical map for the current implementation. Source code and
+tests are authoritative over prose. Current architecture describes what the
+system is now; `docs/process/` and historical ADR/roadmap records describe how
+it got there.
 
-## Canonical current documents
+## Current sources of truth
 
-- [Project status](PROJECT_STATUS.md) — one current gate/status source of truth.
-- [Project structure](PROJECT_STRUCTURE.md) — generated inventory of the actual
-  checkout.
-- [Architecture overview](architecture/overview.md) — current runtime and
-  responsibility boundary.
-- [Current workflows](workflows/current-workflows.md) — operational sequence.
-- [Testing strategy](testing/TESTING_STRATEGY.md) — test layers and acceptance
-  requirements.
-- [Runtime configuration](operations/configuration.md) — active settings and
-  prerequisites.
-- [Running the project](operations/running-project.md) — startup and health
-  checks.
-- [Claude runtime](operations/claude-runtime.md) — Claude/Ollama/MCP contract.
-- [C.14.12 readiness closeout](architecture/c14-12-runtime-readiness-gate.md)
-  — accepted readiness evidence.
+| Area | Current document | Purpose and audience |
+|---|---|---|
+| Project status | [`PROJECT_STATUS.md`](PROJECT_STATUS.md) | Gate state for maintainers, reviewers, and operators. |
+| Architecture | [`architecture/README.md`](architecture/README.md) | Current system boundaries and component responsibilities. |
+| Requirements | [`requirements/README.md`](requirements/README.md) | Functional, non-functional, and specification traceability. |
+| Use cases | [`use-cases/README.md`](use-cases/README.md) | Actor-oriented behavior and permissions. |
+| Workflows | [`workflows/README.md`](workflows/README.md) | Operational lifecycle flows and fail-closed branches. |
+| Testing strategy | [`testing/README.md`](testing/README.md) | Test layers, environments, and methods. |
+| Test results | [`testing/test-results.md`](testing/test-results.md) | Latest verifiable non-real results and infrastructure checks. |
+| Implementation history | [`process/implementation-history.md`](process/implementation-history.md) | Phase/milestone history kept separate from architecture. |
+| Future work | [`roadmap/future-work.md`](roadmap/future-work.md) | Deferred requirements and post-v1 work. |
+| Technical report | [`report/README.md`](report/README.md) | Arabic DOCX scope, provenance, and validation. |
 
-## Supporting documents
+## Supporting documentation
 
-- `docs/testing/` contains unit, integration, controlled-evaluation, and
-  real-runtime testing references.
-- `docs/operations/` contains configuration, database, startup, and runtime
-  procedures.
-- `docs/architecture/` contains current subsystem references and historical
-  C.14 migration records.
-- `docs/decisions/` contains accepted ADRs. ADRs are preserved decisions and
-  may describe the state that existed when they were accepted.
-- `docs/roadmap/` contains roadmap, phase, and closeout records. Historical
-  milestone records are not current operator instructions.
+- `docs/operations/` contains startup, configuration, deployment, database,
+  Admin, and runtime runbooks.
+- `docs/api/` contains endpoint-oriented reference material.
+- `docs/security/` contains security boundaries and negative guarantees.
+- `docs/decisions/` contains accepted ADRs. ADRs are historical decisions,
+  not replacements for the current architecture document.
+- `docs/roadmap/` contains preserved milestone records and the current
+  deferred plan. Files named `phase-*`, `*-implementation-plan.md`, and
+  `*-final-report.md` are historical unless explicitly linked from the
+  canonical map.
+- `docs/architecture/steps/` contains preserved implementation notes. These
+  are historical closeout records where they describe a completed phase; they
+  must not be read as the current component map.
 
-## Current status at a glance
+## Current verified baseline
+
+As verified on 2026-08-14 in the stable WSL environment:
 
 ```text
-Phase 4.20: COMPLETE
-C.14.0-C.14.11: COMPLETE
-C.14.11A: PASS
-C.14.12: PASS
-C.14.13: PASS
-C.14.14: PASS
-Phase C: COMPLETE / CLOSED
-Phase 5: COMPLETE / CLOSED
-Phase 6: IMPLEMENTED / NOT CLOSED
-automatic_remediation_allowed: false
+Python: 3.14.7
+Non-real suite: 586 passed, 1 warning
+Database: 33/33 tables, pgvector OK, 3/3 custom RAG indexes
+MCP catalog: 25 tools
+Routes: 99 total / 73 OpenAPI / 26 web-only
+Automatic remediation: false by default
 ```
 
-For the generated classification of every Markdown document, see
-[DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md).
+The repository contains a contradiction for Phase 6 live acceptance: the
+machine-readable readiness artifact says `PASS`, while the Phase 6 final
+report and default real test path say `BLOCKED_BY_SANDBOX_RUNTIME`. Phase 7
+implementation is present, but no standalone live acceptance result is stored
+in the repository. This is explicitly tracked in
+[`roadmap/deferred-requirements.md`](roadmap/deferred-requirements.md).
+
+## Obsolete or historical claims
+
+Older documents may mention earlier MCP counts, phase gates, or proposed
+components. They remain for historical traceability and are classified in
+[`DOCUMENTATION_INVENTORY.md`](DOCUMENTATION_INVENTORY.md). They do not
+override the current map, source code, tests, or current test-results record.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-13**
+Documentation synchronized: **2026-08-14**
 
 Canonical project state:
 
 ```text
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-Phase 6: implemented / not closed
-Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
+Phase 6: implemented / evidence reconciliation required
+Phase 6 readiness: conflicting repository records
+Phase 7: implemented / live acceptance record not present
 automatic_remediation_allowed: false
 ```
 

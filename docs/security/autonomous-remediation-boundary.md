@@ -22,3 +22,22 @@ failure suspension, and explicit manual resume provide operational brakes.
 This repository's existing Admin surface has no authentication/RBAC provider;
 deployment must place the Admin API behind the project's authenticated
 operator boundary before enabling autonomy in production.
+
+<!-- PROJECT-DOC-METADATA:BEGIN -->
+Document classification: **OPERATIONS**
+
+Documentation synchronized: **2026-08-14**
+
+Canonical project state:
+
+```text
+Phase 5: complete / closed
+Phase 5 readiness: 13/13 PASS
+Phase 6: implemented / evidence reconciliation required
+Phase 6 readiness: conflicting repository records
+Phase 7: implemented / live acceptance record not present
+automatic_remediation_allowed: false
+```
+
+For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md).
+<!-- PROJECT-DOC-METADATA:END -->

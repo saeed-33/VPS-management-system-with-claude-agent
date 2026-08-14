@@ -63,7 +63,7 @@ for inspection or protocol use is:
 uv run python tools/run_project_mcp_server.py
 ```
 
-The server name is `vps` and the catalog contains 24 bounded project tools.
+The server name is `vps` and the catalog contains 25 bounded project tools.
 
 ## 6. Real runtime acceptance
 
@@ -95,15 +95,16 @@ focused, controlled, persisted, and real-runtime validation layers.
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-13**
+Documentation synchronized: **2026-08-14**
 
 Canonical project state:
 
 ```text
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-Phase 6: implemented / not closed
-Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
+Phase 6: implemented / evidence reconciliation required
+Phase 6 readiness: conflicting repository records
+Phase 7: implemented / live acceptance record not present
 automatic_remediation_allowed: false
 ```
 

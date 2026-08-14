@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant C as Claude Code
+  participant M as vps MCP
+  participant P as Python policy/capability
+  participant O as Ollama
+  participant D as DB/SSH/Evidence
+  C->>M: typed bounded tool request
+  M->>P: validated contract
+  P->>O: analysis/reasoning when allowed
+  P->>D: policy, persistence, bounded infrastructure
+  D-->>P: structured result
+  P-->>M: safe result
+  M-->>C: structured response

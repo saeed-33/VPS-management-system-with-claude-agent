@@ -1,0 +1,23 @@
+classDiagram
+  class ClaudeSupervisor
+  class ProjectMcpToolBoundary
+  class MonitoringService
+  class InvestigationRouter
+  class SpecialistInvestigationLoop
+  class EvidenceCollectionService
+  class RemediationService
+  class AutonomousRemediationPolicyEvaluator
+  class AutonomousExecutionService
+  class AdminAuthService
+  class ServerRepository
+  class RemediationRepository
+  ClaudeSupervisor --> ProjectMcpToolBoundary
+  ProjectMcpToolBoundary --> MonitoringService
+  ProjectMcpToolBoundary --> InvestigationRouter
+  ProjectMcpToolBoundary --> AutonomousExecutionService
+  InvestigationRouter --> SpecialistInvestigationLoop
+  SpecialistInvestigationLoop --> EvidenceCollectionService
+  AutonomousExecutionService --> AutonomousRemediationPolicyEvaluator
+  AutonomousExecutionService --> RemediationService
+  AdminAuthService --> ServerRepository
+  RemediationService --> RemediationRepository

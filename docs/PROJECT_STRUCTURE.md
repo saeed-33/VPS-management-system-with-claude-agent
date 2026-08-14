@@ -648,7 +648,7 @@ Evaluation / Production Readiness Gate
 - `docs/architecture/c14-11a4-3b-investigation-ollama-infrastructure.md` — Project documentation.
 - `docs/architecture/c14-11a4-3c-database-infrastructure-boundary.md` — Project documentation.
 - `docs/architecture/c14-11a4-3d-database-models-migrations-boundary.md` — Project documentation.
-- `docs/architecture/c14-12-runtime-readiness-gate.md` — Project documentation.
+- `docs/architecture/steps/c14-12-runtime-readiness-gate.md` — Current C.14.12 readiness evidence.
 - `docs/architecture/c14-9-claude-native-orchestration.md` — Project documentation.
 - `docs/architecture/cross-specialist-correlation.md` — Project documentation.
 - `docs/architecture/database.md` — Project documentation.
@@ -734,15 +734,16 @@ Regenerate this document whenever files are added, removed, or substantially rep
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**
 
-Documentation synchronized: **2026-08-13**
+Documentation synchronized: **2026-08-14**
 
 Canonical project state:
 
 ```text
 Phase 5: complete / closed
 Phase 5 readiness: 13/13 PASS
-Phase 6: implemented / not closed
-Phase 6 readiness: BLOCKED_BY_SANDBOX_RUNTIME
+Phase 6: implemented / evidence reconciliation required
+Phase 6 readiness: conflicting repository records
+Phase 7: implemented / live acceptance record not present
 automatic_remediation_allowed: false
 ```
 

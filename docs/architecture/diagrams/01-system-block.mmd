@@ -1,0 +1,9 @@
+flowchart LR
+  U[Admin or Operator] --> A[FastAPI Admin API/Web]
+  C[Claude Code Supervisor] --> M[Bounded vps MCP: 25 tools]
+  A --> P[Python Capabilities and Policies]
+  M --> P
+  P --> D[(PostgreSQL + pgvector)]
+  P --> S[Known-hosts SSH / Named Commands]
+  P --> O[Ollama adapters]
+  P --> B[Native Sandbox and Evidence]

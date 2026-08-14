@@ -1,0 +1,8 @@
+flowchart LR
+  Login[Login] --> Hash[scrypt verification]
+  Hash --> Session[Server-side session digest]
+  Session --> Middleware[Auth middleware]
+  Middleware --> RBAC[Role permission mapper]
+  RBAC --> CSRF[CSRF for mutation]
+  CSRF --> Operation[API/Web operation]
+  Operation --> Audit[Admin auth/operation audit]

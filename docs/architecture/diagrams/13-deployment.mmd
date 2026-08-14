@@ -1,0 +1,9 @@
+flowchart TB
+  Browser[Browser] --> App[FastAPI/Uvicorn host]
+  App --> DB[(PostgreSQL + pgvector)]
+  App --> Ollama[Ollama]
+  App --> Claude[Claude Code CLI]
+  Claude --> MCP[Project MCP process]
+  App --> SSH[Known-hosts SSH]
+  SSH --> VPS[Non-production or managed VPS]
+  App --> Sandbox[WSL2 native Sandbox]

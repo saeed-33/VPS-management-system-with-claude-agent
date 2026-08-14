@@ -1,0 +1,7 @@
+flowchart LR
+  F[Issue + plan fingerprints] --> Policy[Unambiguous enabled policy]
+  Policy --> Auth[Issue and consume authorization]
+  Auth --> Reserve[Unique idempotency reservation]
+  Reserve -->|owner token| Execute[Execute outside transaction]
+  Execute --> Finalize[Conditional finalize owner token]
+  Reserve -->|collision/replay| Block[Block duplicate]
