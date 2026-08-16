@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.structured_compatibility، app.core.config، app.infrastructure.database.models.report_analysis، app.infrastructure.database.models.report_analysis_source، app.infrastructure.database.models.report_retrieval_document، app.infrastructure.database.session.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import argparse
@@ -35,6 +45,12 @@ from app.infrastructure.database.session import SessionLocal
 
 @dataclass(slots=True)
 class EvaluationSummary:
+    """
+    يمثل EvaluationSummary جزءًا من طبقة Developer tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه CLI أو المطور مباشرة. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     completed_analyses: int
     reused: int
     assisted: int
@@ -63,12 +79,24 @@ class EvaluationSummary:
 
 
 def ratio(numerator: int, denominator: int) -> float | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى ratio؛ المدخلات المهمة: numerator، denominator.
+    تعيد float | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if denominator <= 0:
         return None
     return numerator / denominator
 
 
 def fetch_hnsw_index_present(session) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى fetch_hnsw_index_present؛ المدخلات المهمة: session.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     value = session.scalar(
         text(
             """
@@ -87,6 +115,12 @@ def fetch_hnsw_index_present(session) -> bool:
 def build_document_map(
     session,
 ) -> dict[int, ReportRetrievalDocumentModel]:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى build_document_map؛ المدخلات المهمة: session.
+    تعيد dict[int, ReportRetrievalDocumentModel] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     documents = session.scalars(
         select(ReportRetrievalDocumentModel)
     ).all()
@@ -100,6 +134,12 @@ def source_scope_matches(
     current: ReportRetrievalDocumentModel | None,
     historical: ReportRetrievalDocumentModel | None,
 ) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى source_scope_matches؛ المدخلات المهمة: current، historical.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if current is None or historical is None:
         return False
 
@@ -115,6 +155,12 @@ def source_scope_matches(
 def is_historical_source(
     source: ReportAnalysisSourceModel,
 ) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى is_historical_source؛ المدخلات المهمة: source.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return (
         source.source_analysis_id is not None
         and source.source_report_id is not None
@@ -125,6 +171,12 @@ def metadata_float(
     metadata: dict[str, Any],
     key: str,
 ) -> float | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى metadata_float؛ المدخلات المهمة: metadata، key.
+    تعيد float | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     value = metadata.get(key)
 
     if isinstance(value, bool):
@@ -191,6 +243,12 @@ def is_legacy_rrf_storage(
     source: ReportAnalysisSourceModel,
     effective_score: float | None,
 ) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى is_legacy_rrf_storage؛ المدخلات المهمة: source، effective_score.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if (
         source.similarity_score is None
         or effective_score is None
@@ -214,6 +272,12 @@ def is_legacy_rrf_storage(
 def evaluate_database(
     limit: int | None = None,
 ) -> dict[str, Any]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى evaluate_database؛ المدخلات المهمة: limit.
+    تعيد dict[str, Any] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     checker = StructuredCompatibilityChecker()
 
     with SessionLocal() as session:
@@ -803,6 +867,12 @@ def evaluate_database(
 def print_summary(
     report: dict[str, Any],
 ) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى print_summary؛ المدخلات المهمة: report.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     summary = report["summary"]
 
     print()
@@ -929,6 +999,12 @@ def print_summary(
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Evaluate RAG/reuse behavior "

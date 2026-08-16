@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.investigation، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_reasoning_agent، app.core.contracts.specialist_reasoning.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 
 import pytest
@@ -22,21 +32,45 @@ from app.core.contracts.specialist_reasoning import (
 
 
 class Client:
+    """
+    يمثل Client جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     provider_name = "test"
     model_name = "test-model"
 
     def __init__(self, output):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: output.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.output = output
         self.system_prompt = None
         self.user_prompt = None
 
     async def reason(self, *, system_prompt, user_prompt):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى reason؛ المدخلات المهمة: system_prompt، user_prompt.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
         return self.output
 
 
 def context():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى context؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistContextSnapshot(
         task_id="task-1",
         investigation_id="inv-1",
@@ -75,6 +109,12 @@ def context():
 
 
 def valid_output():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى valid_output؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistReasoningOutput(
         summary="The current context suggests a proxy-related path.",
         confidence=0.55,
@@ -104,6 +144,12 @@ def valid_output():
 
 
 def test_reasoning_converts_valid_output_to_contract():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_reasoning_converts_valid_output_to_contract؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(valid_output())
     agent = SpecialistReasoningAgent(client=client)
 
@@ -124,6 +170,12 @@ def test_reasoning_converts_valid_output_to_contract():
 
 
 def test_unknown_knowledge_citation_is_rejected():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unknown_knowledge_citation_is_rejected؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     output = valid_output()
     output.findings[0].knowledge_source_ids = [
         "knowledge-chunk:999"
@@ -143,6 +195,12 @@ def test_unknown_knowledge_citation_is_rejected():
 
 
 def test_unknown_recommended_specialist_is_dropped():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unknown_recommended_specialist_is_dropped؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     output = valid_output()
     output.recommended_next_specialists = [
         "invented-specialist"
@@ -169,6 +227,12 @@ def test_unknown_recommended_specialist_is_dropped():
 
 
 def test_systemd_alias_maps_to_systemd_service():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_systemd_alias_maps_to_systemd_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     output = valid_output()
     output.recommended_next_specialists = [
         "systemd",
@@ -199,6 +263,12 @@ def test_systemd_alias_maps_to_systemd_service():
 
 
 def test_prompt_has_no_tool_execution_request():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_prompt_has_no_tool_execution_request؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(valid_output())
     agent = SpecialistReasoningAgent(client=client)
 
@@ -211,6 +281,12 @@ def test_prompt_has_no_tool_execution_request():
 
 
 def test_prompt_lists_exact_evidence_id_allowlist_without_raw_observation():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_prompt_lists_exact_evidence_id_allowlist_without_raw_observation؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(valid_output())
 
     asyncio.run(
@@ -228,6 +304,12 @@ def test_prompt_lists_exact_evidence_id_allowlist_without_raw_observation():
 
 
 def test_raw_log_text_in_evidence_id_field_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_raw_log_text_in_evidence_id_field_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     output = valid_output()
     output.findings[0].evidence_ids = [
         "Active: inactive (dead)",
@@ -242,6 +324,12 @@ def test_raw_log_text_in_evidence_id_field_fails_closed():
 
 
 def test_evidence_from_another_context_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_evidence_from_another_context_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     output = valid_output()
     output.findings[0].evidence_ids = ["evidence-other-context"]
 
@@ -254,6 +342,12 @@ def test_evidence_from_another_context_fails_closed():
 
 
 def test_duplicate_evidence_ids_follow_existing_aggregate_deduplication():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_duplicate_evidence_ids_follow_existing_aggregate_deduplication؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     output = valid_output()
     output.findings[0].evidence_ids = [
         "evidence-A",

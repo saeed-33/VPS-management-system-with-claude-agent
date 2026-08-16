@@ -35,6 +35,12 @@ GRAY = "F2F4F7"
 
 
 def set_rtl(paragraph, align=WD_ALIGN_PARAGRAPH.RIGHT):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى set_rtl؛ المدخلات المهمة: paragraph، align.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     paragraph.alignment = align
     ppr = paragraph._p.get_or_add_pPr()
     bidi = ppr.find(qn("w:bidi"))
@@ -56,6 +62,12 @@ def set_ltr(paragraph, align=WD_ALIGN_PARAGRAPH.LEFT):
 
 
 def set_font(run, name="Arial", size=12, bold=False, color=None):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى set_font؛ المدخلات المهمة: run، name، size، bold، color.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     run.font.name = name
     run._element.get_or_add_rPr().rFonts.set(qn("w:ascii"), name)
     run._element.get_or_add_rPr().rFonts.set(qn("w:hAnsi"), name)
@@ -93,6 +105,12 @@ def add_mixed_runs(paragraph, text, *, size=12, bold=False, color=None):
 
 
 def shade(cell, fill: str):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى shade؛ المدخلات المهمة: cell، fill.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     tcpr = cell._tc.get_or_add_tcPr()
     shd = tcpr.find(qn("w:shd"))
     if shd is None:
@@ -102,6 +120,12 @@ def shade(cell, fill: str):
 
 
 def set_cell_margins(cell, top=80, start=120, bottom=80, end=120):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى set_cell_margins؛ المدخلات المهمة: cell، top، start، bottom، end.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     tc = cell._tc
     tcpr = tc.get_or_add_tcPr()
     tc_mar = tcpr.first_child_found_in("w:tcMar")
@@ -118,6 +142,12 @@ def set_cell_margins(cell, top=80, start=120, bottom=80, end=120):
 
 
 def set_table_geometry(table, widths):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى set_table_geometry؛ المدخلات المهمة: table، widths.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     table.alignment = WD_TABLE_ALIGNMENT.RIGHT
     table.autofit = False
     tbl = table._tbl
@@ -155,6 +185,12 @@ def set_table_geometry(table, widths):
 
 
 def mark_header_row(row):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى mark_header_row؛ المدخلات المهمة: row.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     trpr = row._tr.get_or_add_trPr()
     header = trpr.find(qn("w:tblHeader"))
     if header is None:
@@ -164,6 +200,12 @@ def mark_header_row(row):
 
 
 def add_page_field(paragraph, field="PAGE"):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى add_page_field؛ المدخلات المهمة: paragraph، field.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     run = paragraph.add_run()
     begin = OxmlElement("w:fldChar")
     begin.set(qn("w:fldCharType"), "begin")
@@ -181,6 +223,12 @@ def add_page_field(paragraph, field="PAGE"):
 
 
 def add_toc_field(paragraph):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى add_toc_field؛ المدخلات المهمة: paragraph.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     run = paragraph.add_run()
     begin = OxmlElement("w:fldChar")
     begin.set(qn("w:fldCharType"), "begin")
@@ -198,6 +246,12 @@ def add_toc_field(paragraph):
 
 
 def add_text(doc, text, *, bold=False, size=12, align=WD_ALIGN_PARAGRAPH.RIGHT, style=None):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى add_text؛ المدخلات المهمة: doc، text، bold، size، align، style.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     p = doc.add_paragraph(style=style)
     set_rtl(p, align)
     p.paragraph_format.space_after = Pt(6)
@@ -219,6 +273,12 @@ def add_ltr_text(doc, text, *, bold=False, size=12, align=WD_ALIGN_PARAGRAPH.LEF
 
 
 def add_bullet(doc, text):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى add_bullet؛ المدخلات المهمة: doc، text.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     p = doc.add_paragraph(style="List Paragraph")
     set_rtl(p)
     p.paragraph_format.space_after = Pt(3)
@@ -235,6 +295,12 @@ def add_bullet(doc, text):
 
 
 def add_heading(doc, text, level=1):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى add_heading؛ المدخلات المهمة: doc، text، level.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     p = doc.add_paragraph(style=f"Heading {level}")
     set_rtl(p)
     p.paragraph_format.keep_with_next = True
@@ -245,6 +311,12 @@ def add_heading(doc, text, level=1):
 
 
 def add_table(doc, headers: list[str], rows: Iterable[Iterable[str]], widths=None, caption=None):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى add_table؛ المدخلات المهمة: doc، headers، rows، widths، caption.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if caption:
         add_text(doc, caption, bold=True, size=10)
     rows = [list(map(str, row)) for row in rows]
@@ -272,6 +344,12 @@ def add_table(doc, headers: list[str], rows: Iterable[Iterable[str]], widths=Non
 
 
 def add_figure(doc, number, title, filename):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى add_figure؛ المدخلات المهمة: doc، number، title، filename.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     p = doc.add_paragraph()
     set_rtl(p, WD_ALIGN_PARAGRAPH.CENTER)
     p.paragraph_format.keep_with_next = True
@@ -286,6 +364,12 @@ def add_figure(doc, number, title, filename):
 
 
 def configure_document(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى configure_document؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     global BULLET_NUM_ID
     numbering = doc.part.numbering_part.element
     abstract_ids = [int(x.get(qn("w:abstractNumId"))) for x in numbering.findall(qn("w:abstractNum"))]
@@ -352,6 +436,12 @@ def configure_document(doc):
 
 
 def clear_body(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى clear_body؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     body = doc._element.body
     for child in list(body):
         if child.tag != qn("w:sectPr"):
@@ -359,6 +449,12 @@ def clear_body(doc):
 
 
 def cover(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى cover؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     for text, size, bold in (
         ("الجمهورية العربية السورية", 16, True),
         ("المعهد العالي للعلوم التطبيقية والتكنولوجيا", 15, True),
@@ -380,6 +476,12 @@ def cover(doc):
 
 
 def abstract_and_front(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى abstract_and_front؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     add_heading(doc, "الخلاصة", 1)
     add_text(doc, "يتضمن هذا التقرير شرحاً للمشروع المنفذ لإدارة خوادم Linux باستخدام الذكاء الصنعي. يراقب النظام الخادم، ويحفظ التقارير، ويحللها، ويطلب فحصاً إضافياً عند الحاجة. كما يمكنه اقتراح معالجة المشكلة، لكن تنفيذها يمر دائماً عبر التحقق والموافقة والقيود الموضوعة في النظام.")
     add_text(doc, "يعتمد المشروع على Claude Code للإشراف، وعلى Ollama لتحليل النصوص، بينما تنفذ Python وقاعدة PostgreSQL العمليات المهمة. أظهرت الاختبارات سلامة المصادقة والصلاحيات، وحدود الأدوات، وحفظ الأدلة، ومنع التكرار، والتعامل مع التزامن والأخطاء. وقد فصلنا في هذا التقرير بين نتائج الاختبارات المحلية ونتائج القبول التي تحتاج إلى بيئة تشغيل حقيقية.")
@@ -441,6 +543,12 @@ def abstract_and_front(doc):
 
 
 def chapter1(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى chapter1؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     add_heading(doc, "الفصل الأول: التعريف بالمشروع والمتطلبات", 1)
     add_heading(doc, "1.1 هدف المشروع ونطاقه", 2)
     add_text(doc, "يهدف المشروع إلى مساعدة المشغل على اكتشاف أعطال الخوادم الافتراضية بسرعة، وفهم سبب العطل، واختيار المعالجة المناسبة. يراقب النظام الموارد والخدمات والسجلات، ويحفظ النتائج، ويحللها، ثم يجمع الأدلة عند الحاجة. ولا يسمح للنموذج اللغوي بتنفيذ أوامر مباشرة على الخادم.")
@@ -594,6 +702,12 @@ def chapter2_theory(doc):
 
 
 def chapter2(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى chapter2؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     add_heading(doc, "الفصل الثالث: الدراسة التحليلية", 1)
     add_heading(doc, "3.1 الممثلون وحالات الاستخدام", 2)
     add_text(doc, "المستخدمون الأساسيون هم المشرف ومدير النظام والمطوّر. وتتعاون معهم خدمات Python وClaude Code وOllama وقاعدة PostgreSQL وخادم VPS وبيئة الاختبار المعزولة. وتوجد حالات الاستخدام من UC-001 إلى UC-026 في docs/use-cases/use-cases.md.")
@@ -672,6 +786,12 @@ def chapter2(doc):
 
 
 def chapter3(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى chapter3؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     add_heading(doc, "الفصل الرابع: الدراسة التصميمية", 1)
     add_heading(doc, "4.1 مخطط النظام وسياقه", 2)
     add_figure(doc, 4, "مخطط النظام العام", "01-system-block.png")
@@ -758,6 +878,12 @@ def chapter3(doc):
 
 
 def chapter4(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى chapter4؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     add_text(doc, "في إعداد الإنتاج تُفرض قيمة ADMIN_SESSION_SECRET من خارج المستودع وبطول لا يقل عن 32 محرفاً، مع ADMIN_SESSION_SECURE=true. ويكون النشر خلف HTTPS reverse proxy، وتبقى PostgreSQL وOllama داخلية أو خاصة، ويظل حد MCP محدوداً typed، ويُفرض SSH known_hosts، ويكون السماح بالمعالجة الذاتية false افتراضياً.")
     add_heading(doc, "الفصل الخامس: التنفيذ والاختبارات", 1)
     add_heading(doc, "5.1 البيئة والتقنيات وسبب الاختيار", 2)
@@ -813,6 +939,12 @@ def chapter4(doc):
 
 
 def chapter5_ui_and_testing(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى chapter5_ui_and_testing؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     add_heading(doc, "الفصل السادس: الواجهات والاختبار", 1)
     add_heading(doc, "6.1 مقدمة الواجهات", 2)
     add_text(doc, "تتكون واجهة المشروع من لوحة Admin مبنية على قوالب Jinja2 وملفات JavaScript وCSS. لا تعرض الواجهة كل تفاصيل قاعدة البيانات، بل تعرض المعلومات التي يحتاجها المشغل أو المدير لاتخاذ قرار ومتابعة حالته. وتستخدم الصفحات نفسها الخدمات التي تستخدمها API وأدوات MCP، لذلك لا يوجد تنفيذ مختلف مخفي داخل القالب.")
@@ -856,6 +988,12 @@ def chapter5_ui_and_testing(doc):
 
 
 def appendices(doc):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى appendices؛ المدخلات المهمة: doc.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     add_heading(doc, "الخاتمة والآفاق المستقبلية", 1)
     add_heading(doc, "1. مقدمة", 2)
     add_text(doc, "قدم هذا المشروع وكيلاً يساعد مشغل الخادم على جمع المعلومات وفهم الأعطال ومراجعة المعالجة قبل تنفيذها. بنيت مراحل العمل حول تقرير محفوظ، وتحليل مرتبط بمصدر، وتحقيق متخصص، ثم خطة وسياسة وتحقق وتدقيق. وبذلك أصبح النظام أقرب إلى أداة تشغيل يمكن مراجعتها، وليس مجرد محادثة تنتج اقتراحات.")
@@ -949,6 +1087,12 @@ def synchronize_final_facts(doc):
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     OUT.parent.mkdir(parents=True, exist_ok=True)
     doc = Document(str(TEMPLATE))
     clear_body(doc)

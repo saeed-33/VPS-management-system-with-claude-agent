@@ -1,3 +1,13 @@
+"""
+حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+
+الموقع في المعمارية: MCP capability boundary.
+يُستدعى بواسطة: Claude أو خادم MCP.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.report_fingerprint، app.capabilities.analysis.retrieval.report_normalizer، app.interfaces.mcp.schemas، app.interfaces.mcp.catalog، app.interfaces.mcp.handlers.
+الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
@@ -39,6 +49,14 @@ class ProjectMcpToolBoundary(
     BoundaryCommonMixin,
     BoundaryDefinitionsMixin,
 ):
+    """
+    يمثل ProjectMcpToolBoundary مسؤولية محددة داخل طبقة MCP capability boundary.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
+    ويعتمد على MonitoringToolsMixin، AnalysisToolsMixin، InvestigationToolsMixin، RemediationToolsMixin وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     # Canonical Claude-visible project tool registry.
 
     def __init__(
@@ -61,6 +79,13 @@ class ProjectMcpToolBoundary(
         remediation_service=None,
         autonomous_execution_service=None,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: server_service، monitoring_profile_service، monitoring_service، report_query_service، analysis_orchestrator، analysis_repository.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._server_service = server_service
         self._monitoring_profile_service = (
             monitoring_profile_service
@@ -147,6 +172,13 @@ class ProjectMcpToolBoundary(
     def list_tools(
         self,
     ) -> list[ProjectToolDefinition]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى list_tools؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد list[ProjectToolDefinition] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return [
             self._definitions[key]
             for key in sorted(
@@ -157,6 +189,13 @@ class ProjectMcpToolBoundary(
     def list_tool_groups(
         self,
     ) -> dict[str, list[ProjectToolDefinition]]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى list_tool_groups؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد dict[str, list[ProjectToolDefinition]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return group_definitions(
             self.list_tools()
         )
@@ -165,6 +204,15 @@ class ProjectMcpToolBoundary(
         self,
         call: ProjectToolCall,
     ) -> ProjectToolResult:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى execute؛ المدخلات المهمة: call.
+        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
+        # registry يحدد MCP exposure والـschema، لكنه لا يستبدل policy داخل
+        # capability؛ handler يطبق التحقق الفعلي قبل أي side effect.
         handler = self._handlers.get(
             call.tool_id
         )

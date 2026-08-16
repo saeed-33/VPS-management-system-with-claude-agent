@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.remediation.autonomous_authorization_service، app.capabilities.remediation.autonomous_execution_service، app.capabilities.remediation.autonomous_policy_service، app.core.contracts.autonomous_remediation، app.core.contracts.remediation، app.core.utils.datetime.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import timedelta
@@ -53,6 +63,12 @@ TABLES = (
 
 
 def make_harness(tmp_path: Path, *, mode: str = "failure"):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_harness؛ المدخلات المهمة: tmp_path، mode.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine(
         f"sqlite:///{tmp_path / 'phase7-breaker.db'}",
         connect_args={"check_same_thread": False, "timeout": 30},
@@ -95,6 +111,12 @@ def make_harness(tmp_path: Path, *, mode: str = "failure"):
     )
 
     def deterministic_evaluate(*, plan_id):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى deterministic_evaluate؛ المدخلات المهمة: plan_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         current = repository.get_policy(policy.policy_id)
         contract = policy_service._model_to_contract(current)
         if not service._automatic_remediation_allowed:
@@ -125,7 +147,19 @@ def make_harness(tmp_path: Path, *, mode: str = "failure"):
 
 
 class ControlledRemediation:
+    """
+    يمثل ControlledRemediation جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, factory, plan, mode):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: factory، plan، mode.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.factory = factory
         self.plan = plan
         self.mode = mode
@@ -134,9 +168,21 @@ class ControlledRemediation:
         self.rollback_calls = 0
 
     def get_plan(self, plan_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_plan؛ المدخلات المهمة: plan_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.plan if plan_id == self.plan.plan_id else None
 
     def get_latest_sandbox_validation(self, _plan_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_latest_sandbox_validation؛ المدخلات المهمة: _plan_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return SimpleNamespace(
             validation_id="sandbox-1", status="passed", plan_id=self.plan.plan_id,
             plan_fingerprint=self.plan.plan_fingerprint, server_id=4, service="nginx",
@@ -148,19 +194,43 @@ class ControlledRemediation:
     get_sandbox_validation = get_latest_sandbox_validation
 
     def sandbox_evidence_belongs(self, **_kwargs):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى sandbox_evidence_belongs؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return True
 
     def get_execution(self, *, execution_id=None, **_kwargs):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_execution؛ المدخلات المهمة: execution_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         with self.factory() as session:
             return session.scalar(select(RemediationExecutionModel).where(RemediationExecutionModel.execution_id == execution_id))
 
     def audit_autonomous(self, *, plan_id, event_type, payload):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى audit_autonomous؛ المدخلات المهمة: plan_id، event_type، payload.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.audit_events.append(event_type)
         RemediationRepository(self.factory).append_audit_event(
             plan_id=plan_id, event_type=event_type, actor="autonomous-policy", payload=payload,
         )
 
     def apply_approved(self, *, plan_id, server_id, actor, idempotency_key, autonomous_authorization):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى apply_approved؛ المدخلات المهمة: plan_id، server_id، actor، idempotency_key، autonomous_authorization.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.apply_calls += 1
         execution_id = f"execution-{self.apply_calls}"
         if self.mode == "success":
@@ -182,6 +252,12 @@ class ControlledRemediation:
         return {"applied": applied, "execution_id": execution_id}
 
     def rollback(self, *, plan_id, execution_id, actor, server_id):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى rollback؛ المدخلات المهمة: plan_id، execution_id، actor، server_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.rollback_calls += 1
         failed = self.mode == "rollback_failure"
         with self.factory() as session:
@@ -197,6 +273,12 @@ class ControlledRemediation:
 
 
 def test_success_does_not_trip_and_failure_persists_all_links(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_success_does_not_trip_and_failure_persists_all_links؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service, repo, _policy_service, controlled, factory, policy = make_harness(tmp_path, mode="success")
     result = service.attempt(plan_id="plan-1", idempotency_key="success-key")
     runtime = repo.get_runtime_state(policy.policy_id)
@@ -228,6 +310,12 @@ def test_success_does_not_trip_and_failure_persists_all_links(tmp_path):
 
 
 def test_suspended_policy_blocks_next_and_operator_resume_starts_new_epoch(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_suspended_policy_blocks_next_and_operator_resume_starts_new_epoch؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service, repo, policy_service, controlled, _factory, policy = make_harness(tmp_path)
     service.attempt(plan_id="plan-1", idempotency_key="first")
     denied = service.attempt(plan_id="plan-1", idempotency_key="second")
@@ -259,6 +347,12 @@ def test_suspended_policy_blocks_next_and_operator_resume_starts_new_epoch(tmp_p
 
 
 def test_second_failure_after_resume_and_verification_rollback_fail_closed(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_second_failure_after_resume_and_verification_rollback_fail_closed؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service, repo, policy_service, controlled, _factory, policy = make_harness(tmp_path, mode="verification_failure")
     service.attempt(plan_id="plan-1", idempotency_key="first")
     assert controlled.rollback_calls == 1
@@ -275,6 +369,12 @@ def test_second_failure_after_resume_and_verification_rollback_fail_closed(tmp_p
 
 
 def test_prewrite_denial_does_not_count_and_global_gate_is_independent(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_prewrite_denial_does_not_count_and_global_gate_is_independent؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service, repo, policy_service, controlled, _factory, policy = make_harness(tmp_path)
     service._automatic_remediation_allowed = False
     denied = service.attempt(plan_id="plan-1", idempotency_key="denied")
@@ -290,6 +390,12 @@ def test_prewrite_denial_does_not_count_and_global_gate_is_independent(tmp_path)
 
 
 def test_recovery_failure_is_counted_once_and_concurrent_accounting_is_idempotent(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_recovery_failure_is_counted_once_and_concurrent_accounting_is_idempotent؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service, repo, _policy_service, controlled, factory, policy = make_harness(tmp_path)
     decision = AutonomousPolicyDecision(
         decision_id="recovery-decision", outcome=AutonomousDecisionOutcome.AUTO_EXECUTE,
@@ -318,6 +424,12 @@ def test_recovery_failure_is_counted_once_and_concurrent_accounting_is_idempoten
     results = []
 
     def count_failure():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى count_failure؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         barrier.wait()
         results.append(repo.record_autonomous_failure(
             policy_id=policy.policy_id, policy_version=1, failure_key="same-failure",
@@ -334,6 +446,12 @@ def test_recovery_failure_is_counted_once_and_concurrent_accounting_is_idempoten
 
 
 def test_old_policy_version_failure_cannot_rewrite_new_epoch(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_old_policy_version_failure_cannot_rewrite_new_epoch؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _service, repo, policy_service, _controlled, _factory, policy = make_harness(tmp_path)
     first = repo.record_autonomous_failure(
         policy_id=policy.policy_id, policy_version=1, failure_key="old-failure", decision_id="old-decision",

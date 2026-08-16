@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: app.composition، app.core.contracts.knowledge_sources.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import sys
@@ -18,6 +28,12 @@ from app.core.contracts.knowledge_sources import (
 
 @dataclass(frozen=True, slots=True)
 class SeedKnowledgeSource:
+    """
+    يمثل SeedKnowledgeSource جزءًا من طبقة Developer tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه CLI أو المطور مباشرة. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     slug: str
     name: str
     description: str
@@ -237,6 +253,12 @@ SOURCES: tuple[SeedKnowledgeSource, ...] = (
 def create_dto(
     item: SeedKnowledgeSource,
 ) -> CreateKnowledgeSourceDTO:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى create_dto؛ المدخلات المهمة: item.
+    تعيد CreateKnowledgeSourceDTO أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return CreateKnowledgeSourceDTO(
         slug=item.slug,
         name=item.name,
@@ -258,6 +280,12 @@ def create_dto(
 def update_dto(
     item: SeedKnowledgeSource,
 ) -> UpdateKnowledgeSourceDTO:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى update_dto؛ المدخلات المهمة: item.
+    تعيد UpdateKnowledgeSourceDTO أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return UpdateKnowledgeSourceDTO(
         name=item.name,
         description=item.description,
@@ -276,6 +304,12 @@ def update_dto(
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     repository = (
         container
         .knowledge_source_repository

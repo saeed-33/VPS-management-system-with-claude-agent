@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.capabilities.remediation.service، app.interfaces.admin.dependencies، app.interfaces.admin.schemas.remediation، app.interfaces.mcp.serializers.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -23,6 +33,13 @@ router = APIRouter(prefix="/api/remediation", tags=["remediation"])
 
 
 def _actor(request: Request, fallback: str | None) -> str | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _actor؛ المدخلات المهمة: request، fallback.
+    تعيد str | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     principal = getattr(request.state, "admin_user", None)
     return principal.username if principal is not None else fallback
 
@@ -43,6 +60,13 @@ def _json_value(value: Any) -> Any:
 
 
 def _serialize_fields(value: Any, names: tuple[str, ...]) -> dict[str, Any] | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _serialize_fields؛ المدخلات المهمة: value، names.
+    تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if value is None:
         return None
     return {name: _json_value(getattr(value, name, None)) for name in names}
@@ -79,22 +103,57 @@ _AUDIT_FIELDS = (
 
 
 def _serialize_plan(value: Any) -> dict[str, Any] | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _serialize_plan؛ المدخلات المهمة: value.
+    تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return _serialize_fields(value, _PLAN_FIELDS)
 
 
 def _serialize_approval(value: Any) -> dict[str, Any] | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _serialize_approval؛ المدخلات المهمة: value.
+    تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return _serialize_fields(value, _APPROVAL_FIELDS)
 
 
 def _serialize_execution(value: Any) -> dict[str, Any] | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _serialize_execution؛ المدخلات المهمة: value.
+    تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return _serialize_fields(value, _EXECUTION_FIELDS)
 
 
 def _serialize_sandbox_validation(value: Any) -> dict[str, Any] | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _serialize_sandbox_validation؛ المدخلات المهمة: value.
+    تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return _serialize_fields(value, _SANDBOX_VALIDATION_FIELDS)
 
 
 def _serialize_audit(value: Any) -> dict[str, Any] | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _serialize_audit؛ المدخلات المهمة: value.
+    تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return _serialize_fields(value, _AUDIT_FIELDS)
 
 
@@ -104,6 +163,13 @@ def list_remediation_plans(
     status: str | None = Query(default=None),
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_remediation_plans؛ المدخلات المهمة: limit، status، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return [_serialize_plan(plan) for plan in service.list_plans(limit=limit, status=status)]
 
 
@@ -112,6 +178,13 @@ def get_remediation_plan(
     plan_id: str,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_remediation_plan؛ المدخلات المهمة: plan_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     plan = service.get_plan(plan_id.strip())
     if plan is None:
         raise HTTPException(status_code=404, detail="Remediation plan not found.")
@@ -128,6 +201,13 @@ def get_remediation_audit(
     plan_id: str,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_remediation_audit؛ المدخلات المهمة: plan_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if service.get_plan(plan_id) is None:
         raise HTTPException(status_code=404, detail="Remediation plan not found.")
     return [_serialize_audit(event) for event in service.list_audit_events(plan_id)]
@@ -139,6 +219,13 @@ def request_remediation_approval(
     payload: ApprovalRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى request_remediation_approval؛ المدخلات المهمة: plan_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return serialize_value(service.request_approval(plan_id=plan_id, expires_in_seconds=payload.expires_in_seconds, scope=payload.scope))
     except ValueError as exc:
@@ -151,6 +238,13 @@ def validate_remediation_in_sandbox(
     payload: SandboxValidationRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى validate_remediation_in_sandbox؛ المدخلات المهمة: plan_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         result = service.validate_in_isolated_sandbox(plan_id=plan_id, **payload.model_dump())
         return serialize_value(result)
@@ -166,6 +260,13 @@ def approve_remediation(
     payload: ApprovalDecisionRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى approve_remediation؛ المدخلات المهمة: plan_id، approval_id، request، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         existing = service.get_approval(approval_id)
         if existing is None or existing.plan_id != plan_id:
@@ -184,6 +285,13 @@ def reject_remediation(
     payload: ApprovalDecisionRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى reject_remediation؛ المدخلات المهمة: plan_id، approval_id، request، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         existing = service.get_approval(approval_id)
         if existing is None or existing.plan_id != plan_id:
@@ -201,6 +309,13 @@ def execute_remediation(
     payload: ExecuteRemediationRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى execute_remediation؛ المدخلات المهمة: plan_id، request، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         values = payload.model_dump()
         values["actor"] = _actor(request, values["actor"])
@@ -221,6 +336,13 @@ def rollback_remediation(
     payload: RollbackRemediationRequest,
     service: RemediationService = Depends(get_remediation_service),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى rollback_remediation؛ المدخلات المهمة: plan_id، request، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         values = payload.model_dump()
         values["actor"] = _actor(request, values["actor"])

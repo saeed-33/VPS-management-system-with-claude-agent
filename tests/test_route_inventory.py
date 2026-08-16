@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from tools.dev.list_routes import (
     collect_routes,
 )
@@ -5,6 +15,12 @@ from tools.dev.list_routes import (
 
 def test_route_inventory_contains_application_routes(
 ) -> None:
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_route_inventory_contains_application_routes؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     routes = collect_routes()
 
     paths = {
@@ -45,6 +61,12 @@ def test_route_inventory_contains_application_routes(
 
 def test_web_routes_are_excluded_from_openapi(
 ) -> None:
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_web_routes_are_excluded_from_openapi؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     routes = collect_routes()
 
     web_paths = {
@@ -74,6 +96,12 @@ def test_web_routes_are_excluded_from_openapi(
 
 def test_specialists_api_is_in_openapi_inventory(
 ) -> None:
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_specialists_api_is_in_openapi_inventory؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     routes = collect_routes()
 
     specialist_routes = [
@@ -94,6 +122,12 @@ def test_specialists_api_is_in_openapi_inventory(
 
 def test_health_route_remains_visible(
 ) -> None:
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_health_route_remains_visible؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     routes = collect_routes()
 
     health = [

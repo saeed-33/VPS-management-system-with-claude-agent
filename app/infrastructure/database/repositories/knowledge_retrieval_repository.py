@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.infrastructure.database.models.knowledge_document، app.infrastructure.database.models.knowledge_source، app.infrastructure.database.session.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -18,6 +28,14 @@ from app.infrastructure.database.session import SessionLocal
 
 @dataclass(slots=True, frozen=True)
 class KnowledgeSearchRow:
+    """
+    يمثل KnowledgeSearchRow مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     chunk_id: int
     document_id: int
     source_id: int
@@ -36,10 +54,25 @@ class KnowledgeSearchRow:
 
 
 class KnowledgeRetrievalRepository:
+    """
+    يمثل KnowledgeRetrievalRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def find_by_vector(
@@ -52,6 +85,13 @@ class KnowledgeRetrievalRepository:
         limit: int,
         hnsw_ef_search: int,
     ) -> list[KnowledgeSearchRow]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى find_by_vector؛ المدخلات المهمة: query_embedding، specialist_slug، domains، minimum_similarity، limit، hnsw_ef_search.
+        تعيد list[KnowledgeSearchRow] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         similarity = (
             1.0
             - KnowledgeChunkModel.embedding.cosine_distance(
@@ -125,6 +165,13 @@ class KnowledgeRetrievalRepository:
         domains: tuple[str, ...],
         limit: int,
     ) -> list[KnowledgeSearchRow]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى find_by_full_text؛ المدخلات المهمة: query_text، specialist_slug، domains، limit.
+        تعيد list[KnowledgeSearchRow] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         query_text = query_text.strip()
         if not query_text:
             return []
@@ -196,6 +243,13 @@ class KnowledgeRetrievalRepository:
         specialist_slug: str | None,
         domains: tuple[str, ...],
     ):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى _scope_condition؛ المدخلات المهمة: specialist_slug، domains.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         conditions = []
 
         specialist_json = cast(
@@ -226,6 +280,13 @@ class KnowledgeRetrievalRepository:
 
     @staticmethod
     def _to_row(row) -> KnowledgeSearchRow:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى _to_row؛ المدخلات المهمة: row.
+        تعيد KnowledgeSearchRow أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return KnowledgeSearchRow(
             chunk_id=row[0],
             document_id=row[1],

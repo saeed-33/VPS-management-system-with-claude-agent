@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from pathlib import Path
 
 
@@ -80,6 +90,12 @@ SKILLS = {
 
 
 def read_skill(name: str) -> str:
+    """
+    يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى read_skill؛ المدخلات المهمة: name.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return (
         ROOT
         / ".claude"
@@ -90,12 +106,24 @@ def read_skill(name: str) -> str:
 
 
 def frontmatter(text: str) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى frontmatter؛ المدخلات المهمة: text.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     assert text.startswith("---\n")
     _, data, _ = text.split("---", 2)
     return data
 
 
 def allowed_tools(text: str) -> set[str]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى allowed_tools؛ المدخلات المهمة: text.
+    تعيد set[str] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     data = frontmatter(text)
     tools: set[str] = set()
     in_allowed = False
@@ -118,6 +146,12 @@ def allowed_tools(text: str) -> set[str]:
 
 
 def test_operational_skill_set_is_canonical():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_operational_skill_set_is_canonical؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     skill_root = ROOT / ".claude" / "skills"
 
     names = {
@@ -130,6 +164,12 @@ def test_operational_skill_set_is_canonical():
 
 
 def test_skills_have_frontmatter_and_exact_intended_tools():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_skills_have_frontmatter_and_exact_intended_tools؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     for name, contract in SKILLS.items():
         text = read_skill(name)
         fm = frontmatter(text)
@@ -140,6 +180,12 @@ def test_skills_have_frontmatter_and_exact_intended_tools():
 
 
 def test_skills_define_operational_contract_sections():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_skills_define_operational_contract_sections؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     for name, contract in SKILLS.items():
         text = read_skill(name)
 
@@ -148,6 +194,12 @@ def test_skills_define_operational_contract_sections():
 
 
 def test_analysis_skill_never_forces_normal_analysis():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_analysis_skill_never_forces_normal_analysis؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = read_skill("analyze-incident")
 
     assert "force = false" in text
@@ -155,6 +207,12 @@ def test_analysis_skill_never_forces_normal_analysis():
 
 
 def test_investigation_skill_preserves_db_specialist_authority():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_investigation_skill_preserves_db_specialist_authority؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = read_skill("investigate-incident")
 
     assert "database-defined" in text
@@ -163,6 +221,12 @@ def test_investigation_skill_preserves_db_specialist_authority():
 
 
 def test_remediation_skill_is_supervised_and_approval_gated():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_remediation_skill_is_supervised_and_approval_gated؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = read_skill("plan-remediation")
     tools = allowed_tools(text)
 
@@ -175,6 +239,12 @@ def test_remediation_skill_is_supervised_and_approval_gated():
 
 
 def test_server_supervisor_preloads_canonical_workflow_skills():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_server_supervisor_preloads_canonical_workflow_skills؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = (
         ROOT
         / ".claude"
@@ -187,6 +257,12 @@ def test_server_supervisor_preloads_canonical_workflow_skills():
 
 
 def test_specialist_worker_is_not_a_workflow_coordinator():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_specialist_worker_is_not_a_workflow_coordinator؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = (
         ROOT
         / ".claude"
@@ -198,6 +274,12 @@ def test_specialist_worker_is_not_a_workflow_coordinator():
 
 
 def test_legacy_skill_names_are_removed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_legacy_skill_names_are_removed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     legacy = {
         "server-monitoring",
         "incident-analysis",

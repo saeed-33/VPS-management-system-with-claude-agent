@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.remediation.autonomous_execution_service، app.core.contracts.autonomous_remediation، app.core.contracts.remediation، app.infrastructure.database.base، app.infrastructure.database.models.remediation، app.infrastructure.database.repositories.autonomous_remediation_repository.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -45,6 +55,12 @@ TABLES = (
 
 
 def make_database(tmp_path: Path):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_database؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine(
         f"sqlite:///{tmp_path / 'phase7-concurrency.db'}",
         connect_args={"check_same_thread": False, "timeout": 30},
@@ -55,6 +71,12 @@ def make_database(tmp_path: Path):
 
 
 def add_plan(factory, *, plan_id="plan-1", fingerprint="plan-fp-1"):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى add_plan؛ المدخلات المهمة: factory، plan_id، fingerprint.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     with factory() as session:
         session.add(RemediationPlanModel(
             plan_id=plan_id,
@@ -77,6 +99,12 @@ def add_plan(factory, *, plan_id="plan-1", fingerprint="plan-fp-1"):
 
 
 def add_execution(factory, *, execution_id="execution-1", key="key-1", status="succeeded"):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى add_execution؛ المدخلات المهمة: factory، execution_id، key، status.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     with factory() as session:
         session.add(RemediationExecutionModel(
             execution_id=execution_id,
@@ -97,6 +125,12 @@ def add_execution(factory, *, execution_id="execution-1", key="key-1", status="s
 
 
 def add_authorization(repo, *, authorization_id="authorization-1", status=AutonomousAuthorizationStatus.VALID):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى add_authorization؛ المدخلات المهمة: repo، authorization_id، status.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     authorization = AutonomousAuthorization(
         authorization_id=authorization_id,
         token=f"token-{authorization_id}",
@@ -118,6 +152,12 @@ def add_authorization(repo, *, authorization_id="authorization-1", status=Autono
 
 
 def reserve(repo, *, key="key-1", owner="owner-1", now=NOW, lease_seconds=900):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى reserve؛ المدخلات المهمة: repo، key، owner، now، lease_seconds.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return repo.reserve(
         idempotency_key=key,
         owner_token=owner,
@@ -133,6 +173,12 @@ def reserve(repo, *, key="key-1", owner="owner-1", now=NOW, lease_seconds=900):
 
 
 def test_atomic_same_key_race_has_one_database_reservation(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_atomic_same_key_race_has_one_database_reservation؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     barrier = Barrier(2)
@@ -140,6 +186,12 @@ def test_atomic_same_key_race_has_one_database_reservation(tmp_path):
     errors = []
 
     def worker(owner):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى worker؛ المدخلات المهمة: owner.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         try:
             barrier.wait()
             item = reserve(repo, owner=owner)
@@ -166,6 +218,12 @@ def test_atomic_same_key_race_has_one_database_reservation(tmp_path):
 
 
 def test_service_same_key_race_has_one_authorization_and_execution_path(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_service_same_key_race_has_one_authorization_and_execution_path؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     service, auth, remediation, _policy = make_service(repo)
@@ -174,6 +232,12 @@ def test_service_same_key_race_has_one_authorization_and_execution_path(tmp_path
     errors = []
 
     def worker():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى worker؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         try:
             barrier.wait()
             results.append(service.attempt(plan_id="plan-1", idempotency_key="key-1"))
@@ -195,6 +259,12 @@ def test_service_same_key_race_has_one_authorization_and_execution_path(tmp_path
 
 
 def test_different_keys_cannot_execute_same_active_or_completed_operation(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_different_keys_cannot_execute_same_active_or_completed_operation؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, key="key-a", owner="owner-a")
@@ -211,6 +281,12 @@ def test_different_keys_cannot_execute_same_active_or_completed_operation(tmp_pa
 
 
 def test_owner_token_protects_authorization_finalize_and_competing_state(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_owner_token_protects_authorization_finalize_and_competing_state؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, owner="owner-a")
@@ -228,6 +304,12 @@ def test_owner_token_protects_authorization_finalize_and_competing_state(tmp_pat
 
 
 def test_reserved_and_in_progress_replay_fail_closed_without_mutation(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_reserved_and_in_progress_replay_fail_closed_without_mutation؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo)
@@ -242,6 +324,12 @@ def test_reserved_and_in_progress_replay_fail_closed_without_mutation(tmp_path):
 
 
 def test_completed_replay_preserves_terminal_identity(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_completed_replay_preserves_terminal_identity؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo)
@@ -255,6 +343,12 @@ def test_completed_replay_preserves_terminal_identity(tmp_path):
 
 
 def test_failed_terminal_reservation_is_not_automatically_retried(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_failed_terminal_reservation_is_not_automatically_retried؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo)
@@ -267,6 +361,12 @@ def test_failed_terminal_reservation_is_not_automatically_retried(tmp_path):
 
 
 def test_stale_lease_recovery_before_authorization_reuses_reservation(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_stale_lease_recovery_before_authorization_reuses_reservation؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)
@@ -281,6 +381,12 @@ def test_stale_lease_recovery_before_authorization_reuses_reservation(tmp_path):
 
 
 def test_crash_after_authorization_issued_preserves_single_authorization(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_crash_after_authorization_issued_preserves_single_authorization؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)
@@ -298,6 +404,12 @@ def test_crash_after_authorization_issued_preserves_single_authorization(tmp_pat
 
 
 def test_crash_after_authorization_consumed_without_execution_fails_closed(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_crash_after_authorization_consumed_without_execution_fails_closed؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)
@@ -313,6 +425,12 @@ def test_crash_after_authorization_consumed_without_execution_fails_closed(tmp_p
 
 
 def test_crash_after_write_before_finalize_reconciles_existing_execution(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_crash_after_write_before_finalize_reconciles_existing_execution؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)
@@ -328,6 +446,12 @@ def test_crash_after_write_before_finalize_reconciles_existing_execution(tmp_pat
 
 
 def test_concurrent_stale_recovery_has_one_takeover(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_concurrent_stale_recovery_has_one_takeover؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)
@@ -336,6 +460,12 @@ def test_concurrent_stale_recovery_has_one_takeover(tmp_path):
     errors = []
 
     def worker(owner):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى worker؛ المدخلات المهمة: owner.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         try:
             barrier.wait()
             results.append(reserve(repo, owner=owner, now=NOW + timedelta(seconds=2)))
@@ -357,6 +487,12 @@ def test_concurrent_stale_recovery_has_one_takeover(tmp_path):
 
 
 def test_plan_fingerprint_change_cannot_recover_old_reservation(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_plan_fingerprint_change_cannot_recover_old_reservation؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     reserve(repo, now=NOW, lease_seconds=1)
@@ -374,13 +510,31 @@ def test_plan_fingerprint_change_cannot_recover_old_reservation(tmp_path):
 
 
 class FakeAuthorizationService:
+    """
+    يمثل FakeAuthorizationService جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.authorization = None
         self.issue_calls = 0
         self.consume_calls = 0
         self._lock = Lock()
 
     def issue(self, *, decision, sandbox_validation_id):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى issue؛ المدخلات المهمة: decision، sandbox_validation_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         with self._lock:
             self.issue_calls += 1
             self.authorization = SimpleNamespace(
@@ -399,11 +553,23 @@ class FakeAuthorizationService:
             return self.authorization
 
     def get(self, authorization_id):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get؛ المدخلات المهمة: authorization_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert self.authorization is not None
         assert self.authorization.authorization_id == authorization_id
         return self.authorization
 
     def consume(self, authorization_id):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى consume؛ المدخلات المهمة: authorization_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         with self._lock:
             self.consume_calls += 1
             assert self.authorization.authorization_id == authorization_id
@@ -414,14 +580,38 @@ class FakeAuthorizationService:
 
 
 class FakeRemediationRepository:
+    """
+    يمثل FakeRemediationRepository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, plan):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: plan.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.plan = plan
         self.executions = {}
 
     def get_plan(self, plan_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_plan؛ المدخلات المهمة: plan_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.plan if plan_id == self.plan.plan_id else None
 
     def get_latest_sandbox_validation(self, _plan_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_latest_sandbox_validation؛ المدخلات المهمة: _plan_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return SimpleNamespace(
             validation_id="sandbox-1", status="passed", plan_id="plan-1",
             plan_fingerprint="plan-fp-1", server_id=4, service="nginx",
@@ -430,26 +620,68 @@ class FakeRemediationRepository:
         )
 
     def get_sandbox_validation(self, _validation_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_sandbox_validation؛ المدخلات المهمة: _validation_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.get_latest_sandbox_validation("plan-1")
 
     def sandbox_evidence_belongs(self, **_kwargs):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى sandbox_evidence_belongs؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return True
 
     def get_execution(self, *, execution_id=None, **_kwargs):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_execution؛ المدخلات المهمة: execution_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.executions.get(execution_id)
 
 
 class FakeRemediationService:
+    """
+    يمثل FakeRemediationService جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, remediation_repository):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: remediation_repository.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.repository = remediation_repository
         self.apply_calls = 0
         self.audit_events = []
         self._lock = Lock()
 
     def audit_autonomous(self, **kwargs):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى audit_autonomous؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.audit_events.append(kwargs)
 
     def apply_approved(self, *, plan_id, server_id, actor, idempotency_key, autonomous_authorization):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى apply_approved؛ المدخلات المهمة: plan_id، server_id، actor، idempotency_key، autonomous_authorization.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         with self._lock:
             self.apply_calls += 1
             execution = SimpleNamespace(
@@ -465,6 +697,12 @@ class FakeRemediationService:
 
 
 def make_service(repo, *, automatic=True, policy_version=1):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_service؛ المدخلات المهمة: repo، automatic، policy_version.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     plan = SimpleNamespace(
         plan_id="plan-1", plan_fingerprint="plan-fp-1", server_id=4,
         status=RemediationPlanStatus.SANDBOX_PASSED.value,
@@ -504,6 +742,12 @@ def make_service(repo, *, automatic=True, policy_version=1):
 
 
 def test_service_recovery_reuses_authorization_and_audits_recovery(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_service_recovery_reuses_authorization_and_audits_recovery؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     reserve(repo, now=NOW, lease_seconds=1)
@@ -519,6 +763,12 @@ def test_service_recovery_reuses_authorization_and_audits_recovery(tmp_path):
 
 
 def test_service_recovery_after_auth_issued_does_not_issue_a_second_authorization(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_service_recovery_after_auth_issued_does_not_issue_a_second_authorization؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)
@@ -542,6 +792,12 @@ def test_service_recovery_after_auth_issued_does_not_issue_a_second_authorizatio
 
 
 def test_kill_switch_blocks_stale_recovery_before_reservation_mutation(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_kill_switch_blocks_stale_recovery_before_reservation_mutation؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)
@@ -571,6 +827,12 @@ def test_kill_switch_blocks_stale_recovery_before_reservation_mutation(tmp_path)
 
 
 def test_policy_version_change_fails_closed_during_recovery(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_policy_version_change_fails_closed_during_recovery؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _engine, factory, repo = make_database(tmp_path)
     add_plan(factory)
     first = reserve(repo, now=NOW, lease_seconds=1)

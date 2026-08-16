@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: app.composition، app.core.config، app.infrastructure.database.engine.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import argparse
@@ -24,6 +34,12 @@ from app.infrastructure.database.engine import (
 
 
 def parse_args():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى parse_args؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Run one real Ollama-backed Claude monitoring "
@@ -39,6 +55,12 @@ def parse_args():
 
 
 def jsonable(value):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى jsonable؛ المدخلات المهمة: value.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if isinstance(value, Enum):
         return value.value
 
@@ -61,12 +83,24 @@ def jsonable(value):
 
 
 def prepare_database_schema() -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى prepare_database_schema؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     # The standalone smoke does not enter FastAPI lifespan.
     # Mirror application startup so newly-added runtime tables exist.
     create_database_tables()
 
 
 async def main_async(server_id: int) -> int:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى main_async؛ المدخلات المهمة: server_id.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if server_id < 1:
         print("server-id must be a positive integer.")
         return 2
@@ -121,6 +155,12 @@ async def main_async(server_id: int) -> int:
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     args = parse_args()
     return asyncio.run(
         main_async(args.server_id)

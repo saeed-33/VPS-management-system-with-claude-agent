@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.runtime.claude.models، app.runtime.claude.ollama_runtime.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from pathlib import Path
 
 from app.runtime.claude.models import ClaudeRuntimeRequest
@@ -7,6 +17,12 @@ from app.runtime.claude.ollama_runtime import (
 
 
 def test_direct_claude_uses_ollama_backend(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_direct_claude_uses_ollama_backend؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
     (project / ".mcp.json").write_text(
@@ -56,6 +72,12 @@ def test_direct_claude_uses_ollama_backend(tmp_path):
 
 
 def test_runtime_composition_uses_direct_claude_settings():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_composition_uses_direct_claude_settings؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     root = Path(__file__).resolve().parents[1]
     text = (
         root

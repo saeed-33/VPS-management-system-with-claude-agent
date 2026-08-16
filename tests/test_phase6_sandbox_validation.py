@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.remediation.execution، app.capabilities.remediation.service، app.core.contracts.sandbox_validation، app.infrastructure.database.base، app.infrastructure.database.models.server، app.infrastructure.database.models.remediation.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime
@@ -27,37 +37,109 @@ from app.infrastructure.database.repositories.remediation_repository import Reme
 
 
 class FakeServerRepository:
+    """
+    يمثل FakeServerRepository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, server):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: server.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.server = server
 
     def get_by_id(self, server_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_by_id؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.server if self.server.id == server_id else None
 
 
 class FakeWriter:
+    """
+    يمثل FakeWriter جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, success=True):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: success.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.success = success
         self.calls = []
 
     def run(self, **kwargs):
+        """
+        يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى run؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls.append(kwargs)
         return WriteCommandResult(success=self.success, exit_status=0 if self.success else 1, error=None if self.success else "failed")
 
 
 class FakeEvidence:
+    """
+    يمثل FakeEvidence جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, states=("inactive", "active", "inactive")):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: states.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.states = list(states)
 
     def collect(self, **_kwargs):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى collect؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return ServiceStateObservation(state=self.states.pop(0) if self.states else "unknown")
 
 
 class FakeVerifier:
+    """
+    يمثل FakeVerifier جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def verify_state(self, *, expected_state, **_kwargs):
+        """
+        يتحقق من invariant أو readiness شرطها ظاهر في الكود ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى verify_state؛ المدخلات المهمة: expected_state.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return True, {"expected": expected_state, "observed": expected_state}
 
 
 def make_service(*, states=("inactive", "active", "inactive"), writer=None):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_service؛ المدخلات المهمة: states، writer.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine("sqlite+pysqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     tables = [
         ServerModel.__table__, RemediationPlanModel.__table__, RemediationSandboxResultModel.__table__,
@@ -83,6 +165,12 @@ def make_service(*, states=("inactive", "active", "inactive"), writer=None):
 
 
 def make_plan(service, *, action_type="start_service"):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_plan؛ المدخلات المهمة: service، action_type.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return service.create_plan(
         plan_id="phase6-plan", investigation_id="phase6-investigation", title="Sandbox validation",
         problem_summary="Validate one dedicated lab action.",
@@ -92,6 +180,12 @@ def make_plan(service, *, action_type="start_service"):
 
 
 def test_validation_contracts_and_invalid_target_fail_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_validation_contracts_and_invalid_target_fail_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     make_plan(service)
     result = service.validate_in_isolated_sandbox(
@@ -102,6 +196,12 @@ def test_validation_contracts_and_invalid_target_fail_closed():
 
 
 def test_successful_validation_persists_evidence_and_allows_approval():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_successful_validation_persists_evidence_and_allows_approval؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     plan = make_plan(service)
     result = service.validate_in_isolated_sandbox(
@@ -120,6 +220,12 @@ def test_successful_validation_persists_evidence_and_allows_approval():
 
 
 def test_action_or_verification_failure_blocks_approval():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_action_or_verification_failure_blocks_approval؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service(writer=FakeWriter(success=False))
     plan = make_plan(service)
     result = service.validate_in_isolated_sandbox(
@@ -132,6 +238,12 @@ def test_action_or_verification_failure_blocks_approval():
 
 
 def test_changed_fingerprint_marks_validation_stale_and_blocks_approval():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_changed_fingerprint_marks_validation_stale_and_blocks_approval؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     plan = make_plan(service)
     result = service.validate_in_isolated_sandbox(
@@ -144,6 +256,12 @@ def test_changed_fingerprint_marks_validation_stale_and_blocks_approval():
 
 
 def test_stale_successful_validation_cannot_promote_changed_plan():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_stale_successful_validation_cannot_promote_changed_plan؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     plan = make_plan(service)
     validation_id = "stale-validation"
@@ -174,6 +292,12 @@ def test_stale_successful_validation_cannot_promote_changed_plan():
 
 
 def test_unverified_validation_cannot_promote_plan():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unverified_validation_cannot_promote_plan؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     plan = make_plan(service)
     validation_id = "unverified-validation"
@@ -203,6 +327,12 @@ def test_unverified_validation_cannot_promote_plan():
 
 
 def test_mismatched_action_and_target_cannot_promote_plan():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_mismatched_action_and_target_cannot_promote_plan؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     plan = make_plan(service)
     validation_id = "mismatch-validation"
@@ -232,6 +362,12 @@ def test_mismatched_action_and_target_cannot_promote_plan():
 
 
 def test_mismatched_server_cannot_promote_plan():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_mismatched_server_cannot_promote_plan؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     plan = make_plan(service)
     validation_id = "server-mismatch-validation"
@@ -261,6 +397,12 @@ def test_mismatched_server_cannot_promote_plan():
 
 
 def test_restart_and_reload_cannot_be_validated_without_restoration():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_restart_and_reload_cannot_be_validated_without_restoration؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     for action_type in ("restart_service", "reload_service"):
         service = make_service()
         plan = make_plan(service, action_type=action_type)
@@ -271,6 +413,12 @@ def test_restart_and_reload_cannot_be_validated_without_restoration():
 
 
 def test_native_sandbox_runtime_is_required_by_default():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_native_sandbox_runtime_is_required_by_default؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = make_service()
     service._sandbox_runtime = type("Runtime", (), {"check": lambda self: SandboxRuntimeCheck(False, "claude-native-sandbox", "attestation_missing")})()
     plan = make_plan(service)

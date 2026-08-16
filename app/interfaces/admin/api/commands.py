@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.commands، app.core.contracts.commands، app.core.exceptions، app.capabilities.monitoring.command_service.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from fastapi import (
     APIRouter,
     Depends,
@@ -46,6 +56,13 @@ def list_commands(
         get_command_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_commands؛ المدخلات المهمة: service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return service.list_commands()
 
 
@@ -59,6 +76,13 @@ def get_command(
         get_command_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_command؛ المدخلات المهمة: command_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.get_command(command_id)
     except CommandNotFoundError as exc:
@@ -79,6 +103,13 @@ def create_command(
         get_command_service
     ),
 ):
+    """
+    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى create_command؛ المدخلات المهمة: payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.create_command(
             CreateCommandDTO(
@@ -108,6 +139,13 @@ def update_command(
         get_command_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى update_command؛ المدخلات المهمة: command_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.update_command(
             command_id,
@@ -142,6 +180,13 @@ def delete_command(
         get_command_service
     ),
 ) -> Response:
+    """
+    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى delete_command؛ المدخلات المهمة: command_id، service.
+    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         service.delete_command(command_id)
     except CommandNotFoundError as exc:

@@ -14,6 +14,12 @@ REPORT = ROOT / "docs" / "report" / "سعيد_بقدونس_هندسة_برمجي
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     with ZipFile(REPORT) as package:
         names = set(package.namelist())
         assert "word/document.xml" in names

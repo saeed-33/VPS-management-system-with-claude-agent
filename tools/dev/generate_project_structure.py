@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import ast
@@ -152,6 +162,12 @@ SPECIAL = {
 
 
 def should_skip(path: Path) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى should_skip؛ المدخلات المهمة: path.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parts = path.relative_to(ROOT).parts
 
     if any(
@@ -172,6 +188,12 @@ def should_skip(path: Path) -> bool:
 
 
 def python_summary(path: Path) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى python_summary؛ المدخلات المهمة: path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     rel = path.relative_to(ROOT).as_posix()
 
     if rel in SPECIAL:
@@ -413,6 +435,12 @@ def python_summary(path: Path) -> str:
 
 
 def describe(path: Path) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى describe؛ المدخلات المهمة: path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     rel = path.relative_to(ROOT).as_posix()
 
     if rel in SPECIAL:
@@ -469,6 +497,12 @@ def describe(path: Path) -> str:
 
 
 def group(rel: str) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى group؛ المدخلات المهمة: rel.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if rel.startswith("app/interfaces/admin/"):
         return "Administration API and Web UI"
     if rel.startswith("tools/acceptance/evaluation/"):
@@ -501,6 +535,12 @@ def group(rel: str) -> str:
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     files = []
 
     for path in ROOT.rglob("*"):

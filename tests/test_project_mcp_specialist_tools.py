@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.investigation، app.capabilities.investigation.specialist_investigation_loop، app.capabilities.investigation.specialist_registry، app.interfaces.mcp.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 
 from app.core.contracts.investigation import (
@@ -40,6 +50,12 @@ def specialist(
     max_rounds=2,
     max_actions=3,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى specialist؛ المدخلات المهمة: slug، allowed_tool_ids، max_rounds، max_actions.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistRuntimeDefinition(
         id=1,
         slug=slug,
@@ -58,20 +74,56 @@ def specialist(
 
 
 class SpecialistRegistry:
+    """
+    يمثل SpecialistRegistry جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, definitions):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: definitions.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.definitions = tuple(definitions)
 
     def snapshot(self):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return SpecialistRegistrySnapshot.build(
             self.definitions
         )
 
 
 class SpecialistLoop:
+    """
+    يمثل SpecialistLoop جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls = []
 
     async def run(self, **kwargs):
+        """
+        يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى run؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls.append(kwargs)
         task = kwargs["task"]
         return SpecialistInvestigationLoopResult(
@@ -107,6 +159,12 @@ def boundary(
     read=None,
     analysis_repository=None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى boundary؛ المدخلات المهمة: registry، loop، read، analysis_repository.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return ProjectMcpToolBoundary(
         server_service=ServerService(),
         monitoring_profile_service=(
@@ -137,6 +195,12 @@ def run_tool(
     *,
     tool_boundary=None,
 ):
+    """
+    ينفذ مرحلة الأداة أو يحفظ نتيجة التقييم ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى run_tool؛ المدخلات المهمة: tool_id، arguments، tool_boundary.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return asyncio.run(
         (
             tool_boundary
@@ -152,6 +216,12 @@ def run_tool(
 
 
 def test_get_available_specialists_reads_enabled_runtime_registry():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_available_specialists_reads_enabled_runtime_registry؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "get_available_specialists",
         {
@@ -167,6 +237,12 @@ def test_get_available_specialists_reads_enabled_runtime_registry():
 
 
 def test_get_specialist_definition_reads_latest_registry_snapshot():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_specialist_definition_reads_latest_registry_snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     dynamic = SpecialistRegistry(
         [
             specialist(
@@ -195,6 +271,12 @@ def test_get_specialist_definition_reads_latest_registry_snapshot():
 
 
 def test_run_specialist_uses_selected_db_definition_and_budget():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_run_specialist_uses_selected_db_definition_and_budget؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     loop = SpecialistLoop()
     selected = specialist(
         allowed_tool_ids=("ssh.read_only", "journalctl.read"),
@@ -246,6 +328,12 @@ def test_run_specialist_uses_selected_db_definition_and_budget():
 
 
 def test_run_specialist_rejects_unselected_specialist():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_run_specialist_rejects_unselected_specialist؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     loop = SpecialistLoop()
 
     result = run_tool(
@@ -273,6 +361,12 @@ def test_run_specialist_rejects_unselected_specialist():
 
 
 def test_run_specialist_requires_configured_loop():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_run_specialist_requires_configured_loop؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "run_specialist",
         {

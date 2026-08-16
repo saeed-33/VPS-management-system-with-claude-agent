@@ -1,3 +1,13 @@
+"""
+حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+
+الموقع في المعمارية: MCP capability boundary.
+يُستدعى بواسطة: Claude أو خادم MCP.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import fields, is_dataclass
@@ -10,6 +20,13 @@ from typing import Any
 def serialize_value(
     value: Any,
 ) -> Any:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_value؛ المدخلات المهمة: value.
+    تعيد Any أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if isinstance(value, datetime):
         return value.isoformat()
 
@@ -48,6 +65,13 @@ def serialize_value(
 def serialize_server(
     server,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_server؛ المدخلات المهمة: server.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return {
         "id": server.id,
         "name": server.name,
@@ -77,6 +101,13 @@ def serialize_profile(
     *,
     commands=None,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_profile؛ المدخلات المهمة: profile، commands.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     data = {
         "id": profile.id,
         "name": profile.name,
@@ -112,6 +143,13 @@ def serialize_profile(
 def serialize_monitoring_report_data(
     report,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_monitoring_report_data؛ المدخلات المهمة: report.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(
         report
     )
@@ -120,6 +158,13 @@ def serialize_monitoring_report_data(
 def serialize_report_details(
     report,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_report_details؛ المدخلات المهمة: report.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(
         report
     )
@@ -128,6 +173,13 @@ def serialize_report_details(
 def serialize_analysis(
     analysis,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_analysis؛ المدخلات المهمة: analysis.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return {
         "id": analysis.id,
         "report_id": analysis.report_id,
@@ -177,6 +229,13 @@ def serialize_analysis(
 def serialize_incident_context(
     context,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_incident_context؛ المدخلات المهمة: context.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(
         context
     )
@@ -185,6 +244,13 @@ def serialize_incident_context(
 def serialize_knowledge_context(
     context,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_knowledge_context؛ المدخلات المهمة: context.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(
         context
     )
@@ -193,6 +259,13 @@ def serialize_knowledge_context(
 def serialize_specialist_definition(
     specialist,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_specialist_definition؛ المدخلات المهمة: specialist.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(
         specialist
     )
@@ -201,6 +274,13 @@ def serialize_specialist_definition(
 def serialize_specialist_loop_result(
     result,
 ) -> dict[str, Any]:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى serialize_specialist_loop_result؛ المدخلات المهمة: result.
+    تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(
         result
     )

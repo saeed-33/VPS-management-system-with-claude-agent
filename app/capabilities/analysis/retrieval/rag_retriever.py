@@ -1,3 +1,13 @@
+"""
+جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+
+الموقع في المعمارية: Application capability / retrieval.
+يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.embedding_client، app.capabilities.analysis.retrieval.rag_context، app.infrastructure.database.repositories.analysis_repository، app.infrastructure.database.repositories.retrieval_repository، app.capabilities.analysis.retrieval.performance_profiler.
+الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import logging
 from time import perf_counter
 
@@ -14,6 +24,14 @@ logger = logging.getLogger(__name__)
 
 
 class RagRetriever:
+    """
+    يمثل RagRetriever مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
@@ -24,6 +42,13 @@ class RagRetriever:
         minimum_score: float = 0.72,
         hnsw_ef_search: int = 100,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: embedding_client، retrieval_repository، analysis_repository، top_k، minimum_score، hnsw_ef_search.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._embedding_client = embedding_client
         self._retrieval_repository = retrieval_repository
         self._analysis_repository = analysis_repository
@@ -40,6 +65,13 @@ class RagRetriever:
         command_set_hash: str | None,
         exclude_report_id: int,
     ) -> list[RetrievedAnalysisContext]:
+        """
+        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى retrieve؛ المدخلات المهمة: normalized_report، server_id، monitoring_profile_id، command_set_hash، exclude_report_id.
+        تعيد list[RetrievedAnalysisContext] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         embedding_started = perf_counter()
         embedding = await self._embedding_client.embed(
             normalized_report

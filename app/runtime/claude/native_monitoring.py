@@ -1,3 +1,13 @@
+"""
+جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+
+الموقع في المعمارية: Claude supervisory runtime.
+يُستدعى بواسطة: composition أو Scheduler.
+يعتمد مباشرة على: app.runtime.claude.exceptions، app.runtime.claude.job_service، app.runtime.claude.models، app.runtime.claude.runtime.
+الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from uuid import uuid4
@@ -45,6 +55,13 @@ class ClaudeNativeMonitoringRunner:
         timeout_seconds: float,
         max_turns: int,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: runtime_adapter، agent_job_service، timeout_seconds، max_turns.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._runtime_adapter = runtime_adapter
         self._agent_job_service = agent_job_service
         self._timeout_seconds = timeout_seconds
@@ -61,6 +78,13 @@ class ClaudeNativeMonitoringRunner:
             )
 
     async def run(self, server_id: int):
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if (
             not isinstance(server_id, int)
             or isinstance(server_id, bool)
@@ -133,6 +157,13 @@ class ClaudeNativeMonitoringRunner:
         server_id: int,
         job_id: str,
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _prompt؛ المدخلات المهمة: server_id، job_id.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return (
             "Execute one real operational monitoring cycle for "
             f"server_id={server_id}. "

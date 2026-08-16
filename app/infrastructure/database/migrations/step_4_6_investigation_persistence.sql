@@ -1,3 +1,5 @@
+-- Migration مملوكة للمشروع: تغيّر schema/persistence contract المطلوب للمراحل التي يسميها اسم الملف.
+-- تُشغّل خارج application workflow ولا تحتوي منطق runtime أو authorization.
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS investigations (

@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from tools.acceptance.evaluation.cases import (
     EvaluationCase,
     default_evaluation_cases,

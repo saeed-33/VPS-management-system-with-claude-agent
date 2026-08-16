@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_policy، app.core.policies.diagnostic_tools، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_investigation_loop، app.capabilities.investigation.specialist_reasoning_agent.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 from types import MappingProxyType
 
@@ -33,7 +43,19 @@ from app.capabilities.investigation.specialist_registry import (
 
 
 class ContextBuilder:
+    """
+    يمثل ContextBuilder جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls = []
 
     async def build(
@@ -47,6 +69,12 @@ class ContextBuilder:
         initial_analysis_issues=(),
         incident_contexts=(),
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى build؛ المدخلات المهمة: task، specialist، detected_domains، evidence، initial_analysis_summary، initial_analysis_issues.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls.append(
             tuple(
                 item.evidence_id
@@ -88,7 +116,19 @@ class ContextBuilder:
 
 
 class ReasoningAgent:
+    """
+    يمثل ReasoningAgent جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, executions):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: executions.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.executions = list(
             executions
         )
@@ -102,6 +142,12 @@ class ReasoningAgent:
         diagnostic_tool_catalog=None,
         force_final_synthesis=False,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى reason؛ المدخلات المهمة: context، allowed_specialist_slugs، diagnostic_tool_catalog، force_final_synthesis.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.catalogs.append(
             diagnostic_tool_catalog
         )
@@ -109,10 +155,28 @@ class ReasoningAgent:
 
 
 class EvidenceCollector:
+    """
+    يمثل EvidenceCollector جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls = []
 
     async def collect(self, request):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى collect؛ المدخلات المهمة: request.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls.append(request)
 
         return EvidenceReference(
@@ -141,6 +205,12 @@ def specialist(
     max_rounds=3,
     max_actions=4,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى specialist؛ المدخلات المهمة: allowed_tool_ids، max_rounds، max_actions.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistRuntimeDefinition(
         id=1,
         slug="nginx",
@@ -161,6 +231,12 @@ def specialist(
 
 
 def task():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى task؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistTask(
         task_id="task-1",
         investigation_id="inv-1",
@@ -176,6 +252,12 @@ def result(
     summary,
     confidence,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى result؛ المدخلات المهمة: summary، confidence.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistResult(
         task_id="task-1",
         specialist_id="nginx",
@@ -193,6 +275,12 @@ def execution(
     confidence,
     requests=(),
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى execution؛ المدخلات المهمة: summary، confidence، requests.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistReasoningExecution(
         result=result(
             summary=summary,
@@ -210,6 +298,12 @@ def request_tool(
     tool_id,
     arguments,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى request_tool؛ المدخلات المهمة: tool_id، arguments.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistDiagnosticToolRequest(
         call=DiagnosticToolCall(
             tool_id=tool_id,
@@ -220,6 +314,12 @@ def request_tool(
 
 
 def make_loop(executions):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_loop؛ المدخلات المهمة: executions.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     context_builder = ContextBuilder()
     reasoning_agent = ReasoningAgent(
         executions
@@ -252,6 +352,12 @@ def make_loop(executions):
 
 
 def test_loop_collects_evidence_then_reasons_again():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_loop_collects_evidence_then_reasons_again؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     first = execution(
         summary="Need listeners.",
         confidence=0.2,
@@ -309,6 +415,12 @@ def test_loop_collects_evidence_then_reasons_again():
 
 
 def test_denied_request_forces_synthesis_without_execution():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_denied_request_forces_synthesis_without_execution؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     first = execution(
         summary="Need an unassigned tool.",
         confidence=0.1,
@@ -367,6 +479,12 @@ def test_denied_request_forces_synthesis_without_execution():
 
 
 def test_last_round_requests_are_not_executed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_last_round_requests_are_not_executed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     first = execution(
         summary="Still need evidence.",
         confidence=0.2,
@@ -420,6 +538,12 @@ def test_last_round_requests_are_not_executed():
 
 
 def test_action_budget_stops_additional_execution():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_action_budget_stops_additional_execution؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     first = execution(
         summary="Need two checks.",
         confidence=0.2,
@@ -487,6 +611,12 @@ def test_action_budget_stops_additional_execution():
 
 
 def test_duplicate_request_is_not_executed_twice():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_duplicate_request_is_not_executed_twice؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     first = execution(
         summary="Need listeners.",
         confidence=0.2,

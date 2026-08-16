@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.core.contracts.investigation، app.capabilities.investigation.source_location، app.core.policies.diagnostic_policy، app.infrastructure.ssh، app.infrastructure.ssh.client، app.infrastructure.ssh.command_executor.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,6 +25,14 @@ from app.infrastructure.ssh.command_executor import SSHCommandExecutor
 
 @dataclass(slots=True, frozen=True)
 class DiagnosticExecutionOutcome:
+    """
+    يمثل DiagnosticExecutionOutcome مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     success: bool
     exit_status: int | None
     stdout: str
@@ -26,6 +44,14 @@ class DiagnosticExecutionOutcome:
 
 
 class DiagnosticCommandRunner(Protocol):
+    """
+    يمثل DiagnosticCommandRunner مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     async def run(
         self,
         *,
@@ -34,10 +60,25 @@ class DiagnosticCommandRunner(Protocol):
         command_text: str,
         timeout_seconds: float,
     ) -> DiagnosticExecutionOutcome:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: config، tool_id، command_text، timeout_seconds.
+        تعيد DiagnosticExecutionOutcome أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ...
 
 
 class ServerRecord(Protocol):
+    """
+    يمثل ServerRecord مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     host: str
     port: int
@@ -46,17 +87,47 @@ class ServerRecord(Protocol):
 
 
 class ServerRepositoryProtocol(Protocol):
+    """
+    يمثل ServerRepositoryProtocol مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def get_by_id(self, server_id: int) -> ServerRecord | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: server_id.
+        تعيد ServerRecord | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ...
 
 
 @dataclass(slots=True, frozen=True)
 class EvidenceCollectionRequest:
+    """
+    يمثل EvidenceCollectionRequest مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     evidence_id: str
     server_id: int
     policy_result: DiagnosticPolicyResult
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.evidence_id.strip():
             raise ValueError("evidence_id must not be empty.")
         if self.server_id < 1:
@@ -64,6 +135,14 @@ class EvidenceCollectionRequest:
 
 
 class SSHDiagnosticCommandRunner:
+    """
+    يمثل SSHDiagnosticCommandRunner مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     async def run(
         self,
         *,
@@ -72,6 +151,13 @@ class SSHDiagnosticCommandRunner:
         command_text: str,
         timeout_seconds: float,
     ) -> DiagnosticExecutionOutcome:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: config، tool_id، command_text، timeout_seconds.
+        تعيد DiagnosticExecutionOutcome أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         started_at = datetime.now(UTC)
         started_counter = perf_counter()
 
@@ -120,6 +206,14 @@ class SSHDiagnosticCommandRunner:
 
 
 class EvidenceCollectionService:
+    """
+    يمثل EvidenceCollectionService مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
@@ -129,6 +223,13 @@ class EvidenceCollectionService:
         connection_timeout_seconds: float,
         runner: DiagnosticCommandRunner | None = None,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: server_repository، default_private_key_path، known_hosts_path، connection_timeout_seconds، runner.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not default_private_key_path.strip():
             raise ValueError(
                 "default_private_key_path must not be empty."
@@ -150,6 +251,13 @@ class EvidenceCollectionService:
         self,
         request: EvidenceCollectionRequest,
     ) -> EvidenceReference:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى collect؛ المدخلات المهمة: request.
+        تعيد EvidenceReference أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         policy = request.policy_result
 
         if not policy.allowed:
@@ -249,6 +357,13 @@ class EvidenceCollectionService:
         outcome: DiagnosticExecutionOutcome,
         limit: int,
     ) -> tuple[str, bool]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _render_excerpt؛ المدخلات المهمة: outcome، limit.
+        تعيد tuple[str, bool] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         parts: list[str] = []
 
         if outcome.stdout:

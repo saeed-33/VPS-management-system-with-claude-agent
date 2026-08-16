@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.investigation.specialist_registry.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from types import SimpleNamespace
 
 import pytest
@@ -17,6 +27,12 @@ def specialist(
     domains: list[str] | None = None,
     name: str | None = None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى specialist؛ المدخلات المهمة: specialist_id، slug، enabled، priority، domains، name.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SimpleNamespace(
         id=specialist_id,
         slug=slug,
@@ -36,16 +52,40 @@ def specialist(
 
 
 class FakeRepository:
+    """
+    يمثل FakeRepository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, items):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: items.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.items = items
         self.calls = 0
 
     def list_enabled(self):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى list_enabled؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls += 1
         return [item for item in self.items if item.enabled]
 
 
 def test_disabled_specialists_are_excluded():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_disabled_specialists_are_excluded؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     registry = SpecialistRegistry(
         FakeRepository([
             specialist(1, "cpu", domains=["cpu"]),
@@ -57,6 +97,12 @@ def test_disabled_specialists_are_excluded():
 
 
 def test_snapshot_is_stable_and_uses_one_repository_read():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_snapshot_is_stable_and_uses_one_repository_read؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     cpu = specialist(1, "cpu", domains=["cpu"])
     repository = FakeRepository([cpu])
     registry = SpecialistRegistry(repository)
@@ -72,6 +118,12 @@ def test_snapshot_is_stable_and_uses_one_repository_read():
 
 
 def test_registry_order_is_deterministic():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_registry_order_is_deterministic؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     registry = SpecialistRegistry(
         FakeRepository([
             specialist(3, "zeta", priority=50, domains=["cpu"], name="Zeta"),
@@ -88,6 +140,12 @@ def test_registry_order_is_deterministic():
 
 
 def test_domain_lookup_is_case_insensitive():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_domain_lookup_is_case_insensitive؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     registry = SpecialistRegistry(
         FakeRepository([
             specialist(1, "cpu", domains=[" CPU ", "Process"]),
@@ -99,6 +157,12 @@ def test_domain_lookup_is_case_insensitive():
 
 
 def test_multi_domain_lookup_prefers_more_matches():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_multi_domain_lookup_prefers_more_matches؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     registry = SpecialistRegistry(
         FakeRepository([
             specialist(1, "cpu", priority=20, domains=["cpu", "performance"]),
@@ -115,6 +179,12 @@ def test_multi_domain_lookup_prefers_more_matches():
 
 
 def test_require_all_filters_partial_matches():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_require_all_filters_partial_matches؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     registry = SpecialistRegistry(
         FakeRepository([
             specialist(1, "cpu", domains=["cpu"]),
@@ -131,6 +201,12 @@ def test_require_all_filters_partial_matches():
 
 
 def test_invalid_definition_fails_snapshot():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_invalid_definition_fails_snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     invalid = specialist(1, "cpu", domains=["cpu"])
     invalid.max_rounds = 0
 
@@ -144,6 +220,12 @@ def test_invalid_definition_fails_snapshot():
 
 
 def test_invalid_domains_payload_fails_snapshot():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_invalid_domains_payload_fails_snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     invalid = specialist(1, "cpu", domains=["cpu"])
     invalid.domains = "cpu"
 
@@ -157,6 +239,12 @@ def test_invalid_domains_payload_fails_snapshot():
 
 
 def test_duplicate_domains_are_normalized():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_duplicate_domains_are_normalized؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     registry = SpecialistRegistry(
         FakeRepository([
             specialist(

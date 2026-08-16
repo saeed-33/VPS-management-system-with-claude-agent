@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -33,6 +43,12 @@ HISTORICAL = {
 
 
 def rel(path: Path) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى rel؛ المدخلات المهمة: path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return path.relative_to(ROOT).as_posix()
 
 
@@ -40,6 +56,12 @@ def local_markdown_links(
     path: Path,
     text: str,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى local_markdown_links؛ المدخلات المهمة: path، text.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     pattern = re.compile(
         r"\[[^\]]+\]\(([^)]+)\)"
     )
@@ -80,6 +102,12 @@ def local_markdown_links(
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     errors = []
 
     docs = sorted(

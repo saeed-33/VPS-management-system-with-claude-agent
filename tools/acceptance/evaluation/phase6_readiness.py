@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -5,6 +15,12 @@ from enum import StrEnum
 
 
 class Phase6Metric(StrEnum):
+    """
+    يمثل Phase6Metric جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     CLAUDE_NATIVE_SANDBOX = "claude_native_sandbox"
     FAIL_CLOSED_STARTUP = "fail_closed_startup"
     UNSANDBOXED_ESCAPE_PREVENTION = "unsandboxed_escape_prevention"
@@ -22,6 +38,12 @@ class Phase6Metric(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Phase6Observation:
+    """
+    يمثل Phase6Observation جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     metric: Phase6Metric
     numerator: int
     denominator: int
@@ -30,11 +52,29 @@ class Phase6Observation:
 
     @property
     def score(self) -> float:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى score؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد float أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.numerator / self.denominator
 
 
 class Phase6ReadinessGate:
+    """
+    يمثل Phase6ReadinessGate جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def evaluate(self, observations: list[Phase6Observation], *, real_acceptance_status: str) -> dict:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى evaluate؛ المدخلات المهمة: observations، real_acceptance_status.
+        تعيد dict أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         results = []
         blockers = []
         indexed = {item.metric: item for item in observations}

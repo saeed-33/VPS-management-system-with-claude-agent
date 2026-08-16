@@ -1,3 +1,13 @@
+"""
+جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+
+الموقع في المعمارية: Application capability / retrieval.
+يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.rag_context.
+الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from typing import Any
 
 from app.capabilities.analysis.retrieval.rag_context import (
@@ -6,6 +16,14 @@ from app.capabilities.analysis.retrieval.rag_context import (
 
 
 class RagContextBuilder:
+    """
+    يمثل RagContextBuilder مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
@@ -13,6 +31,13 @@ class RagContextBuilder:
         max_summary_characters: int = 600,
         max_issue_characters: int = 1000,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: max_cases، max_summary_characters، max_issue_characters.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._max_cases = max_cases
         self._max_summary_characters = (
             max_summary_characters
@@ -25,6 +50,13 @@ class RagContextBuilder:
         self,
         contexts: list[RetrievedAnalysisContext],
     ) -> list[dict[str, Any]]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: contexts.
+        تعيد list[dict[str, Any]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         result: list[dict[str, Any]] = []
 
         for context in contexts[: self._max_cases]:

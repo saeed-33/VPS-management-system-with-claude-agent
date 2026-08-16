@@ -1,3 +1,13 @@
+"""
+عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
+
+الموقع في المعمارية: Core application contracts.
+يُستدعى بواسطة: capabilities وinterfaces وadapters.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا تنفذ I/O أو workflow.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -8,6 +18,14 @@ from typing import Any
 
 
 class RemediationRisk(StrEnum):
+    """
+    يمثل RemediationRisk مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -20,6 +38,14 @@ RiskLevel = RemediationRisk
 
 
 class RemediationPlanStatus(StrEnum):
+    """
+    يمثل RemediationPlanStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     PROPOSED = "proposed"
     SANDBOX_PASSED = "sandbox_passed"
     SANDBOX_FAILED = "sandbox_failed"
@@ -40,6 +66,14 @@ class RemediationPlanStatus(StrEnum):
 
 
 class ApprovalStatus(StrEnum):
+    """
+    يمثل ApprovalStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -48,6 +82,14 @@ class ApprovalStatus(StrEnum):
 
 
 class ExecutionStatus(StrEnum):
+    """
+    يمثل ExecutionStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     CLAIMED = "claimed"
     RUNNING = "running"
     SUCCEEDED = "succeeded"
@@ -56,12 +98,28 @@ class ExecutionStatus(StrEnum):
 
 
 class VerificationStatus(StrEnum):
+    """
+    يمثل VerificationStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     VERIFIED = "verified"
     FAILED = "failed"
     INCONCLUSIVE = "inconclusive"
 
 
 class RollbackStatus(StrEnum):
+    """
+    يمثل RollbackStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     NOT_REQUIRED = "not_required"
     REQUIRED = "required"
     RUNNING = "running"
@@ -70,6 +128,14 @@ class RollbackStatus(StrEnum):
 
 
 class PolicyDecision(StrEnum):
+    """
+    يمثل PolicyDecision مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     ALLOW = "allow"
     DENY = "deny"
     REQUIRE_APPROVAL = "require_approval"
@@ -77,6 +143,13 @@ class PolicyDecision(StrEnum):
 
 
 def _canonical_json(value: Any) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+    تُستدعى عندما يصل workflow إلى _canonical_json؛ المدخلات المهمة: value.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return json.dumps(
         value,
         sort_keys=True,
@@ -103,6 +176,13 @@ class RemediationAction:
     action_id: str | None = None
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.action_type.strip():
             raise ValueError("action_type must not be empty.")
         if not self.target.strip():
@@ -112,6 +192,13 @@ class RemediationAction:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "RemediationAction":
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى from_dict؛ المدخلات المهمة: value.
+        تعيد 'RemediationAction' أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not isinstance(value, dict):
             raise ValueError("remediation actions must be objects.")
         action_type = str(
@@ -139,6 +226,13 @@ class RemediationAction:
         )
 
     def to_dict(self) -> dict[str, Any]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى to_dict؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "action_id": self.action_id,
             "action_type": self.action_type,
@@ -162,6 +256,13 @@ def remediation_fingerprint(
     actions: list[dict[str, Any]],
     evidence_ids: list[str],
 ) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+    تُستدعى عندما يصل workflow إلى remediation_fingerprint؛ المدخلات المهمة: plan_id، version، server_id، actions، evidence_ids.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     payload = {
         "plan_id": plan_id,
         "version": version,
@@ -174,6 +275,14 @@ def remediation_fingerprint(
 
 @dataclass(slots=True, frozen=True)
 class CreateRemediationPlanDTO:
+    """
+    يمثل CreateRemediationPlanDTO مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     plan_id: str
     investigation_id: str
     title: str
@@ -189,6 +298,13 @@ class CreateRemediationPlanDTO:
     plan_fingerprint: str | None = None
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         for name in ("plan_id", "investigation_id", "title", "problem_summary"):
             if not getattr(self, name).strip():
                 raise ValueError(f"{name} must not be empty.")
@@ -206,6 +322,14 @@ class CreateRemediationPlanDTO:
 
 @dataclass(slots=True, frozen=True)
 class CreateSandboxResultDTO:
+    """
+    يمثل CreateSandboxResultDTO مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     result_id: str
     plan_id: str
     status: str
@@ -215,6 +339,13 @@ class CreateSandboxResultDTO:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.result_id.strip():
             raise ValueError("result_id must not be empty.")
         if not self.plan_id.strip():
@@ -225,6 +356,14 @@ class CreateSandboxResultDTO:
 
 @dataclass(slots=True, frozen=True)
 class ApprovalRequest:
+    """
+    يمثل ApprovalRequest مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     approval_id: str
     plan_id: str
     plan_fingerprint: str
@@ -236,9 +375,24 @@ class ApprovalRequest:
 
 @dataclass(slots=True, frozen=True)
 class PolicyResult:
+    """
+    يمثل PolicyResult مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     decision: PolicyDecision
     reasons: tuple[str, ...]
 
     @property
     def allowed(self) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى allowed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.decision == PolicyDecision.ALLOW

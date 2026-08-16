@@ -1,3 +1,13 @@
+"""
+نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
+
+الموقع في المعمارية: Persistence model.
+يُستدعى بواسطة: repositories وطبقة database.
+يعتمد مباشرة على: app.infrastructure.database.base، app.core.utils.datetime.
+الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 from datetime import datetime
 from pgvector.sqlalchemy import Vector
@@ -8,6 +18,14 @@ from app.infrastructure.database.base import Base
 from app.core.utils.datetime import utc_now
 
 class KnowledgeDocumentModel(Base):
+    """
+    يمثل KnowledgeDocumentModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "knowledge_documents"
     __table_args__ = (
         UniqueConstraint("source_id", "canonical_uri", name="uq_knowledge_documents_source_uri"),
@@ -36,6 +54,14 @@ class KnowledgeDocumentModel(Base):
     )
 
 class KnowledgeChunkModel(Base):
+    """
+    يمثل KnowledgeChunkModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "knowledge_chunks"
     __table_args__ = (
         UniqueConstraint("document_id", "chunk_index", name="uq_knowledge_chunks_document_index"),

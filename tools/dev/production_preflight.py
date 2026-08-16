@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: app.core.config، app.infrastructure.database.engine.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import argparse
@@ -15,6 +25,12 @@ from app.infrastructure.database.engine import engine
 
 
 def check(name: str, ok: bool, detail: str) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى check؛ المدخلات المهمة: name، ok، detail.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     print(
         f"[{'PASS' if ok else 'FAIL'}] "
         f"{name}: {detail}"
@@ -23,6 +39,12 @@ def check(name: str, ok: bool, detail: str) -> bool:
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Non-destructive production preflight checks "

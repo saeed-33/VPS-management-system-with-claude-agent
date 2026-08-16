@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.runtime.claude.exceptions، app.runtime.claude.session_runner.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import json
 
 import pytest
@@ -11,6 +21,12 @@ from app.runtime.claude.session_runner import (
 
 
 def _required_events():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _required_events؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return [
         {
             "type": "system",
@@ -56,6 +72,12 @@ def _required_events():
 
 
 def test_stream_json_operational_success_is_evidence_based():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_stream_json_operational_success_is_evidence_based؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = "\n".join(
@@ -83,6 +105,12 @@ def test_stream_json_operational_success_is_evidence_based():
 
 
 def test_operational_success_rejects_failed_mcp():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_operational_success_rejects_failed_mcp؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     events = _required_events()
     events[0]["mcp_servers"][0][
         "status"
@@ -100,6 +128,12 @@ def test_operational_success_rejects_failed_mcp():
 
 
 def test_operational_success_rejects_missing_required_tool():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_operational_success_rejects_missing_required_tool؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     events = _required_events()
     events[1]["message"]["content"] = (
         events[1]["message"]["content"][:1]
@@ -117,6 +151,12 @@ def test_operational_success_rejects_missing_required_tool():
 
 
 def test_result_error_subtype_is_not_accepted():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_result_error_subtype_is_not_accepted؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     events = _required_events()
     events[-1]["subtype"] = (
         "error_max_turns"

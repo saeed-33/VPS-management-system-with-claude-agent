@@ -12,6 +12,12 @@ LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     bad: list[tuple[str, str]] = []
     for path in (ROOT / "docs").rglob("*.md"):
         for target in LINK.findall(path.read_text(encoding="utf-8")):

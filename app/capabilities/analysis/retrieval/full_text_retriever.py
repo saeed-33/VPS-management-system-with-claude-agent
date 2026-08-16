@@ -1,3 +1,13 @@
+"""
+جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+
+الموقع في المعمارية: Application capability / retrieval.
+يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
+يعتمد مباشرة على: app.infrastructure.database.repositories.retrieval_repository، app.capabilities.analysis.retrieval.performance_profiler.
+الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import json
 import logging
 from time import perf_counter
@@ -17,6 +27,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass(slots=True, frozen=True)
 class FullTextCandidate:
+    """
+    يمثل FullTextCandidate مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     report_id: int
     analysis_id: int
     rank: float
@@ -24,7 +42,22 @@ class FullTextCandidate:
 
 
 class FullTextQueryBuilder:
+    """
+    يمثل FullTextQueryBuilder مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def build(self, normalized_report: str) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: normalized_report.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         try:
             payload = json.loads(normalized_report)
         except (TypeError, ValueError):
@@ -51,6 +84,14 @@ class FullTextQueryBuilder:
 
 
 class FullTextRetriever:
+    """
+    يمثل FullTextRetriever مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
@@ -59,6 +100,13 @@ class FullTextRetriever:
         candidate_limit: int = 20,
         minimum_rank: float = 0.0,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: retrieval_repository، query_builder، candidate_limit، minimum_rank.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._retrieval_repository = retrieval_repository
         self._query_builder = (
             query_builder
@@ -76,6 +124,13 @@ class FullTextRetriever:
         command_set_hash: str | None,
         exclude_report_id: int,
     ) -> list[FullTextCandidate]:
+        """
+        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى retrieve؛ المدخلات المهمة: normalized_report، server_id، monitoring_profile_id، command_set_hash، exclude_report_id.
+        تعيد list[FullTextCandidate] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         query_started = perf_counter()
         query_text = self._query_builder.build(
             normalized_report

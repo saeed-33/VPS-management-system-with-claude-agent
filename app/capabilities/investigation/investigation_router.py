@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.capabilities.investigation.specialist_registry.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,6 +23,14 @@ from app.capabilities.investigation.specialist_registry import (
 
 
 class RoutingReason(StrEnum):
+    """
+    يمثل RoutingReason مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     ANALYSIS_ISSUES = "analysis_issues"
     ANALYSIS_HEALTH = "analysis_health"
     REPORT_FAILURE = "report_failure"
@@ -23,6 +41,14 @@ class RoutingReason(StrEnum):
 
 @dataclass(slots=True, frozen=True)
 class SpecialistRoutingMatch:
+    """
+    يمثل SpecialistRoutingMatch مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     specialist_id: int
     specialist_slug: str
     specialist_name: str
@@ -35,6 +61,14 @@ class SpecialistRoutingMatch:
 
 @dataclass(slots=True, frozen=True)
 class InvestigationRoutingDecision:
+    """
+    يمثل InvestigationRoutingDecision مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     should_investigate: bool
     reasons: tuple[RoutingReason, ...]
     detected_domains: tuple[str, ...]
@@ -47,15 +81,37 @@ class InvestigationRoutingDecision:
 
     @property
     def candidate_slugs(self) -> tuple[str, ...]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى candidate_slugs؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد tuple[str, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return tuple(x.specialist_slug for x in self.candidate_specialists)
 
     @property
     def selected_slugs(self) -> tuple[str, ...]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى selected_slugs؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد tuple[str, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return tuple(x.specialist_slug for x in self.selected_specialists)
 
 
 @dataclass(slots=True, frozen=True)
 class _IssueSignal:
+    """
+    يمثل _IssueSignal مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     index: int
     severity: str
     text: str
@@ -63,6 +119,14 @@ class _IssueSignal:
 
 @dataclass(slots=True, frozen=True)
 class _Candidate:
+    """
+    يمثل _Candidate مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     specialist: SpecialistRuntimeDefinition
     score: int
     matched_domains: tuple[str, ...]
@@ -75,6 +139,13 @@ _BOUNDARY_RE = re.compile(r"[^\w]+", re.UNICODE)
 
 
 def _normalize_text(value: str | None) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _normalize_text؛ المدخلات المهمة: value.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if not value:
         return ""
     text = _BOUNDARY_RE.sub(" ", value.casefold())
@@ -82,17 +153,38 @@ def _normalize_text(value: str | None) -> str:
 
 
 def _contains_phrase(normalized_text: str, phrase: str) -> bool:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _contains_phrase؛ المدخلات المهمة: normalized_text، phrase.
+    تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     needle = _normalize_text(phrase)
     return bool(needle) and f" {needle} " in f" {normalized_text} "
 
 
 def _value(obj: Any, key: str, default: Any = None) -> Any:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _value؛ المدخلات المهمة: obj، key، default.
+    تعيد Any أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if isinstance(obj, dict):
         return obj.get(key, default)
     return getattr(obj, key, default)
 
 
 def _issue_signals(analysis: Any) -> tuple[_IssueSignal, ...]:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _issue_signals؛ المدخلات المهمة: analysis.
+    تعيد tuple[_IssueSignal, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     result = []
     for index, issue in enumerate(_value(analysis, "issues", []) or []):
         severity = str(_value(issue, "severity", "")).casefold()
@@ -107,6 +199,13 @@ def _issue_signals(analysis: Any) -> tuple[_IssueSignal, ...]:
 
 
 def _report_signal_text(report: Any) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _report_signal_text؛ المدخلات المهمة: report.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     parts: list[str] = []
     status = _value(report, "status", None)
     if status:
@@ -126,6 +225,13 @@ def _report_signal_text(report: Any) -> str:
 
 
 def _report_failed(report: Any) -> bool:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _report_failed؛ المدخلات المهمة: report.
+    تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if not bool(_value(report, "connection_successful", True)):
         return True
     status = str(_value(report, "status", "")).casefold()
@@ -135,10 +241,24 @@ def _report_failed(report: Any) -> bool:
 
 
 def _health_status(analysis: Any) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _health_status؛ المدخلات المهمة: analysis.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return str(_value(analysis, "health_status", "") or "").casefold()
 
 
 def _actionable_issues(issues: Iterable[_IssueSignal]) -> tuple[_IssueSignal, ...]:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _actionable_issues؛ المدخلات المهمة: issues.
+    تعيد tuple[_IssueSignal, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return tuple(x for x in issues if x.severity in {"warning", "critical"})
 
 
@@ -160,6 +280,13 @@ class InvestigationRouter:
         trigger_weight: int = 5,
         domain_weight: int = 2,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: specialist_registry، candidate_limit، selection_limit، trigger_weight، domain_weight.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if candidate_limit < 1:
             raise ValueError("candidate_limit must be >= 1.")
         if selection_limit < 1:
@@ -184,6 +311,13 @@ class InvestigationRouter:
         analysis: Any,
         snapshot: SpecialistRegistrySnapshot | None = None,
     ) -> InvestigationRoutingDecision:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى route؛ المدخلات المهمة: report، analysis، snapshot.
+        تعيد InvestigationRoutingDecision أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         snapshot = snapshot or self._specialist_registry.snapshot()
 
         issues = _issue_signals(analysis)
@@ -299,6 +433,13 @@ class InvestigationRouter:
 
     @staticmethod
     def _to_match(item: _Candidate) -> SpecialistRoutingMatch:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _to_match؛ المدخلات المهمة: item.
+        تعيد SpecialistRoutingMatch أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return SpecialistRoutingMatch(
             specialist_id=item.specialist.id,
             specialist_slug=item.specialist.slug,
@@ -317,6 +458,13 @@ class InvestigationRouter:
         evidence_text: str,
         issues: tuple[_IssueSignal, ...],
     ) -> _Candidate:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _score_specialist؛ المدخلات المهمة: specialist، evidence_text، issues.
+        تعيد _Candidate أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         matched_domains = tuple(
             d for d in specialist.domains
             if _contains_phrase(evidence_text, d)

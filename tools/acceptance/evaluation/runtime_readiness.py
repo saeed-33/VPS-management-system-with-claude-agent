@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -41,6 +51,12 @@ CRITICAL_RUNTIME_READINESS_METRICS = (
 
 @dataclass(slots=True, frozen=True)
 class RuntimeReadinessMetric:
+    """
+    يمثل RuntimeReadinessMetric جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     case_id: str
     metric: EvaluationMetric
     reference_passed: bool
@@ -58,6 +74,12 @@ class RuntimeReadinessMetric:
 
 @dataclass(slots=True, frozen=True)
 class RuntimeReadinessResult:
+    """
+    يمثل RuntimeReadinessResult جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     status: ReadinessStatus
     runtime_ready: bool
     comparisons: tuple[
@@ -72,6 +94,12 @@ class RuntimeReadinessResult:
 
 
 class RuntimeReadinessGate:
+    """
+    يمثل RuntimeReadinessGate جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(
         self,
         *,
@@ -85,6 +113,12 @@ class RuntimeReadinessGate:
         ] = CRITICAL_RUNTIME_READINESS_METRICS,
         allowed_score_regression: float = 0.0,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: required_case_ids، critical_metrics، allowed_score_regression.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if not required_case_ids:
             raise ValueError(
                 "required_case_ids must not be empty."
@@ -115,6 +149,12 @@ class RuntimeReadinessGate:
             ...
         ],
     ) -> RuntimeReadinessResult:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى evaluate؛ المدخلات المهمة: reference_observations، runtime_observations.
+        تعيد RuntimeReadinessResult أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         reference = self._index(
             reference_observations
         )
@@ -295,6 +335,12 @@ class RuntimeReadinessGate:
         tuple[str, EvaluationMetric],
         EvaluationObservation,
     ]:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى _index؛ المدخلات المهمة: observations.
+        تعيد dict[tuple[str, EvaluationMetric], EvaluationObservation] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         indexed = {}
         for observation in observations:
             key = (

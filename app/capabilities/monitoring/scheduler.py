@@ -1,3 +1,13 @@
+"""
+جزء من Monitoring لاختيار profile/commands أو تنفيذ الدورة وحفظ report.
+
+الموقع في المعمارية: Application capability / monitoring.
+يُستدعى بواسطة: Scheduler أو MCP أو Admin API.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يقوم بتحليل LLM أو Investigation.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import asyncio
 import logging
 from datetime import UTC, datetime
@@ -7,23 +17,61 @@ logger = logging.getLogger(__name__)
 
 
 class SchedulableServerRecord(Protocol):
+    """
+    يمثل SchedulableServerRecord مسؤولية محددة داخل طبقة Application capability / monitoring.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     interval_seconds: int
     monitor_enabled: bool
 
 
 class MonitoringRunnerProtocol(Protocol):
+    """
+    يمثل MonitoringRunnerProtocol مسؤولية محددة داخل طبقة Application capability / monitoring.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     async def run(
         self,
         server_id: int,
     ):
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ...
 
 
 class SchedulerServerRepositoryProtocol(Protocol):
+    """
+    يمثل SchedulerServerRepositoryProtocol مسؤولية محددة داخل طبقة Application capability / monitoring.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def list_enabled_servers(
         self,
     ) -> list[SchedulableServerRecord]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى list_enabled_servers؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد list[SchedulableServerRecord] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ...
 
 
@@ -45,6 +93,13 @@ class MonitoringScheduler:
         polling_interval_seconds: float = 5.0,
         max_concurrent_servers: int = 5,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: server_repository، monitoring_service، polling_interval_seconds، max_concurrent_servers.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._server_repository = server_repository
         self._monitoring_service = monitoring_service
 
@@ -62,6 +117,13 @@ class MonitoringScheduler:
         )
 
     async def start(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى start؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         logger.info(
             "Monitoring scheduler started."
         )
@@ -88,15 +150,32 @@ class MonitoringScheduler:
         )
 
     def stop(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى stop؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._stop_event.set()
 
     async def run_iteration(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى run_iteration؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         now = datetime.now(UTC)
 
         servers = (
             self._server_repository
             .list_enabled_servers()
         )
+
+        # scheduler يختار المرشحين فقط؛ تنفيذ دورة كل server يبقى داخل
+        # MonitoringService، بينما semaphore يحد concurrency على مستوى الجدولة.
 
         tasks: list[asyncio.Task[None]] = []
 
@@ -123,6 +202,13 @@ class MonitoringScheduler:
         server: SchedulableServerRecord,
         now: datetime,
     ) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى _should_run؛ المدخلات المهمة: server، now.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not server.monitor_enabled:
             return False
 
@@ -149,6 +235,13 @@ class MonitoringScheduler:
         self,
         server_id: int,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى _run_server؛ المدخلات المهمة: server_id.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if server_id in self._running_server_ids:
             return
 

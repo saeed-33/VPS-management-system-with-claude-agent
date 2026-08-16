@@ -1,3 +1,13 @@
+"""
+جزء من Monitoring لاختيار profile/commands أو تنفيذ الدورة وحفظ report.
+
+الموقع في المعمارية: Application capability / monitoring.
+يُستدعى بواسطة: Scheduler أو MCP أو Admin API.
+يعتمد مباشرة على: app.infrastructure.database.repositories.report_repository، app.core.contracts.reports، app.core.exceptions.
+الحد المعماري: لا يقوم بتحليل LLM أو Investigation.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from app.infrastructure.database.repositories.report_repository import (
     ReportRepository,
 )
@@ -12,10 +22,25 @@ from app.core.exceptions import (
 
 
 class ReportQueryService:
+    """
+    يمثل ReportQueryService مسؤولية محددة داخل طبقة Application capability / monitoring.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         repository: ReportRepository,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._repository = repository
 
     def list_reports(
@@ -29,6 +54,13 @@ class ReportQueryService:
         list[ReportListItemDTO],
         int,
     ]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى list_reports؛ المدخلات المهمة: server_id، status، page، page_size.
+        تعيد tuple[list[ReportListItemDTO], int] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if page < 1:
             raise ValueError(
                 "Page must be greater than zero."
@@ -85,6 +117,13 @@ class ReportQueryService:
         self,
         report_id: int,
     ) -> ReportDetailsDTO:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
+
+        تُستدعى عندما يصل workflow إلى get_report؛ المدخلات المهمة: report_id.
+        تعيد ReportDetailsDTO أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         row = self._repository.get_with_server(
             report_id
         )

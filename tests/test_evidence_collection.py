@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_policy، app.capabilities.investigation.evidence_collection.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 from datetime import UTC, datetime
 from types import SimpleNamespace
@@ -18,7 +28,19 @@ from app.capabilities.investigation.evidence_collection import (
 
 
 class Repository:
+    """
+    يمثل Repository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, server="default"):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: server.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls = 0
         if server == "default":
             self.server = SimpleNamespace(
@@ -32,6 +54,12 @@ class Repository:
             self.server = server
 
     def get_by_id(self, server_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_by_id؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls += 1
         if self.server is None:
             return None
@@ -41,7 +69,19 @@ class Repository:
 
 
 class Runner:
+    """
+    يمثل Runner جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, outcome):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: outcome.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.outcome = outcome
         self.calls = 0
         self.last_config = None
@@ -55,6 +95,12 @@ class Runner:
         command_text,
         timeout_seconds,
     ):
+        """
+        يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى run؛ المدخلات المهمة: config، tool_id، command_text، timeout_seconds.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls += 1
         self.last_config = config
         self.last_command = command_text
@@ -69,6 +115,12 @@ def make_outcome(
     stderr="",
     error_message=None,
 ):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_outcome؛ المدخلات المهمة: success، exit_status، stdout، stderr، error_message.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     timestamp = datetime.now(UTC)
     return DiagnosticExecutionOutcome(
         success=success,
@@ -83,6 +135,12 @@ def make_outcome(
 
 
 def allowed_policy(output_limit_chars=20000):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى allowed_policy؛ المدخلات المهمة: output_limit_chars.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return DiagnosticPolicyResult(
         decision=DiagnosticPolicyDecision.ALLOW,
         reasons=(DiagnosticPolicyReason.ALLOWED,),
@@ -101,6 +159,12 @@ def allowed_policy(output_limit_chars=20000):
 
 
 def denied_policy():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى denied_policy؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return DiagnosticPolicyResult(
         decision=DiagnosticPolicyDecision.DENY,
         reasons=(
@@ -116,6 +180,12 @@ def make_service(
     repository=None,
     runner=None,
 ):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_service؛ المدخلات المهمة: repository، runner.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     repository = repository or Repository()
     runner = runner or Runner(make_outcome())
 
@@ -133,6 +203,12 @@ def make_service(
 
 
 def test_denied_policy_never_touches_repository_or_runner():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_denied_policy_never_touches_repository_or_runner؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     collector, repository, runner = make_service()
 
     with pytest.raises(PermissionError):
@@ -151,6 +227,12 @@ def test_denied_policy_never_touches_repository_or_runner():
 
 
 def test_success_becomes_command_result_evidence():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_success_becomes_command_result_evidence؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     collector, _, runner = make_service()
 
     evidence = asyncio.run(
@@ -173,6 +255,12 @@ def test_success_becomes_command_result_evidence():
 
 
 def test_nonzero_command_is_still_evidence():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_nonzero_command_is_still_evidence؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     runner = Runner(
         make_outcome(
             success=False,
@@ -202,6 +290,12 @@ def test_nonzero_command_is_still_evidence():
 
 
 def test_output_is_truncated_to_policy_limit():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_output_is_truncated_to_policy_limit؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     runner = Runner(
         make_outcome(stdout="x" * 500)
     )
@@ -224,6 +318,12 @@ def test_output_is_truncated_to_policy_limit():
 
 
 def test_server_specific_key_overrides_default():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_server_specific_key_overrides_default؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository = Repository(
         SimpleNamespace(
             id=7,
@@ -257,6 +357,12 @@ def test_server_specific_key_overrides_default():
 
 
 def test_default_key_is_used_when_server_has_none():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_default_key_is_used_when_server_has_none؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     collector, _, runner = make_service()
 
     asyncio.run(
@@ -273,6 +379,12 @@ def test_default_key_is_used_when_server_has_none():
 
 
 def test_missing_server_does_not_call_runner():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_missing_server_does_not_call_runner؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository = Repository(None)
     runner = Runner(make_outcome())
     collector, _, _ = make_service(
@@ -298,6 +410,12 @@ def test_missing_server_does_not_call_runner():
 
 
 def test_connection_failure_becomes_evidence():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_connection_failure_becomes_evidence؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     runner = Runner(
         make_outcome(
             success=False,
@@ -327,6 +445,12 @@ def test_connection_failure_becomes_evidence():
 
 
 def test_empty_output_is_explicit():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_empty_output_is_explicit؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     runner = Runner(
         make_outcome(
             stdout="",

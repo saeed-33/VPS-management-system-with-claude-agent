@@ -10,6 +10,12 @@ from app.interfaces.admin.auth import AdminAuthService, AdminRole
 
 
 def main(argv: list[str] | None = None) -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: argv.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser(
         description="Create a persisted local Admin operator account."
     )

@@ -1,3 +1,13 @@
+"""
+حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+
+الموقع في المعمارية: MCP capability boundary.
+يُستدعى بواسطة: Claude أو خادم MCP.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,6 +19,14 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True, frozen=True)
 class ProjectToolGroup:
+    """
+    يمثل ProjectToolGroup مسؤولية محددة داخل طبقة MCP capability boundary.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     name: str
     tool_ids: tuple[str, ...]
 
@@ -75,6 +93,13 @@ PROJECT_TOOL_GROUPS = (
 def tool_group_for(
     tool_id: str,
 ) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى tool_group_for؛ المدخلات المهمة: tool_id.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     for group in PROJECT_TOOL_GROUPS:
         if tool_id in group.tool_ids:
             return group.name
@@ -87,6 +112,13 @@ def tool_group_for(
 def group_definitions(
     definitions: list[ProjectToolDefinition],
 ) -> dict[str, list[ProjectToolDefinition]]:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+    تُستدعى عندما يصل workflow إلى group_definitions؛ المدخلات المهمة: definitions.
+    تعيد dict[str, list[ProjectToolDefinition]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     by_id = {
         item.tool_id: item
         for item in definitions

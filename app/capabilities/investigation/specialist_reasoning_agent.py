@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_tools، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_reasoning_client، app.core.contracts.specialist_reasoning، app.capabilities.investigation.source_location.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -78,12 +88,28 @@ response does not create or execute any additional specialist.
 
 @dataclass(slots=True, frozen=True)
 class SpecialistDiagnosticToolRequest:
+    """
+    يمثل SpecialistDiagnosticToolRequest مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     call: DiagnosticToolCall
     rationale: str
 
 
 @dataclass(slots=True, frozen=True)
 class SpecialistReasoningExecution:
+    """
+    يمثل SpecialistReasoningExecution مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     result: SpecialistResult
     provider: str
     model: str
@@ -94,11 +120,26 @@ class SpecialistReasoningExecution:
 
 
 class SpecialistReasoningAgent:
+    """
+    يمثل SpecialistReasoningAgent مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
         client: SpecialistReasoningClient,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: client.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._client = client
 
     async def reason(
@@ -109,6 +150,13 @@ class SpecialistReasoningAgent:
         diagnostic_tool_catalog: str | None = None,
         force_final_synthesis: bool = False,
     ) -> SpecialistReasoningExecution:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى reason؛ المدخلات المهمة: context، allowed_specialist_slugs، diagnostic_tool_catalog، force_final_synthesis.
+        تعيد SpecialistReasoningExecution أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         user_prompt = (
             "## Mandatory Investigation Objective\n"
             + context.objective
@@ -265,6 +313,13 @@ class SpecialistReasoningAgent:
         context: SpecialistContextSnapshot,
         allowed_specialist_slugs: tuple[str, ...],
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _validate_references؛ المدخلات المهمة: output، context، allowed_specialist_slugs.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         evidence_ids = {
             item.evidence_id
             for item in context.evidence
@@ -280,6 +335,13 @@ class SpecialistReasoningAgent:
             namespace: str,
             allowed: set[str],
         ) -> str:
+            """
+            يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Application capability / investigation.
+
+            تُستدعى عندما يصل workflow إلى normalize_reference؛ المدخلات المهمة: value، namespace، allowed.
+            تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            """
             candidate = value.strip()
 
             prefix = namespace + ":"
@@ -370,6 +432,13 @@ class SpecialistReasoningAgent:
         recommendations: tuple[str, ...],
         allowed_specialist_slugs: tuple[str, ...],
     ) -> tuple[tuple[str, ...], tuple[str, ...]]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _normalize_specialist_recommendations؛ المدخلات المهمة: recommendations، allowed_specialist_slugs.
+        تعيد tuple[tuple[str, ...], tuple[str, ...]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         allowed = {
             value.strip().casefold()
             for value in allowed_specialist_slugs
@@ -425,12 +494,26 @@ class SpecialistReasoningAgent:
         context: SpecialistContextSnapshot,
         dropped_specialist_recommendations: tuple[str, ...] = (),
     ) -> SpecialistResult:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _to_result؛ المدخلات المهمة: output، context، dropped_specialist_recommendations.
+        تعيد SpecialistResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         evidence_by_id = {
             item.evidence_id: item
             for item in context.evidence
         }
 
         def finding_metadata(evidence_ids: tuple[str, ...]) -> dict:
+            """
+            ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+            تُستدعى عندما يصل workflow إلى finding_metadata؛ المدخلات المهمة: evidence_ids.
+            تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            """
             locations = []
             for evidence_id in evidence_ids:
                 evidence = evidence_by_id.get(evidence_id)

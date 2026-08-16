@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.investigation_read_models.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from dataclasses import replace
 from datetime import (
     datetime,
@@ -34,6 +44,12 @@ def make_detail(
     foreign_evidence=False,
     foreign_server=False,
 ):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_detail؛ المدخلات المهمة: bad_evidence، bad_budget، bad_narrative، malformed_evidence، foreign_evidence، foreign_server.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     evidence_id = "e1"
 
     run_evidence_id = (
@@ -163,6 +179,12 @@ def make_detail(
 
 
 def by_metric(result):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى by_metric؛ المدخلات المهمة: result.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return {
         item.metric: item
         for item in result.observations
@@ -170,6 +192,12 @@ def by_metric(result):
 
 
 def test_valid_snapshot_emits_five_real_metrics():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_valid_snapshot_emits_five_real_metrics؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = (
         PersistedRuntimeEvaluator()
         .evaluate(
@@ -189,6 +217,12 @@ def test_valid_snapshot_emits_five_real_metrics():
 
 
 def test_unknown_evidence_fails_grounding():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unknown_evidence_fails_grounding؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = (
         PersistedRuntimeEvaluator()
         .evaluate(
@@ -210,6 +244,12 @@ def test_unknown_evidence_fails_grounding():
 
 
 def test_budget_overrun_fails():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_budget_overrun_fails؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = (
         PersistedRuntimeEvaluator()
         .evaluate(
@@ -231,6 +271,12 @@ def test_budget_overrun_fails():
 
 
 def test_unknown_narrative_claim_fails():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unknown_narrative_claim_fails؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = (
         PersistedRuntimeEvaluator()
         .evaluate(
@@ -252,6 +298,12 @@ def test_unknown_narrative_claim_fails():
 
 
 def test_malformed_evidence_reference_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_malformed_evidence_reference_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     metrics = by_metric(
         PersistedRuntimeEvaluator().evaluate(
             make_detail(malformed_evidence=True)
@@ -262,6 +314,12 @@ def test_malformed_evidence_reference_fails_closed():
 
 
 def test_foreign_investigation_evidence_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_foreign_investigation_evidence_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     metrics = by_metric(
         PersistedRuntimeEvaluator().evaluate(
             make_detail(foreign_evidence=True)
@@ -272,6 +330,12 @@ def test_foreign_investigation_evidence_fails_closed():
 
 
 def test_foreign_server_evidence_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_foreign_server_evidence_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     metrics = by_metric(
         PersistedRuntimeEvaluator().evaluate(
             make_detail(foreign_server=True)
@@ -282,6 +346,12 @@ def test_foreign_server_evidence_fails_closed():
 
 
 def test_evidence_without_context_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_evidence_without_context_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     detail = make_detail()
     runtime = detail.runtime
     assert runtime is not None

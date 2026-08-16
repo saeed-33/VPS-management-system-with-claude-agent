@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.infrastructure.database.models.investigation، app.infrastructure.database.session، app.core.contracts.investigations.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -15,10 +25,32 @@ from app.core.contracts.investigations import PersistInvestigationDTO
 
 
 class InvestigationRepository:
+    """
+    يمثل InvestigationRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(self, session_factory: sessionmaker = SessionLocal) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def create(self, data: PersistInvestigationDTO) -> InvestigationModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
+        تعيد InvestigationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = InvestigationModel(
             investigation_id=data.investigation_id,
             server_id=data.server_id,
@@ -69,6 +101,13 @@ class InvestigationRepository:
         status: str,
         metadata: dict,
     ) -> InvestigationModel:
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_runtime_snapshot؛ المدخلات المهمة: investigation_id، status، metadata.
+        تعيد InvestigationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(
                 select(
@@ -288,6 +327,13 @@ class InvestigationRepository:
         self,
         investigation_id: str,
     ) -> InvestigationModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_by_investigation_id؛ المدخلات المهمة: investigation_id.
+        تعيد InvestigationModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(
                 select(InvestigationModel).where(
@@ -304,6 +350,13 @@ class InvestigationRepository:
         limit: int = 100,
         server_id: int | None = None,
     ) -> list[InvestigationModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_recent؛ المدخلات المهمة: limit، server_id.
+        تعيد list[InvestigationModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if limit < 1:
             raise ValueError("limit must be >= 1.")
 
@@ -330,6 +383,13 @@ class InvestigationRepository:
             return models
 
     def list_by_report_id(self, report_id: int) -> list[InvestigationModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_by_report_id؛ المدخلات المهمة: report_id.
+        تعيد list[InvestigationModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             models = list(
                 session.scalars(

@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.investigation.correlation، app.capabilities.investigation.final_diagnosis_synthesizer.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 
 from app.capabilities.investigation.correlation import (
@@ -16,6 +26,12 @@ def diagnosis(
     *,
     with_conflict=False,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى diagnosis؛ المدخلات المهمة: with_conflict.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     claim = CorrelatedDiagnosisClaim(
         claim_id="inv-1:claim:1",
         title="NGINX service presence",
@@ -97,10 +113,22 @@ def diagnosis(
 
 
 class Client:
+    """
+    يمثل Client جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     provider_name = "test"
     model_name = "test-model"
 
     def __init__(self, output):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: output.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.output = output
         self.calls = []
 
@@ -110,6 +138,12 @@ class Client:
         system_prompt,
         user_prompt,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى synthesize؛ المدخلات المهمة: system_prompt، user_prompt.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls.append(
             (system_prompt, user_prompt)
         )
@@ -124,6 +158,12 @@ class Client:
 
 
 def test_valid_llm_narrative_is_used():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_valid_llm_narrative_is_used؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(
         FinalDiagnosisNarrativeOutput(
             summary=(
@@ -155,6 +195,12 @@ def test_valid_llm_narrative_is_used():
 
 
 def test_unknown_claim_id_uses_fallback():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unknown_claim_id_uses_fallback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(
         FinalDiagnosisNarrativeOutput(
             summary="Invented claim.",
@@ -187,6 +233,12 @@ def test_unknown_claim_id_uses_fallback():
 
 
 def test_conflict_must_be_preserved():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_conflict_must_be_preserved؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(
         FinalDiagnosisNarrativeOutput(
             summary=(
@@ -217,6 +269,12 @@ def test_conflict_must_be_preserved():
 
 
 def test_client_failure_uses_deterministic_summary():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_client_failure_uses_deterministic_summary؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(
         RuntimeError(
             "provider unavailable"
@@ -240,6 +298,12 @@ def test_client_failure_uses_deterministic_summary():
 
 
 def test_no_client_uses_fallback():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_no_client_uses_fallback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     expected = diagnosis(
         with_conflict=True
     )
@@ -259,6 +323,12 @@ def test_no_client_uses_fallback():
 
 
 def test_prompt_contains_only_validated_envelope():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_prompt_contains_only_validated_envelope؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     client = Client(
         FinalDiagnosisNarrativeOutput(
             summary="Summary.",

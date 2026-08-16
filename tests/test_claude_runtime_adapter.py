@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.runtime.claude، app.runtime.claude.exceptions.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 import json
 
@@ -15,6 +25,12 @@ from app.runtime.claude.exceptions import (
 def request(
     **overrides,
 ) -> ClaudeRuntimeRequest:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى request؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد ClaudeRuntimeRequest أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     values = {
         "job_id": "job-1",
         "job_type": "monitoring_cycle",
@@ -28,6 +44,12 @@ def request(
 
 
 class Runner:
+    """
+    يمثل Runner جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(
         self,
         *,
@@ -35,6 +57,12 @@ class Runner:
         delay_seconds=0.0,
         error: Exception | None = None,
     ):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: content، delay_seconds، error.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.content = (
             content
             if content is not None
@@ -59,6 +87,12 @@ class Runner:
         self,
         runtime_request,
     ):
+        """
+        يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى run؛ المدخلات المهمة: runtime_request.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if self.delay_seconds:
             await asyncio.sleep(
                 self.delay_seconds
@@ -81,12 +115,24 @@ class Runner:
         self,
         session_id,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى cancel؛ المدخلات المهمة: session_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.cancelled_sessions.append(
             session_id
         )
 
 
 def test_bounded_claude_invocation_succeeds():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_bounded_claude_invocation_succeeds؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = asyncio.run(
         ClaudeRuntimeAdapter(
             runner=Runner()
@@ -112,6 +158,12 @@ def test_bounded_claude_invocation_succeeds():
 
 
 def test_timeout_is_returned_as_controlled_result():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_timeout_is_returned_as_controlled_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = asyncio.run(
         ClaudeRuntimeAdapter(
             runner=Runner(
@@ -130,6 +182,12 @@ def test_timeout_is_returned_as_controlled_result():
 
 
 def test_runtime_failure_is_returned_as_controlled_result():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_failure_is_returned_as_controlled_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = asyncio.run(
         ClaudeRuntimeAdapter(
             runner=Runner(
@@ -148,6 +206,12 @@ def test_runtime_failure_is_returned_as_controlled_result():
 
 
 def test_invalid_structured_output_is_rejected():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_invalid_structured_output_is_rejected؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = asyncio.run(
         ClaudeRuntimeAdapter(
             runner=Runner(
@@ -167,6 +231,12 @@ def test_invalid_structured_output_is_rejected():
 
 
 def test_operational_tool_access_is_disabled_in_c2():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_operational_tool_access_is_disabled_in_c2؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = asyncio.run(
         ClaudeRuntimeAdapter(
             runner=Runner()
@@ -188,6 +258,12 @@ def test_operational_tool_access_is_disabled_in_c2():
 
 
 def test_claude_reported_failure_remains_failed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_claude_reported_failure_remains_failed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = asyncio.run(
         ClaudeRuntimeAdapter(
             runner=Runner(

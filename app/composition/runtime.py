@@ -1,3 +1,13 @@
+"""
+يركب dependencies ويربط repositories والخدمات والـruntime.
+
+الموقع في المعمارية: Bootstrap / dependency composition.
+يُستدعى بواسطة: app.main أو الاختبارات عند إنشاء container.
+يعتمد مباشرة على: app.composition.analysis، app.composition.repositories، app.composition.services، app.runtime.claude.native_monitoring، app.runtime.claude.ollama_runtime، app.runtime.claude.runtime.
+الحد المعماري: لا ينفذ workflow business؛ دوره wiring وترتيب الإنشاء.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -22,6 +32,14 @@ from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
 @dataclass(slots=True, frozen=True)
 class RuntimeComposition:
+    """
+    يمثل RuntimeComposition مسؤولية محددة داخل طبقة Bootstrap / dependency composition.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه app.main أو الاختبارات عند إنشاء container
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     monitoring_service: MonitoringService
     project_mcp_tool_boundary: ProjectMcpToolBoundary
     claude_supervisor: ClaudeSupervisor
@@ -36,6 +54,13 @@ def build_runtime_composition(
     settings: Settings,
     project_root: Path,
 ) -> RuntimeComposition:
+    """
+    يبني DTO أو dependency graph من المدخلات ضمن طبقة Bootstrap / dependency composition.
+
+    تُستدعى عندما يصل workflow إلى build_runtime_composition؛ المدخلات المهمة: repositories، services، retrieval، analysis، settings، project_root.
+    تعيد RuntimeComposition أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     monitoring_service = MonitoringService(
         server_repository=repositories.server_repository,
         profile_repository=repositories.profile_repository,

@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.autonomous_remediation، app.core.policies.autonomous_remediation، app.capabilities.remediation.autonomous_execution_service.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
@@ -18,6 +28,12 @@ NOW = datetime(2026, 8, 14, tzinfo=timezone.utc)
 
 
 def policy(**updates):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى policy؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     values = {
         "policy_id": "policy-1",
         "name": "Start nginx",
@@ -36,6 +52,12 @@ def policy(**updates):
 
 
 def context(**updates):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى context؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     values = {
         "global_enabled": True,
         "now": NOW,
@@ -69,18 +91,36 @@ def context(**updates):
 
 
 def test_valid_low_risk_context_auto_executes():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_valid_low_risk_context_auto_executes؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(context())
     assert result.outcome is AutonomousDecisionOutcome.AUTO_EXECUTE
     assert "policy_match" in result.reason_codes
 
 
 def test_global_kill_switch_denies_even_with_valid_policy():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_global_kill_switch_denies_even_with_valid_policy؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(context(global_enabled=False))
     assert result.outcome is AutonomousDecisionOutcome.DENY
     assert result.reason_codes == ("global_autonomy_disabled",)
 
 
 def test_missing_issue_fingerprint_requires_human_approval():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_missing_issue_fingerprint_requires_human_approval؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(context(issue_fingerprint=""))
     assert result.outcome is AutonomousDecisionOutcome.REQUIRE_HUMAN_APPROVAL
     assert "issue_fingerprint_missing" in result.reason_codes
@@ -88,6 +128,12 @@ def test_missing_issue_fingerprint_requires_human_approval():
 
 @pytest.mark.parametrize("action", ["stop_service", "restart_service", "reload_service", "reboot", "raw_command"])
 def test_v1_hard_allowlist_denies_other_actions(action):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_v1_hard_allowlist_denies_other_actions؛ المدخلات المهمة: action.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(
         context(action_type=action, policy=policy(allowed_action_type=action))
     )
@@ -96,18 +142,36 @@ def test_v1_hard_allowlist_denies_other_actions(action):
 
 
 def test_missing_policy_requires_human_approval():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_missing_policy_requires_human_approval؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(context(policy=None))
     assert result.outcome is AutonomousDecisionOutcome.REQUIRE_HUMAN_APPROVAL
     assert result.reason_codes == ("no_policy_match",)
 
 
 def test_non_ready_plan_cannot_auto_execute_even_with_passed_sandbox():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_non_ready_plan_cannot_auto_execute_even_with_passed_sandbox؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(context(plan_ready=False))
     assert result.outcome is AutonomousDecisionOutcome.DENY
     assert "hard_deny" in result.reason_codes
 
 
 def test_ambiguous_policy_match_denies():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_ambiguous_policy_match_denies؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(context(policy=None, ambiguous_policy_match=True))
     assert result.outcome is AutonomousDecisionOutcome.DENY
     assert result.reason_codes == ("ambiguous_policy_match",)
@@ -126,6 +190,12 @@ def test_ambiguous_policy_match_denies():
     ],
 )
 def test_policy_selection_is_status_aware(statuses, selected_status, ambiguous):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_policy_selection_is_status_aware؛ المدخلات المهمة: statuses، selected_status، ambiguous.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     matches = [SimpleNamespace(status=status) for status in statuses]
 
     selected, actual_ambiguous = AutonomousExecutionService._select_policy(matches)
@@ -135,6 +205,12 @@ def test_policy_selection_is_status_aware(statuses, selected_status, ambiguous):
 
 
 def test_enabled_policy_precedence_allows_evaluation_with_inactive_history():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_enabled_policy_precedence_allows_evaluation_with_inactive_history؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     selected, ambiguous = AutonomousExecutionService._select_policy([
         SimpleNamespace(status=AutonomousPolicyStatus.ENABLED),
         SimpleNamespace(status=AutonomousPolicyStatus.DISABLED),
@@ -149,6 +225,12 @@ def test_enabled_policy_precedence_allows_evaluation_with_inactive_history():
 
 
 def test_multiple_enabled_policies_fail_closed_in_evaluator():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_multiple_enabled_policies_fail_closed_in_evaluator؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     selected, ambiguous = AutonomousExecutionService._select_policy([
         SimpleNamespace(status=AutonomousPolicyStatus.ENABLED),
         SimpleNamespace(status=AutonomousPolicyStatus.ENABLED),
@@ -164,6 +246,12 @@ def test_multiple_enabled_policies_fail_closed_in_evaluator():
 
 
 def test_single_inactive_policy_preserves_explicit_deny_semantics():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_single_inactive_policy_preserves_explicit_deny_semantics؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     for status, reason in (
         (AutonomousPolicyStatus.DISABLED, "policy_disabled"),
         (AutonomousPolicyStatus.SUSPENDED, "policy_suspended"),
@@ -180,6 +268,12 @@ def test_single_inactive_policy_preserves_explicit_deny_semantics():
 
 
 def test_sandbox_mismatch_and_stale_are_denied():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_sandbox_mismatch_and_stale_are_denied؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     mismatch = AutonomousRemediationPolicyEvaluator().evaluate(
         context(sandbox=SimpleNamespace(
             status="passed", plan_id="plan-2", plan_fingerprint="fp-2", server_id=4,
@@ -201,6 +295,12 @@ def test_sandbox_mismatch_and_stale_are_denied():
 
 
 def test_insufficient_history_requires_human_approval():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_insufficient_history_requires_human_approval؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = AutonomousRemediationPolicyEvaluator().evaluate(
         context(history=AutonomousHistorySnapshot(
             issue_fingerprint="issue-1", action_type="start_service", target="nginx",

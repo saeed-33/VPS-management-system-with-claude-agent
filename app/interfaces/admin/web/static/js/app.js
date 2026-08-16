@@ -1,3 +1,6 @@
+/**
+ * مشترك بين صفحات Admin Web. يدير permission visibility، theme/navigation، تنسيق القيم وطلبات API. الحالة الأساسية في DOM وsession/browser state؛ لا يمنح الصلاحية بل يعكس قرار الخادم.
+ */
 console.log("Global app.js loaded");
 
 const adminContext =
@@ -5,10 +8,18 @@ const adminContext =
         permissions: []
     };
 
+/**
+ * ينفذ خطوة واجهة باسم hasAdminPermission ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function hasAdminPermission(permission) {
     return (adminContext.permissions || []).includes(permission);
 }
 
+/**
+ * ينفذ خطوة واجهة باسم applyPermissionVisibility ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function applyPermissionVisibility() {
     document
         .querySelectorAll("[data-required-permission]")
@@ -55,12 +66,20 @@ const sidebar = document.getElementById("sidebar");
 const sidebarOverlay =
     document.getElementById("sidebar-overlay");
 
+/**
+ * ينفذ خطوة واجهة باسم escapeHtml ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function escapeHtml(value) {
     const element = document.createElement("div");
     element.textContent = value ?? "";
     return element.innerHTML;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم formatDate ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function formatDate(value) {
     if (!value) {
         return "لم يُفحص بعد";
@@ -75,6 +94,10 @@ function formatDate(value) {
     ).format(new Date(value));
 }
 
+/**
+ * ينفذ خطوة واجهة باسم formatDuration ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function formatDuration(milliseconds) {
     if (milliseconds === null ||
         milliseconds === undefined) {
@@ -88,6 +111,10 @@ function formatDuration(milliseconds) {
     return `${(milliseconds / 1000).toFixed(2)} s`;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم statusBadge ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function statusBadge(status) {
     const normalizedStatus =
         String(status || "unknown").toLowerCase();
@@ -112,6 +139,10 @@ function statusBadge(status) {
     `;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم showToast ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function showToast(
     message,
     type = "info",
@@ -155,6 +186,10 @@ function showToast(
     );
 }
 
+/**
+ * ينفذ خطوة واجهة باسم apiRequest ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function apiRequest(
     url,
     options = {}
@@ -221,6 +256,10 @@ async function apiRequest(
     return data;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم initializeTheme ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function initializeTheme() {
     const storedTheme =
         localStorage.getItem("dashboard-theme");
@@ -237,6 +276,10 @@ function initializeTheme() {
     htmlElement.dataset.theme = selectedTheme;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم toggleTheme ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function toggleTheme() {
     const nextTheme =
         htmlElement.dataset.theme === "dark"
@@ -251,16 +294,28 @@ function toggleTheme() {
     );
 }
 
+/**
+ * ينفذ خطوة واجهة باسم openSidebar ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function openSidebar() {
     sidebar?.classList.add("open");
     sidebarOverlay?.classList.add("visible");
 }
 
+/**
+ * ينفذ خطوة واجهة باسم closeSidebar ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function closeSidebar() {
     sidebar?.classList.remove("open");
     sidebarOverlay?.classList.remove("visible");
 }
 
+/**
+ * ينفذ خطوة واجهة باسم initializeNavigation ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function initializeNavigation() {
     const currentPath =
         window.location.pathname;

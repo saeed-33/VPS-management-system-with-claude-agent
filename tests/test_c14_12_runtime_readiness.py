@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.interfaces.mcp.registry، app.interfaces.mcp.schemas، app.runtime.claude.result_parser، app.runtime.claude.exceptions.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -19,6 +29,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _boundary() -> ProjectMcpToolBoundary:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _boundary؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد ProjectMcpToolBoundary أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return ProjectMcpToolBoundary(
         server_service=None,
         monitoring_profile_service=None,
@@ -28,6 +44,12 @@ def _boundary() -> ProjectMcpToolBoundary:
 
 
 def test_c14_12_startup_recovers_interrupted_jobs():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_12_startup_recovers_interrupted_jobs؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = (ROOT / "app/main.py").read_text(encoding="utf-8")
 
     assert "recover_interrupted_jobs" in text
@@ -35,6 +57,12 @@ def test_c14_12_startup_recovers_interrupted_jobs():
 
 
 def test_c14_12_mcp_surface_is_bounded_and_stable():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_12_mcp_surface_is_bounded_and_stable؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     boundary = _boundary()
     definitions = boundary.list_tools()
 
@@ -80,7 +108,19 @@ def test_c14_12_mcp_surface_is_bounded_and_stable():
 
 
 def test_c14_12_unknown_and_unregistered_tools_fail_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_12_unknown_and_unregistered_tools_fail_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     async def run() -> None:
+        """
+        يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى run؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         for tool_id in (
             "raw_ssh",
             "raw_sql",
@@ -97,6 +137,12 @@ def test_c14_12_unknown_and_unregistered_tools_fail_closed():
 
 
 def test_c14_12_claude_malformed_output_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_12_claude_malformed_output_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     parser = ClaudeStructuredResultParser()
 
     try:
@@ -108,6 +154,12 @@ def test_c14_12_claude_malformed_output_fails_closed():
 
 
 def test_c14_12_controlled_policy_and_provider_failures_are_measured():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_12_controlled_policy_and_provider_failures_are_measured؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     policy = evaluate_policy_cases()
     provider = asyncio.run(evaluate_provider_cases())
 

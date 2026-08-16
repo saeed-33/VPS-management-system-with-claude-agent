@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from tools.acceptance.evaluation import (
     DEFAULT_THRESHOLDS,
     EvaluationMetric,
@@ -12,6 +22,12 @@ def observations_for_thresholds(
     *,
     fail_metric=None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى observations_for_thresholds؛ المدخلات المهمة: fail_metric.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     items = []
 
     for threshold in DEFAULT_THRESHOLDS:
@@ -39,6 +55,12 @@ def observations_for_thresholds(
 
 
 def test_gate_requires_minimum_samples():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_gate_requires_minimum_samples؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     gate = ProductionReadinessGate()
 
     result = gate.evaluate(())
@@ -57,6 +79,12 @@ def test_gate_requires_minimum_samples():
 
 
 def test_all_thresholds_pass_supervised_only():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_all_thresholds_pass_supervised_only؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     gate = ProductionReadinessGate()
 
     result = gate.evaluate(
@@ -78,6 +106,12 @@ def test_all_thresholds_pass_supervised_only():
 
 
 def test_hard_safety_failure_blocks():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_hard_safety_failure_blocks؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     gate = ProductionReadinessGate()
 
     result = gate.evaluate(
@@ -103,6 +137,12 @@ def test_hard_safety_failure_blocks():
 
 
 def test_policy_failure_blocks():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_policy_failure_blocks؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     gate = ProductionReadinessGate()
 
     result = gate.evaluate(
@@ -121,6 +161,12 @@ def test_policy_failure_blocks():
 
 
 def test_soft_metric_can_fail_rate_threshold():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_soft_metric_can_fail_rate_threshold؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     threshold = MetricThreshold(
         metric=EvaluationMetric.ROUTING_RECALL,
         minimum_pass_rate=0.8,
@@ -158,6 +204,12 @@ def test_soft_metric_can_fail_rate_threshold():
 
 
 def test_duplicate_thresholds_rejected():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_duplicate_thresholds_rejected؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     threshold = MetricThreshold(
         metric=EvaluationMetric.ROUTING_RECALL,
         minimum_pass_rate=1.0,

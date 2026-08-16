@@ -1,5 +1,12 @@
+/**
+ * صفحة إدارة Servers. تحمل servers وmonitoring profiles عبر Admin API، تدير forms/modals، وتعرض اختبار SSH وتبديل monitoring. لا تنفذ SSH في المتصفح؛ الخادم هو صاحب القرار.
+ */
 console.log("Servers page script loaded");
 
+/**
+ * ينفذ خطوة واجهة باسم safetyDesignationLabel ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function safetyDesignationLabel(value) {
     const labels = {
         safe_remediation_lab: "Safe remediation lab",
@@ -10,6 +17,10 @@ function safetyDesignationLabel(value) {
     return labels[value] || labels.unclassified;
 }
 
+    /**
+     * ينفذ خطوة واجهة باسم assignProfileToServer ضمن صفحة Admin Web.
+     * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+     */
     async function assignProfileToServer(
     serverId,
     selectedValue
@@ -48,12 +59,20 @@ function safetyDesignationLabel(value) {
         await loadServers();
     }
 }
+    /**
+     * ينفذ خطوة واجهة باسم loadAvailableMonitoringProfiles ضمن صفحة Admin Web.
+     * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+     */
     async function loadAvailableMonitoringProfiles() {
         availableMonitoringProfiles =
             await apiRequest(
                 "/api/monitoring-profiles"
             );
     }
+    /**
+     * ينفذ خطوة واجهة باسم loadServers ضمن صفحة Admin Web.
+     * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+     */
     async function loadServers() {
         const table =
             document.getElementById("servers-table");
@@ -321,6 +340,10 @@ function safetyDesignationLabel(value) {
             }
         );
 
+    /**
+     * ينفذ خطوة واجهة باسم testServer ضمن صفحة Admin Web.
+     * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+     */
     async function testServer(serverId) {
         try {
             showToast(
@@ -353,6 +376,10 @@ function safetyDesignationLabel(value) {
         }
     }
 
+    /**
+     * ينفذ خطوة واجهة باسم deleteServer ضمن صفحة Admin Web.
+     * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+     */
     async function deleteServer(serverId) {
         const confirmed = window.confirm(
             "هل تريد حذف هذا السيرفر نهائيًا؟"
@@ -391,6 +418,10 @@ function safetyDesignationLabel(value) {
             "click",
             loadServers
         );
+/**
+ * ينفذ خطوة واجهة باسم toggleMonitoring ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function toggleMonitoring(
     serverId,
     currentlyEnabled
@@ -436,6 +467,10 @@ async function toggleMonitoring(
         );
     }
 }
+/**
+ * ينفذ خطوة واجهة باسم initializeServersPage ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function initializeServersPage() {
     const table = document.getElementById(
         "servers-table"
@@ -505,6 +540,10 @@ async function initializeServersPage() {
 initializeServersPage();
 
 // Edit server modal handlers
+/**
+ * ينفذ خطوة واجهة باسم openEditServerModal ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function openEditServerModal(serverId) {
     const server = currentServers.find(
         item => item.id === serverId
@@ -593,6 +632,10 @@ function openEditServerModal(serverId) {
     );
 }
 
+/**
+ * ينفذ خطوة واجهة باسم closeEditServerModal ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function closeEditServerModal() {
     const modal = document.getElementById(
         "edit-server-modal"

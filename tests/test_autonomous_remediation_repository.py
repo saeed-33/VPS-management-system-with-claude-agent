@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.autonomous_remediation، app.infrastructure.database.base، app.infrastructure.database.models، app.infrastructure.database.models.remediation، app.infrastructure.database.repositories.autonomous_remediation_repository.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from datetime import datetime, timezone
 
 from sqlalchemy import create_engine
@@ -27,6 +37,12 @@ from app.infrastructure.database.repositories.autonomous_remediation_repository 
 
 
 def repository():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى repository؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine("sqlite+pysqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     for model in (
         RemediationPlanModel,
@@ -45,6 +61,12 @@ def repository():
 
 
 def test_policy_version_updates_and_status_changes_are_persisted():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_policy_version_updates_and_status_changes_are_persisted؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repo = repository()
     policy = AutonomousRemediationPolicy(
         policy_id="p1", name="p1", description="test", status=AutonomousPolicyStatus.DISABLED,
@@ -58,6 +80,12 @@ def test_policy_version_updates_and_status_changes_are_persisted():
 
 
 def test_reservation_lookup_by_idempotency_key_preserves_persisted_binding():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_reservation_lookup_by_idempotency_key_preserves_persisted_binding؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repo = repository()
     now = datetime.now(timezone.utc)
     created = repo.reserve(
@@ -77,9 +105,21 @@ def test_reservation_lookup_by_idempotency_key_preserves_persisted_binding():
 
 
 def test_matching_policies_returns_structural_matches_across_statuses_and_scope():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_matching_policies_returns_structural_matches_across_statuses_and_scope؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repo = repository()
 
     def add(policy_id, *, status=AutonomousPolicyStatus.ENABLED, fingerprint="fp", target="nginx", servers=(4,)):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى add؛ المدخلات المهمة: policy_id، status، fingerprint، target، servers.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         repo.create_policy(AutonomousRemediationPolicy(
             policy_id=policy_id, name=policy_id, description="test", status=status,
             version=1, issue_fingerprint=fingerprint, allowed_action_type="start_service",
@@ -103,6 +143,12 @@ def test_matching_policies_returns_structural_matches_across_statuses_and_scope(
 
 
 def test_reservation_idempotency_and_single_use_authorization():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_reservation_idempotency_and_single_use_authorization؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     from datetime import datetime, timezone, timedelta
     from app.core.contracts.autonomous_remediation import AutonomousAuthorization, AutonomousAuthorizationStatus
 
@@ -137,6 +183,12 @@ def test_reservation_idempotency_and_single_use_authorization():
 
 
 def test_history_and_candidates_group_trusted_issue_across_distinct_plans():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_history_and_candidates_group_trusted_issue_across_distinct_plans؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     from datetime import datetime, timezone
     from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
     from app.infrastructure.database.models.remediation import (

@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import json
 import os
 import subprocess
@@ -10,6 +20,12 @@ HOOK = ROOT / "tools" / "claude_hooks" / "runtime_hooks.py"
 
 
 def read_settings() -> dict:
+    """
+    يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى read_settings؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد dict أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return json.loads(
         (ROOT / ".claude/settings.json").read_text(
             encoding="utf-8"
@@ -23,6 +39,12 @@ def run_hook(
     *,
     provider: str = "ollama",
 ):
+    """
+    ينفذ مرحلة الأداة أو يحفظ نتيجة التقييم ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى run_hook؛ المدخلات المهمة: payload، tmp_path، provider.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     env = os.environ.copy()
     env["CLAUDE_PROJECT_DIR"] = str(ROOT)
     env["AI_VPS_LLM_PROVIDER"] = provider
@@ -50,6 +72,12 @@ def run_hook(
 
 
 def runtime_payload(event: str) -> dict:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى runtime_payload؛ المدخلات المهمة: event.
+    تعيد dict أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return {
         "session_id": "session-test",
         "cwd": str(ROOT),
@@ -60,6 +88,12 @@ def runtime_payload(event: str) -> dict:
 
 
 def test_settings_register_only_concrete_runtime_hooks():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_settings_register_only_concrete_runtime_hooks؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     hooks = read_settings()["hooks"]
 
     assert set(hooks) == {
@@ -86,6 +120,12 @@ def test_settings_register_only_concrete_runtime_hooks():
 
 
 def test_hook_handlers_use_cross_platform_exec_form():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_hook_handlers_use_cross_platform_exec_form؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     hooks = read_settings()["hooks"]
 
     handlers = []
@@ -106,6 +146,12 @@ def test_hook_handlers_use_cross_platform_exec_form():
 
 
 def test_normal_development_session_is_ignored(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_normal_development_session_is_ignored؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     payload = {
         "session_id": "dev-session",
         "cwd": str(ROOT),
@@ -126,6 +172,12 @@ def test_normal_development_session_is_ignored(tmp_path):
 
 
 def test_runtime_preflight_passes_current_c14_contract(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_preflight_passes_current_c14_contract؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     payload = runtime_payload("UserPromptSubmit")
     payload["prompt"] = "run server 1"
 
@@ -145,6 +197,12 @@ def test_runtime_preflight_passes_current_c14_contract(tmp_path):
 
 
 def test_runtime_preflight_blocks_non_ollama_provider(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_preflight_blocks_non_ollama_provider؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     payload = runtime_payload("UserPromptSubmit")
 
     result, output, _ = run_hook(
@@ -161,6 +219,12 @@ def test_runtime_preflight_blocks_non_ollama_provider(tmp_path):
 def test_session_start_adds_runtime_context_without_blocking(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_session_start_adds_runtime_context_without_blocking؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     payload = runtime_payload("SessionStart")
     payload["source"] = "startup"
     payload["model"] = "runtime-model"
@@ -176,6 +240,12 @@ def test_session_start_adds_runtime_context_without_blocking(
 
 
 def test_runtime_config_change_is_blocked(tmp_path):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_config_change_is_blocked؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     payload = runtime_payload("ConfigChange")
     payload["source"] = "project_settings"
     payload["file_path"] = str(
@@ -191,6 +261,12 @@ def test_runtime_config_change_is_blocked(tmp_path):
 def test_specialist_lifecycle_audit_does_not_store_prompt_or_output(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_specialist_lifecycle_audit_does_not_store_prompt_or_output؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     payload = {
         "session_id": "session-test",
         "cwd": str(ROOT),
@@ -217,6 +293,12 @@ def test_specialist_lifecycle_audit_does_not_store_prompt_or_output(
 
 
 def test_runtime_event_directory_is_gitignored():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_event_directory_is_gitignored؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     gitignore = (ROOT / ".gitignore").read_text(
         encoding="utf-8"
     )
@@ -227,6 +309,12 @@ def test_runtime_event_directory_is_gitignored():
 def test_runtime_preflight_accepts_hardened_project_mcp_command(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_preflight_accepts_hardened_project_mcp_command؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     payload = runtime_payload("UserPromptSubmit")
     payload["prompt"] = "run server 2"
 
@@ -245,6 +333,12 @@ def test_runtime_preflight_accepts_hardened_project_mcp_command(
 
 
 def test_project_mcp_validation_accepts_hardened_argv():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_project_mcp_validation_accepts_hardened_argv؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     hook_source = HOOK.read_text(encoding="utf-8")
 
     assert "def _valid_project_mcp_command" in hook_source

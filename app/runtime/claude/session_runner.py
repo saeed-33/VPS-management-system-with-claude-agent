@@ -1,3 +1,13 @@
+"""
+جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+
+الموقع في المعمارية: Claude supervisory runtime.
+يُستدعى بواسطة: composition أو Scheduler.
+يعتمد مباشرة على: app.runtime.claude.command، app.runtime.claude.exceptions، app.runtime.claude.models، app.runtime.claude.stream_decoder.
+الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -42,6 +52,13 @@ class SubprocessClaudeSessionRunner:
         max_stdout_bytes: int = 16 * 1024 * 1024,
         max_stderr_bytes: int = 2 * 1024 * 1024,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: command_builder، project_root، decoder، base_env، terminate_grace_seconds، max_stdout_bytes.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._command_builder = (
             command_builder
         )
@@ -94,6 +111,13 @@ class SubprocessClaudeSessionRunner:
     def active_job_ids(
         self,
     ) -> tuple[str, ...]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى active_job_ids؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد tuple[str, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return tuple(
             sorted(self._processes)
         )
@@ -102,9 +126,18 @@ class SubprocessClaudeSessionRunner:
         self,
         request: ClaudeRuntimeRequest,
     ) -> ClaudeRawResult:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: request.
+        تعيد ClaudeRawResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         command = self._command_builder.build(
             request
         )
+        # Claude Runtime يبني command من request؛ لا يقرر هذا runner capability
+        # أو policy، بل يفرض project_root وحدود stdout/stderr على العملية.
         cwd = (
             command.cwd
             if command.cwd is not None
@@ -139,6 +172,8 @@ class SubprocessClaudeSessionRunner:
             ] = process
 
         try:
+            # نقرأ القناتين بحدود ثابتة وننتظر process معًا حتى لا يعلق runtime
+            # بسبب امتلاء stderr أو stdout أثناء تشغيل Claude Code.
             stdout_bytes, stderr_bytes = (
                 await self._communicate_bounded(
                     process
@@ -186,6 +221,13 @@ class SubprocessClaudeSessionRunner:
         self,
         process: asyncio.subprocess.Process,
     ) -> tuple[bytes, bytes]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _communicate_bounded؛ المدخلات المهمة: process.
+        تعيد tuple[bytes, bytes] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         stdout_task = asyncio.create_task(
             self._read_stream_bounded(
                 process.stdout,
@@ -227,6 +269,13 @@ class SubprocessClaudeSessionRunner:
         limit: int,
         label: str,
     ) -> bytes:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _read_stream_bounded؛ المدخلات المهمة: stream، limit، label.
+        تعيد bytes أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if stream is None:
             return b""
 
@@ -275,6 +324,13 @@ class SubprocessClaudeSessionRunner:
         self,
         cwd: Path,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _validate_cwd؛ المدخلات المهمة: cwd.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if cwd != self._project_root:
             raise ClaudeRuntimeError(
                 "Claude runtime command must execute from "
@@ -288,6 +344,13 @@ class SubprocessClaudeSessionRunner:
         cwd: Path,
         env: dict[str, str],
     ) -> asyncio.subprocess.Process:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _spawn؛ المدخلات المهمة: command، cwd، env.
+        تعيد asyncio.subprocess.Process أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         kwargs: dict = {}
 
         if os.name == "nt":
@@ -324,6 +387,13 @@ class SubprocessClaudeSessionRunner:
         self,
         process: asyncio.subprocess.Process,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _terminate_process؛ المدخلات المهمة: process.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if process.returncode is not None:
             return
 
@@ -365,6 +435,13 @@ class SubprocessClaudeSessionRunner:
         self,
         process: asyncio.subprocess.Process,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _terminate_windows؛ المدخلات المهمة: process.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         try:
             killer = await (
                 asyncio.create_subprocess_exec(
@@ -395,6 +472,13 @@ class SubprocessClaudeSessionRunner:
     def _terminate_posix(
         process: asyncio.subprocess.Process,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _terminate_posix؛ المدخلات المهمة: process.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         try:
             os.killpg(
                 process.pid,
@@ -414,6 +498,13 @@ class SubprocessClaudeSessionRunner:
         stderr: str,
         stdout: str,
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
+
+        تُستدعى عندما يصل workflow إلى _process_error_message؛ المدخلات المهمة: returncode، stderr، stdout.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         diagnostic = (
             stderr.strip()
             or stdout.strip()

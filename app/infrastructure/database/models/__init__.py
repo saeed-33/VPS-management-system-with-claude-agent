@@ -1,3 +1,13 @@
+"""
+نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
+
+الموقع في المعمارية: Persistence model.
+يُستدعى بواسطة: repositories وطبقة database.
+يعتمد مباشرة على: app.infrastructure.database.models.knowledge_document، app.infrastructure.database.models.agent_job، app.infrastructure.database.models.admin_auth، app.infrastructure.database.models.remediation، app.infrastructure.database.models.knowledge_source، app.infrastructure.database.models.investigation.
+الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from app.infrastructure.database.models.knowledge_document import (
     KnowledgeChunkModel,
     KnowledgeDocumentModel,

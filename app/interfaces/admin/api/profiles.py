@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.profiles، app.core.contracts.profiles، app.core.exceptions، app.capabilities.monitoring.profile_service.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from dataclasses import asdict
 
 from fastapi import (
@@ -52,6 +62,13 @@ def list_profiles(
         get_monitoring_profile_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_profiles؛ المدخلات المهمة: service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return service.list_profiles()
 
 
@@ -65,6 +82,13 @@ def get_profile(
         get_monitoring_profile_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_profile؛ المدخلات المهمة: profile_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.get_profile(profile_id)
     except MonitoringProfileNotFoundError as exc:
@@ -85,6 +109,13 @@ def create_profile(
         get_monitoring_profile_service
     ),
 ):
+    """
+    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى create_profile؛ المدخلات المهمة: payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.create_profile(
             CreateMonitoringProfileDTO(
@@ -114,6 +145,13 @@ def update_profile(
         get_monitoring_profile_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى update_profile؛ المدخلات المهمة: profile_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.update_profile(
             profile_id,
@@ -143,6 +181,13 @@ def delete_profile(
         get_monitoring_profile_service
     ),
 ) -> Response:
+    """
+    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى delete_profile؛ المدخلات المهمة: profile_id، service.
+    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         service.delete_profile(profile_id)
     except MonitoringProfileNotFoundError as exc:
@@ -167,6 +212,13 @@ def list_profile_commands(
         get_monitoring_profile_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_profile_commands؛ المدخلات المهمة: profile_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         rows = service.list_profile_commands(
             profile_id
@@ -213,6 +265,13 @@ def assign_command(
         get_monitoring_profile_service
     ),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى assign_command؛ المدخلات المهمة: profile_id، command_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         assignment = service.assign_command(
             profile_id=profile_id,
@@ -278,6 +337,13 @@ def update_command_assignment(
         get_monitoring_profile_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى update_command_assignment؛ المدخلات المهمة: profile_id، command_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     supplied_fields = payload.model_fields_set
 
     try:
@@ -345,6 +411,13 @@ def remove_command(
         get_monitoring_profile_service
     ),
 ) -> Response:
+    """
+    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى remove_command؛ المدخلات المهمة: profile_id، command_id، service.
+    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         service.remove_command(
             profile_id=profile_id,
@@ -372,6 +445,13 @@ def assign_profile_to_server(
         get_monitoring_profile_service
     ),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى assign_profile_to_server؛ المدخلات المهمة: server_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         server = service.assign_profile_to_server(
             server_id=server_id,

@@ -1,3 +1,5 @@
+-- Migration مملوكة للمشروع: تغيّر schema/persistence contract المطلوب للمراحل التي يسميها اسم الملف.
+-- تُشغّل خارج application workflow ولا تحتوي منطق runtime أو authorization.
 CREATE TABLE IF NOT EXISTS remediation_plans (
     id INTEGER PRIMARY KEY,
     plan_id VARCHAR(64) NOT NULL UNIQUE,

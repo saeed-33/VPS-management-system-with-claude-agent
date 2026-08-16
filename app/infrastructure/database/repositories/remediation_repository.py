@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.core.contracts.remediation، app.core.utils.datetime، app.infrastructure.database.models.remediation، app.infrastructure.database.models.server، app.infrastructure.database.session.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime
@@ -33,10 +43,32 @@ from app.infrastructure.database.session import SessionLocal
 
 
 class RemediationRepository:
+    """
+    يمثل RemediationRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(self, session_factory: sessionmaker = SessionLocal) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def create_plan(self, data: CreateRemediationPlanDTO) -> RemediationPlanModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_plan؛ المدخلات المهمة: data.
+        تعيد RemediationPlanModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         fingerprint = data.plan_fingerprint or remediation_fingerprint(
             plan_id=data.plan_id,
             version=data.plan_version,
@@ -71,12 +103,26 @@ class RemediationRepository:
             return model
 
     def get_plan(self, plan_id: str) -> RemediationPlanModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_plan؛ المدخلات المهمة: plan_id.
+        تعيد RemediationPlanModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(select(RemediationPlanModel).where(RemediationPlanModel.plan_id == plan_id))
 
     def create_no_solution_plan(self, *, plan_id: str, investigation_id: str, title: str,
                                 problem_summary: str, diagnosis_claim_ids: list[str],
                                 evidence_ids: list[str], server_id: int | None = None) -> RemediationPlanModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_no_solution_plan؛ المدخلات المهمة: plan_id، investigation_id، title، problem_summary، diagnosis_claim_ids، evidence_ids.
+        تعيد RemediationPlanModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationPlanModel(
             plan_id=plan_id,
             investigation_id=investigation_id,
@@ -102,6 +148,13 @@ class RemediationRepository:
             return model
 
     def list_plans(self, *, limit: int = 100, status: str | None = None) -> list[RemediationPlanModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_plans؛ المدخلات المهمة: limit، status.
+        تعيد list[RemediationPlanModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(RemediationPlanModel).order_by(RemediationPlanModel.created_at.desc()).limit(limit)
             if status:
@@ -109,6 +162,13 @@ class RemediationRepository:
             return list(session.scalars(statement).all())
 
     def create_sandbox_result(self, data: CreateSandboxResultDTO) -> RemediationSandboxResultModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_sandbox_result؛ المدخلات المهمة: data.
+        تعيد RemediationSandboxResultModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationSandboxResultModel(
             result_id=data.result_id,
             plan_id=data.plan_id,
@@ -135,10 +195,24 @@ class RemediationRepository:
             return model
 
     def get_sandbox_result(self, result_id: str) -> RemediationSandboxResultModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_sandbox_result؛ المدخلات المهمة: result_id.
+        تعيد RemediationSandboxResultModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(select(RemediationSandboxResultModel).where(RemediationSandboxResultModel.result_id == result_id))
 
     def get_latest_sandbox_result_for_plan(self, plan_id: str) -> RemediationSandboxResultModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_latest_sandbox_result_for_plan؛ المدخلات المهمة: plan_id.
+        تعيد RemediationSandboxResultModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(
                 select(RemediationSandboxResultModel)
@@ -147,6 +221,13 @@ class RemediationRepository:
             )
 
     def create_sandbox_validation(self, **data) -> SandboxValidationModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_sandbox_validation؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد SandboxValidationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = SandboxValidationModel(**data)
         with self._session_factory() as session:
             session.add(model)
@@ -255,6 +336,13 @@ class RemediationRepository:
         return None
 
     def get_sandbox_validation(self, validation_id: str) -> SandboxValidationModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_sandbox_validation؛ المدخلات المهمة: validation_id.
+        تعيد SandboxValidationModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         try:
             with self._session_factory() as session:
                 return session.scalar(select(SandboxValidationModel).where(
@@ -264,6 +352,13 @@ class RemediationRepository:
             return None
 
     def get_latest_sandbox_validation(self, plan_id: str) -> SandboxValidationModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_latest_sandbox_validation؛ المدخلات المهمة: plan_id.
+        تعيد SandboxValidationModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         try:
             with self._session_factory() as session:
                 return session.scalar(
@@ -275,6 +370,13 @@ class RemediationRepository:
             return None
 
     def list_sandbox_validations(self, plan_id: str) -> list[SandboxValidationModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_sandbox_validations؛ المدخلات المهمة: plan_id.
+        تعيد list[SandboxValidationModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return list(session.scalars(
                 select(SandboxValidationModel)
@@ -283,6 +385,13 @@ class RemediationRepository:
             ).all())
 
     def update_sandbox_validation(self, validation_id: str, **updates) -> SandboxValidationModel:
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_sandbox_validation؛ المدخلات المهمة: validation_id.
+        تعيد SandboxValidationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(SandboxValidationModel).where(
                 SandboxValidationModel.validation_id == validation_id
@@ -300,6 +409,13 @@ class RemediationRepository:
     def update_plan_status(self, plan_id: str, status: str, *, approved_by: str | None = None,
                            denial_reason: str | None = None, approval_requested: bool = False,
                            **updates) -> RemediationPlanModel:
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_plan_status؛ المدخلات المهمة: plan_id، status، approved_by، denial_reason، approval_requested.
+        تعيد RemediationPlanModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             plan = session.scalar(select(RemediationPlanModel).where(RemediationPlanModel.plan_id == plan_id))
             if plan is None:
@@ -322,6 +438,13 @@ class RemediationRepository:
 
     def create_approval(self, *, plan_id: str, plan_fingerprint: str, expires_at: datetime | None = None,
                         scope: dict | None = None) -> RemediationApprovalModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_approval؛ المدخلات المهمة: plan_id، plan_fingerprint، expires_at، scope.
+        تعيد RemediationApprovalModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationApprovalModel(
             approval_id=str(uuid4()),
             plan_id=plan_id,
@@ -347,6 +470,13 @@ class RemediationRepository:
             return model
 
     def get_approval(self, approval_id: str | None = None, *, plan_id: str | None = None) -> RemediationApprovalModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_approval؛ المدخلات المهمة: approval_id، plan_id.
+        تعيد RemediationApprovalModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             if approval_id:
                 return session.scalar(select(RemediationApprovalModel).where(RemediationApprovalModel.approval_id == approval_id))
@@ -359,6 +489,13 @@ class RemediationRepository:
             raise ValueError("approval_id or plan_id is required.")
 
     def get_latest_execution_for_plan(self, plan_id: str) -> RemediationExecutionModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_latest_execution_for_plan؛ المدخلات المهمة: plan_id.
+        تعيد RemediationExecutionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(
                 select(RemediationExecutionModel)
@@ -368,6 +505,13 @@ class RemediationRepository:
 
     def decide_approval(self, approval_id: str, *, status: str, approver: str, comment: str | None = None,
                         scope: dict | None = None) -> RemediationApprovalModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى decide_approval؛ المدخلات المهمة: approval_id، status، approver، comment، scope.
+        تعيد RemediationApprovalModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if status not in {ApprovalStatus.APPROVED.value, ApprovalStatus.REJECTED.value, ApprovalStatus.CANCELLED.value}:
             raise ValueError("Invalid approval decision.")
         with self._session_factory() as session:
@@ -399,6 +543,13 @@ class RemediationRepository:
             return approval
 
     def sandbox_evidence_belongs(self, *, validation) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى sandbox_evidence_belongs؛ المدخلات المهمة: validation.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if validation is None:
             return False
         expected = set(validation.before_evidence_ids or ()) | set(validation.after_evidence_ids or ())
@@ -413,6 +564,13 @@ class RemediationRepository:
             return {row.evidence_id for row in rows} == expected
 
     def expire_approval(self, approval_id: str) -> RemediationApprovalModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى expire_approval؛ المدخلات المهمة: approval_id.
+        تعيد RemediationApprovalModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             approval = session.scalar(select(RemediationApprovalModel).where(RemediationApprovalModel.approval_id == approval_id))
             if approval is None:
@@ -432,6 +590,13 @@ class RemediationRepository:
             return approval
 
     def create_execution(self, **data) -> RemediationExecutionModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_execution؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد RemediationExecutionModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationExecutionModel(**data)
         with self._session_factory() as session:
             existing = session.scalar(select(RemediationExecutionModel).where(RemediationExecutionModel.idempotency_key == model.idempotency_key))
@@ -450,6 +615,13 @@ class RemediationRepository:
             return model
 
     def get_execution(self, execution_id: str | None = None, *, idempotency_key: str | None = None) -> RemediationExecutionModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_execution؛ المدخلات المهمة: execution_id، idempotency_key.
+        تعيد RemediationExecutionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             if execution_id:
                 return session.scalar(select(RemediationExecutionModel).where(RemediationExecutionModel.execution_id == execution_id))
@@ -458,6 +630,13 @@ class RemediationRepository:
             raise ValueError("execution_id or idempotency_key is required.")
 
     def create_evidence(self, **data) -> RemediationEvidenceModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_evidence؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد RemediationEvidenceModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationEvidenceModel(**data)
         with self._session_factory() as session:
             session.add(model)
@@ -466,6 +645,13 @@ class RemediationRepository:
             return model
 
     def get_evidence(self, evidence_id: str) -> RemediationEvidenceModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_evidence؛ المدخلات المهمة: evidence_id.
+        تعيد RemediationEvidenceModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(
                 select(RemediationEvidenceModel).where(
@@ -474,6 +660,13 @@ class RemediationRepository:
             )
 
     def list_evidence(self, *, plan_id: str, execution_id: str | None = None) -> list[RemediationEvidenceModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_evidence؛ المدخلات المهمة: plan_id، execution_id.
+        تعيد list[RemediationEvidenceModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(RemediationEvidenceModel).where(
                 RemediationEvidenceModel.plan_id == plan_id
@@ -483,6 +676,13 @@ class RemediationRepository:
             return list(session.scalars(statement).all())
 
     def update_execution(self, execution_id: str, **updates) -> RemediationExecutionModel:
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_execution؛ المدخلات المهمة: execution_id.
+        تعيد RemediationExecutionModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(RemediationExecutionModel).where(RemediationExecutionModel.execution_id == execution_id))
             if model is None:
@@ -520,6 +720,13 @@ class RemediationRepository:
             return len(models)
 
     def create_verification(self, **data) -> RemediationVerificationModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_verification؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد RemediationVerificationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationVerificationModel(**data)
         with self._session_factory() as session:
             session.add(model)
@@ -528,6 +735,13 @@ class RemediationRepository:
             return model
 
     def create_rollback(self, **data) -> RemediationRollbackModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_rollback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد RemediationRollbackModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationRollbackModel(**data)
         with self._session_factory() as session:
             session.add(model)
@@ -536,6 +750,13 @@ class RemediationRepository:
             return model
 
     def get_rollback(self, rollback_id: str) -> RemediationRollbackModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_rollback؛ المدخلات المهمة: rollback_id.
+        تعيد RemediationRollbackModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(
                 select(RemediationRollbackModel).where(
@@ -546,6 +767,13 @@ class RemediationRepository:
     def append_audit_event(self, *, plan_id: str, event_type: str, actor: str | None = None,
                            server_id: int | None = None, runtime_session_id: str | None = None,
                            agent_job_id: str | None = None, payload: dict | None = None) -> RemediationAuditEventModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى append_audit_event؛ المدخلات المهمة: plan_id، event_type، actor، server_id، runtime_session_id، agent_job_id.
+        تعيد RemediationAuditEventModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = RemediationAuditEventModel(
             event_id=str(uuid4()), plan_id=plan_id, event_type=event_type, actor=actor,
             server_id=server_id, runtime_session_id=runtime_session_id, agent_job_id=agent_job_id,
@@ -558,6 +786,13 @@ class RemediationRepository:
             return model
 
     def list_audit_events(self, plan_id: str) -> list[RemediationAuditEventModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_audit_events؛ المدخلات المهمة: plan_id.
+        تعيد list[RemediationAuditEventModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return list(session.scalars(
                 select(RemediationAuditEventModel)
@@ -568,6 +803,13 @@ class RemediationRepository:
     def list_all_audit_events(
         self, *, plan_id: str | None = None, event_type: str | None = None, limit: int = 100
     ) -> list[RemediationAuditEventModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_all_audit_events؛ المدخلات المهمة: plan_id، event_type، limit.
+        تعيد list[RemediationAuditEventModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(RemediationAuditEventModel)

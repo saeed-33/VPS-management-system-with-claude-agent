@@ -1,3 +1,13 @@
+"""
+جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+
+الموقع في المعمارية: Application capability / knowledge.
+يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
+يعتمد مباشرة على: app.infrastructure.database.repositories.knowledge_source_repository.
+الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -11,6 +21,14 @@ from app.infrastructure.database.repositories.knowledge_source_repository import
 
 @dataclass(slots=True, frozen=True)
 class KnowledgeSourceRuntimeDefinition:
+    """
+    يمثل KnowledgeSourceRuntimeDefinition مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     slug: str
     name: str
@@ -29,6 +47,13 @@ class KnowledgeSourceRuntimeDefinition:
         cls,
         model,
     ) -> "KnowledgeSourceRuntimeDefinition":
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى from_model؛ المدخلات المهمة: model.
+        تعيد 'KnowledgeSourceRuntimeDefinition' أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return cls(
             id=model.id,
             slug=model.slug.strip().lower(),
@@ -70,6 +95,14 @@ class KnowledgeSourceRuntimeDefinition:
 
 @dataclass(slots=True, frozen=True)
 class KnowledgeSourceRegistrySnapshot:
+    """
+    يمثل KnowledgeSourceRegistrySnapshot مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     sources: tuple[
         KnowledgeSourceRuntimeDefinition,
         ...
@@ -82,6 +115,13 @@ class KnowledgeSourceRegistrySnapshot:
         KnowledgeSourceRuntimeDefinition,
         ...
     ]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى find_by_domain؛ المدخلات المهمة: domain.
+        تعيد tuple[KnowledgeSourceRuntimeDefinition, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         value = domain.strip().casefold()
 
         if not value:
@@ -100,6 +140,13 @@ class KnowledgeSourceRegistrySnapshot:
         KnowledgeSourceRuntimeDefinition,
         ...
     ]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى find_for_specialist؛ المدخلات المهمة: specialist_slug.
+        تعيد tuple[KnowledgeSourceRuntimeDefinition, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         value = (
             specialist_slug
             .strip()
@@ -118,15 +165,37 @@ class KnowledgeSourceRegistrySnapshot:
 
 
 class KnowledgeSourceRegistry:
+    """
+    يمثل KnowledgeSourceRegistry مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         repository: KnowledgeSourceRepository,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._repository = repository
 
     def snapshot(
         self,
     ) -> KnowledgeSourceRegistrySnapshot:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد KnowledgeSourceRegistrySnapshot أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         sources = tuple(
             sorted(
                 (

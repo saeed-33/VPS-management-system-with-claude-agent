@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.infrastructure.database.models.monitor_command، app.infrastructure.database.models.monitoring_profile، app.infrastructure.database.models.profile_command، app.infrastructure.database.models.server، app.infrastructure.database.session، app.core.contracts.profiles.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from dataclasses import asdict
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
@@ -25,16 +35,38 @@ from app.core.utils.datetime import utc_now
 
 
 class MonitoringProfileRepository:
+    """
+    يمثل MonitoringProfileRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def get_by_id(
         self,
         profile_id: int,
     ) -> MonitoringProfileModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: profile_id.
+        تعيد MonitoringProfileModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.get(
                 MonitoringProfileModel,
@@ -45,6 +77,13 @@ class MonitoringProfileRepository:
         self,
         name: str,
     ) -> MonitoringProfileModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_by_name؛ المدخلات المهمة: name.
+        تعيد MonitoringProfileModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(
                 MonitoringProfileModel
@@ -57,6 +96,13 @@ class MonitoringProfileRepository:
     def list_all(
         self,
     ) -> list[MonitoringProfileModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_all؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد list[MonitoringProfileModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(MonitoringProfileModel)
@@ -73,6 +119,13 @@ class MonitoringProfileRepository:
         self,
         data: CreateMonitoringProfileDTO,
     ) -> MonitoringProfileModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
+        تعيد MonitoringProfileModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = MonitoringProfileModel(
             name=data.name.strip(),
             description=data.description,
@@ -91,6 +144,13 @@ class MonitoringProfileRepository:
         profile_id: int,
         data: UpdateMonitoringProfileDTO,
     ) -> MonitoringProfileModel | None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: profile_id، data.
+        تعيد MonitoringProfileModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.get(
                 MonitoringProfileModel,
@@ -123,6 +183,13 @@ class MonitoringProfileRepository:
         self,
         profile_id: int,
     ) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى delete؛ المدخلات المهمة: profile_id.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.get(
                 MonitoringProfileModel,
@@ -148,6 +215,13 @@ class MonitoringProfileRepository:
             float | None
         ) = None,
     ) -> MonitoringProfileCommandModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى assign_command؛ المدخلات المهمة: profile_id، command_id، execution_order، enabled، custom_timeout_seconds.
+        تعيد MonitoringProfileCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = MonitoringProfileCommandModel(
             profile_id=profile_id,
             command_id=command_id,
@@ -180,6 +254,13 @@ class MonitoringProfileRepository:
         profile_id: int,
         command_id: int,
     ) -> bool:
+        """
+        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى remove_command؛ المدخلات المهمة: profile_id، command_id.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = delete(
                 MonitoringProfileCommandModel
@@ -204,6 +285,13 @@ class MonitoringProfileRepository:
             MonitoringProfileCommandModel,
         ]
     ]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_profile_commands؛ المدخلات المهمة: profile_id.
+        تعيد list[tuple[MonitorCommandModel, MonitoringProfileCommandModel]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(
@@ -232,6 +320,13 @@ class MonitoringProfileRepository:
         self,
         server_id: int,
     ) -> list[MonitoringProfileCommandConfig]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_enabled_commands_for_server؛ المدخلات المهمة: server_id.
+        تعيد list[MonitoringProfileCommandConfig] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(
@@ -307,6 +402,13 @@ class MonitoringProfileRepository:
         server_id: int,
         profile_id: int | None,
     ) -> ServerModel | None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى assign_profile_to_server؛ المدخلات المهمة: server_id، profile_id.
+        تعيد ServerModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             server = session.get(
                 ServerModel,
@@ -344,6 +446,13 @@ class MonitoringProfileRepository:
         custom_timeout_seconds: float | None = None,
         update_custom_timeout: bool = False,
     ) -> MonitoringProfileCommandModel | None:
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_command_assignment؛ المدخلات المهمة: profile_id، command_id، execution_order، enabled، custom_timeout_seconds، update_custom_timeout.
+        تعيد MonitoringProfileCommandModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(
                 MonitoringProfileCommandModel
@@ -382,6 +491,13 @@ class MonitoringProfileRepository:
         self,
         profile_id: int,
     ) -> int:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى count_servers؛ المدخلات المهمة: profile_id.
+        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(
                 func.count(ServerModel.id)

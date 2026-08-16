@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.infrastructure.database.models.agent_job، app.infrastructure.database.session، app.core.contracts.agent_jobs.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -19,22 +29,51 @@ _MAX_ERROR_MESSAGE_LENGTH = 2000
 
 
 def _bounded_error_message(value: str | None) -> str | None:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+    تُستدعى عندما يصل workflow إلى _bounded_error_message؛ المدخلات المهمة: value.
+    تعيد str | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if value is None:
         return None
     return value[:_MAX_ERROR_MESSAGE_LENGTH]
 
 
 class AgentJobRepository:
+    """
+    يمثل AgentJobRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def create(
         self,
         data: CreateAgentJobDTO,
     ) -> AgentJobModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
+        تعيد AgentJobModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = AgentJobModel(
             job_id=data.job_id,
             job_type=data.job_type,
@@ -63,6 +102,13 @@ class AgentJobRepository:
         job_id: str,
         data: UpdateAgentJobDTO,
     ) -> AgentJobModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: job_id، data.
+        تعيد AgentJobModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(
                 select(AgentJobModel).where(
@@ -113,6 +159,13 @@ class AgentJobRepository:
         self,
         job_id: str,
     ) -> AgentJobModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_by_job_id؛ المدخلات المهمة: job_id.
+        تعيد AgentJobModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(
                 select(AgentJobModel).where(
@@ -127,6 +180,13 @@ class AgentJobRepository:
         server_id: int | None = None,
         status: str | None = None,
     ) -> list[AgentJobModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_recent؛ المدخلات المهمة: limit، server_id، status.
+        تعيد list[AgentJobModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if limit < 1:
             raise ValueError(
                 "limit must be >= 1."
@@ -167,6 +227,13 @@ class AgentJobRepository:
         error_code: str,
         error_message: str,
     ) -> int:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى mark_unfinished_after_restart؛ المدخلات المهمة: statuses، failed_status، error_code، error_message.
+        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         updated = 0
 
         with self._session_factory() as session:

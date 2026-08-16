@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: app.core.contracts.investigation_read_models.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,6 +23,12 @@ from app.core.contracts.investigation_read_models import (
 
 @dataclass(slots=True, frozen=True)
 class PersistedRuntimeEvaluation:
+    """
+    يمثل PersistedRuntimeEvaluation جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     investigation_id: str
     observations: tuple[
         EvaluationObservation,
@@ -33,6 +49,12 @@ class PersistedRuntimeEvaluator:
         self,
         investigation: InvestigationDetailReadModel,
     ) -> PersistedRuntimeEvaluation:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى evaluate؛ المدخلات المهمة: investigation.
+        تعيد PersistedRuntimeEvaluation أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if not investigation.runtime_available:
             return PersistedRuntimeEvaluation(
                 investigation_id=(
@@ -80,6 +102,12 @@ class PersistedRuntimeEvaluator:
         self,
         investigation,
     ) -> EvaluationObservation:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى _specialist_completion؛ المدخلات المهمة: investigation.
+        تعيد EvaluationObservation أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         runtime = investigation.runtime
         assert runtime is not None
 
@@ -127,6 +155,12 @@ class PersistedRuntimeEvaluator:
         self,
         investigation,
     ) -> EvaluationObservation:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى _evidence_grounding؛ المدخلات المهمة: investigation.
+        تعيد EvaluationObservation أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         runtime = investigation.runtime
         assert runtime is not None
 
@@ -144,6 +178,12 @@ class PersistedRuntimeEvaluator:
             source: str,
             payload: dict,
         ) -> None:
+            """
+            ينفذ مرحلة الأداة أو يحفظ نتيجة التقييم ضمن طبقة Acceptance tooling.
+
+            تُستدعى عندما يصل المسار إلى collect_references؛ المدخلات المهمة: source، payload.
+            تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+            """
             values = payload.get("evidence_ids")
 
             if values is None:
@@ -331,6 +371,12 @@ class PersistedRuntimeEvaluator:
         self,
         investigation,
     ) -> EvaluationObservation:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى _budget_compliance؛ المدخلات المهمة: investigation.
+        تعيد EvaluationObservation أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         runtime = investigation.runtime
         assert runtime is not None
 
@@ -382,6 +428,12 @@ class PersistedRuntimeEvaluator:
         self,
         investigation,
     ) -> EvaluationObservation:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى _conflict_preservation؛ المدخلات المهمة: investigation.
+        تعيد EvaluationObservation أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         runtime = investigation.runtime
         assert runtime is not None
 
@@ -498,6 +550,12 @@ class PersistedRuntimeEvaluator:
         self,
         investigation,
     ) -> EvaluationObservation:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى _final_diagnosis_grounding؛ المدخلات المهمة: investigation.
+        تعيد EvaluationObservation أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         runtime = investigation.runtime
         assert runtime is not None
 

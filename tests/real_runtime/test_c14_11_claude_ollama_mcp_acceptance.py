@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.servers.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -34,6 +44,12 @@ _WINDOWS_ABSOLUTE_PATH = re.compile(
 
 
 def _resolve_acceptance_runtime_path(value: str) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _resolve_acceptance_runtime_path؛ المدخلات المهمة: value.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     raw = str(value).strip()
     direct = Path(raw)
     if direct.is_file():
@@ -57,9 +73,21 @@ class _AcceptanceServerRepository:
     """Add only WSL path normalization around the real repository."""
 
     def __init__(self, delegate):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: delegate.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self._delegate = delegate
 
     def get_by_id(self, server_id):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_by_id؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         server = self._delegate.get_by_id(server_id)
         if server is not None and server.private_key_path:
             server.private_key_path = _resolve_acceptance_runtime_path(
@@ -68,10 +96,22 @@ class _AcceptanceServerRepository:
         return server
 
     def __getattr__(self, name):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __getattr__؛ المدخلات المهمة: name.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return getattr(self._delegate, name)
 
 
 def _install_acceptance_ssh_path_normalization(container) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _install_acceptance_ssh_path_normalization؛ المدخلات المهمة: container.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     repository = _AcceptanceServerRepository(
         container.server_repository
     )
@@ -85,6 +125,12 @@ def _normalize_persisted_server_key_path(
     *,
     server_id: int,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _normalize_persisted_server_key_path؛ المدخلات المهمة: repository، server_id.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     server = repository.get_by_id(server_id)
     if server is None or not server.private_key_path:
         return lambda: None
@@ -100,6 +146,12 @@ def _normalize_persisted_server_key_path(
     )
 
     def restore() -> None:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى restore؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         repository.update(
             server_id,
             UpdateServerDTO(private_key_path=original),
@@ -113,6 +165,12 @@ def _restore_operational_database_env(
     *,
     env_path: Path | None = None,
 ) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _restore_operational_database_env؛ المدخلات المهمة: env_path.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     # Real-runtime acceptance must use the application's operational DB.
     # Explicit process values are authoritative. The project .env is only a
     # fallback for values absent from the process environment. This function
@@ -163,6 +221,12 @@ def _restore_operational_database_env(
         os.environ[key] = str(values[key])
 
 def _server_id() -> int:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _server_id؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     raw = os.getenv(
         "AI_VPS_REAL_RUNTIME_SERVER_ID",
         "",
@@ -192,6 +256,12 @@ def _server_id() -> int:
 def test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence(
     request: pytest.FixtureRequest,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_11_real_claude_ollama_mcp_cycle_persists_evidence؛ المدخلات المهمة: request.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     # Imports are intentionally inside the opt-in test so the normal
     # unit-test suite does not bootstrap the operational runtime.
     _restore_operational_database_env()

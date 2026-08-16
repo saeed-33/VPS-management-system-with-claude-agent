@@ -1,3 +1,13 @@
+"""
+نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
+
+الموقع في المعمارية: Persistence model.
+يُستدعى بواسطة: repositories وطبقة database.
+يعتمد مباشرة على: app.infrastructure.database.base، app.core.utils.datetime.
+الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime
@@ -18,6 +28,14 @@ from app.core.utils.datetime import utc_now
 
 
 class RemediationPlanModel(Base):
+    """
+    يمثل RemediationPlanModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_plans"
     __table_args__ = (
         Index(
@@ -178,6 +196,14 @@ class RemediationPlanModel(Base):
 
 
 class RemediationSandboxResultModel(Base):
+    """
+    يمثل RemediationSandboxResultModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_sandbox_results"
     __table_args__ = (
         Index(
@@ -239,6 +265,14 @@ class RemediationSandboxResultModel(Base):
 
 
 class RemediationApprovalModel(Base):
+    """
+    يمثل RemediationApprovalModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_approvals"
     __table_args__ = (
         Index("ix_remediation_approvals_plan_created", "plan_id", "created_at"),
@@ -259,6 +293,14 @@ class RemediationApprovalModel(Base):
 
 
 class RemediationExecutionModel(Base):
+    """
+    يمثل RemediationExecutionModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_executions"
     __table_args__ = (
         Index("ix_remediation_executions_plan_created", "plan_id", "created_at"),
@@ -288,6 +330,14 @@ class RemediationExecutionModel(Base):
 
 
 class RemediationEvidenceModel(Base):
+    """
+    يمثل RemediationEvidenceModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_evidence"
     __table_args__ = (
         Index("ix_remediation_evidence_plan_created", "plan_id", "created_at"),
@@ -308,6 +358,14 @@ class RemediationEvidenceModel(Base):
 
 
 class SandboxValidationModel(Base):
+    """
+    يمثل SandboxValidationModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "sandbox_validations"
     __table_args__ = (
         Index("ix_sandbox_validations_plan_created", "plan_id", "created_at"),
@@ -338,6 +396,14 @@ class SandboxValidationModel(Base):
 
 
 class RemediationVerificationModel(Base):
+    """
+    يمثل RemediationVerificationModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_verifications"
     id: Mapped[int] = mapped_column(primary_key=True)
     verification_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
@@ -350,6 +416,14 @@ class RemediationVerificationModel(Base):
 
 
 class RemediationRollbackModel(Base):
+    """
+    يمثل RemediationRollbackModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_rollbacks"
     id: Mapped[int] = mapped_column(primary_key=True)
     rollback_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
@@ -362,6 +436,14 @@ class RemediationRollbackModel(Base):
 
 
 class RemediationAuditEventModel(Base):
+    """
+    يمثل RemediationAuditEventModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "remediation_audit_events"
     __table_args__ = (
         Index("ix_remediation_audit_plan_created", "plan_id", "created_at"),
@@ -381,6 +463,14 @@ class RemediationAuditEventModel(Base):
 
 
 class AutonomousRemediationPolicyModel(Base):
+    """
+    يمثل AutonomousRemediationPolicyModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "autonomous_remediation_policies"
     __table_args__ = (
         Index("ix_autonomous_policies_match", "issue_fingerprint", "allowed_action_type", "status"),
@@ -419,6 +509,14 @@ class AutonomousRemediationPolicyModel(Base):
 
 
 class AutonomousPolicyDecisionModel(Base):
+    """
+    يمثل AutonomousPolicyDecisionModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "autonomous_policy_decisions"
     __table_args__ = (
         Index("ix_autonomous_decisions_plan_created", "plan_id", "created_at"),
@@ -445,6 +543,14 @@ class AutonomousPolicyDecisionModel(Base):
 
 
 class AutonomousAuthorizationModel(Base):
+    """
+    يمثل AutonomousAuthorizationModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "autonomous_authorizations"
     __table_args__ = (
         Index("ix_autonomous_authorizations_plan", "plan_id", "status"),
@@ -470,6 +576,14 @@ class AutonomousAuthorizationModel(Base):
 
 
 class AutonomousPolicyExecutionReservationModel(Base):
+    """
+    يمثل AutonomousPolicyExecutionReservationModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "autonomous_policy_execution_reservations"
     __table_args__ = (
         Index("ix_autonomous_reservations_plan", "plan_id", "created_at"),
@@ -495,6 +609,14 @@ class AutonomousPolicyExecutionReservationModel(Base):
 
 
 class AutonomousPolicyRuntimeStateModel(Base):
+    """
+    يمثل AutonomousPolicyRuntimeStateModel مسؤولية محددة داخل طبقة Persistence model.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
+    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     __tablename__ = "autonomous_policy_runtime_state"
 
     id: Mapped[int] = mapped_column(primary_key=True)

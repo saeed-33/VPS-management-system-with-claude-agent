@@ -1,3 +1,13 @@
+"""
+جزء من Analysis لتحويل report إلى analysis مع Retrieval وLLM.
+
+الموقع في المعمارية: Application capability / analysis.
+يُستدعى بواسطة: MCP أو مسارات ما بعد Monitoring.
+يعتمد مباشرة على: app.capabilities.analysis.report_analyzer، app.capabilities.analysis.retrieval.report_fingerprint، app.capabilities.analysis.retrieval.report_normalizer، app.capabilities.analysis.retrieval.retrieval_indexer، app.capabilities.analysis.retrieval.context_builder، app.capabilities.analysis.retrieval.rag_retriever.
+الحد المعماري: لا ينفذ SSH أو Investigation أو Remediation.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import logging
 from time import perf_counter
 
@@ -66,6 +76,13 @@ class AnalysisOrchestrator:
         rag_assisted_enabled: bool = True,
         analysis_reuse_policy: AnalysisReusePolicy | None = None,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / analysis.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: report_query_service، analysis_repository، report_analyzer، exact_reuse_enabled، retrieval_indexer، rag_retriever.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._report_query_service = (
             report_query_service
         )
@@ -106,6 +123,13 @@ class AnalysisOrchestrator:
         server_id: int,
         force: bool = False,
     ) -> int:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / analysis.
+
+        تُستدعى عندما يصل workflow إلى process؛ المدخلات المهمة: report_id، server_id، force.
+        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         start_profile(report_id)
         set_counter("server_id", server_id)
         set_counter("force", force)
@@ -114,6 +138,8 @@ class AnalysisOrchestrator:
         report = self._report_query_service.get_report(
             report_id
         )
+        # report_id هو نقطة الربط بين Monitoring وبين Analysis/RAG؛ كل
+        # normalization وfingerprint لاحق مبني على report المحفوظ الأصلي.
         record_timing(
             "report_fetch_ms",
             (perf_counter() - report_fetch_started) * 1000,
@@ -141,6 +167,8 @@ class AnalysisOrchestrator:
             self._exact_reuse_enabled
             and not force
         ):
+            # exact reuse يسبق Retrieval وLLM لأن fingerprint المطابق يعطي
+            # نتيجة قابلة للتتبع بأقل تكلفة ومن دون reasoning جديد.
             exact_lookup_started = perf_counter()
             reusable_analysis = (
                 self._analysis_repository
@@ -330,6 +358,8 @@ class AnalysisOrchestrator:
 
                 return reused.id
 
+        # من هنا يبدأ Retrieval ببناء context؛ reasoning الفعلي يبقى داخل
+        # ReportAnalyzer ولا يتحول استرجاع المصادر إلى تشخيص بحد ذاته.
         retrieved_contexts = []
         rag_prompt_context = []
 

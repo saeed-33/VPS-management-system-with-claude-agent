@@ -1,3 +1,4 @@
+{# قالب Admin Web لصفحة autonomous runtime. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
 {% extends "base.html" %}
 {% block title %}Autonomous Runtime{% endblock %}
 {% block content %}<header class="page-header"><div><h1 class="page-heading">Autonomous Runtime</h1><p class="page-description">Per-policy runtime state, suspension state, and circuit-breaker status. Resume starts a new operator-approved epoch.</p></div></header><section class="panel"><header class="panel-header"><h2 class="panel-title">Policy runtime</h2><button id="runtime-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div id="runtime-list" class="panel-body"><div class="empty-state"><h3>Loading runtime...</h3></div></div></section>{% endblock %}

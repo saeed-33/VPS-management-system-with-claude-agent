@@ -1,3 +1,4 @@
+{# قالب Admin Web لصفحة autonomous authorizations. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
 {% extends "base.html" %}
 {% block title %}Autonomous Authorizations{% endblock %}
 {% block content %}<header class="page-header"><div><h1 class="page-heading">Autonomous Authorizations</h1><p class="page-description">Read-only authorization visibility. Secrets and tokens are intentionally omitted.</p></div></header><section class="panel"><header class="panel-header"><h2 class="panel-title">Authorization records</h2><button id="authorization-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div id="authorization-list" class="panel-body"><div class="empty-state"><h3>Loading authorizations...</h3></div></div></section>{% endblock %}

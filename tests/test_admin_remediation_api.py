@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.remediation.service، app.infrastructure.database.base، app.infrastructure.database.models.admin_auth، app.infrastructure.database.models.remediation، app.infrastructure.database.repositories.remediation_repository، app.interfaces.admin.api.remediation.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import json
@@ -32,6 +42,12 @@ from app.interfaces.admin.web import auth_router
 
 @pytest.fixture()
 def remediation_api_app():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى remediation_api_app؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -93,6 +109,12 @@ def remediation_api_app():
 
 
 def _login(client: TestClient, service: AdminAuthService, username: str) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _login؛ المدخلات المهمة: client، service، username.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     response = client.post(
         "/login",
         data={
@@ -109,6 +131,12 @@ def _login(client: TestClient, service: AdminAuthService, username: str) -> None
 def test_remediation_list_is_finite_json_and_preserves_frontend_shape(
     remediation_api_app, username
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_remediation_list_is_finite_json_and_preserves_frontend_shape؛ المدخلات المهمة: remediation_api_app، username.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, service = remediation_api_app
     client = TestClient(app)
     _login(client, service, username)
@@ -132,6 +160,12 @@ def test_remediation_list_is_finite_json_and_preserves_frontend_shape(
 
 
 def test_remediation_detail_and_missing_record_are_safe_json(remediation_api_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_remediation_detail_and_missing_record_are_safe_json؛ المدخلات المهمة: remediation_api_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, service = remediation_api_app
     client = TestClient(app)
     _login(client, service, "operator")

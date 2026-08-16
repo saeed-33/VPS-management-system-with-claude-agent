@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.runtime.claude.native_monitoring.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from app.runtime.claude.native_monitoring import (
@@ -7,6 +17,12 @@ from app.runtime.claude.native_monitoring import (
 
 
 def test_c14_11_runtime_allows_mandatory_operational_tools():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_11_runtime_allows_mandatory_operational_tools؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     allowed = set(
         SERVER_SUPERVISOR_ALLOWED_TOOLS
     )
@@ -22,6 +38,12 @@ def test_c14_11_runtime_allows_mandatory_operational_tools():
 
 
 def test_c14_11_native_prompt_requires_real_mcp_execution():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_11_native_prompt_requires_real_mcp_execution؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     prompt = ClaudeNativeMonitoringRunner._prompt(
         server_id=2,
         job_id="acceptance-job",

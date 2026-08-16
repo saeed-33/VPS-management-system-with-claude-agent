@@ -40,6 +40,12 @@ CUSTOM_DIAGRAMS = {
 
 
 def font(size: int):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى font؛ المدخلات المهمة: size.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     candidates = [
         Path("C:/Windows/Fonts/arial.ttf"),
         Path("C:/Windows/Fonts/DejaVuSans.ttf"),
@@ -51,6 +57,12 @@ def font(size: int):
 
 
 def render(name: str, labels: list[str]) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى render؛ المدخلات المهمة: name، labels.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     image = Image.new("RGB", (W, H), "#F7F9FC")
     draw = ImageDraw.Draw(image)
     title = name.replace("-", " ").title()
@@ -87,12 +99,24 @@ def render(name: str, labels: list[str]) -> None:
 
 
 def save_custom(name: str, image: Image.Image) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى save_custom؛ المدخلات المهمة: name، image.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     for directory in (ARCHIVE_DIR, REPORT_DIR):
         directory.mkdir(parents=True, exist_ok=True)
         image.save(directory / f"{name}.png", dpi=(220, 220))
 
 
 def draw_box(draw: ImageDraw.ImageDraw, xy, label: str, *, fill="#E8EEF5", outline="#2E74B5", size=26):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى draw_box؛ المدخلات المهمة: draw، xy، label، fill، outline، size.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     draw.rounded_rectangle(xy, radius=18, fill=fill, outline=outline, width=4)
     x1, y1, x2, y2 = xy
     bbox = draw.textbbox((0, 0), label, font=font(size))
@@ -100,6 +124,12 @@ def draw_box(draw: ImageDraw.ImageDraw, xy, label: str, *, fill="#E8EEF5", outli
 
 
 def draw_arrow(draw: ImageDraw.ImageDraw, start, end, label: str = ""):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى draw_arrow؛ المدخلات المهمة: draw، start، end، label.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     draw.line((*start, *end), fill="#7A5A00", width=4)
     dx = end[0] - start[0]
     dy = end[1] - start[1]
@@ -115,6 +145,12 @@ def draw_arrow(draw: ImageDraw.ImageDraw, start, end, label: str = ""):
 
 
 def render_use_case() -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى render_use_case؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     image = Image.new("RGB", (W, H), "#F7F9FC")
     draw = ImageDraw.Draw(image)
     draw.text((80, 45), "Use Case Diagram", fill="#0B2545", font=font(42))
@@ -135,6 +171,12 @@ def render_use_case() -> None:
 
 
 def render_sequence() -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى render_sequence؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     image = Image.new("RGB", (W, H), "#F7F9FC")
     draw = ImageDraw.Draw(image)
     draw.text((80, 45), "Monitoring and Analysis Sequence", fill="#0B2545", font=font(42))
@@ -149,6 +191,12 @@ def render_sequence() -> None:
 
 
 def render_activity() -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى render_activity؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     image = Image.new("RGB", (W, H), "#F7F9FC")
     draw = ImageDraw.Draw(image)
     draw.text((80, 45), "Supervised Remediation Activity", fill="#0B2545", font=font(42))
@@ -217,6 +265,12 @@ def render_ui_wireframe(name: str, title: str, nav: list[str], cards: list[str])
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     for name, labels in DIAGRAMS.items():
         render(name, labels)
     render_use_case()

@@ -1,3 +1,13 @@
+"""
+Policy أو registry حتمي يقرر السماح أو الرفض أو التصنيف قبل التنفيذ.
+
+الموقع في المعمارية: Core policy.
+يُستدعى بواسطة: capabilities وMCP handlers.
+يعتمد مباشرة على: app.core.contracts.remediation.
+الحد المعماري: لا تنفذ SSH أو LLM أو persistence.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,6 +23,14 @@ from app.core.contracts.remediation import (
 
 @dataclass(frozen=True, slots=True)
 class RemediationPolicyEngine:
+    """
+    يمثل RemediationPolicyEngine مسؤولية محددة داخل طبقة Core policy.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     automatic_remediation_allowed: bool = False
 
     def evaluate_execution(
@@ -23,6 +41,13 @@ class RemediationPolicyEngine:
         requested_server_id: int | None,
         now: datetime,
     ) -> PolicyResult:
+        """
+        يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى evaluate_execution؛ المدخلات المهمة: plan، approval، requested_server_id، now.
+        تعيد PolicyResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         reasons: list[str] = []
         if requested_server_id is None or plan.server_id is None or requested_server_id != plan.server_id:
             reasons.append("wrong_or_missing_server")
@@ -55,6 +80,13 @@ class RemediationPolicyEngine:
         return PolicyResult(PolicyDecision.ALLOW, ())
 
     def evaluate_action(self, *, registered: bool, rollback_supported: bool, verification_available: bool) -> PolicyResult:
+        """
+        يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى evaluate_action؛ المدخلات المهمة: registered، rollback_supported، verification_available.
+        تعيد PolicyResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         reasons: list[str] = []
         if not registered:
             reasons.append("unknown_write_tool")

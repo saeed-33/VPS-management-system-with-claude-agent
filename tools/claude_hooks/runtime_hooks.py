@@ -1,3 +1,13 @@
+"""
+Hook يربط lifecycle الخاص بـClaude Runtime بسجلات أو سياسات المشروع.
+
+الموقع في المعمارية: Claude runtime tooling.
+يُستدعى بواسطة: Claude Code hooks.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يستبدل MCP أو application policy.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 #!/usr/bin/env python3
 from __future__ import annotations
 
@@ -40,6 +50,12 @@ REQUIRED_FILES = (
 
 
 def _read_input() -> dict[str, Any]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _read_input؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد dict[str, Any] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     raw = sys.stdin.read()
     if not raw.strip():
         return {}
@@ -51,6 +67,12 @@ def _read_input() -> dict[str, Any]:
 
 
 def _project_root(payload: dict[str, Any]) -> Path:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _project_root؛ المدخلات المهمة: payload.
+    تعيد Path أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     configured = os.environ.get("CLAUDE_PROJECT_DIR")
     if configured:
         return Path(configured).resolve()
@@ -63,12 +85,24 @@ def _project_root(payload: dict[str, Any]) -> Path:
 
 
 def _safe_slug(value: object, fallback: str) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _safe_slug؛ المدخلات المهمة: value، fallback.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     text = str(value or fallback)
     text = re.sub(r"[^A-Za-z0-9._-]+", "-", text).strip("-._")
     return (text or fallback)[:120]
 
 
 def _audit_dir(root: Path) -> Path:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _audit_dir؛ المدخلات المهمة: root.
+    تعيد Path أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     override = os.environ.get("AI_VPS_RUNTIME_HOOK_AUDIT_DIR")
     if override:
         return Path(override).resolve()
@@ -76,6 +110,12 @@ def _audit_dir(root: Path) -> Path:
 
 
 def _audit(payload: dict[str, Any], event: str) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _audit؛ المدخلات المهمة: payload، event.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     root = _project_root(payload)
     target_root = _audit_dir(root)
 
@@ -124,6 +164,12 @@ def _audit(payload: dict[str, Any], event: str) -> None:
 
 
 def _is_main_runtime(payload: dict[str, Any]) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _is_main_runtime؛ المدخلات المهمة: payload.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if payload.get("agent_type") == RUNTIME_MAIN_AGENT:
         return True
 
@@ -137,10 +183,22 @@ def _is_main_runtime(payload: dict[str, Any]) -> bool:
 
 
 def _is_worker(payload: dict[str, Any]) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _is_worker؛ المدخلات المهمة: payload.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return payload.get("agent_type") == RUNTIME_WORKER_AGENT
 
 
 def _load_json(path: Path) -> dict[str, Any]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _load_json؛ المدخلات المهمة: path.
+    تعيد dict[str, Any] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise ValueError(f"{path} must contain a JSON object.")
@@ -186,6 +244,12 @@ def _valid_project_mcp_command(server: dict[str, Any]) -> bool:
 
 
 def _preflight_errors(payload: dict[str, Any]) -> list[str]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _preflight_errors؛ المدخلات المهمة: payload.
+    تعيد list[str] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     root = _project_root(payload)
     errors: list[str] = []
 
@@ -295,6 +359,12 @@ def _preflight_errors(payload: dict[str, Any]) -> list[str]:
 
 
 def _session_start(payload: dict[str, Any]) -> dict[str, Any] | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _session_start؛ المدخلات المهمة: payload.
+    تعيد dict[str, Any] | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if not _is_main_runtime(payload):
         return None
 
@@ -318,6 +388,12 @@ def _session_start(payload: dict[str, Any]) -> dict[str, Any] | None:
 def _user_prompt_submit(
     payload: dict[str, Any],
 ) -> dict[str, Any] | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _user_prompt_submit؛ المدخلات المهمة: payload.
+    تعيد dict[str, Any] | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if not _is_main_runtime(payload):
         return None
 
@@ -355,6 +431,12 @@ def _user_prompt_submit(
 
 
 def _config_change(payload: dict[str, Any]) -> dict[str, Any] | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _config_change؛ المدخلات المهمة: payload.
+    تعيد dict[str, Any] | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if not _is_main_runtime(payload):
         return None
 
@@ -370,6 +452,12 @@ def _config_change(payload: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def _subagent_start(payload: dict[str, Any]) -> dict[str, Any] | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _subagent_start؛ المدخلات المهمة: payload.
+    تعيد dict[str, Any] | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if not _is_worker(payload):
         return None
 
@@ -388,18 +476,36 @@ def _subagent_start(payload: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def _subagent_stop(payload: dict[str, Any]) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _subagent_stop؛ المدخلات المهمة: payload.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if _is_worker(payload):
         _audit(payload, "SubagentStop")
     return None
 
 
 def _session_end(payload: dict[str, Any]) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى _session_end؛ المدخلات المهمة: payload.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if _is_main_runtime(payload):
         _audit(payload, "SessionEnd")
     return None
 
 
 def dispatch(payload: dict[str, Any]) -> dict[str, Any] | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى dispatch؛ المدخلات المهمة: payload.
+    تعيد dict[str, Any] | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     event = payload.get("hook_event_name")
 
     if event == "SessionStart":
@@ -419,6 +525,12 @@ def dispatch(payload: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Claude runtime tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     try:
         payload = _read_input()
         output = dispatch(payload)

@@ -1,3 +1,13 @@
+"""
+يركب dependencies ويربط repositories والخدمات والـruntime.
+
+الموقع في المعمارية: Bootstrap / dependency composition.
+يُستدعى بواسطة: app.main أو الاختبارات عند إنشاء container.
+يعتمد مباشرة على: app.composition.runtime، app.composition.analysis، app.composition.container، app.composition.services، app.composition.repositories، app.interfaces.admin.services.ssh_test_service.
+الحد المعماري: لا ينفذ workflow business؛ دوره wiring وترتيب الإنشاء.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from app.composition.runtime import build_runtime_composition
 from app.composition.analysis import (
     build_analysis_investigation_composition,
@@ -35,6 +45,8 @@ def build_container() -> ApplicationContainer:
     # Repositories
     # -------------------------------------------------
 
+    # نبني repositories أولًا لأنها source of persistence تعتمد عليها كل
+    # services اللاحقة؛ الكائنات هنا shared داخل container الواحد.
     repositories = build_repositories()
     server_repository = repositories.server_repository
     command_repository = repositories.command_repository
@@ -55,6 +67,8 @@ def build_container() -> ApplicationContainer:
     # Shared services
     # -------------------------------------------------
 
+    # بعد persistence نركب services/policies التي لا تحتاج إلى تشغيل Claude
+    # بعد، ثم نمررها إلى capabilities بدل إنشائها داخل routes.
     services = build_core_services(
         repositories,
         settings,
@@ -112,6 +126,8 @@ def build_container() -> ApplicationContainer:
     # LLM analysis
     # -------------------------------------------------
 
+    # Retrieval/Analysis ثم Investigation تعتمد على repositories والخدمات
+    # المشتركة؛ لذلك تأتي بعدهما وقبل MCP وruntime اللذين يستهلكانها.
     analysis_composition = build_analysis_investigation_composition(
         repositories,
         services,
@@ -131,6 +147,8 @@ def build_container() -> ApplicationContainer:
     # Monitoring agent
     # -------------------------------------------------
 
+    # آخر مجموعة هي supervisory runtime وMCP boundary؛ هنا فقط تتجمع كل
+    # dependencies لتصبح per-application shared services قابلة للحقن.
     runtime_composition = build_runtime_composition(
         repositories=repositories,
         services=services,

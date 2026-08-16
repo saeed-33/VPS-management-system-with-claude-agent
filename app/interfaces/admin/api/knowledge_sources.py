@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.knowledge_sources، app.core.contracts.knowledge_sources، app.capabilities.knowledge.source_service.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from fastapi import (
@@ -46,6 +56,13 @@ def list_knowledge_sources(
         get_knowledge_source_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_knowledge_sources؛ المدخلات المهمة: enabled_only، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return service.list_sources(
         enabled_only=enabled_only
     )
@@ -61,6 +78,13 @@ def get_knowledge_source(
         get_knowledge_source_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_knowledge_source؛ المدخلات المهمة: source_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.get_source(
             source_id
@@ -83,6 +107,13 @@ def create_knowledge_source(
         get_knowledge_source_service
     ),
 ):
+    """
+    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى create_knowledge_source؛ المدخلات المهمة: payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.create_source(
             CreateKnowledgeSourceDTO(
@@ -135,6 +166,13 @@ def update_knowledge_source(
         get_knowledge_source_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى update_knowledge_source؛ المدخلات المهمة: source_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.update_source(
             source_id,
@@ -202,6 +240,13 @@ def set_knowledge_source_enabled(
         get_knowledge_source_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى set_knowledge_source_enabled؛ المدخلات المهمة: source_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.set_enabled(
             source_id,
@@ -224,6 +269,13 @@ def delete_knowledge_source(
         get_knowledge_source_service
     ),
 ) -> Response:
+    """
+    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى delete_knowledge_source؛ المدخلات المهمة: source_id، service.
+    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         service.delete_source(
             source_id

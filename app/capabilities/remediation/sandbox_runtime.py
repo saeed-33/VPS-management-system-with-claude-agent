@@ -1,3 +1,13 @@
+"""
+جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+
+الموقع في المعمارية: Application capability / remediation.
+يُستدعى بواسطة: Admin API أو MCP.
+يعتمد مباشرة على: app.core.contracts.sandbox_validation.
+الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import json
@@ -17,6 +27,13 @@ class NativeSandboxRuntime:
     """
 
     def check(self) -> SandboxRuntimeCheck:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى check؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد SandboxRuntimeCheck أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         path_value = os.getenv("PHASE6_NATIVE_SANDBOX_ATTESTATION_FILE", "").strip()
         if not path_value:
             return SandboxRuntimeCheck(False, "claude-native-sandbox", "attestation_file_missing")

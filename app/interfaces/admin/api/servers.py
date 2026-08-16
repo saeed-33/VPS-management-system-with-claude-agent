@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.servers، app.interfaces.admin.services.ssh_test_service، app.core.contracts.servers، app.core.exceptions، app.capabilities.monitoring.server_service.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from fastapi import (
     APIRouter,
     Depends,
@@ -51,6 +61,13 @@ def _safety_designation(server) -> str:
 
 
 def _server_response(server) -> ServerResponse:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _server_response؛ المدخلات المهمة: server.
+    تعيد ServerResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     response = ServerResponse.model_validate(server)
     return response.model_copy(update={"safety_designation": _safety_designation(server)})
 
@@ -64,6 +81,13 @@ def list_servers(
         get_server_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_servers؛ المدخلات المهمة: service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return [_server_response(item) for item in service.list_servers()]
 
 
@@ -77,6 +101,13 @@ def get_server(
         get_server_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_server؛ المدخلات المهمة: server_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return _server_response(service.get_server(server_id))
     except ServerNotFoundError as exc:
@@ -97,6 +128,13 @@ def create_server(
         get_server_service
     ),
 ):
+    """
+    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى create_server؛ المدخلات المهمة: payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return _server_response(service.create_server(CreateServerDTO(**payload.model_dump())))
     except DuplicateServerError as exc:
@@ -122,6 +160,13 @@ def update_server(
         get_server_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى update_server؛ المدخلات المهمة: server_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return _server_response(service.update_server(
             server_id,
@@ -156,6 +201,13 @@ def delete_server(
         get_server_service
     ),
 ) -> Response:
+    """
+    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى delete_server؛ المدخلات المهمة: server_id، service.
+    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         service.delete_server(server_id)
     except ServerNotFoundError as exc:
@@ -179,6 +231,13 @@ async def test_ssh_connection(
         get_ssh_test_service
     ),
 ):
+    """
+    يتحقق من contract أو سلوك محدد عبر الحالة الاختبارية ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى test_ssh_connection؛ المدخلات المهمة: server_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    يفشل الاختبار عند خرق الـcontract، ولا يغير production state إلا إذا صمم لذلك.
+    """
     try:
         result = await service.test(server_id)
     except ServerNotFoundError as exc:

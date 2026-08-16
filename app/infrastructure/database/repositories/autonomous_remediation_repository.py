@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.core.contracts.autonomous_remediation، app.core.utils.datetime، app.infrastructure.database.models.remediation، app.infrastructure.database.session.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timedelta
@@ -33,10 +43,32 @@ from app.infrastructure.database.session import SessionLocal
 
 
 class AutonomousRemediationRepository:
+    """
+    يمثل AutonomousRemediationRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(self, session_factory=SessionLocal) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def create_policy(self, policy: AutonomousRemediationPolicy):
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_policy؛ المدخلات المهمة: policy.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = self._policy_model(policy)
         with self._session_factory() as session:
             session.add(model)
@@ -45,10 +77,24 @@ class AutonomousRemediationRepository:
             return model
 
     def get_policy(self, policy_id: str):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_policy؛ المدخلات المهمة: policy_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(select(AutonomousRemediationPolicyModel).where(AutonomousRemediationPolicyModel.policy_id == policy_id))
 
     def list_policies(self, *, status: str | None = None):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_policies؛ المدخلات المهمة: status.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(AutonomousRemediationPolicyModel).order_by(AutonomousRemediationPolicyModel.created_at.desc())
             if status:
@@ -56,6 +102,13 @@ class AutonomousRemediationRepository:
             return list(session.scalars(statement).all())
 
     def matching_policies(self, *, issue_fingerprint: str, action_type: str, target: str, server_id: int | None):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى matching_policies؛ المدخلات المهمة: issue_fingerprint، action_type، target، server_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(AutonomousRemediationPolicyModel).where(
                 AutonomousRemediationPolicyModel.issue_fingerprint == issue_fingerprint,
@@ -69,6 +122,13 @@ class AutonomousRemediationRepository:
             ]
 
     def candidate_keys(self):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى candidate_keys؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             plans = list(session.scalars(select(RemediationPlanModel)).all())
             executions = list(session.scalars(select(RemediationExecutionModel)).all())
@@ -116,6 +176,13 @@ class AutonomousRemediationRepository:
             return result
 
     def update_policy(self, policy_id: str, *, updates: dict, version: int):
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_policy؛ المدخلات المهمة: policy_id، updates، version.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(AutonomousRemediationPolicyModel).where(AutonomousRemediationPolicyModel.policy_id == policy_id).with_for_update())
             if model is None:
@@ -130,6 +197,13 @@ class AutonomousRemediationRepository:
             return model
 
     def set_policy_status(self, policy_id: str, status: str):
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى set_policy_status؛ المدخلات المهمة: policy_id، status.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.update_policy(policy_id, updates={"status": status}, version=self.get_policy(policy_id).version)
 
     def resume_policy(self, policy_id: str):
@@ -287,6 +361,13 @@ class AutonomousRemediationRepository:
             return runtime, True, trip, False
 
     def create_decision(self, decision: AutonomousPolicyDecision, *, history: dict, metadata: dict | None = None):
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_decision؛ المدخلات المهمة: decision، history، metadata.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = AutonomousPolicyDecisionModel(
             decision_id=decision.decision_id, policy_id=decision.policy_id,
             policy_version=decision.policy_version, plan_id=decision.plan_id or "",
@@ -303,6 +384,13 @@ class AutonomousRemediationRepository:
             return model
 
     def list_decisions(self, *, plan_id: str | None = None, limit: int = 100):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_decisions؛ المدخلات المهمة: plan_id، limit.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(AutonomousPolicyDecisionModel).order_by(AutonomousPolicyDecisionModel.created_at.desc()).limit(limit)
             if plan_id:
@@ -310,10 +398,24 @@ class AutonomousRemediationRepository:
             return list(session.scalars(statement).all())
 
     def get_decision(self, decision_id: str):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_decision؛ المدخلات المهمة: decision_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(select(AutonomousPolicyDecisionModel).where(AutonomousPolicyDecisionModel.decision_id == decision_id))
 
     def create_authorization(self, authorization: AutonomousAuthorization):
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_authorization؛ المدخلات المهمة: authorization.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = AutonomousAuthorizationModel(
             authorization_id=authorization.authorization_id, token=authorization.token,
             status=authorization.status.value, policy_id=authorization.policy_id,
@@ -330,6 +432,13 @@ class AutonomousRemediationRepository:
             return model
 
     def consume_authorization(self, authorization_id: str, *, now: datetime):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى consume_authorization؛ المدخلات المهمة: authorization_id، now.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(AutonomousAuthorizationModel).where(AutonomousAuthorizationModel.authorization_id == authorization_id).with_for_update())
             if model is None:
@@ -350,10 +459,24 @@ class AutonomousRemediationRepository:
             return model
 
     def get_authorization(self, authorization_id: str):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_authorization؛ المدخلات المهمة: authorization_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(select(AutonomousAuthorizationModel).where(AutonomousAuthorizationModel.authorization_id == authorization_id))
 
     def list_authorizations(self, *, limit: int = 100):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_authorizations؛ المدخلات المهمة: limit.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(AutonomousAuthorizationModel)
@@ -363,6 +486,13 @@ class AutonomousRemediationRepository:
             return list(session.scalars(statement).all())
 
     def reserve(self, *, idempotency_key: str, owner_token: str, policy_id: str, plan_id: str, plan_fingerprint: str, action_type: str, target: str, server_id: int, now: datetime, lease_seconds: int = 900):
+        """
+        يدير reservation/finalization مع مراعاة idempotency وconcurrency ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى reserve؛ المدخلات المهمة: idempotency_key، owner_token، policy_id، plan_id، plan_fingerprint، action_type.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             # Lock the persisted plan when it exists.  This gives different
             # idempotency keys a shared database row to serialize on, while
@@ -530,6 +660,13 @@ class AutonomousRemediationRepository:
 
     @staticmethod
     def _execution_for_reservation(*, session, reservation):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى _execution_for_reservation؛ المدخلات المهمة: session، reservation.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         execution = session.scalar(select(RemediationExecutionModel).where(
             RemediationExecutionModel.idempotency_key == reservation.idempotency_key,
             RemediationExecutionModel.plan_id == reservation.plan_id,
@@ -592,6 +729,13 @@ class AutonomousRemediationRepository:
         return reservation
 
     def finalize_reservation(self, reservation_id: str, *, owner_token: str, status: str, execution_id: str | None = None):
+        """
+        يدير reservation/finalization مع مراعاة idempotency وconcurrency ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى finalize_reservation؛ المدخلات المهمة: reservation_id، owner_token، status، execution_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(AutonomousPolicyExecutionReservationModel).where(AutonomousPolicyExecutionReservationModel.reservation_id == reservation_id).with_for_update())
             if model is None:
@@ -608,6 +752,13 @@ class AutonomousRemediationRepository:
             return model
 
     def update_reservation_authorization(self, reservation_id: str, *, owner_token: str, authorization_id: str):
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_reservation_authorization؛ المدخلات المهمة: reservation_id، owner_token، authorization_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(AutonomousPolicyExecutionReservationModel).where(AutonomousPolicyExecutionReservationModel.reservation_id == reservation_id).with_for_update())
             if model is None:
@@ -624,6 +775,13 @@ class AutonomousRemediationRepository:
             return model
 
     def get_runtime_state(self, policy_id: str):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_runtime_state؛ المدخلات المهمة: policy_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(AutonomousPolicyRuntimeStateModel).where(AutonomousPolicyRuntimeStateModel.policy_id == policy_id))
             if model is None:
@@ -634,6 +792,13 @@ class AutonomousRemediationRepository:
             return model
 
     def list_reservations(self, *, policy_id: str | None = None, plan_id: str | None = None, limit: int = 100):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_reservations؛ المدخلات المهمة: policy_id، plan_id، limit.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(AutonomousPolicyExecutionReservationModel).order_by(AutonomousPolicyExecutionReservationModel.created_at.desc()).limit(limit)
             if policy_id:
@@ -652,6 +817,13 @@ class AutonomousRemediationRepository:
             )
 
     def update_runtime_state(self, policy_id: str, **updates):
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_runtime_state؛ المدخلات المهمة: policy_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.scalar(select(AutonomousPolicyRuntimeStateModel).where(AutonomousPolicyRuntimeStateModel.policy_id == policy_id).with_for_update())
             if model is None:
@@ -668,6 +840,13 @@ class AutonomousRemediationRepository:
 
     def append_policy_audit_event(self, *, policy_id: str, policy_version: int, event_type: str,
                                   actor: str = "admin", payload: dict | None = None):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى append_policy_audit_event؛ المدخلات المهمة: policy_id، policy_version، event_type، actor، payload.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = AutonomousPolicyAuditEventModel(
             event_id=str(uuid4()), policy_id=policy_id, policy_version=policy_version,
             event_type=event_type, actor=actor, payload=dict(payload or {}),
@@ -679,6 +858,13 @@ class AutonomousRemediationRepository:
             return model
 
     def list_policy_audit_events(self, policy_id: str):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_policy_audit_events؛ المدخلات المهمة: policy_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return list(session.scalars(
                 select(AutonomousPolicyAuditEventModel)
@@ -687,6 +873,13 @@ class AutonomousRemediationRepository:
             ).all())
 
     def list_all_policy_audit_events(self, *, policy_id: str | None = None, limit: int = 100):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_all_policy_audit_events؛ المدخلات المهمة: policy_id، limit.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(AutonomousPolicyAuditEventModel)
@@ -700,6 +893,13 @@ class AutonomousRemediationRepository:
             return list(session.scalars(statement).all())
 
     def history(self, *, issue_fingerprint: str, action_type: str, target: str) -> AutonomousHistorySnapshot:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى history؛ المدخلات المهمة: issue_fingerprint، action_type، target.
+        تعيد AutonomousHistorySnapshot أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             plans = list(session.scalars(select(RemediationPlanModel)).all())
             plan_ids = {
@@ -740,6 +940,13 @@ class AutonomousRemediationRepository:
             )
 
     def execution_counts(self, *, policy_id: str, now: datetime):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى execution_counts؛ المدخلات المهمة: policy_id، now.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         from datetime import timedelta
         with self._session_factory() as session:
             rows = list(session.scalars(select(AutonomousPolicyExecutionReservationModel).where(AutonomousPolicyExecutionReservationModel.policy_id == policy_id)).all())
@@ -751,6 +958,13 @@ class AutonomousRemediationRepository:
 
     @staticmethod
     def _aware(value, reference: datetime):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى _aware؛ المدخلات المهمة: value، reference.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if value is None:
             return None
         if value.tzinfo is None and reference.tzinfo is not None:
@@ -759,6 +973,13 @@ class AutonomousRemediationRepository:
 
     @staticmethod
     def _policy_model(policy: AutonomousRemediationPolicy):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى _policy_model؛ المدخلات المهمة: policy.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return AutonomousRemediationPolicyModel(
             policy_id=policy.policy_id, name=policy.name, description=policy.description,
             status=policy.status.value, version=policy.version, issue_fingerprint=policy.issue_fingerprint,

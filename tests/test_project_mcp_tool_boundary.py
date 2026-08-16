@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.interfaces.mcp، app.core.contracts.reports.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -24,6 +34,12 @@ NOW = datetime(
 
 @dataclass
 class Server:
+    """
+    يمثل Server جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     id: int = 1
     name: str = "server-1"
     host: str = "10.0.0.1"
@@ -42,6 +58,12 @@ class Server:
 
 @dataclass
 class Profile:
+    """
+    يمثل Profile جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     id: int = 5
     name: str = "baseline"
     description: str | None = None
@@ -50,6 +72,12 @@ class Profile:
 
 @dataclass
 class Command:
+    """
+    يمثل Command جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     id: int = 9
     name: str = "uptime"
     command: str = "uptime"
@@ -58,25 +86,55 @@ class Command:
 
 @dataclass
 class Assignment:
+    """
+    يمثل Assignment جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     execution_order: int = 1
     enabled: bool = True
     custom_timeout_seconds: float | None = None
 
 
 class ServerService:
+    """
+    يمثل ServerService جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def get_server(
         self,
         server_id,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_server؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert server_id == 1
         return Server()
 
 
 class ProfileService:
+    """
+    يمثل ProfileService جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def get_profile(
         self,
         profile_id,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_profile؛ المدخلات المهمة: profile_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert profile_id == 5
         return Profile()
 
@@ -84,6 +142,12 @@ class ProfileService:
         self,
         profile_id,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى list_profile_commands؛ المدخلات المهمة: profile_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert profile_id == 5
         return [
             (
@@ -94,13 +158,31 @@ class ProfileService:
 
 
 class MonitoringService:
+    """
+    يمثل MonitoringService جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.ran_server_ids = []
 
     async def run(
         self,
         server_id,
     ):
+        """
+        يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى run؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.ran_server_ids.append(
             server_id
         )
@@ -121,7 +203,19 @@ class MonitoringService:
 
 
 class ReportService:
+    """
+    يمثل ReportService جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.reports = {
             10: ReportDetailsDTO(
                 id=10,
@@ -149,6 +243,12 @@ class ReportService:
         page=1,
         page_size=50,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى list_reports؛ المدخلات المهمة: server_id، status، page، page_size.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert server_id == 1
         assert page == 1
         assert page_size == 1
@@ -172,12 +272,24 @@ class ReportService:
         self,
         report_id,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_report؛ المدخلات المهمة: report_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.reports[report_id]
 
 
 def boundary(
     report_service=None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى boundary؛ المدخلات المهمة: report_service.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return ProjectMcpToolBoundary(
         server_service=ServerService(),
         monitoring_profile_service=(
@@ -198,6 +310,12 @@ def run_tool(
     *,
     tool_boundary=None,
 ):
+    """
+    ينفذ مرحلة الأداة أو يحفظ نتيجة التقييم ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى run_tool؛ المدخلات المهمة: tool_id، arguments، tool_boundary.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return asyncio.run(
         (
             tool_boundary
@@ -213,6 +331,12 @@ def run_tool(
 
 
 def test_tool_inventory_is_deliberately_small():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_tool_inventory_is_deliberately_small؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     tool_ids = [
         tool.tool_id
         for tool in boundary().list_tools()
@@ -273,6 +397,12 @@ def test_tool_inventory_is_deliberately_small():
 
 
 def test_get_server_context_uses_project_service():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_server_context_uses_project_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "get_server_context",
         {
@@ -291,6 +421,12 @@ def test_get_server_context_uses_project_service():
 
 
 def test_get_monitoring_profile_includes_commands():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_monitoring_profile_includes_commands؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "get_monitoring_profile",
         {
@@ -311,6 +447,12 @@ def test_get_monitoring_profile_includes_commands():
 
 
 def test_run_monitoring_invokes_existing_service_and_reads_report():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_run_monitoring_invokes_existing_service_and_reads_report؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "run_monitoring",
         {
@@ -330,6 +472,12 @@ def test_run_monitoring_invokes_existing_service_and_reads_report():
 
 
 def test_get_report_reads_persisted_report():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_report_reads_persisted_report؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "get_report",
         {
@@ -342,11 +490,29 @@ def test_get_report_reads_persisted_report():
 
 
 def test_get_latest_report_returns_controlled_not_found():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_latest_report_returns_controlled_not_found؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     class EmptyReportService(ReportService):
+        """
+        يمثل EmptyReportService جزءًا من طبقة Test suite.
+
+        يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+        تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+        """
         def list_reports(
             self,
             **kwargs,
         ):
+            """
+            يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+            تُستدعى عندما يصل المسار إلى list_reports؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+            تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+            """
             return [], 0
 
     result = run_tool(
@@ -364,6 +530,12 @@ def test_get_latest_report_returns_controlled_not_found():
 
 
 def test_invalid_input_is_normalized():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_invalid_input_is_normalized؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "get_server_context",
         {
@@ -376,6 +548,12 @@ def test_invalid_input_is_normalized():
 
 
 def test_unknown_tool_is_rejected():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unknown_tool_is_rejected؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "raw_ssh",
         {

@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.investigation.correlation، app.capabilities.investigation.source_location، app.capabilities.investigation.specialist_reasoning_agent، app.capabilities.investigation.runtime_snapshot_service، app.core.contracts.investigation، app.core.contracts.specialist_reasoning.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from types import SimpleNamespace
 
 from app.capabilities.investigation.correlation import CrossSpecialistCorrelator
@@ -11,6 +21,12 @@ from app.interfaces.admin.schemas.investigations import InvestigationRuntimeResp
 
 
 def test_python_traceback_location_contains_reason_and_evidence_binding():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_python_traceback_location_contains_reason_and_evidence_binding؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     locations = extract_source_locations(
         'Traceback (most recent call last):\n'
         '  File "/srv/app/main.py", line 42, in start_service\n'
@@ -31,6 +47,12 @@ def test_python_traceback_location_contains_reason_and_evidence_binding():
 
 
 def test_generic_source_location_supports_column_and_rejects_transport_errors():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_generic_source_location_supports_column_and_rejects_transport_errors؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     locations = extract_source_locations("build failed at /srv/app/index.ts:10:4")
     assert locations[0].file_path == "/srv/app/index.ts"
     assert locations[0].line_number == 10
@@ -41,6 +63,12 @@ def test_generic_source_location_supports_column_and_rejects_transport_errors():
 
 
 def test_specialist_location_metadata_can_only_come_from_referenced_evidence():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_specialist_location_metadata_can_only_come_from_referenced_evidence؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     evidence = EvidenceReference(
         evidence_id="e1",
         kind=EvidenceKind.COMMAND_RESULT,
@@ -74,6 +102,12 @@ def test_specialist_location_metadata_can_only_come_from_referenced_evidence():
 
 
 def test_correlator_carries_finding_locations_into_claim_metadata():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_correlator_carries_finding_locations_into_claim_metadata؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     finding = SimpleNamespace(
         finding_id="f1",
         title="Application failure",
@@ -100,6 +134,12 @@ def test_correlator_carries_finding_locations_into_claim_metadata():
 
 
 def test_traceback_evidence_reaches_persisted_projection_and_api_read_model():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_traceback_evidence_reaches_persisted_projection_and_api_read_model؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     evidence = EvidenceReference(
         evidence_id="e2",
         kind=EvidenceKind.COMMAND_RESULT,

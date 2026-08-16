@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import date
@@ -92,10 +102,22 @@ CURRENT_CANONICAL = {
 
 
 def rel(path: Path) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى rel؛ المدخلات المهمة: path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return path.relative_to(ROOT).as_posix()
 
 
 def classify(path: Path) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى classify؛ المدخلات المهمة: path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     name = rel(path)
     text = path.read_text(encoding="utf-8")
 
@@ -187,6 +209,12 @@ def classify(path: Path) -> str:
 
 
 def title(path: Path) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى title؛ المدخلات المهمة: path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     text = path.read_text(
         encoding="utf-8"
     )
@@ -199,6 +227,12 @@ def title(path: Path) -> str:
 
 
 def remove_managed_block(text: str) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى remove_managed_block؛ المدخلات المهمة: text.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     pattern = re.compile(
         re.escape(BEGIN)
         + r".*?"
@@ -216,6 +250,12 @@ def metadata_block(
     *,
     classification: str,
 ) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى metadata_block؛ المدخلات المهمة: classification.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     historical_banner = (
         "> Historical document — not current architecture.\n"
         if classification.startswith("HISTORICAL")
@@ -244,6 +284,12 @@ For current system state, see [`docs/PROJECT_STATUS.md`](/docs/PROJECT_STATUS.md
 
 
 def update_doc(path: Path) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى update_doc؛ المدخلات المهمة: path.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
    
 
     text = path.read_text(
@@ -275,6 +321,12 @@ def update_doc(path: Path) -> None:
 def generate_inventory(
     docs: list[Path],
 ) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى generate_inventory؛ المدخلات المهمة: docs.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     rows = []
 
     for path in docs:
@@ -336,6 +388,12 @@ def generate_inventory(
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     docs = sorted(
         path
         for path in DOCS.rglob("*.md")

@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.runtime.claude، app.runtime.claude.exceptions.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 import json
 import pytest
@@ -21,6 +31,12 @@ from app.runtime.claude.exceptions import (
 def request(
     **overrides,
 ) -> ClaudeRuntimeRequest:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى request؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد ClaudeRuntimeRequest أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     values = {
         "job_id": "job-1",
         "job_type": "monitoring_cycle",
@@ -34,6 +50,12 @@ def request(
 
 
 class ScriptCommandBuilder:
+    """
+    يمثل ScriptCommandBuilder جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(
         self,
         script: Path,
@@ -41,6 +63,12 @@ class ScriptCommandBuilder:
         cwd: Path | None = None,
         env: dict[str, str] | None = None,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: script، cwd، env.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self._script = script
         self._cwd = cwd
         self._env = env or {}
@@ -49,6 +77,12 @@ class ScriptCommandBuilder:
         self,
         runtime_request,
     ) -> ClaudeProcessCommand:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى build؛ المدخلات المهمة: runtime_request.
+        تعيد ClaudeProcessCommand أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return ClaudeProcessCommand(
             argv=(
                 sys.executable,
@@ -63,6 +97,12 @@ def write_script(
     tmp_path: Path,
     content: str,
 ) -> Path:
+    """
+    ينفذ مرحلة الأداة أو يحفظ نتيجة التقييم ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى write_script؛ المدخلات المهمة: tmp_path، content.
+    تعيد Path أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     path = tmp_path / "child.py"
     path.write_text(
         content,
@@ -74,6 +114,12 @@ def write_script(
 def test_process_runner_decodes_structured_output(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_process_runner_decodes_structured_output؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
 
@@ -131,6 +177,12 @@ print(json.dumps({
 def test_process_runner_accepts_result_text_envelope(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_process_runner_accepts_result_text_envelope؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
 
@@ -172,6 +224,12 @@ print(json.dumps({{
 def test_process_runner_rejects_invalid_json_output(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_process_runner_rejects_invalid_json_output؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
 
@@ -204,6 +262,12 @@ def test_process_runner_rejects_invalid_json_output(
 def test_process_runner_returns_controlled_nonzero_failure(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_process_runner_returns_controlled_nonzero_failure؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
 
@@ -243,6 +307,12 @@ raise SystemExit(7)
 def test_process_runner_requires_project_root_cwd(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_process_runner_requires_project_root_cwd؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
     other = tmp_path / "other"
@@ -277,6 +347,12 @@ def test_process_runner_requires_project_root_cwd(
 def test_adapter_timeout_terminates_active_process(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_adapter_timeout_terminates_active_process؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
 
@@ -314,6 +390,12 @@ time.sleep(30)
 def test_cancel_by_job_id_terminates_process(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_cancel_by_job_id_terminates_process؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
 
@@ -326,6 +408,12 @@ time.sleep(30)
     )
 
     async def scenario():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى scenario؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         runner = SubprocessClaudeSessionRunner(
             command_builder=ScriptCommandBuilder(
                 script
@@ -367,6 +455,12 @@ time.sleep(30)
 def test_command_environment_is_applied_without_prompt_transport(
     tmp_path,
 ):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_command_environment_is_applied_without_prompt_transport؛ المدخلات المهمة: tmp_path.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     project = tmp_path / "project"
     project.mkdir()
 
@@ -413,6 +507,12 @@ print(json.dumps({
 
 
 def test_decoder_accepts_strict_batched_event_array():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_accepts_strict_batched_event_array؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -462,6 +562,12 @@ def test_decoder_accepts_strict_batched_event_array():
 
 
 def test_decoder_rejects_event_array_without_final_result():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_rejects_event_array_without_final_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -485,6 +591,12 @@ def test_decoder_rejects_event_array_without_final_result():
 
 
 def test_decoder_rejects_event_array_session_mismatch():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_rejects_event_array_session_mismatch؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -516,6 +628,12 @@ def test_decoder_rejects_event_array_session_mismatch():
 
 
 def test_decoder_surfaces_error_max_turns_result():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_surfaces_error_max_turns_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -544,6 +662,12 @@ def test_decoder_surfaces_error_max_turns_result():
 
 
 def test_decoder_counts_tool_use_blocks_from_event_array():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_counts_tool_use_blocks_from_event_array؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -600,6 +724,12 @@ def test_decoder_counts_tool_use_blocks_from_event_array():
 
 
 def test_decoder_uses_final_assistant_text_when_success_result_omits_result():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_uses_final_assistant_text_when_success_result_omits_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -683,6 +813,12 @@ def test_decoder_uses_final_assistant_text_when_success_result_omits_result():
 
 
 def test_decoder_rejects_tool_use_message_as_final_text_fallback():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_rejects_tool_use_message_as_final_text_fallback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -726,6 +862,12 @@ def test_decoder_rejects_tool_use_message_as_final_text_fallback():
 
 
 def test_decoder_success_event_array_can_use_final_assistant_text():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_success_event_array_can_use_final_assistant_text؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(
@@ -807,6 +949,12 @@ def test_decoder_success_event_array_can_use_final_assistant_text():
 
 
 def test_decoder_does_not_use_tool_message_as_final_fallback():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_decoder_does_not_use_tool_message_as_final_fallback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decoder = ClaudeCliJsonDecoder()
 
     stdout = json.dumps(

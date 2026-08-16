@@ -1,7 +1,14 @@
+/**
+ * صفحة إدارة Monitoring Profiles وassignments. تحمل profiles/commands، وتدير ربط الأوامر وترتيبها وتفعيلها عبر Admin API.
+ */
 let monitoringProfiles = [];
 let monitoringCommands = [];
 let selectedProfileId = null;
 
+/**
+ * ينفذ خطوة واجهة باسم loadMonitoringProfiles ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function loadMonitoringProfiles() {
     const list = document.getElementById(
         "profiles-list"
@@ -40,6 +47,10 @@ async function loadMonitoringProfiles() {
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم loadMonitoringCommands ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function loadMonitoringCommands() {
     try {
         monitoringCommands = await apiRequest(
@@ -54,6 +65,10 @@ async function loadMonitoringCommands() {
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم renderProfiles ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderProfiles() {
     const list = document.getElementById(
         "profiles-list"
@@ -117,6 +132,10 @@ function renderProfiles() {
         .join("");
 }
 
+/**
+ * ينفذ خطوة واجهة باسم selectProfile ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function selectProfile(profileId) {
     selectedProfileId = profileId;
 
@@ -142,6 +161,10 @@ async function selectProfile(profileId) {
     await loadProfileEditor(profile);
 }
 
+/**
+ * ينفذ خطوة واجهة باسم loadProfileEditor ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function loadProfileEditor(profile) {
     const editor = document.getElementById(
         "profile-editor"
@@ -325,6 +348,10 @@ async function loadProfileEditor(profile) {
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم renderAssignmentRow ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderAssignmentRow(
     profileId,
     assignment
@@ -434,6 +461,10 @@ function renderAssignmentRow(
     `;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم assignCommandToProfile ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function assignCommandToProfile() {
     const commandId = Number(
         document.getElementById(
@@ -496,6 +527,10 @@ async function assignCommandToProfile() {
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم saveAssignment ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function saveAssignment(
     profileId,
     commandId,
@@ -544,6 +579,10 @@ async function saveAssignment(
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم toggleAssignment ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function toggleAssignment(
     profileId,
     commandId,
@@ -578,6 +617,10 @@ async function toggleAssignment(
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم removeCommandFromProfile ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function removeCommandFromProfile(
     profileId,
     commandId
@@ -614,6 +657,10 @@ async function removeCommandFromProfile(
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم toggleProfileStatus ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function toggleProfileStatus(
     profileId,
     currentlyEnabled
@@ -646,6 +693,10 @@ async function toggleProfileStatus(
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم deleteProfile ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function deleteProfile(profileId) {
     const confirmed = window.confirm(
         "هل تريد حذف ملف المراقبة؟ " +

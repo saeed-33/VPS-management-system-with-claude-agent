@@ -1,3 +1,13 @@
+"""
+حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+
+الموقع في المعمارية: MCP capability boundary.
+يُستدعى بواسطة: Claude أو خادم MCP.
+يعتمد مباشرة على: app.interfaces.mcp.schemas، app.interfaces.mcp.serializers.
+الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from typing import Any
@@ -12,10 +22,25 @@ from app.interfaces.mcp.serializers import (
 
 
 class MonitoringToolsMixin:
+    """
+    يمثل MonitoringToolsMixin مسؤولية محددة داخل طبقة MCP capability boundary.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     async def _get_server_context(
         self,
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى _get_server_context؛ المدخلات المهمة: arguments.
+        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         server_id = self._required_int(
             arguments,
             "server_id",
@@ -39,6 +64,13 @@ class MonitoringToolsMixin:
         self,
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى _get_monitoring_profile؛ المدخلات المهمة: arguments.
+        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         profile_id = self._required_int(
             arguments,
             "profile_id",
@@ -72,6 +104,13 @@ class MonitoringToolsMixin:
         self,
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى _run_monitoring؛ المدخلات المهمة: arguments.
+        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         server_id = self._required_int(
             arguments,
             "server_id",
@@ -108,6 +147,13 @@ class MonitoringToolsMixin:
         self,
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى _get_report؛ المدخلات المهمة: arguments.
+        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         report_id = self._required_int(
             arguments,
             "report_id",
@@ -134,6 +180,13 @@ class MonitoringToolsMixin:
         self,
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى _get_latest_report؛ المدخلات المهمة: arguments.
+        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         server_id = self._required_int(
             arguments,
             "server_id",
@@ -168,6 +221,13 @@ class MonitoringToolsMixin:
         self,
         server_id: int,
     ):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
+
+        تُستدعى عندما يصل workflow إلى _latest_report_for_server؛ المدخلات المهمة: server_id.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         items, total = (
             self._report_query_service
             .list_reports(

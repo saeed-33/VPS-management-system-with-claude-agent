@@ -1,3 +1,13 @@
+"""
+نقطة تشغيل تطبيق FastAPI وتسجيل واجهات HTTP وMCP.
+
+الموقع في المعمارية: Bootstrap / composition.
+يُستدعى بواسطة: خادم ASGI.
+يعتمد مباشرة على: app.interfaces.admin.api، app.interfaces.admin.auth، app.interfaces.admin.web، app.composition، app.core.config، app.infrastructure.database.engine.
+الحد المعماري: لا يحتوي منطق capability أو SQL.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import asyncio
 import logging
 from contextlib import asynccontextmanager
@@ -54,6 +64,13 @@ STATIC_DIRECTORY = (
 async def lifespan(
     app: FastAPI,
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Bootstrap / composition.
+
+    تُستدعى عندما يصل workflow إلى lifespan؛ المدخلات المهمة: app.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     # Application lifecycle after C.14.9:
     # - create database tables;
     # - start periodic scheduling only when the Claude runtime is active;
@@ -184,6 +201,13 @@ app.include_router(autonomous_remediation_router)
     tags=["system"],
 )
 async def health_check() -> dict:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Bootstrap / composition.
+
+    تُستدعى عندما يصل workflow إلى health_check؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     supervisor_status = (
         container.claude_supervisor.status
     )

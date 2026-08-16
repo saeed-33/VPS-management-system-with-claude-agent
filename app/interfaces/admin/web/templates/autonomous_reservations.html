@@ -1,3 +1,4 @@
+{# قالب Admin Web لصفحة autonomous reservations. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
 {% extends "base.html" %}
 {% block title %}Autonomous Reservations{% endblock %}
 {% block content %}<header class="page-header"><div><h1 class="page-heading">Autonomous Reservations</h1><p class="page-description">Read-only idempotency and recovery state. Owner tokens are never displayed.</p></div></header><section class="panel"><header class="panel-header"><h2 class="panel-title">Reservations</h2><button id="reservation-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div id="reservation-list" class="panel-body"><div class="empty-state"><h3>Loading reservations...</h3></div></div></section>{% endblock %}

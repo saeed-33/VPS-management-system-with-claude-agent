@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.reports، app.interfaces.admin.services.report_pdf_service، app.infrastructure.database.repositories.analysis_repository، app.infrastructure.database.repositories.analysis_source_repository، app.core.exceptions.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from typing import Annotated
 
 from fastapi import (
@@ -69,6 +79,13 @@ def list_reports(
         Query(ge=1, le=200),
     ] = 50,
 ) -> PaginatedReportsResponse:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_reports؛ المدخلات المهمة: service، server_id، report_status، page، page_size.
+    تعيد PaginatedReportsResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         items, total = service.list_reports(
             server_id=server_id,
@@ -102,6 +119,13 @@ def get_report(
         Depends(get_report_query_service),
     ],
 ) -> ReportDetailsResponse:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_report؛ المدخلات المهمة: report_id، service.
+    تعيد ReportDetailsResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.get_report(report_id)
 
@@ -123,6 +147,13 @@ def get_report_analysis(
         Depends(get_analysis_repository),
     ],
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_report_analysis؛ المدخلات المهمة: report_id، repository.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     analysis = repository.get_by_report_id(
         report_id
     )
@@ -154,6 +185,13 @@ def get_report_analysis_sources(
         Depends(get_analysis_source_repository),
     ],
 ) -> ReportAnalysisSourcesResponse:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_report_analysis_sources؛ المدخلات المهمة: report_id، analysis_repository، source_repository.
+    تعيد ReportAnalysisSourcesResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     analysis = analysis_repository.get_by_report_id(
         report_id
     )
@@ -196,6 +234,13 @@ def export_report_pdf(
         Depends(get_report_pdf_service),
     ],
 ) -> Response:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى export_report_pdf؛ المدخلات المهمة: report_id، report_service، analysis_repository، source_repository، pdf_service.
+    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         report = report_service.get_report(report_id)
     except ReportNotFoundError as exc:
@@ -249,6 +294,13 @@ def get_report_analysis_summary(
         Depends(get_analysis_repository),
     ],
 ) -> dict:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_report_analysis_summary؛ المدخلات المهمة: report_id، repository.
+    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     analysis = repository.get_by_report_id(
         report_id
     )

@@ -1,3 +1,13 @@
+"""
+جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+
+الموقع في المعمارية: Administration interface.
+يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
+يعتمد مباشرة على: app.core.config، app.core.utils.datetime، app.infrastructure.database.models.admin_auth، app.infrastructure.database.session.
+الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import base64
@@ -29,12 +39,28 @@ from app.infrastructure.database.session import SessionLocal
 
 
 class AdminRole(StrEnum):
+    """
+    يمثل AdminRole مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     VIEWER = "viewer"
     OPERATOR = "operator"
     ADMIN = "admin"
 
 
 class AdminPermission(StrEnum):
+    """
+    يمثل AdminPermission مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     ADMIN_READ = "admin.read"
     SERVER_READ = "server.read"
     SERVER_WRITE = "server.write"
@@ -127,10 +153,24 @@ class AdminPrincipal:
     permissions: frozenset[AdminPermission]
 
     def can(self, permission: str | AdminPermission) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى can؛ المدخلات المهمة: permission.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return AdminPermission(permission) in self.permissions
 
 
 def principal_from_model(model: AdminUserModel) -> AdminPrincipal:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى principal_from_model؛ المدخلات المهمة: model.
+    تعيد AdminPrincipal أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     role = AdminRole(model.role)
     return AdminPrincipal(
         user_id=model.id,
@@ -141,14 +181,35 @@ def principal_from_model(model: AdminUserModel) -> AdminPrincipal:
 
 
 def _b64(value: bytes) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى _b64؛ المدخلات المهمة: value.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return base64.urlsafe_b64encode(value).decode("ascii").rstrip("=")
 
 
 def _unb64(value: str) -> bytes:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى _unb64؛ المدخلات المهمة: value.
+    تعيد bytes أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
 
 
 def hash_password(password: str) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى hash_password؛ المدخلات المهمة: password.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     salt = secrets.token_bytes(16)
     n, r, p = 2**14, 8, 1
     digest = hashlib.scrypt(
@@ -158,6 +219,13 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, encoded: str) -> bool:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى verify_password؛ المدخلات المهمة: password، encoded.
+    تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         algorithm, n, r, p, salt, expected = encoded.split("$", 5)
         if algorithm != "scrypt":
@@ -180,14 +248,35 @@ _USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.@-]{2,119}$")
 
 
 def _utc(value: datetime) -> datetime:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى _utc؛ المدخلات المهمة: value.
+    تعيد datetime أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
 
 
 def normalize_username(username: str) -> str:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى normalize_username؛ المدخلات المهمة: username.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return str(username or "").strip().casefold()
 
 
 def validate_admin_credentials(username: str, password: str) -> tuple[str, str]:
+    """
+    يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى validate_admin_credentials؛ المدخلات المهمة: username، password.
+    تعيد tuple[str, str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     normalized = normalize_username(username)
     if not _USERNAME_PATTERN.fullmatch(normalized):
         raise ValueError(
@@ -208,6 +297,13 @@ class AdminAuthService:
         session_secret: str | None = None,
         session_ttl_seconds: int | None = None,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory، session_secret، session_ttl_seconds.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
         configured_secret = session_secret or settings.admin_session_secret
         self._session_secret = (
@@ -221,17 +317,45 @@ class AdminAuthService:
 
     @property
     def cookie_name(self) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى cookie_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return settings.admin_session_cookie_name
 
     @property
     def cookie_secure(self) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى cookie_secure؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return settings.admin_session_secure
 
     @property
     def session_ttl_seconds(self) -> int:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى session_ttl_seconds؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return int(self._session_ttl.total_seconds())
 
     def create_admin(self, *, username: str, password: str, role: str = "admin") -> AdminPrincipal:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى create_admin؛ المدخلات المهمة: username، password، role.
+        تعيد AdminPrincipal أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         normalized, validated_password = validate_admin_credentials(username, password)
         normalized_role = AdminRole(role)
         with self._session_factory() as session:
@@ -261,6 +385,13 @@ class AdminAuthService:
             return principal
 
     def authenticate(self, *, username: str, password: str, request: Request) -> tuple[AdminPrincipal, str] | None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى authenticate؛ المدخلات المهمة: username، password، request.
+        تعيد tuple[AdminPrincipal, str] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         normalized = normalize_username(username)
         with self._session_factory() as session:
             model = session.scalar(
@@ -303,6 +434,13 @@ class AdminAuthService:
             return principal, raw_token
 
     def authenticate_cookie(self, raw_token: str | None) -> AdminPrincipal | None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى authenticate_cookie؛ المدخلات المهمة: raw_token.
+        تعيد AdminPrincipal | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not raw_token:
             return None
         now = utc_now()
@@ -329,6 +467,13 @@ class AdminAuthService:
             return principal_from_model(user)
 
     def revoke_cookie(self, raw_token: str | None, *, request: Request) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى revoke_cookie؛ المدخلات المهمة: raw_token، request.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not raw_token:
             return
         with self._session_factory() as session:
@@ -352,6 +497,13 @@ class AdminAuthService:
             session.commit()
 
     def csrf_token(self, raw_token: str | None) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى csrf_token؛ المدخلات المهمة: raw_token.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not raw_token:
             return ""
         return hmac.new(
@@ -361,6 +513,13 @@ class AdminAuthService:
         ).hexdigest()
 
     def csrf_valid(self, raw_token: str | None, supplied: str | None) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى csrf_valid؛ المدخلات المهمة: raw_token، supplied.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         expected = self.csrf_token(raw_token)
         return bool(expected and supplied and hmac.compare_digest(expected, supplied))
 
@@ -373,6 +532,13 @@ class AdminAuthService:
         success: bool = True,
         metadata: dict | None = None,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى record_event؛ المدخلات المهمة: event_type، principal، request، success، metadata.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             self._write_audit(
                 session,
@@ -407,6 +573,13 @@ class AdminAuthService:
         success: bool = True,
         metadata: dict | None = None,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى _write_audit؛ المدخلات المهمة: session، event_type، principal، username، request، success.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         session.add(
             AdminAuthAuditEventModel(
                 event_id=secrets.token_hex(16),
@@ -428,10 +601,24 @@ class AdminAuthService:
 
     @staticmethod
     def _digest(raw_token: str) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى _digest؛ المدخلات المهمة: raw_token.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
 
 def safe_redirect_path(value: str | None, *, default: str = "/") -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى safe_redirect_path؛ المدخلات المهمة: value، default.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     candidate = str(value or "").strip()
     parsed = urlsplit(candidate)
     if not candidate.startswith("/") or candidate.startswith("//"):
@@ -444,6 +631,13 @@ def safe_redirect_path(value: str | None, *, default: str = "/") -> str:
 def permission_for_api_request(
     method: str, path: str, *, payload: object | None = None
 ) -> AdminPermission:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى permission_for_api_request؛ المدخلات المهمة: method، path، payload.
+    تعيد AdminPermission أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     normalized = path.rstrip("/") or "/"
     if normalized.startswith("/api/servers"):
         if normalized.endswith("/test"):
@@ -513,12 +707,26 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
     )
 
     def __init__(self, app, *, auth_service: AdminAuthService) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: app، auth_service.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         super().__init__(app)
         self._auth_service = auth_service
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى dispatch؛ المدخلات المهمة: request، call_next.
+        تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         path = request.url.path
         if self._is_public(path, request.method):
             return await call_next(request)
@@ -598,6 +806,13 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
 
     @classmethod
     def _is_public(cls, path: str, method: str) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى _is_public؛ المدخلات المهمة: path، method.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if path in {"/health", "/login"} or path.startswith("/static/"):
             return True
         if path == "/logout" and method == "GET":
@@ -609,6 +824,13 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
 
 
 def get_admin_principal(request: Request) -> AdminPrincipal:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى get_admin_principal؛ المدخلات المهمة: request.
+    تعيد AdminPrincipal أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     principal = getattr(request.state, "admin_user", None)
     if principal is None:
         raise PermissionError("Admin authentication required.")

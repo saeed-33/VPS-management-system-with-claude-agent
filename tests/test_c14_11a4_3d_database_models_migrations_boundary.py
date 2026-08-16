@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from pathlib import Path
 import ast
 
@@ -6,6 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_database_models_live_only_in_infrastructure():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_database_models_live_only_in_infrastructure؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     old_root = ROOT / "app/shared/database/models"
     new_root = ROOT / "app/infrastructure/database/models"
 
@@ -28,6 +44,12 @@ def test_database_models_live_only_in_infrastructure():
 
 
 def test_production_uses_infrastructure_model_imports():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_production_uses_infrastructure_model_imports؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     violations = []
 
     for path in (ROOT / "app").rglob("*.py"):
@@ -39,6 +61,12 @@ def test_production_uses_infrastructure_model_imports():
 
 
 def test_engine_registers_infrastructure_models():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_engine_registers_infrastructure_models؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = (
         ROOT / "app/infrastructure/database/engine.py"
     ).read_text(encoding="utf-8")
@@ -48,6 +76,12 @@ def test_engine_registers_infrastructure_models():
 
 
 def test_migrations_have_one_canonical_owner():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_migrations_have_one_canonical_owner؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     old_root = ROOT / "app/shared/database/migrations"
     new_root = ROOT / "app/infrastructure/database/migrations"
 

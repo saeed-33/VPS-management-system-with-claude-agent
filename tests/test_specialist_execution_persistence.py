@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.investigation.runtime_snapshot_service، app.capabilities.investigation.specialist_execution_service، app.capabilities.investigation.specialist_investigation_loop، app.core.contracts.investigation.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -25,7 +35,19 @@ from app.core.contracts.investigation import (
 
 
 class Repository:
+    """
+    يمثل Repository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.model = SimpleNamespace(
             investigation_id="inv-1",
             server_id=4,
@@ -48,6 +70,12 @@ class Repository:
         self.reservations = {}
 
     def reserve_specialist(self, *, investigation_id, specialist_slug, ownership_token, lease_seconds=900):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى reserve_specialist؛ المدخلات المهمة: investigation_id، specialist_slug، ownership_token، lease_seconds.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         runs = self.model.investigation_metadata["runtime_snapshot"]["specialist_runs"]
         existing = next((item for item in runs if item["specialist_slug"] == specialist_slug), None)
         if existing and existing["status"] in {"completed", "failed", "cancelled"}:
@@ -58,6 +86,12 @@ class Repository:
         return {"status": "reserved", "ownership_token": ownership_token, "actions_used": 1}
 
     def finalize_specialist(self, *, investigation_id, specialist_slug, ownership_token, merge):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى finalize_specialist؛ المدخلات المهمة: investigation_id، specialist_slug، ownership_token، merge.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert self.reservations.pop(specialist_slug, None) == ownership_token
         status, metadata = merge(self.model, dict(self.model.investigation_metadata))
         self.model.status = status
@@ -65,6 +99,12 @@ class Repository:
         return self.model
 
     def persist_finalization(self, *, investigation_id, merge):
+        """
+        ينفذ مرحلة الأداة أو يحفظ نتيجة التقييم ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى persist_finalization؛ المدخلات المهمة: investigation_id، merge.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         status, metadata = merge(self.model, dict(self.model.investigation_metadata))
         self.model.status = status
         self.model.investigation_metadata = metadata
@@ -72,6 +112,12 @@ class Repository:
 
 
 def task(slug):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى task؛ المدخلات المهمة: slug.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistTask(
         task_id=f"inv-1:{slug}:1",
         investigation_id="inv-1",
@@ -90,6 +136,12 @@ def loop_result(
     status=SpecialistTaskStatus.COMPLETED,
     with_finding=False,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى loop_result؛ المدخلات المهمة: slug، actions، status، with_finding.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     evidence = EvidenceReference(
         evidence_id=f"ev-{slug}",
         kind=EvidenceKind.COMMAND_RESULT,
@@ -128,6 +180,12 @@ def loop_result(
 
 
 def test_specialist_runs_accumulate_and_duplicate_is_idempotent():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_specialist_runs_accumulate_and_duplicate_is_idempotent؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository = Repository()
     service = SpecialistExecutionService(
         repository=repository,
@@ -159,6 +217,12 @@ def test_specialist_runs_accumulate_and_duplicate_is_idempotent():
 
 
 def test_all_selected_specialists_trigger_atomic_aggregate_finalization():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_all_selected_specialists_trigger_atomic_aggregate_finalization؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository = Repository()
     service = SpecialistExecutionService(
         repository=repository,
@@ -187,6 +251,12 @@ def test_all_selected_specialists_trigger_atomic_aggregate_finalization():
 
 
 def test_second_concurrent_reservation_is_blocked():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_second_concurrent_reservation_is_blocked؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository = Repository()
     first = repository.reserve_specialist(
         investigation_id="inv-1",
@@ -203,6 +273,12 @@ def test_second_concurrent_reservation_is_blocked():
 
 
 def test_failed_specialist_is_persisted_without_claiming_runtime_available():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_failed_specialist_is_persisted_without_claiming_runtime_available؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository = Repository()
     service = SpecialistExecutionService(
         repository=repository,

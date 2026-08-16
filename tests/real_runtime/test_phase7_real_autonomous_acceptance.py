@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import json
@@ -334,6 +344,12 @@ def _create_plan(container, *, investigation_id: str, claim_id: str, evidence_id
 
 
 def _assert_inactive(container, plan_id: str) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _assert_inactive؛ المدخلات المهمة: container، plan_id.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     observation = container.remediation_service.collect_service_evidence(
         plan_id=plan_id,
         server_id=SERVER_ID,
@@ -347,6 +363,12 @@ def _assert_inactive(container, plan_id: str) -> None:
 
 
 def _validate_native_sandbox(container, plan):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _validate_native_sandbox؛ المدخلات المهمة: container، plan.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     validation = container.remediation_service.validate_in_isolated_sandbox(
         plan_id=plan.plan_id,
         target_server_id=SERVER_ID,
@@ -370,6 +392,12 @@ def _validate_native_sandbox(container, plan):
 
 
 def _assert_supervised_execution(container, plan, approval, label: str):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _assert_supervised_execution؛ المدخلات المهمة: container، plan، approval، label.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     outcome = container.remediation_service.apply_approved(
         plan_id=plan.plan_id,
         approval_id=approval.approval_id,

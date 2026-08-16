@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.api.agent_observability، app.interfaces.admin.api.investigations، app.interfaces.admin.api.knowledge_sources، app.interfaces.admin.api.diagnostic_tools، app.interfaces.admin.api.system، app.interfaces.admin.api.specialists.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from app.interfaces.admin.api.agent_observability import (
     router as agent_observability_router,
 )

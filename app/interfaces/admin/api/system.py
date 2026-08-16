@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.runtime.claude.supervisor، app.interfaces.mcp.registry، app.core.config، app.core.contracts.autonomous_remediation.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from fastapi import APIRouter, Depends
 
 from app.interfaces.admin.dependencies import (
@@ -33,6 +43,13 @@ async def get_runtime_overview(
         get_project_tool_boundary
     ),
 ) -> dict:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_runtime_overview؛ المدخلات المهمة: supervisor، tool_boundary.
+    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     tool_groups = (
         tool_boundary.list_tool_groups()
     )

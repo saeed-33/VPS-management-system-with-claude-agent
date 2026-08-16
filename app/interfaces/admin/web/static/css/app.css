@@ -1,3 +1,4 @@
+/* تنسيقات مشتركة لواجهة Admin Web: layout وtheme وstatus components. لا يحتوي هذا الملف على policy أو state persistence. */
 :root {
     --font-family:
         "IBM Plex Sans Arabic",

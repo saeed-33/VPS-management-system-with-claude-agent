@@ -1,3 +1,13 @@
+"""
+Policy أو registry حتمي يقرر السماح أو الرفض أو التصنيف قبل التنفيذ.
+
+الموقع في المعمارية: Core policy.
+يُستدعى بواسطة: capabilities وMCP handlers.
+يعتمد مباشرة على: app.core.contracts.analysis.
+الحد المعماري: لا تنفذ SSH أو LLM أو persistence.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from app.core.contracts.analysis import (

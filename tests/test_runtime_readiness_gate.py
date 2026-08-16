@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from tools.acceptance.evaluation import (
     EvaluationMetric,
     EvaluationObservation,
@@ -23,6 +33,12 @@ def observations(
     score_drop_case=None,
     score_drop_metric=None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى observations؛ المدخلات المهمة: fail_case، fail_metric، omit_case، score_drop_case، score_drop_metric.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     items = []
     for case_id in RUNTIME_READINESS_CASES:
         if case_id == omit_case:
@@ -50,6 +66,12 @@ def observations(
 
 
 def test_runtime_readiness_gate_passes_full_non_regressing_matrix():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_readiness_gate_passes_full_non_regressing_matrix؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = RuntimeReadinessGate().evaluate(
         reference_observations=observations(),
         runtime_observations=observations(),
@@ -69,6 +91,12 @@ def test_runtime_readiness_gate_passes_full_non_regressing_matrix():
 
 
 def test_runtime_readiness_gate_blocks_missing_runtime_case():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_readiness_gate_blocks_missing_runtime_case؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = RuntimeReadinessGate().evaluate(
         reference_observations=observations(),
         runtime_observations=observations(
@@ -88,6 +116,12 @@ def test_runtime_readiness_gate_blocks_missing_runtime_case():
 
 
 def test_runtime_readiness_gate_blocks_critical_regression():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_readiness_gate_blocks_critical_regression؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = RuntimeReadinessGate().evaluate(
         reference_observations=observations(),
         runtime_observations=observations(
@@ -108,6 +142,12 @@ def test_runtime_readiness_gate_blocks_critical_regression():
 
 
 def test_runtime_readiness_gate_blocks_critical_score_regression():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_runtime_readiness_gate_blocks_critical_score_regression؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = RuntimeReadinessGate().evaluate(
         reference_observations=observations(),
         runtime_observations=observations(
@@ -131,6 +171,12 @@ def test_runtime_readiness_gate_blocks_critical_score_regression():
 
 
 def test_non_critical_regression_is_recorded_but_does_not_block():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_non_critical_regression_is_recorded_but_does_not_block؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     reference = observations() + (
         EvaluationObservation(
             case_id="high-cpu",
@@ -166,6 +212,12 @@ def test_non_critical_regression_is_recorded_but_does_not_block():
 
 
 def test_duplicate_observations_are_rejected():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_duplicate_observations_are_rejected؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     duplicate = observations() + (
         EvaluationObservation(
             case_id="high-cpu",

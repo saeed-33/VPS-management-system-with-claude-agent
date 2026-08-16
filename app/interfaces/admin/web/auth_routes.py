@@ -1,3 +1,13 @@
+"""
+جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+
+الموقع في المعمارية: Administration interface.
+يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
+يعتمد مباشرة على: app.interfaces.admin.auth.
+الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -15,6 +25,13 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, next: str | None = None):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى login_page؛ المدخلات المهمة: request، next.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if getattr(request.state, "admin_user", None) is not None:
         return RedirectResponse(safe_redirect_path(next), status_code=303)
     return templates.TemplateResponse(
@@ -31,6 +48,13 @@ async def login(
     password: str = Form(...),
     next: str | None = Form(default=None),
 ):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى login؛ المدخلات المهمة: request، username، password، next.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     service = request.app.state.admin_auth_service
     result = service.authenticate(username=username, password=password, request=request)
     if result is None:
@@ -60,6 +84,13 @@ async def login(
 
 @router.post("/logout")
 async def logout(request: Request):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى logout؛ المدخلات المهمة: request.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     service = request.app.state.admin_auth_service
     service.revoke_cookie(request.cookies.get(service.cookie_name), request=request)
     response = RedirectResponse("/login", status_code=303)

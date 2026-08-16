@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.runtime.claude.observability.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from fastapi import (
@@ -39,6 +49,13 @@ async def list_agent_job_traces(
         get_claude_agent_observability_service
     ),
 ) -> dict:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_agent_job_traces؛ المدخلات المهمة: limit، server_id، status، service.
+    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     traces = service.list_recent_traces(
         limit=limit,
         server_id=server_id,
@@ -58,6 +75,13 @@ async def get_agent_job_trace(
         get_claude_agent_observability_service
     ),
 ) -> dict:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_agent_job_trace؛ المدخلات المهمة: job_id، service.
+    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     trace = service.get_trace(job_id)
 
     if trace is None:
@@ -87,6 +111,13 @@ async def get_agent_observability_summary(
         get_claude_agent_observability_service
     ),
 ) -> dict:
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_agent_observability_summary؛ المدخلات المهمة: limit، server_id، service.
+    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return service.summarize_recent(
         limit=limit,
         server_id=server_id,

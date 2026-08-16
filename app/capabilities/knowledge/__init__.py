@@ -16,6 +16,13 @@ _MODULES = (
 
 
 def __getattr__(name: str):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+    تُستدعى عندما يصل workflow إلى __getattr__؛ المدخلات المهمة: name.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     for module_name in _MODULES:
         module = import_module(f"{__name__}.{module_name}")
         if hasattr(module, name):

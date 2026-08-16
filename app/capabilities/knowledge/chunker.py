@@ -1,3 +1,13 @@
+"""
+جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+
+الموقع في المعمارية: Application capability / knowledge.
+يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
+يعتمد مباشرة على: app.capabilities.knowledge.ingestion_contracts.
+الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,12 +24,27 @@ _SENTENCE_BOUNDARY_RE = re.compile(r"(?<=[.!?])\s+")
 
 @dataclass(slots=True, frozen=True)
 class KnowledgeChunkerConfig:
+    """
+    يمثل KnowledgeChunkerConfig مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     target_chars: int = 1800
     max_chars: int = 2600
     overlap_chars: int = 240
     min_chars: int = 180
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if self.target_chars < 200:
             raise ValueError("target_chars must be >= 200.")
         if self.max_chars < self.target_chars:
@@ -34,16 +59,39 @@ class KnowledgeChunkerConfig:
 
 @dataclass(slots=True, frozen=True)
 class _Block:
+    """
+    يمثل _Block مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     text: str
     section_title: str | None
     page_number: int | None
 
 
 class StructureAwareKnowledgeChunker:
+    """
+    يمثل StructureAwareKnowledgeChunker مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         config: KnowledgeChunkerConfig | None = None,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: config.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._config = config or KnowledgeChunkerConfig()
 
     def chunk_document(
@@ -52,6 +100,13 @@ class StructureAwareKnowledgeChunker:
         text: str,
         metadata: dict | None = None,
     ) -> tuple[KnowledgeChunkDraft, ...]:
+        """
+        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى chunk_document؛ المدخلات المهمة: text، metadata.
+        تعيد tuple[KnowledgeChunkDraft, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         blocks = self._build_blocks(
             text=text,
             metadata=dict(metadata or {}),
@@ -139,6 +194,13 @@ class StructureAwareKnowledgeChunker:
         text: str,
         metadata: dict,
     ) -> list[_Block]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _build_blocks؛ المدخلات المهمة: text، metadata.
+        تعيد list[_Block] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         pages = metadata.get("pages")
 
         if isinstance(pages, list) and pages:
@@ -188,6 +250,13 @@ class StructureAwareKnowledgeChunker:
         page_number: int | None = None,
         known_headings: set[str] | None = None,
     ) -> list[_Block]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _paragraph_blocks؛ المدخلات المهمة: text، page_number، known_headings.
+        تعيد list[_Block] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         known_headings = known_headings or set()
         blocks: list[_Block] = []
         current_section: str | None = None
@@ -223,6 +292,13 @@ class StructureAwareKnowledgeChunker:
         self,
         block: _Block,
     ) -> list[_Block]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _split_oversized_block؛ المدخلات المهمة: block.
+        تعيد list[_Block] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if len(block.text) <= self._config.max_chars:
             return [block]
 
@@ -284,6 +360,13 @@ class StructureAwareKnowledgeChunker:
         self,
         blocks: list[_Block],
     ) -> list[_Block]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _overlap_blocks؛ المدخلات المهمة: blocks.
+        تعيد list[_Block] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if self._config.overlap_chars == 0:
             return []
 
@@ -311,6 +394,13 @@ class StructureAwareKnowledgeChunker:
 
     @staticmethod
     def _joined_size(blocks: list[_Block]) -> int:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _joined_size؛ المدخلات المهمة: blocks.
+        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not blocks:
             return 0
 
@@ -325,6 +415,13 @@ class StructureAwareKnowledgeChunker:
         index: int,
         blocks: list[_Block],
     ) -> KnowledgeChunkDraft:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _make_chunk؛ المدخلات المهمة: index، blocks.
+        تعيد KnowledgeChunkDraft أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         sections = [
             block.section_title
             for block in blocks

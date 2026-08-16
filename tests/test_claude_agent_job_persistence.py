@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.runtime.claude، app.infrastructure.database.models.agent_job، app.infrastructure.database.repositories.agent_job_repository.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -18,6 +28,12 @@ from app.infrastructure.database.repositories.agent_job_repository import (
 
 
 def make_repository():
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_repository؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={
@@ -40,6 +56,12 @@ def make_repository():
 def make_request(
     job_id="job-1",
 ) -> ClaudeRuntimeRequest:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_request؛ المدخلات المهمة: job_id.
+    تعيد ClaudeRuntimeRequest أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return ClaudeRuntimeRequest(
         job_id=job_id,
         job_type="monitoring_cycle",
@@ -55,6 +77,12 @@ def make_request(
 
 
 def test_job_is_created_from_runtime_request():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_job_is_created_from_runtime_request؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository, _ = make_repository()
     service = ClaudeAgentJobService(
         repository
@@ -77,6 +105,12 @@ def test_job_is_created_from_runtime_request():
 
 
 def test_job_completion_preserves_result_observability():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_job_completion_preserves_result_observability؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository, _ = make_repository()
     service = ClaudeAgentJobService(
         repository
@@ -120,6 +154,12 @@ def test_job_completion_preserves_result_observability():
 
 
 def test_job_survives_repository_recreation():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_job_survives_repository_recreation؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository, factory = make_repository()
     ClaudeAgentJobService(
         repository
@@ -144,6 +184,12 @@ def test_job_survives_repository_recreation():
 
 
 def test_interrupted_jobs_are_recovered_as_failed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_interrupted_jobs_are_recovered_as_failed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository, _ = make_repository()
     service = ClaudeAgentJobService(
         repository
@@ -182,6 +228,12 @@ def test_interrupted_jobs_are_recovered_as_failed():
 
 
 def test_recent_jobs_can_be_filtered_by_status():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_recent_jobs_can_be_filtered_by_status؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository, _ = make_repository()
     service = ClaudeAgentJobService(
         repository

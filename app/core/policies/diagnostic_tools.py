@@ -1,3 +1,13 @@
+"""
+Policy أو registry حتمي يقرر السماح أو الرفض أو التصنيف قبل التنفيذ.
+
+الموقع في المعمارية: Core policy.
+يُستدعى بواسطة: capabilities وMCP handlers.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا تنفذ SSH أو LLM أو persistence.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,10 +24,26 @@ _SAFE_PATH_RE = re.compile(r"^/[A-Za-z0-9_./@:+-]+$")
 
 
 class DiagnosticToolRisk(StrEnum):
+    """
+    يمثل DiagnosticToolRisk مسؤولية محددة داخل طبقة Core policy.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     READ_ONLY = "read_only"
 
 
 class DiagnosticParameterKind(StrEnum):
+    """
+    يمثل DiagnosticParameterKind مسؤولية محددة داخل طبقة Core policy.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     SERVICE = "service"
     INTEGER = "integer"
     PORT = "port"
@@ -28,6 +54,14 @@ class DiagnosticParameterKind(StrEnum):
 
 @dataclass(slots=True, frozen=True)
 class DiagnosticToolParameter:
+    """
+    يمثل DiagnosticToolParameter مسؤولية محددة داخل طبقة Core policy.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     name: str
     kind: DiagnosticParameterKind
     required: bool = True
@@ -37,6 +71,13 @@ class DiagnosticToolParameter:
     description: str | None = None
 
     def validate(self, value: Any) -> Any:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى validate؛ المدخلات المهمة: value.
+        تعيد Any أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if value is None:
             if self.required and self.default is None:
                 raise ValueError(
@@ -153,6 +194,14 @@ class DiagnosticToolParameter:
 
 @dataclass(slots=True, frozen=True)
 class DiagnosticToolDefinition:
+    """
+    يمثل DiagnosticToolDefinition مسؤولية محددة داخل طبقة Core policy.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     tool_id: str
     name: str
     description: str
@@ -169,6 +218,13 @@ class DiagnosticToolDefinition:
         self,
         arguments: Mapping[str, Any] | None = None,
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى render_command؛ المدخلات المهمة: arguments.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         raw = dict(arguments or {})
         known = {
             item.name
@@ -223,11 +279,27 @@ class DiagnosticToolDefinition:
 
 @dataclass(slots=True, frozen=True)
 class DiagnosticToolCall:
+    """
+    يمثل DiagnosticToolCall مسؤولية محددة داخل طبقة Core policy.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     tool_id: str
     arguments: Mapping[str, Any]
 
 
 class DiagnosticToolRegistry:
+    """
+    يمثل DiagnosticToolRegistry مسؤولية محددة داخل طبقة Core policy.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         definitions: tuple[
@@ -235,6 +307,13 @@ class DiagnosticToolRegistry:
             ...
         ],
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: definitions.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         by_id: dict[
             str,
             DiagnosticToolDefinition,
@@ -286,12 +365,26 @@ class DiagnosticToolRegistry:
         DiagnosticToolDefinition,
         ...
     ]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى definitions؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد tuple[DiagnosticToolDefinition, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self._definitions
 
     def get(
         self,
         tool_id: str,
     ) -> DiagnosticToolDefinition | None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى get؛ المدخلات المهمة: tool_id.
+        تعيد DiagnosticToolDefinition | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self._by_id.get(
             tool_id.strip().casefold()
         )
@@ -300,6 +393,13 @@ class DiagnosticToolRegistry:
         self,
         tool_id: str,
     ) -> DiagnosticToolDefinition:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى require؛ المدخلات المهمة: tool_id.
+        تعيد DiagnosticToolDefinition أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         definition = self.get(tool_id)
 
         if definition is None:
@@ -316,6 +416,13 @@ class DiagnosticToolRegistry:
         DiagnosticToolDefinition,
         ...
     ]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى allowed_for_specialist؛ المدخلات المهمة: allowed_tool_ids.
+        تعيد tuple[DiagnosticToolDefinition, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         result = []
 
         for tool_id in allowed_tool_ids:
@@ -334,6 +441,13 @@ class DiagnosticToolRegistry:
         *,
         allowed_tool_ids: tuple[str, ...],
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
+
+        تُستدعى عندما يصل workflow إلى render_call؛ المدخلات المهمة: call، allowed_tool_ids.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         allowed = {
             value.strip().casefold()
             for value in allowed_tool_ids
@@ -360,6 +474,13 @@ class DiagnosticToolRegistry:
 
 
 def build_default_diagnostic_tool_registry() -> DiagnosticToolRegistry:
+    """
+    يبني DTO أو dependency graph من المدخلات ضمن طبقة Core policy.
+
+    تُستدعى عندما يصل workflow إلى build_default_diagnostic_tool_registry؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد DiagnosticToolRegistry أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     service = DiagnosticToolParameter(
         name="service",
         kind=DiagnosticParameterKind.SERVICE,

@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.infrastructure.database.models.report_retrieval_document، app.infrastructure.database.session.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
@@ -6,7 +16,22 @@ from app.infrastructure.database.session import SessionLocal
 
 
 class RetrievalRepository:
+    """
+    يمثل RetrievalRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(self, session_factory: sessionmaker = SessionLocal) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def upsert_document(
@@ -29,6 +54,13 @@ class RetrievalRepository:
         embedding_dimensions: int,
         analysis_health_status: str | None,
     ) -> ReportRetrievalDocumentModel:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى upsert_document؛ المدخلات المهمة: report_id، analysis_id، server_id، monitoring_profile_id، command_set_hash، connection_successful.
+        تعيد ReportRetrievalDocumentModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             existing = session.scalar(
                 select(ReportRetrievalDocumentModel).where(
@@ -69,6 +101,13 @@ class RetrievalRepository:
         target_normalized_text: str,
         target_health_status: str | None,
     ) -> ReportRetrievalDocumentModel | None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى clone_document؛ المدخلات المهمة: source_analysis_id، target_analysis_id، target_report_id، target_server_id، target_fingerprint، target_normalized_text.
+        تعيد ReportRetrievalDocumentModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             source = session.scalar(
                 select(
@@ -143,6 +182,13 @@ class RetrievalRepository:
         self,
         analysis_id: int,
     ) -> ReportRetrievalDocumentModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_by_analysis_id؛ المدخلات المهمة: analysis_id.
+        تعيد ReportRetrievalDocumentModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.scalar(
                 select(
@@ -164,6 +210,13 @@ class RetrievalRepository:
         minimum_rank: float = 0.0,
         limit: int = 20,
     ):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى find_by_full_text؛ المدخلات المهمة: query_text، server_id، monitoring_profile_id، command_set_hash، exclude_report_id، minimum_rank.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         cleaned_query = query_text.strip()
         if not cleaned_query:
             return []
@@ -236,6 +289,13 @@ class RetrievalRepository:
         limit: int = 5,
         hnsw_ef_search: int = 100,
     ):
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى find_similar؛ المدخلات المهمة: server_id، monitoring_profile_id، command_set_hash، embedding، exclude_report_id، minimum_score.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         distance = (
             ReportRetrievalDocumentModel.embedding.cosine_distance(
                 embedding

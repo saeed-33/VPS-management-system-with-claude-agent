@@ -1,3 +1,4 @@
+{# قالب Admin Web لصفحة autonomous decisions. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
 {% extends "base.html" %}
 {% block title %}Autonomous Decisions{% endblock %}
 {% block content %}<header class="page-header"><div><h1 class="page-heading">Autonomous Decisions</h1><p class="page-description">Safety decisions are operational outcomes, not application errors.</p></div></header><section class="panel"><header class="panel-header"><h2 class="panel-title">Decision log</h2><button id="decision-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div id="decision-list" class="panel-body"><div class="empty-state"><h3>Loading decisions...</h3></div></div></section>{% endblock %}

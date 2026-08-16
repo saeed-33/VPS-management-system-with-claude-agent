@@ -1,3 +1,13 @@
+"""
+نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
+
+الموقع في المعمارية: Persistence model.
+يُستدعى بواسطة: repositories وطبقة database.
+يعتمد مباشرة على: app.core.utils.datetime، app.infrastructure.database.base.
+الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import datetime

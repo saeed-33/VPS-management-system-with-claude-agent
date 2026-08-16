@@ -1,3 +1,13 @@
+"""
+عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
+
+الموقع في المعمارية: Core application contracts.
+يُستدعى بواسطة: capabilities وinterfaces وadapters.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا تنفذ I/O أو workflow.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -7,18 +17,42 @@ from typing import Any
 
 
 class AutonomousPolicyStatus(StrEnum):
+    """
+    يمثل AutonomousPolicyStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     ENABLED = "enabled"
     DISABLED = "disabled"
     SUSPENDED = "suspended"
 
 
 class AutonomousDecisionOutcome(StrEnum):
+    """
+    يمثل AutonomousDecisionOutcome مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     AUTO_EXECUTE = "auto_execute"
     REQUIRE_HUMAN_APPROVAL = "require_human_approval"
     DENY = "deny"
 
 
 class AutonomousAuthorizationStatus(StrEnum):
+    """
+    يمثل AutonomousAuthorizationStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     VALID = "valid"
     CONSUMED = "consumed"
     STALE = "stale"
@@ -27,6 +61,14 @@ class AutonomousAuthorizationStatus(StrEnum):
 
 
 class AutonomousSuspensionReason(StrEnum):
+    """
+    يمثل AutonomousSuspensionReason مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     EXECUTION_FAILURE = "execution_failure"
     VERIFICATION_FAILURE = "verification_failure"
     ROLLBACK_FAILURE = "rollback_failure"
@@ -36,6 +78,14 @@ class AutonomousSuspensionReason(StrEnum):
 
 
 class AutonomousDecisionReasonCode(StrEnum):
+    """
+    يمثل AutonomousDecisionReasonCode مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     POLICY_MATCH = "policy_match"
     POLICY_DISABLED = "policy_disabled"
     POLICY_SUSPENDED = "policy_suspended"
@@ -74,6 +124,14 @@ V1_AUTONOMOUS_RISK_CEILING = "low"
 
 @dataclass(slots=True, frozen=True)
 class AutonomousRemediationPolicy:
+    """
+    يمثل AutonomousRemediationPolicy مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     policy_id: str
     name: str
     description: str
@@ -104,6 +162,13 @@ class AutonomousRemediationPolicy:
     updated_at: datetime | None = None
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.policy_id.strip() or not self.name.strip():
             raise ValueError("policy_id and name must not be empty.")
         if self.version < 1:
@@ -121,6 +186,14 @@ class AutonomousRemediationPolicy:
 
 @dataclass(slots=True, frozen=True)
 class AutonomousHistorySnapshot:
+    """
+    يمثل AutonomousHistorySnapshot مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     issue_fingerprint: str
     action_type: str
     target: str
@@ -140,19 +213,48 @@ class AutonomousHistorySnapshot:
 
     @property
     def success_rate(self) -> float:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى success_rate؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.verified_success_count / self.supervised_execution_count if self.supervised_execution_count else 0.0
 
     @property
     def failure_rate(self) -> float:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى failure_rate؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.failed_execution_count / self.supervised_execution_count if self.supervised_execution_count else 0.0
 
     @property
     def rollback_failure_rate(self) -> float:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى rollback_failure_rate؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.rollback_failure_count / self.rollback_required_count if self.rollback_required_count else 0.0
 
 
 @dataclass(slots=True, frozen=True)
 class AutonomousPolicyDecision:
+    """
+    يمثل AutonomousPolicyDecision مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     decision_id: str
     outcome: AutonomousDecisionOutcome
     reason_codes: tuple[str, ...]
@@ -171,6 +273,14 @@ class AutonomousPolicyDecision:
 
 @dataclass(slots=True, frozen=True)
 class AutonomousAuthorization:
+    """
+    يمثل AutonomousAuthorization مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     authorization_id: str
     token: str
     status: AutonomousAuthorizationStatus
@@ -190,6 +300,14 @@ class AutonomousAuthorization:
 
 @dataclass(slots=True, frozen=True)
 class AutonomousExecutionReservation:
+    """
+    يمثل AutonomousExecutionReservation مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     reservation_id: str
     idempotency_key: str
     status: str
@@ -202,6 +320,14 @@ class AutonomousExecutionReservation:
 
 @dataclass(slots=True, frozen=True)
 class AutonomousPolicyCandidate:
+    """
+    يمثل AutonomousPolicyCandidate مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     issue_fingerprint: str
     action_type: str
     target: str
@@ -215,6 +341,14 @@ class AutonomousPolicyCandidate:
 
 @dataclass(slots=True, frozen=True)
 class AutonomousEvaluationContext:
+    """
+    يمثل AutonomousEvaluationContext مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     global_enabled: bool
     now: datetime
     policy: AutonomousRemediationPolicy | None

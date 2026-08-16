@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.rag_context، app.capabilities.knowledge.retrieval، app.interfaces.mcp.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import asyncio
 from dataclasses import dataclass
 
@@ -22,6 +32,12 @@ from tests.test_project_mcp_tool_boundary import (
 
 @dataclass
 class Analysis:
+    """
+    يمثل Analysis جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     id: int
     report_id: int
     server_id: int = 1
@@ -40,6 +56,12 @@ class Analysis:
     llm_called: bool = True
 
     def __post_init__(self):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.issues = self.issues or [
             {
                 "title": "High CPU",
@@ -54,7 +76,19 @@ class Analysis:
 
 
 class AnalysisRepository:
+    """
+    يمثل AnalysisRepository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.exact = Analysis(
             id=3,
             report_id=8,
@@ -73,6 +107,12 @@ class AnalysisRepository:
         self,
         **kwargs,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى find_completed_by_fingerprint؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert kwargs["server_id"] == 1
         assert kwargs["exclude_report_id"] == 10
         return self.exact
@@ -81,6 +121,12 @@ class AnalysisRepository:
         self,
         analysis_id,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_by_id؛ المدخلات المهمة: analysis_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self.by_id.get(
             analysis_id
         )
@@ -89,13 +135,31 @@ class AnalysisRepository:
         self,
         report_id,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_by_report_id؛ المدخلات المهمة: report_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if report_id == 10:
             return self.by_id[4]
         return None
 
 
 class AnalysisOrchestrator:
+    """
+    يمثل AnalysisOrchestrator جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls = []
 
     async def process(
@@ -105,6 +169,12 @@ class AnalysisOrchestrator:
         server_id,
         force=False,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى process؛ المدخلات المهمة: report_id، server_id، force.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.calls.append(
             {
                 "report_id": report_id,
@@ -116,10 +186,22 @@ class AnalysisOrchestrator:
 
 
 class IncidentRetriever:
+    """
+    يمثل IncidentRetriever جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     async def retrieve(
         self,
         **kwargs,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى retrieve؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert kwargs["server_id"] == 1
         assert kwargs["exclude_report_id"] == 10
         return [
@@ -141,6 +223,12 @@ class IncidentRetriever:
 
 
 class KnowledgeRetriever:
+    """
+    يمثل KnowledgeRetriever جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     async def retrieve(
         self,
         *,
@@ -148,6 +236,12 @@ class KnowledgeRetriever:
         specialist_slug=None,
         domains=(),
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى retrieve؛ المدخلات المهمة: query، specialist_slug، domains.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         assert query == "nginx cpu"
         assert specialist_slug == "web"
         assert domains == ("nginx",)
@@ -185,6 +279,12 @@ def boundary(
     incident_retriever=None,
     knowledge_retriever=None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى boundary؛ المدخلات المهمة: analysis_repository، analysis_orchestrator، incident_retriever، knowledge_retriever.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return ProjectMcpToolBoundary(
         server_service=ServerService(),
         monitoring_profile_service=(
@@ -221,6 +321,12 @@ def run_tool(
     *,
     tool_boundary=None,
 ):
+    """
+    ينفذ مرحلة الأداة أو يحفظ نتيجة التقييم ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى run_tool؛ المدخلات المهمة: tool_id، arguments، tool_boundary.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return asyncio.run(
         (
             tool_boundary
@@ -236,6 +342,12 @@ def run_tool(
 
 
 def test_find_exact_report_match_returns_reusable_analysis():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_find_exact_report_match_returns_reusable_analysis؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "find_exact_report_match",
         {
@@ -254,6 +366,12 @@ def test_find_exact_report_match_returns_reusable_analysis():
 
 
 def test_get_top_similar_reports_is_capped_at_three():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_top_similar_reports_is_capped_at_three؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "get_top_similar_reports",
         {
@@ -274,6 +392,12 @@ def test_get_top_similar_reports_is_capped_at_three():
 
 
 def test_analyze_report_uses_existing_orchestrator():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_analyze_report_uses_existing_orchestrator؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     orchestrator = AnalysisOrchestrator()
     result = run_tool(
         "analyze_report",
@@ -299,6 +423,12 @@ def test_analyze_report_uses_existing_orchestrator():
 
 
 def test_get_analysis_by_report_id():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_get_analysis_by_report_id؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "get_analysis",
         {
@@ -311,6 +441,12 @@ def test_get_analysis_by_report_id():
 
 
 def test_search_knowledge_uses_project_retriever():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_search_knowledge_uses_project_retriever؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     result = run_tool(
         "search_knowledge",
         {
@@ -332,6 +468,12 @@ def test_search_knowledge_uses_project_retriever():
 
 
 def test_missing_dependency_is_controlled_error():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_missing_dependency_is_controlled_error؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     tool_boundary = ProjectMcpToolBoundary(
         server_service=ServerService(),
         monitoring_profile_service=(

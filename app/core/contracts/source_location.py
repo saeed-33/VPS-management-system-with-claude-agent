@@ -1,3 +1,13 @@
+"""
+عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
+
+الموقع في المعمارية: Core application contracts.
+يُستدعى بواسطة: capabilities وinterfaces وadapters.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا تنفذ I/O أو workflow.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -18,6 +28,13 @@ class SourceLocation:
     evidence_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.file_path.strip():
             raise ValueError("file_path must not be empty.")
         if self.line_number < 1:
@@ -30,6 +47,13 @@ class SourceLocation:
             raise ValueError("source must not be empty.")
 
     def to_dict(self) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+
+        تُستدعى عندما يصل workflow إلى to_dict؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "file_path": self.file_path,
             "line_number": self.line_number,

@@ -1,3 +1,6 @@
+/**
+ * صفحة إدارة monitoring commands. تتعامل مع CRUD للأوامر وإعداد fingerprint strategy عبر Admin API، وتبقي form/modal state محليًا.
+ */
 let currentCommands = [];
 
 const fingerprintStrategyInformation = {
@@ -38,6 +41,10 @@ const fingerprintStrategyInformation = {
 };
 
 
+/**
+ * ينفذ خطوة واجهة باسم loadCommands ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function loadCommands() {
     const table = document.getElementById(
         "commands-table"
@@ -128,6 +135,10 @@ async function loadCommands() {
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم renderCommandRow ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderCommandRow(command) {
     const strategy =
         command.fingerprint_strategy ||
@@ -243,6 +254,10 @@ function renderCommandRow(command) {
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم parseFingerprintConfig ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function parseFingerprintConfig(
     rawValue,
     fieldName
@@ -277,6 +292,10 @@ function parseFingerprintConfig(
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم updateStrategyHelp ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function updateStrategyHelp(
     selectId,
     helpId
@@ -304,6 +323,10 @@ function updateStrategyHelp(
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم resetCreateCommandForm ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function resetCreateCommandForm() {
     document.getElementById(
         "command-timeout"
@@ -328,6 +351,10 @@ function resetCreateCommandForm() {
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم openEditCommandModal ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function openEditCommandModal(commandId) {
     const command = currentCommands.find(
         item => item.id === commandId
@@ -397,6 +424,10 @@ function openEditCommandModal(commandId) {
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم closeEditCommandModal ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function closeEditCommandModal() {
     const modal = document.getElementById(
         "edit-command-modal"
@@ -410,6 +441,10 @@ function closeEditCommandModal() {
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم toggleCommand ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function toggleCommand(
     commandId,
     currentlyEnabled
@@ -443,6 +478,10 @@ async function toggleCommand(
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم deleteCommand ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function deleteCommand(commandId) {
     const command = currentCommands.find(
         item => item.id === commandId

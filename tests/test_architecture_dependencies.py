@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import ast
@@ -9,6 +19,12 @@ APP = ROOT / "app"
 
 
 def _module_name(path: Path) -> str:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _module_name؛ المدخلات المهمة: path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     relative = path.relative_to(ROOT).with_suffix("")
     parts = list(relative.parts)
     if parts[-1] == "__init__":
@@ -17,6 +33,12 @@ def _module_name(path: Path) -> str:
 
 
 def _imports(path: Path) -> set[str]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _imports؛ المدخلات المهمة: path.
+    تعيد set[str] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     tree = ast.parse(path.read_text(encoding="utf-8"))
     result: set[str] = set()
 
@@ -33,6 +55,12 @@ def _violations(
     package: str,
     forbidden_prefixes: tuple[str, ...],
 ) -> list[str]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _violations؛ المدخلات المهمة: package، forbidden_prefixes.
+    تعيد list[str] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     violations: list[str] = []
     root = ROOT / package.replace(".", "/")
 
@@ -47,6 +75,12 @@ def _violations(
 
 
 def test_core_has_no_outer_layer_dependencies():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_core_has_no_outer_layer_dependencies؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert _violations(
         "app/core",
         (
@@ -60,6 +94,12 @@ def test_core_has_no_outer_layer_dependencies():
 
 
 def test_capabilities_do_not_depend_on_interfaces_composition_or_runtime():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_capabilities_do_not_depend_on_interfaces_composition_or_runtime؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert _violations(
         "app/capabilities",
         (
@@ -71,6 +111,12 @@ def test_capabilities_do_not_depend_on_interfaces_composition_or_runtime():
 
 
 def test_infrastructure_does_not_depend_on_interface_or_runtime_layers():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_infrastructure_does_not_depend_on_interface_or_runtime_layers؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert _violations(
         "app/infrastructure",
         (
@@ -82,6 +128,12 @@ def test_infrastructure_does_not_depend_on_interface_or_runtime_layers():
 
 
 def test_legacy_application_packages_are_absent():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_legacy_application_packages_are_absent؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert not (APP / "shared").exists()
     assert not (APP / "tools").exists()
     assert not (APP / "domain").exists()
@@ -91,6 +143,12 @@ def test_legacy_application_packages_are_absent():
 
 
 def test_application_sources_do_not_import_deleted_namespaces():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_application_sources_do_not_import_deleted_namespaces؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     forbidden = (
         "app.domain",
         "app.admin",
@@ -107,6 +165,12 @@ def test_application_sources_do_not_import_deleted_namespaces():
 
 
 def test_application_import_graph_is_acyclic():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_application_import_graph_is_acyclic؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     module_paths = {
         _module_name(path): path
         for path in APP.rglob("*.py")
@@ -125,6 +189,12 @@ def test_application_import_graph_is_acyclic():
     cycles: list[str] = []
 
     def visit(module: str) -> None:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى visit؛ المدخلات المهمة: module.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if module in visiting:
             start = visiting.index(module)
             cycles.append(" -> ".join(visiting[start:] + [module]))

@@ -1,3 +1,13 @@
+"""
+جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+
+الموقع في المعمارية: Administration interface.
+يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from typing import Any
@@ -6,6 +16,14 @@ from pydantic import BaseModel, Field
 
 
 class AutonomousPolicyRequest(BaseModel):
+    """
+    يمثل AutonomousPolicyRequest مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     policy_id: str | None = Field(default=None, min_length=1, max_length=64)
     name: str = Field(min_length=1, max_length=200)
     description: str = Field(default="", max_length=4000)
@@ -34,6 +52,14 @@ class AutonomousPolicyRequest(BaseModel):
 
 
 class AutonomousPolicyUpdateRequest(BaseModel):
+    """
+    يمثل AutonomousPolicyUpdateRequest مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     name: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=4000)
     allowed_target_pattern: str | None = Field(default=None, min_length=1, max_length=128)

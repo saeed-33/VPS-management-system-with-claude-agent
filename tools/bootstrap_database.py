@@ -1,3 +1,13 @@
+"""
+أداة CLI لإدارة database أو تشغيل MCP أو سيناريو خارجي.
+
+الموقع في المعمارية: Operational tooling.
+يُستدعى بواسطة: مشغل الأداة أو deployment workflow.
+يعتمد مباشرة على: app.core.config.
+الحد المعماري: لا يضيف endpoint أو capability تلقائيًا إلى التطبيق.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import argparse
@@ -60,6 +70,12 @@ CUSTOM_INDEXES = {
 
 
 def connection_kwargs(*, database: str) -> dict:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى connection_kwargs؛ المدخلات المهمة: database.
+    تعيد dict أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return {
         "host": settings.postgres_host,
         "port": settings.postgres_port,
@@ -70,6 +86,12 @@ def connection_kwargs(*, database: str) -> dict:
 
 
 def database_exists(database: str) -> bool:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى database_exists؛ المدخلات المهمة: database.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     with psycopg.connect(
         **connection_kwargs(database="postgres"),
         autocommit=True,
@@ -83,6 +105,12 @@ def database_exists(database: str) -> bool:
 
 
 def create_database_if_missing() -> bool:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى create_database_if_missing؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     database = settings.postgres_db
 
     if database_exists(database):
@@ -107,6 +135,12 @@ def create_database_if_missing() -> bool:
 
 
 def ensure_vector_extension() -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى ensure_vector_extension؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     with psycopg.connect(
         **connection_kwargs(database=settings.postgres_db),
         autocommit=True,
@@ -120,6 +154,12 @@ def ensure_vector_extension() -> None:
 
 
 def create_model_tables() -> None:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى create_model_tables؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     # Importing this module registers every mapped model in Base.metadata.
     import app.infrastructure.database.models  # noqa: F401
     from app.infrastructure.database.base import Base
@@ -189,6 +229,12 @@ def create_custom_indexes() -> None:
 
 
 def verify_schema() -> bool:
+    """
+    يتحقق من invariant أو readiness شرطها ظاهر في الكود ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى verify_schema؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     failures: list[str] = []
 
     with psycopg.connect(
@@ -344,6 +390,12 @@ def verify_schema() -> bool:
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Create/verify the PostgreSQL database required by "

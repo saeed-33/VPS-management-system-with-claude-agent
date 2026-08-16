@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from pathlib import Path
 import ast
 
@@ -6,6 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_investigation_ollama_adapters_live_in_infrastructure():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_investigation_ollama_adapters_live_in_infrastructure؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     specialist = (
         ROOT
         / "app/infrastructure/llm/ollama/specialist_reasoning_client.py"
@@ -22,6 +38,12 @@ def test_investigation_ollama_adapters_live_in_infrastructure():
 
 
 def test_investigation_capability_keeps_contracts_not_ollama_implementations():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_investigation_capability_keeps_contracts_not_ollama_implementations؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     specialist = (
         ROOT
         / "app/capabilities/investigation/specialist_reasoning_client.py"
@@ -57,6 +79,12 @@ def test_investigation_capability_keeps_contracts_not_ollama_implementations():
 
 
 def test_capability_contracts_resolve_provider_adapters_lazily():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_capability_contracts_resolve_provider_adapters_lazily؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     specialist = (
         ROOT
         / "app/capabilities/investigation/specialist_reasoning_client.py"

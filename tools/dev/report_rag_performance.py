@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: app.infrastructure.database.models.report_analysis، app.infrastructure.database.session.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import argparse
@@ -21,6 +31,12 @@ from app.infrastructure.database.session import SessionLocal
 
 
 def percentile(values: list[float], pct: float) -> float | None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى percentile؛ المدخلات المهمة: values، pct.
+    تعيد float | None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if not values:
         return None
 
@@ -30,6 +46,12 @@ def percentile(values: list[float], pct: float) -> float | None:
 
 
 def stats(values: list[float]) -> dict[str, float | int]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى stats؛ المدخلات المهمة: values.
+    تعيد dict[str, float | int] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return {
         "count": len(values),
         "mean": round(mean(values), 2),
@@ -39,6 +61,12 @@ def stats(values: list[float]) -> dict[str, float | int]:
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=200)
     parser.add_argument("--json", type=Path, default=None)

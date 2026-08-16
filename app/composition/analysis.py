@@ -1,3 +1,13 @@
+"""
+يركب dependencies ويربط repositories والخدمات والـruntime.
+
+الموقع في المعمارية: Bootstrap / dependency composition.
+يُستدعى بواسطة: app.main أو الاختبارات عند إنشاء container.
+يعتمد مباشرة على: app.interfaces.admin.services.report_pdf_service، app.composition.repositories، app.composition.services، app.capabilities.analysis.analysis_orchestrator، app.capabilities.analysis.client_factory، app.capabilities.analysis.report_analyzer.
+الحد المعماري: لا ينفذ workflow business؛ دوره wiring وترتيب الإنشاء.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import logging
@@ -40,6 +50,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass(slots=True, frozen=True)
 class RetrievalComposition:
+    """
+    يمثل RetrievalComposition مسؤولية محددة داخل طبقة Bootstrap / dependency composition.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه app.main أو الاختبارات عند إنشاء container
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     retrieval_indexer: RetrievalIndexer | None
     rag_retriever: HybridRetriever | None
     rag_context_builder: RagContextBuilder | None
@@ -48,6 +66,14 @@ class RetrievalComposition:
 
 @dataclass(slots=True, frozen=True)
 class AnalysisInvestigationComposition:
+    """
+    يمثل AnalysisInvestigationComposition مسؤولية محددة داخل طبقة Bootstrap / dependency composition.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه app.main أو الاختبارات عند إنشاء container
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     specialist_knowledge_retriever: KnowledgeHybridRetriever | None
     specialist_investigation_loop: SpecialistInvestigationLoop | None
     report_analyzer: ReportAnalyzer | None
@@ -58,6 +84,13 @@ def build_retrieval_composition(
     repositories: RepositoryBundle,
     settings: Settings,
 ) -> RetrievalComposition:
+    """
+    يبني DTO أو dependency graph من المدخلات ضمن طبقة Bootstrap / dependency composition.
+
+    تُستدعى عندما يصل workflow إلى build_retrieval_composition؛ المدخلات المهمة: repositories، settings.
+    تعيد RetrievalComposition أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     embedding_client = None
     retrieval_indexer = None
     vector_retriever = None
@@ -137,6 +170,13 @@ def build_analysis_investigation_composition(
     retrieval: RetrievalComposition,
     settings: Settings,
 ) -> AnalysisInvestigationComposition:
+    """
+    يبني DTO أو dependency graph من المدخلات ضمن طبقة Bootstrap / dependency composition.
+
+    تُستدعى عندما يصل workflow إلى build_analysis_investigation_composition؛ المدخلات المهمة: repositories، services، retrieval، settings.
+    تعيد AnalysisInvestigationComposition أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     specialist_knowledge_retriever = None
     specialist_investigation_loop = None
     report_analyzer = None

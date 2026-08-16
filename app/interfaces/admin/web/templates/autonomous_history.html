@@ -1,3 +1,4 @@
+{# قالب Admin Web لصفحة autonomous history. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
 {% extends "base.html" %}
 {% block title %}Autonomous History{% endblock %}
 {% block content %}<header class="page-header"><div><h1 class="page-heading">Autonomous History</h1><p class="page-description">Supervised operational history used by the Phase 7 evaluator.</p></div></header><section class="panel"><header class="panel-header"><h2 class="panel-title">History snapshots</h2><button id="history-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div id="history-list" class="panel-body"><div class="empty-state"><h3>Loading history...</h3></div></div></section>{% endblock %}

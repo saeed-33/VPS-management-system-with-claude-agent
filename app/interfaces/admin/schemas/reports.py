@@ -1,3 +1,13 @@
+"""
+جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+
+الموقع في المعمارية: Administration interface.
+يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from datetime import datetime
 from typing import Any
 
@@ -5,6 +15,14 @@ from pydantic import BaseModel, ConfigDict
 
 
 class ReportListItemResponse(BaseModel):
+    """
+    يمثل ReportListItemResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     server_id: int
     server_name: str
@@ -25,12 +43,28 @@ class ReportListItemResponse(BaseModel):
     )
 
 class PaginatedReportsResponse(BaseModel):
+    """
+    يمثل PaginatedReportsResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     items: list[ReportListItemResponse]
     page: int
     page_size: int
     total: int
 
 class CommandExecutionResponse(BaseModel):
+    """
+    يمثل CommandExecutionResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     command_id: int | None
     command_name: str
@@ -54,6 +88,14 @@ class CommandExecutionResponse(BaseModel):
 
 
 class ReportDetailsResponse(BaseModel):
+    """
+    يمثل ReportDetailsResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     server_id: int
     server_name: str
@@ -80,6 +122,14 @@ class ReportDetailsResponse(BaseModel):
 
 
 class ReportAnalysisResponse(BaseModel):
+    """
+    يمثل ReportAnalysisResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     report_id: int
     server_id: int
@@ -112,6 +162,14 @@ class ReportAnalysisResponse(BaseModel):
 
 
 class ReportAnalysisSourceResponse(BaseModel):
+    """
+    يمثل ReportAnalysisSourceResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     source_type: str
 
@@ -135,6 +193,14 @@ class ReportAnalysisSourceResponse(BaseModel):
 
 
 class ReportAnalysisSourcesResponse(BaseModel):
+    """
+    يمثل ReportAnalysisSourcesResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     report_id: int
     analysis_id: int
     sources: list[ReportAnalysisSourceResponse]

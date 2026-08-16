@@ -1,3 +1,6 @@
+/**
+ * صفحة تفاصيل Monitoring Report. تقرأ report وanalysis وretrieval sources من Admin API، ثم تبني العرض؛ لا تنفذ Analysis أو Retrieval بنفسها.
+ */
 const reportPageData = document.getElementById(
     "report-page-data"
 );
@@ -5,6 +8,10 @@ const reportPageData = document.getElementById(
 const reportId = Number(
     reportPageData.dataset.reportId
 );
+/**
+ * ينفذ خطوة واجهة باسم loadReportDetails ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function loadReportDetails() {
     try {
         const report = await apiRequest(
@@ -53,6 +60,10 @@ async function loadReportDetails() {
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم loadReportAnalysis ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function loadReportAnalysis() {
     const container =
         document.getElementById(
@@ -80,6 +91,10 @@ async function loadReportAnalysis() {
     }
 }
 
+/**
+ * ينفذ خطوة واجهة باسم loadAnalysisSources ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 async function loadAnalysisSources() {
     const container =
         document.getElementById(
@@ -109,6 +124,10 @@ async function loadAnalysisSources() {
 }
 
 
+/**
+ * ينفذ خطوة واجهة باسم renderAnalysisSources ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderAnalysisSources(sources) {
     const container =
         document.getElementById(
@@ -229,6 +248,10 @@ function renderAnalysisSources(sources) {
     `;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم renderReportAnalysis ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderReportAnalysis(analysis) {
     const container =
         document.getElementById(
@@ -567,6 +590,10 @@ function renderReportAnalysis(analysis) {
     `;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم renderAnalysisList ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderAnalysisList(items) {
     if (!items || !items.length) {
         return `
@@ -587,6 +614,10 @@ function renderAnalysisList(items) {
     `;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم formatRetrievalStrategy ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function formatRetrievalStrategy(strategy) {
     const labels = {
         exact_fingerprint: "تطابق البصمة",
@@ -601,6 +632,10 @@ function formatRetrievalStrategy(strategy) {
         : "لا يوجد";
 }
 
+/**
+ * ينفذ خطوة واجهة باسم analysisHealthBadge ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function analysisHealthBadge(status) {
     const values = {
         healthy: {
@@ -632,6 +667,10 @@ function analysisHealthBadge(status) {
     `;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم renderReportInformation ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderReportInformation(report) {
     const container =
         document.getElementById(
@@ -704,6 +743,10 @@ function renderReportInformation(report) {
     `;
 }
 
+/**
+ * ينفذ خطوة واجهة باسم renderCommandExecutions ضمن صفحة Admin Web.
+ * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ */
 function renderCommandExecutions(executions) {
     const container =
         document.getElementById(

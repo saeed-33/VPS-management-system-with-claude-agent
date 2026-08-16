@@ -1,3 +1,13 @@
+"""
+جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+
+الموقع في المعمارية: Application capability / remediation.
+يُستدعى بواسطة: Admin API أو MCP.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -12,6 +22,13 @@ class IssueFingerprintService:
     _SCHEMA = "issue-fingerprint-v1"
 
     def __init__(self, *, investigation_read_service) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: investigation_read_service.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._investigation_read_service = investigation_read_service
 
     def derive(self, investigation_id: str) -> str | None:
@@ -59,5 +76,12 @@ class IssueFingerprintService:
 
     @staticmethod
     def _normalize_text(value) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى _normalize_text؛ المدخلات المهمة: value.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         text = unicodedata.normalize("NFKC", str(value or ""))
         return re.sub(r"\s+", " ", text.strip()).casefold()

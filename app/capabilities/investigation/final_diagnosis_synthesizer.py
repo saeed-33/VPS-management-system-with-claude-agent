@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.capabilities.investigation.correlation، app.core.config، app.core.contracts.final_diagnosis.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import json
@@ -17,6 +27,14 @@ from app.core.contracts.final_diagnosis import (
 
 
 class FinalDiagnosisSynthesizer:
+    """
+    يمثل FinalDiagnosisSynthesizer مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     SYSTEM_PROMPT = """
 You write a concise server-level diagnostic narrative.
 
@@ -43,12 +61,26 @@ upgrade confirmed/probable/unknown labels.
             | None
         ) = None,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: client.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._client = client
 
     async def synthesize(
         self,
         diagnosis: FinalDiagnosis,
     ) -> FinalDiagnosisNarrative:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى synthesize؛ المدخلات المهمة: diagnosis.
+        تعيد FinalDiagnosisNarrative أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if self._client is None:
             return self._fallback(
                 diagnosis,
@@ -122,6 +154,13 @@ upgrade confirmed/probable/unknown labels.
         diagnosis: FinalDiagnosis,
         output: FinalDiagnosisNarrativeOutput,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _validate_output؛ المدخلات المهمة: diagnosis، output.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         allowed_claims = {
             claim.claim_id
             for claim in diagnosis.claims
@@ -179,6 +218,13 @@ upgrade confirmed/probable/unknown labels.
         self,
         diagnosis: FinalDiagnosis,
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _render_prompt؛ المدخلات المهمة: diagnosis.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         payload = {
             "investigation_id": (
                 diagnosis.investigation_id
@@ -268,6 +314,13 @@ upgrade confirmed/probable/unknown labels.
         *,
         reason: str,
     ) -> FinalDiagnosisNarrative:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _fallback؛ المدخلات المهمة: diagnosis، reason.
+        تعيد FinalDiagnosisNarrative أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         notes = []
 
         if diagnosis.conflicts:
@@ -332,6 +385,13 @@ upgrade confirmed/probable/unknown labels.
 def create_final_diagnosis_narrative_client(
     settings: Settings,
 ) -> FinalDiagnosisNarrativeClient:
+    """
+    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى create_final_diagnosis_narrative_client؛ المدخلات المهمة: settings.
+    تعيد FinalDiagnosisNarrativeClient أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     from app.infrastructure.llm.ollama.final_diagnosis_client import (
         OllamaFinalDiagnosisNarrativeClient,
     )
@@ -354,6 +414,13 @@ def create_final_diagnosis_narrative_client(
     )
 
 def __getattr__(name: str):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى __getattr__؛ المدخلات المهمة: name.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if name == 'OllamaFinalDiagnosisNarrativeClient':
         from app.infrastructure.llm.ollama.final_diagnosis_client import (
             OllamaFinalDiagnosisNarrativeClient,

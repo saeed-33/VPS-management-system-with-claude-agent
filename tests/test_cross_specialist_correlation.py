@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.investigation، app.capabilities.investigation.correlation، app.capabilities.investigation.execution_contracts.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from app.core.contracts.investigation import (
     EvidenceKind,
     EvidenceReference,
@@ -20,6 +30,12 @@ from app.capabilities.investigation.execution_contracts import (
 
 
 def make_state():
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_state؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     state = ServerInvestigationState(
         investigation_id="inv-1",
         server_id=2,
@@ -46,6 +62,12 @@ def make_state():
 
 
 def make_run(*, slug, finding):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_run؛ المدخلات المهمة: slug، finding.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     task = SpecialistTask(
         task_id=f"inv-1:{slug}:1",
         investigation_id="inv-1",
@@ -72,6 +94,12 @@ def make_run(*, slug, finding):
 
 
 def wrap(state, *runs):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى wrap؛ المدخلات المهمة: state.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     for run in runs:
         state.add_task(run.task)
         state.add_result(run.result)
@@ -83,6 +111,12 @@ def wrap(state, *runs):
 
 
 def test_live_evidence_high_confidence_is_confirmed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_live_evidence_high_confidence_is_confirmed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     state = make_state()
     run = make_run(
         slug="nginx",
@@ -106,6 +140,12 @@ def test_live_evidence_high_confidence_is_confirmed():
 
 
 def test_live_evidence_lower_confidence_is_probable():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_live_evidence_lower_confidence_is_probable؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     state = make_state()
     run = make_run(
         slug="linux-network",
@@ -129,6 +169,12 @@ def test_live_evidence_lower_confidence_is_probable():
 
 
 def test_knowledge_only_finding_remains_unknown():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_knowledge_only_finding_remains_unknown؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     state = make_state()
     run = make_run(
         slug="nginx",
@@ -154,6 +200,12 @@ def test_knowledge_only_finding_remains_unknown():
 
 
 def test_same_title_merges_specialists():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_same_title_merges_specialists؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     state = make_state()
 
     run1 = make_run(
@@ -189,6 +241,12 @@ def test_same_title_merges_specialists():
 
 
 def test_unknown_evidence_reference_fails_closed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unknown_evidence_reference_fails_closed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     state = make_state()
     run = make_run(
         slug="nginx",

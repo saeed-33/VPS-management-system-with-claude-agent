@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.contracts.investigation، app.capabilities.investigation.correlation، app.capabilities.investigation.final_diagnosis_synthesizer، app.capabilities.investigation.runtime_snapshot_service، app.capabilities.investigation.execution_contracts.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from types import SimpleNamespace
 
 from app.core.contracts.investigation import (
@@ -29,7 +39,19 @@ from app.capabilities.investigation.execution_contracts import (
 
 
 class Repository:
+    """
+    يمثل Repository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.model = SimpleNamespace(
             investigation_id="persisted-1",
             status="created",
@@ -43,6 +65,12 @@ class Repository:
         self,
         investigation_id,
     ):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى get_by_investigation_id؛ المدخلات المهمة: investigation_id.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if investigation_id == "persisted-1":
             return self.model
         return None
@@ -54,6 +82,12 @@ class Repository:
         status,
         metadata,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى update_runtime_snapshot؛ المدخلات المهمة: investigation_id، status، metadata.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.updated = {
             "investigation_id": (
                 investigation_id
@@ -65,6 +99,12 @@ class Repository:
 
 
 def make_result():
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     state = ServerInvestigationState(
         investigation_id="runtime-1",
         server_id=2,
@@ -140,6 +180,12 @@ def make_result():
 
 
 def make_diagnosis():
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_diagnosis؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     claim = CorrelatedDiagnosisClaim(
         claim_id="runtime-1:claim:1",
         title="Service state",
@@ -176,6 +222,12 @@ def make_diagnosis():
 
 
 def test_build_snapshot_serializes_runtime():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_build_snapshot_serializes_runtime؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = (
         InvestigationRuntimeSnapshotService(
             Repository()
@@ -210,6 +262,12 @@ def test_build_snapshot_serializes_runtime():
 
 
 def test_persist_preserves_existing_metadata():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_persist_preserves_existing_metadata؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     repository = Repository()
     service = (
         InvestigationRuntimeSnapshotService(
@@ -241,6 +299,12 @@ def test_persist_preserves_existing_metadata():
 
 
 def test_narrative_is_persisted():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_narrative_is_persisted؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = (
         InvestigationRuntimeSnapshotService(
             Repository()
@@ -281,6 +345,12 @@ def test_narrative_is_persisted():
 
 
 def test_missing_investigation_fails():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_missing_investigation_fails؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     service = (
         InvestigationRuntimeSnapshotService(
             Repository()

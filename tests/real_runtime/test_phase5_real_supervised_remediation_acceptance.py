@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.policies.remediation_tools، app.core.contracts.sandbox_validation.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import json
@@ -20,6 +30,12 @@ pytestmark = pytest.mark.skipif(
 
 
 def _restore_operational_runtime_env() -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _restore_operational_runtime_env؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     from dotenv import dotenv_values
 
     env_path = Path(__file__).resolve().parents[2] / ".env"
@@ -55,6 +71,12 @@ def _restore_operational_runtime_env() -> None:
 
 
 def _safe_target():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى _safe_target؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     raw_id = os.getenv("SAFE_REMEDIATION_SERVER_ID", "").strip()
     expected_name = os.getenv("SAFE_REMEDIATION_SERVER_NAME", "").strip()
     service = os.getenv("SAFE_REMEDIATION_SERVICE", "").strip()
@@ -73,6 +95,12 @@ def _safe_target():
 
 
 def test_phase5_real_supervised_remediation_acceptance():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_phase5_real_supervised_remediation_acceptance؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _restore_operational_runtime_env()
     server_id, expected_name, service_name = _safe_target()
 

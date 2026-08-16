@@ -1,3 +1,13 @@
+"""
+عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
+
+الموقع في المعمارية: Core application contracts.
+يُستدعى بواسطة: capabilities وinterfaces وadapters.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا تنفذ I/O أو workflow.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from enum import StrEnum
 from datetime import datetime
 
@@ -9,6 +19,14 @@ from pydantic import (
 
 
 class AnalysisHealthStatus(StrEnum):
+    """
+    يمثل AnalysisHealthStatus مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     HEALTHY = "healthy"
     WARNING = "warning"
     CRITICAL = "critical"
@@ -16,18 +34,42 @@ class AnalysisHealthStatus(StrEnum):
 
 
 class AnalysisSeverity(StrEnum):
+    """
+    يمثل AnalysisSeverity مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     INFO = "info"
     WARNING = "warning"
     CRITICAL = "critical"
 
 
 class ErrorClassification(StrEnum):
+    """
+    يمثل ErrorClassification مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     NORMAL = "normal"
     DANGEROUS = "dangerous"
     SENSITIVE = "sensitive"
 
 
 class AnalysisIssue(BaseModel):
+    """
+    يمثل AnalysisIssue مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     severity: AnalysisSeverity
     classification: ErrorClassification | None = None
 
@@ -49,6 +91,14 @@ class AnalysisIssue(BaseModel):
 
 
 class ReportAnalysisResult(BaseModel):
+    """
+    يمثل ReportAnalysisResult مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     health_status: AnalysisHealthStatus
 
     summary: str = Field(
@@ -73,6 +123,14 @@ class ReportAnalysisResult(BaseModel):
 
 
 class StoredReportAnalysis(BaseModel):
+    """
+    يمثل StoredReportAnalysis مسؤولية محددة داخل طبقة Core application contracts.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     report_id: int
     server_id: int

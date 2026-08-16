@@ -1,3 +1,13 @@
+"""
+جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+
+الموقع في المعمارية: Administration interface.
+يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from datetime import datetime
 
 from pydantic import (
@@ -8,6 +18,14 @@ from pydantic import (
 
 
 class MonitoringProfileCreateRequest(BaseModel):
+    """
+    يمثل MonitoringProfileCreateRequest مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     name: str = Field(
         min_length=1,
         max_length=150,
@@ -18,6 +36,14 @@ class MonitoringProfileCreateRequest(BaseModel):
 
 
 class MonitoringProfileUpdateRequest(BaseModel):
+    """
+    يمثل MonitoringProfileUpdateRequest مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     name: str | None = Field(
         default=None,
         min_length=1,
@@ -29,6 +55,14 @@ class MonitoringProfileUpdateRequest(BaseModel):
 
 
 class MonitoringProfileResponse(BaseModel):
+    """
+    يمثل MonitoringProfileResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     name: str
     description: str | None
@@ -42,6 +76,14 @@ class MonitoringProfileResponse(BaseModel):
 
 
 class AssignProfileCommandRequest(BaseModel):
+    """
+    يمثل AssignProfileCommandRequest مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     execution_order: int = Field(
         default=1,
         ge=1,
@@ -56,6 +98,14 @@ class AssignProfileCommandRequest(BaseModel):
 
 
 class UpdateProfileCommandRequest(BaseModel):
+    """
+    يمثل UpdateProfileCommandRequest مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     execution_order: int | None = Field(
         default=None,
         ge=1,
@@ -66,6 +116,14 @@ class UpdateProfileCommandRequest(BaseModel):
 
 
 class ProfileCommandResponse(BaseModel):
+    """
+    يمثل ProfileCommandResponse مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     assignment_id: int
     command_id: int
     name: str
@@ -79,4 +137,12 @@ class ProfileCommandResponse(BaseModel):
 
 
 class AssignServerProfileRequest(BaseModel):
+    """
+    يمثل AssignServerProfileRequest مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     profile_id: int | None

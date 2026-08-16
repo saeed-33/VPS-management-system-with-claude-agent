@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -6,6 +16,12 @@ from typing import Any
 
 
 class EvaluationMetric(StrEnum):
+    """
+    يمثل EvaluationMetric جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     ROUTING_RECALL = "routing_recall"
     SPECIALIST_COMPLETION = "specialist_completion"
     EVIDENCE_GROUNDING = "evidence_grounding"
@@ -26,6 +42,12 @@ class EvaluationMetric(StrEnum):
 
 
 class ReadinessStatus(StrEnum):
+    """
+    يمثل ReadinessStatus جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     INSUFFICIENT_EVIDENCE = "insufficient_evidence"
     BLOCKED = "blocked"
     READY_FOR_SUPERVISED_OPERATIONS = (
@@ -35,6 +57,12 @@ class ReadinessStatus(StrEnum):
 
 @dataclass(slots=True, frozen=True)
 class EvaluationObservation:
+    """
+    يمثل EvaluationObservation جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     case_id: str
     metric: EvaluationMetric
     passed: bool
@@ -45,6 +73,12 @@ class EvaluationObservation:
     )
 
     def __post_init__(self) -> None:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if not self.case_id.strip():
             raise ValueError(
                 "case_id must not be empty."
@@ -61,12 +95,24 @@ class EvaluationObservation:
 
 @dataclass(slots=True, frozen=True)
 class MetricThreshold:
+    """
+    يمثل MetricThreshold جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     metric: EvaluationMetric
     minimum_pass_rate: float
     minimum_samples: int
     hard_block_on_any_failure: bool = False
 
     def __post_init__(self) -> None:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if not 0.0 <= self.minimum_pass_rate <= 1.0:
             raise ValueError(
                 "minimum_pass_rate must be between 0 and 1."
@@ -80,6 +126,12 @@ class MetricThreshold:
 
 @dataclass(slots=True, frozen=True)
 class MetricEvaluation:
+    """
+    يمثل MetricEvaluation جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     metric: EvaluationMetric
     samples: int
     passed_samples: int
@@ -94,6 +146,12 @@ class MetricEvaluation:
 
 @dataclass(slots=True, frozen=True)
 class ProductionReadinessResult:
+    """
+    يمثل ProductionReadinessResult جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     status: ReadinessStatus
     metrics: tuple[MetricEvaluation, ...]
     blocking_reasons: tuple[str, ...]

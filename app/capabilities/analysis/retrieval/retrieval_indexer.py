@@ -1,3 +1,13 @@
+"""
+جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+
+الموقع في المعمارية: Application capability / retrieval.
+يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.embedding_client، app.infrastructure.database.repositories.analysis_repository، app.infrastructure.database.repositories.retrieval_repository.
+الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import json
 import logging
 
@@ -9,7 +19,22 @@ logger = logging.getLogger(__name__)
 
 
 class RetrievalIndexer:
+    """
+    يمثل RetrievalIndexer مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(self, *, analysis_repository: AnalysisRepository, retrieval_repository: RetrievalRepository, embedding_client: EmbeddingClient) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: analysis_repository، retrieval_repository، embedding_client.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._analysis_repository = analysis_repository
         self._retrieval_repository = retrieval_repository
         self._embedding_client = embedding_client
@@ -20,6 +45,13 @@ class RetrievalIndexer:
         source_analysis_id: int,
         target_analysis_id: int,
     ) -> str:
+        """
+        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى index_reused_analysis؛ المدخلات المهمة: source_analysis_id، target_analysis_id.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         target_analysis = self._analysis_repository.get_by_id(
             target_analysis_id
         )
@@ -60,6 +92,13 @@ class RetrievalIndexer:
         return "embedded_fallback"
 
     async def index_analysis(self, analysis_id: int) -> None:
+        """
+        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى index_analysis؛ المدخلات المهمة: analysis_id.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         analysis = self._analysis_repository.get_by_id(analysis_id)
         if analysis is None:
             raise ValueError(f"Analysis {analysis_id} was not found.")
@@ -126,6 +165,13 @@ class RetrievalIndexer:
     def _collect_error_signatures(
         payload: dict,
     ) -> list[str]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى _collect_error_signatures؛ المدخلات المهمة: payload.
+        تعيد list[str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         signatures: set[str] = set()
 
         report_error = payload.get("error_message")

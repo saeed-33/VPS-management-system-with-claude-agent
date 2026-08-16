@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from pathlib import Path
 
 
@@ -5,6 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_c14_11a3_removes_legacy_runtime_surfaces():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_11a3_removes_legacy_runtime_surfaces؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert not (ROOT / "app/domain").exists()
     assert not (ROOT / "app/admin").exists()
     assert not (ROOT / "app/mcp").exists()
@@ -15,6 +31,12 @@ def test_c14_11a3_removes_legacy_runtime_surfaces():
 
 
 def test_c14_11a3_runtime_dependencies_are_ollama_only():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_11a3_runtime_dependencies_are_ollama_only؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     pyproject = (
         ROOT / "pyproject.toml"
     ).read_text(encoding="utf-8").lower()
@@ -32,6 +54,12 @@ def test_c14_11a3_runtime_dependencies_are_ollama_only():
 
 
 def test_c14_11a3_no_openai_implementation_surfaces_remain():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_11a3_no_openai_implementation_surfaces_remain؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     paths = (
         ROOT / "app/capabilities/analysis/client_factory.py",
         ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer.py",
@@ -52,6 +80,12 @@ def test_c14_11a3_no_openai_implementation_surfaces_remain():
 
 
 def test_c14_11a3_ollama_implementations_remain():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_11a3_ollama_implementations_remain؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     final_diag = (
         ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer.py"
     ).read_text(encoding="utf-8")

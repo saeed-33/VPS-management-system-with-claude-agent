@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.capabilities.remediation.autonomous_candidate_service، app.capabilities.remediation.autonomous_policy_service، app.interfaces.admin.dependencies، app.interfaces.admin.schemas.autonomous_remediation، app.interfaces.mcp.serializers.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -21,12 +31,26 @@ router = APIRouter(prefix="/api/autonomous-remediation", tags=["autonomous-remed
 
 
 def _actor(request: Request, fallback: str) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _actor؛ المدخلات المهمة: request، fallback.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     principal = getattr(request.state, "admin_user", None)
     return principal.username if principal is not None else fallback
 
 
 @router.post("/policies")
 def create_policy(request: Request, payload: AutonomousPolicyRequest, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى create_policy؛ المدخلات المهمة: request، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         values = payload.model_dump()
         values["created_by"] = _actor(request, values.get("created_by", "admin"))
@@ -38,11 +62,25 @@ def create_policy(request: Request, payload: AutonomousPolicyRequest, service: A
 
 @router.get("/policies")
 def list_policies(status: str | None = Query(default=None), service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_policies؛ المدخلات المهمة: status، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(service.list(status=status))
 
 
 @router.get("/policies/{policy_id}")
 def get_policy(policy_id: str, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_policy؛ المدخلات المهمة: policy_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     policy = service.get(policy_id)
     if policy is None:
         raise HTTPException(status_code=404, detail="Autonomous policy not found.")
@@ -51,6 +89,13 @@ def get_policy(policy_id: str, service: AutonomousPolicyService = Depends(get_au
 
 @router.patch("/policies/{policy_id}")
 def update_policy(policy_id: str, request: Request, payload: AutonomousPolicyUpdateRequest, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى update_policy؛ المدخلات المهمة: policy_id، request، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         updates = payload.model_dump(exclude_none=True)
         updates["updated_by"] = _actor(request, updates.get("updated_by", "admin"))
@@ -61,6 +106,13 @@ def update_policy(policy_id: str, request: Request, payload: AutonomousPolicyUpd
 
 @router.post("/policies/{policy_id}/enable")
 def enable_policy(policy_id: str, request: Request, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى enable_policy؛ المدخلات المهمة: policy_id، request، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return serialize_value(service.enable(policy_id, actor=_actor(request, "admin")))
     except ValueError as exc:
@@ -69,6 +121,13 @@ def enable_policy(policy_id: str, request: Request, service: AutonomousPolicySer
 
 @router.post("/policies/{policy_id}/disable")
 def disable_policy(policy_id: str, request: Request, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى disable_policy؛ المدخلات المهمة: policy_id، request، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return serialize_value(service.disable(policy_id, actor=_actor(request, "admin")))
     except ValueError as exc:
@@ -77,6 +136,13 @@ def disable_policy(policy_id: str, request: Request, service: AutonomousPolicySe
 
 @router.post("/policies/{policy_id}/suspend")
 def suspend_policy(policy_id: str, request: Request, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى suspend_policy؛ المدخلات المهمة: policy_id، request، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return serialize_value(service.suspend(policy_id, reason="operator_suspension", actor=_actor(request, "admin")))
     except ValueError as exc:
@@ -85,6 +151,13 @@ def suspend_policy(policy_id: str, request: Request, service: AutonomousPolicySe
 
 @router.post("/policies/{policy_id}/resume")
 def resume_policy(policy_id: str, request: Request, service: AutonomousPolicyService = Depends(get_autonomous_policy_service)):
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى resume_policy؛ المدخلات المهمة: policy_id، request، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return serialize_value(service.resume(policy_id, actor=_actor(request, "admin")))
     except ValueError as exc:
@@ -93,16 +166,37 @@ def resume_policy(policy_id: str, request: Request, service: AutonomousPolicySer
 
 @router.get("/candidates")
 def list_candidates(service: AutonomousCandidateService = Depends(get_autonomous_candidate_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_candidates؛ المدخلات المهمة: service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(service.list_candidates())
 
 
 @router.get("/decisions")
 def list_decisions(plan_id: str | None = Query(default=None), limit: int = Query(default=100), service=Depends(get_autonomous_execution_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_decisions؛ المدخلات المهمة: plan_id، limit، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(service.list_decisions(plan_id=plan_id, limit=limit))
 
 
 @router.get("/decisions/{decision_id}")
 def get_decision(decision_id: str, service=Depends(get_autonomous_execution_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_decision؛ المدخلات المهمة: decision_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     decision = service.get_decision(decision_id)
     if decision is None:
         raise HTTPException(status_code=404, detail="Autonomous decision not found.")
@@ -111,10 +205,24 @@ def get_decision(decision_id: str, service=Depends(get_autonomous_execution_serv
 
 @router.get("/executions")
 def list_executions(policy_id: str | None = Query(default=None), plan_id: str | None = Query(default=None), limit: int = Query(default=100), service=Depends(get_autonomous_execution_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_executions؛ المدخلات المهمة: policy_id، plan_id، limit، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return [_reservation_view(item) for item in service.list_reservations(policy_id=policy_id, plan_id=plan_id, limit=limit)]
 
 
 def _reservation_view(item) -> dict:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى _reservation_view؛ المدخلات المهمة: item.
+    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return {
         "reservation_id": item.reservation_id,
         "idempotency_key": item.idempotency_key,
@@ -135,6 +243,13 @@ def _reservation_view(item) -> dict:
 
 @router.get("/authorizations")
 def list_authorizations(limit: int = Query(default=100), service=Depends(get_autonomous_execution_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_authorizations؛ المدخلات المهمة: limit، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return [
         {
             "authorization_id": item.authorization_id,
@@ -165,6 +280,13 @@ def list_autonomous_audit(
     execution_service=Depends(get_autonomous_execution_service),
     remediation_service=Depends(get_remediation_service),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_autonomous_audit؛ المدخلات المهمة: policy_id، plan_id، event_type، limit، execution_service، remediation_service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     policy_events = [
         {
             "source": "policy",
@@ -205,9 +327,23 @@ def list_autonomous_audit(
 
 @router.get("/policies/{policy_id}/runtime")
 def get_runtime_state(policy_id: str, service=Depends(get_autonomous_execution_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_runtime_state؛ المدخلات المهمة: policy_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(service.runtime_state(policy_id))
 
 
 @router.get("/history")
 def get_history(issue_fingerprint: str, action_type: str, target: str, service=Depends(get_autonomous_execution_service)):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_history؛ المدخلات المهمة: issue_fingerprint، action_type، target، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return serialize_value(service.history(issue_fingerprint=issue_fingerprint, action_type=action_type, target=target))

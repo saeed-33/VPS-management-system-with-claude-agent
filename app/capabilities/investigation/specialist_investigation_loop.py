@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_policy، app.core.policies.diagnostic_tools، app.capabilities.investigation.evidence_collection، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_reasoning_agent.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
@@ -36,6 +46,14 @@ from app.capabilities.investigation.specialist_registry import (
 
 
 class SpecialistLoopStopReason(StrEnum):
+    """
+    يمثل SpecialistLoopStopReason مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     COMPLETED = "completed"
     MAX_ROUNDS = "max_rounds"
     MAX_ACTIONS = "max_actions"
@@ -44,6 +62,14 @@ class SpecialistLoopStopReason(StrEnum):
 
 @dataclass(slots=True, frozen=True)
 class SpecialistLoopToolDecision:
+    """
+    يمثل SpecialistLoopToolDecision مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     round_number: int
     tool_id: str
     rationale: str
@@ -54,6 +80,14 @@ class SpecialistLoopToolDecision:
 
 @dataclass(slots=True, frozen=True)
 class SpecialistLoopRoundTrace:
+    """
+    يمثل SpecialistLoopRoundTrace مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     round_number: int
     requested_tools: tuple[str, ...]
     collected_evidence_ids: tuple[str, ...]
@@ -66,6 +100,14 @@ class SpecialistLoopRoundTrace:
 
 @dataclass(slots=True, frozen=True)
 class SpecialistInvestigationLoopResult:
+    """
+    يمثل SpecialistInvestigationLoopResult مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     final_result: SpecialistResult
     evidence: tuple[EvidenceReference, ...]
     rounds_completed: int
@@ -81,6 +123,14 @@ class SpecialistInvestigationLoopResult:
 
 
 class SpecialistInvestigationLoop:
+    """
+    يمثل SpecialistInvestigationLoop مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
@@ -90,6 +140,13 @@ class SpecialistInvestigationLoop:
         diagnostic_policy_engine: DiagnosticPolicyEngine,
         evidence_collection_service: EvidenceCollectionService,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: context_builder، reasoning_agent، diagnostic_tool_registry، diagnostic_policy_engine، evidence_collection_service.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._context_builder = context_builder
         self._reasoning_agent = reasoning_agent
         self._diagnostic_tool_registry = (
@@ -119,6 +176,13 @@ class SpecialistInvestigationLoop:
         allowed_specialist_slugs: tuple[str, ...] = (),
         investigation_actions_used: int = 0,
     ) -> SpecialistInvestigationLoopResult:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: task، specialist، investigation_budget، detected_domains، initial_evidence، initial_analysis_summary.
+        تعيد SpecialistInvestigationLoopResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if (
             task.specialist_id.strip().casefold()
             != specialist.slug
@@ -168,6 +232,8 @@ class SpecialistInvestigationLoop:
             1,
             effective_round_limit + 1,
         ):
+            # كل round يعيد بناء context من Evidence المتاح. الـLLM يقترح
+            # Diagnostic Tool فقط، بينما التنفيذ يمر لاحقًا عبر Policy.
             evidence_ids = tuple(
                 dict.fromkeys(
                     task.evidence_ids
@@ -308,6 +374,8 @@ class SpecialistInvestigationLoop:
             round_evidence_ids: list[str] = []
 
             for requested in requests:
+                # حدود Specialist وInvestigation مشتركة حتى لا يستهلك
+                # Specialist واحد كل budget التحقيق أو يبقي loop مفتوحًا.
                 if (
                     specialist_actions_used
                     >= specialist.max_actions
@@ -389,6 +457,8 @@ class SpecialistInvestigationLoop:
                 )
 
                 if not policy.allowed:
+                    # MCP/LLM exposure لا يكفي للسماح؛ هذا القرار الحتمي هو
+                    # نقطة enforcement قبل Evidence collection.
                     decisions.append(
                         SpecialistLoopToolDecision(
                             round_number=(
@@ -437,6 +507,9 @@ class SpecialistInvestigationLoop:
                         )
                     )
                 )
+
+                # لا يدخل Evidence في round التالية إلا بعد اكتمال collection
+                # وتثبيت evidence_id، للحفاظ على provenance القابلة للتتبع.
 
                 evidence.append(
                     collected
@@ -531,6 +604,8 @@ class SpecialistInvestigationLoop:
             SpecialistLoopStopReason.MAX_ROUNDS,
             SpecialistLoopStopReason.MAX_ACTIONS,
         ):
+            # عند بلوغ hard boundary نطلب synthesis read-only أخيرًا؛ لا نفتح
+            # round إضافية ولا نعيد نتيجة تحمل نية Tool غير منفذة.
             synthesis_evidence_ids = tuple(
                 dict.fromkeys(
                     task.evidence_ids
@@ -605,6 +680,13 @@ class SpecialistInvestigationLoop:
         self,
         specialist: SpecialistRuntimeDefinition,
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _render_tool_catalog؛ المدخلات المهمة: specialist.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         entries: list[dict] = []
 
         for tool_id in (
@@ -678,6 +760,13 @@ class SpecialistInvestigationLoop:
     def _request_signature(
         call: DiagnosticToolCall,
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _request_signature؛ المدخلات المهمة: call.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         normalized_arguments = (
             json.dumps(
                 call.arguments,

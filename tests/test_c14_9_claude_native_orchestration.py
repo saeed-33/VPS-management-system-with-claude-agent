@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.analysis، app.capabilities.investigation، app.runtime.claude، app.runtime.claude.supervisor، app.capabilities.monitoring.service.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -27,11 +37,23 @@ LEGACY_PATHS = (
 
 
 def test_c14_9_legacy_python_orchestrators_are_removed():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_9_legacy_python_orchestrators_are_removed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     for relative in LEGACY_PATHS:
         assert not (ROOT / relative).exists()
 
 
 def test_c14_9_monitoring_service_is_execution_only():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_9_monitoring_service_is_execution_only؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     signature = inspect.signature(
         MonitoringService.__init__
     )
@@ -47,6 +69,12 @@ def test_c14_9_monitoring_service_is_execution_only():
 
 
 def test_c14_9_runtime_exports_only_native_claude_orchestration():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_9_runtime_exports_only_native_claude_orchestration؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert hasattr(
         claude_runtime,
         "ClaudeNativeMonitoringRunner",
@@ -66,6 +94,12 @@ def test_c14_9_runtime_exports_only_native_claude_orchestration():
 
 
 def test_c14_9_domain_packages_drop_old_orchestration_exports():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_9_domain_packages_drop_old_orchestration_exports؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert not hasattr(
         analysis_domain,
         "AnalysisAgentManager",
@@ -81,6 +115,12 @@ def test_c14_9_domain_packages_drop_old_orchestration_exports():
 
 
 def test_c14_9_supervisor_fails_closed_when_runtime_disabled():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_9_supervisor_fails_closed_when_runtime_disabled؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     supervisor = ClaudeSupervisor(
         runner=None
     )
@@ -100,6 +140,12 @@ def test_c14_9_supervisor_fails_closed_when_runtime_disabled():
 
 
 def test_c14_9_composition_has_no_python_orchestration_fallback():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_9_composition_has_no_python_orchestration_fallback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     runtime_text = (
         ROOT / "app" / "composition" / "runtime.py"
     ).read_text(
@@ -131,6 +177,12 @@ def test_c14_9_composition_has_no_python_orchestration_fallback():
 
 
 def test_c14_9_main_has_no_analysis_worker_lifecycle():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_9_main_has_no_analysis_worker_lifecycle؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     text = (
         ROOT / "app" / "main.py"
     ).read_text(

@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.core.contracts.investigation، app.capabilities.investigation.execution_contracts.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,6 +25,14 @@ from app.capabilities.investigation.execution_contracts import (
 
 
 class DiagnosisCertainty(StrEnum):
+    """
+    يمثل DiagnosisCertainty مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     CONFIRMED = "confirmed"
     PROBABLE = "probable"
     UNKNOWN = "unknown"
@@ -22,6 +40,14 @@ class DiagnosisCertainty(StrEnum):
 
 @dataclass(slots=True, frozen=True)
 class DiagnosisConflict:
+    """
+    يمثل DiagnosisConflict مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     conflict_id: str
     title: str
     diagnostic_states: tuple[str, ...]
@@ -31,6 +57,13 @@ class DiagnosisConflict:
     description: str
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.conflict_id.strip():
             raise ValueError(
                 "conflict_id must not be empty."
@@ -47,6 +80,14 @@ class DiagnosisConflict:
 
 @dataclass(slots=True, frozen=True)
 class CorrelatedDiagnosisClaim:
+    """
+    يمثل CorrelatedDiagnosisClaim مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     claim_id: str
     title: str
     description: str
@@ -59,6 +100,13 @@ class CorrelatedDiagnosisClaim:
     metadata: dict | None = None
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.claim_id.strip():
             raise ValueError(
                 "claim_id must not be empty."
@@ -85,6 +133,14 @@ class CorrelatedDiagnosisClaim:
 
 @dataclass(slots=True, frozen=True)
 class FinalDiagnosis:
+    """
+    يمثل FinalDiagnosis مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     investigation_id: str
     summary: str
     claims: tuple[
@@ -104,6 +160,13 @@ class FinalDiagnosis:
     metadata: dict
 
     def __post_init__(self) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.investigation_id.strip():
             raise ValueError(
                 "investigation_id must not be empty."
@@ -142,6 +205,13 @@ class CrossSpecialistCorrelator:
         self,
         result: InvestigationExecutionResult,
     ) -> FinalDiagnosis:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى correlate؛ المدخلات المهمة: result.
+        تعيد FinalDiagnosis أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         evidence_by_id = {
             item.evidence_id: item
             for item in result.state.evidence
@@ -299,6 +369,13 @@ class CrossSpecialistCorrelator:
             EvidenceReference,
         ],
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _validate_finding_evidence؛ المدخلات المهمة: finding، evidence_by_id.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         unknown = [
             evidence_id
             for evidence_id
@@ -330,6 +407,13 @@ class CrossSpecialistCorrelator:
         CorrelatedDiagnosisClaim,
         DiagnosisConflict | None,
     ]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _build_claim؛ المدخلات المهمة: investigation_id، index، correlation_key، items.
+        تعيد tuple[CorrelatedDiagnosisClaim, DiagnosisConflict | None] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         specialist_slugs = tuple(
             dict.fromkeys(
                 slug
@@ -489,6 +573,13 @@ class CrossSpecialistCorrelator:
 
     @staticmethod
     def _code_locations_from_claims(claims) -> list[dict]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _code_locations_from_claims؛ المدخلات المهمة: claims.
+        تعيد list[dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         locations = []
         seen = set()
         for claim in claims:
@@ -506,6 +597,13 @@ class CrossSpecialistCorrelator:
 
     @staticmethod
     def _code_locations(items) -> list[dict]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _code_locations؛ المدخلات المهمة: items.
+        تعيد list[dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         locations = []
         seen = set()
         for _, finding in items:
@@ -531,6 +629,13 @@ class CrossSpecialistCorrelator:
         self,
         finding: InvestigationFinding,
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _correlation_key؛ المدخلات المهمة: finding.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         text = finding.title.lower()
 
         tokens = re.findall(
@@ -587,6 +692,13 @@ class CrossSpecialistCorrelator:
             ...
         ],
     ) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _build_summary؛ المدخلات المهمة: claims، conflicts، completed_specialists.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not completed_specialists:
             return (
                 "No completed Specialist "

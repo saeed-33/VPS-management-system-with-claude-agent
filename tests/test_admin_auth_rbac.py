@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.core.utils.datetime، app.infrastructure.database.base، app.infrastructure.database.models.admin_auth، app.interfaces.admin.auth، app.interfaces.admin.web.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from datetime import timedelta
@@ -22,6 +32,12 @@ from app.interfaces.admin.web import auth_router, router as web_router
 
 @pytest.fixture()
 def auth_app():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى auth_app؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -65,30 +81,72 @@ def auth_app():
 
     @app.get("/api/reports")
     def reports():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى reports؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return {"ok": True}
 
     @app.post("/api/servers")
     def create_server():
+        """
+        يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى create_server؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return {"ok": True}
 
     @app.patch("/api/servers/{server_id}")
     async def update_server(server_id: int, request: Request):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى update_server؛ المدخلات المهمة: server_id، request.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return {"ok": True, "server_id": server_id, "payload": await request.json()}
 
     @app.post("/api/remediation/plan/approval/approval/approve")
     def approve():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى approve؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return {"ok": True}
 
     @app.post("/api/remediation/plan/execute")
     def execute():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى execute؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return {"ok": True}
 
     @app.post("/api/remediation/plan/rollback")
     def rollback():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى rollback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return {"ok": True}
 
     @app.post("/api/autonomous-remediation/policies")
     def create_policy():
+        """
+        يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى create_policy؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return {"ok": True}
 
     yield app, service, session_factory
@@ -104,6 +162,12 @@ def auth_app():
 
 
 def login(client: TestClient, service: AdminAuthService, username: str, password: str):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى login؛ المدخلات المهمة: client، service، username، password.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     response = client.post(
         "/login",
         data={"username": username, "password": password, "next": "/"},
@@ -116,6 +180,12 @@ def login(client: TestClient, service: AdminAuthService, username: str, password
 
 
 def test_login_success_failure_logout_and_web_redirect(auth_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_login_success_failure_logout_and_web_redirect؛ المدخلات المهمة: auth_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, service, _session_factory = auth_app
     client = TestClient(app)
 
@@ -152,6 +222,12 @@ def test_login_success_failure_logout_and_web_redirect(auth_app):
     ),
 )
 def test_logout_form_csrf_revokes_session_and_clears_cookie(auth_app, username, password):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_logout_form_csrf_revokes_session_and_clears_cookie؛ المدخلات المهمة: auth_app، username، password.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, service, session_factory = auth_app
     client = TestClient(app)
     csrf = login(client, service, username, password)
@@ -189,6 +265,12 @@ def test_logout_form_csrf_revokes_session_and_clears_cookie(auth_app, username, 
 
 
 def test_unauthenticated_logout_is_safe(auth_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unauthenticated_logout_is_safe؛ المدخلات المهمة: auth_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, _service, _session_factory = auth_app
     response = TestClient(app).post("/logout", follow_redirects=False)
     assert response.status_code == 303
@@ -196,6 +278,12 @@ def test_unauthenticated_logout_is_safe(auth_app):
 
 
 def test_api_authentication_and_csrf_fail_closed(auth_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_api_authentication_and_csrf_fail_closed؛ المدخلات المهمة: auth_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, service, _session_factory = auth_app
     client = TestClient(app)
 
@@ -212,6 +300,12 @@ def test_api_authentication_and_csrf_fail_closed(auth_app):
 
 
 def test_role_matrix_for_read_remediation_and_admin_operations(auth_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_role_matrix_for_read_remediation_and_admin_operations؛ المدخلات المهمة: auth_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, service, _session_factory = auth_app
 
     viewer = TestClient(app)
@@ -266,6 +360,12 @@ def test_role_matrix_for_read_remediation_and_admin_operations(auth_app):
 
 
 def test_expired_session_is_rejected_and_auth_events_are_audited(auth_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_expired_session_is_rejected_and_auth_events_are_audited؛ المدخلات المهمة: auth_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, service, session_factory = auth_app
     client = TestClient(app)
     login(client, service, "admin", "AdminPassword123!")
@@ -294,6 +394,12 @@ def test_expired_session_is_rejected_and_auth_events_are_audited(auth_app):
 
 
 def test_bootstrap_rejects_weak_and_duplicate_credentials(auth_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_bootstrap_rejects_weak_and_duplicate_credentials؛ المدخلات المهمة: auth_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     _app, service, _session_factory = auth_app
     with pytest.raises(ValueError, match="at least 12"):
         service.create_admin(username="weakuser", password="short", role="admin")

@@ -1,3 +1,13 @@
+"""
+جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+
+الموقع في المعمارية: Administration interface.
+يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from io import BytesIO
 from pathlib import Path
 from typing import Iterable
@@ -25,16 +35,38 @@ from reportlab.platypus import (
 
 
 def _rtl(value: object) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+    تُستدعى عندما يصل workflow إلى _rtl؛ المدخلات المهمة: value.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     text = str(value if value is not None else "-")
     return get_display(arabic_reshaper.reshape(text))
 
 
 class ReportPdfService:
+    """
+    يمثل ReportPdfService مسؤولية محددة داخل طبقة Administration interface.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
         font_path: Path,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: font_path.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not font_path.exists():
             raise FileNotFoundError(
                 f"PDF font was not found: {font_path}"
@@ -54,6 +86,13 @@ class ReportPdfService:
         analysis,
         sources: Iterable,
     ) -> bytes:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
+
+        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: report، analysis، sources.
+        تعيد bytes أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         buffer = BytesIO()
         document = SimpleDocTemplate(
             buffer,

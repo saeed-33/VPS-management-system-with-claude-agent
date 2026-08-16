@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_policy، app.core.policies.diagnostic_tools، app.capabilities.investigation.investigation_router، app.capabilities.investigation.specialist_reasoning_client، app.capabilities.investigation.specialist_registry.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -39,13 +49,31 @@ from app.capabilities.investigation.specialist_registry import (
 
 
 class _StaticRegistry:
+    """
+    يمثل _StaticRegistry جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(
         self,
         snapshot: SpecialistRegistrySnapshot,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: snapshot.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self._snapshot = snapshot
 
     def snapshot(self):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return self._snapshot
 
 
@@ -61,6 +89,12 @@ def _specialist(
     max_rounds: int = 3,
     max_actions: int = 4,
 ) -> SpecialistRuntimeDefinition:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى _specialist؛ المدخلات المهمة: specialist_id، slug، domains، trigger_hints، allowed_tool_ids، max_rounds.
+    تعيد SpecialistRuntimeDefinition أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SpecialistRuntimeDefinition(
         id=specialist_id,
         slug=slug,
@@ -80,6 +114,12 @@ def _specialist(
 
 def _routing_snapshot(
 ) -> SpecialistRegistrySnapshot:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى _routing_snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد SpecialistRegistrySnapshot أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     definitions = (
         _specialist(
             specialist_id=1,
@@ -137,6 +177,12 @@ def _routing_snapshot(
 
 def evaluate_routing_cases(
 ) -> tuple[EvaluationObservation, ...]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى evaluate_routing_cases؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد tuple[EvaluationObservation, ...] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     snapshot = _routing_snapshot()
 
     router = InvestigationRouter(
@@ -301,6 +347,12 @@ def evaluate_routing_cases(
 
 def _policy_tool_registry(
 ) -> DiagnosticToolRegistry:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى _policy_tool_registry؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد DiagnosticToolRegistry أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     service_tool = DiagnosticToolDefinition(
         tool_id="service-status",
         name="Service Status",
@@ -333,6 +385,12 @@ def _policy_tool_registry(
 
 def evaluate_policy_cases(
 ) -> tuple[EvaluationObservation, ...]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى evaluate_policy_cases؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد tuple[EvaluationObservation, ...] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     registry = _policy_tool_registry()
 
     engine = DiagnosticPolicyEngine(
@@ -644,6 +702,12 @@ def _ollama_response(
     done_reason: str = "stop",
     include_message: bool = True,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى _ollama_response؛ المدخلات المهمة: request، content، status_code، done_reason، include_message.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     if status_code != 200:
         return httpx.Response(
             status_code,
@@ -674,6 +738,12 @@ async def _run_provider_case(
     final_synthesis: bool = False,
     expect_success: bool,
 ) -> EvaluationObservation:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى _run_provider_case؛ المدخلات المهمة: case_id، handler، final_synthesis، expect_success.
+    تعيد EvaluationObservation أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     client = OllamaSpecialistReasoningClient(
         base_url="http://ollama.test",
         model="test-model",
@@ -745,6 +815,12 @@ async def _run_provider_case(
 
 async def evaluate_provider_cases(
 ) -> tuple[EvaluationObservation, ...]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى evaluate_provider_cases؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد tuple[EvaluationObservation, ...] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     observations = []
 
     async def add(
@@ -754,6 +830,12 @@ async def evaluate_provider_cases(
         final_synthesis=False,
         expect_success,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى add؛ المدخلات المهمة: case_id، handler، final_synthesis، expect_success.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         observations.append(
             await _run_provider_case(
                 case_id,
@@ -781,6 +863,12 @@ async def evaluate_provider_cases(
     calls = {"count": 0}
 
     def schema_then_json(request):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى schema_then_json؛ المدخلات المهمة: request.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         calls["count"] += 1
 
         if calls["count"] == 1:
@@ -805,6 +893,12 @@ async def evaluate_provider_cases(
     calls = {"count": 0}
 
     def invalid_then_valid(request):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى invalid_then_valid؛ المدخلات المهمة: request.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         calls["count"] += 1
 
         if calls["count"] == 1:
@@ -899,6 +993,12 @@ async def evaluate_provider_cases(
     )
 
     def timeout_handler(request):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى timeout_handler؛ المدخلات المهمة: request.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         raise httpx.ReadTimeout(
             "controlled timeout",
             request=request,
@@ -915,6 +1015,12 @@ async def evaluate_provider_cases(
 
 async def evaluate_safety_runtime(
 ) -> tuple[EvaluationObservation, ...]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى evaluate_safety_runtime؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد tuple[EvaluationObservation, ...] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return (
         *evaluate_routing_cases(),
         *evaluate_policy_cases(),

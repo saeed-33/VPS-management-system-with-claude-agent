@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.capabilities.investigation.investigation_router، app.capabilities.investigation.specialist_registry.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from types import SimpleNamespace
 
 import pytest
@@ -10,6 +20,12 @@ from app.capabilities.investigation.specialist_registry import SpecialistRegistr
 
 
 def specialist(i, slug, *, domains, trigger_hints, priority=100):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى specialist؛ المدخلات المهمة: i، slug، domains، trigger_hints، priority.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SimpleNamespace(
         id=i,
         slug=slug,
@@ -29,14 +45,38 @@ def specialist(i, slug, *, domains, trigger_hints, priority=100):
 
 
 class FakeRepository:
+    """
+    يمثل FakeRepository جزءًا من طبقة Test suite.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه pytest أو أدوات acceptance. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def __init__(self, items):
+        """
+        ينشئ الحالة الداخلية أو fixture المطلوبة ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى __init__؛ المدخلات المهمة: items.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         self.items = items
 
     def list_enabled(self):
+        """
+        يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+        تُستدعى عندما يصل المسار إلى list_enabled؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return [x for x in self.items if x.enabled]
 
 
 def make_router(*items, candidate_limit=12, selection_limit=4):
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_router؛ المدخلات المهمة: candidate_limit، selection_limit.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return InvestigationRouter(
         specialist_registry=SpecialistRegistry(
             FakeRepository(list(items))
@@ -53,6 +93,12 @@ def report(
     commands_failed=0,
     error_message=None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى report؛ المدخلات المهمة: status، connection_successful، commands_failed، error_message.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SimpleNamespace(
         status=status,
         connection_successful=connection_successful,
@@ -63,6 +109,12 @@ def report(
 
 
 def analysis(*, health_status="healthy", issues=None, summary=""):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى analysis؛ المدخلات المهمة: health_status، issues، summary.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return SimpleNamespace(
         health_status=health_status,
         issues=issues or [],
@@ -77,6 +129,12 @@ def issue(
     description="Detected problem.",
     evidence=None,
 ):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى issue؛ المدخلات المهمة: title، severity، description، evidence.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return {
         "severity": severity,
         "title": title,
@@ -86,6 +144,12 @@ def issue(
 
 
 def baseline():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى baseline؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return (
         specialist(
             1,
@@ -112,6 +176,12 @@ def baseline():
 
 
 def test_healthy_report_has_no_candidates_or_selection():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_healthy_report_has_no_candidates_or_selection؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decision = make_router(*baseline()).route(
         report=report(),
         analysis=analysis(),
@@ -123,6 +193,12 @@ def test_healthy_report_has_no_candidates_or_selection():
 
 
 def test_cpu_issue_has_same_candidate_and_selection():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_cpu_issue_has_same_candidate_and_selection؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decision = make_router(*baseline()).route(
         report=report(),
         analysis=analysis(
@@ -140,6 +216,12 @@ def test_cpu_issue_has_same_candidate_and_selection():
 
 
 def test_connection_failure_routes_network_only():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_connection_failure_routes_network_only؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     network = specialist(
         4,
         "linux-network",
@@ -177,6 +259,12 @@ def test_connection_failure_routes_network_only():
 
 
 def test_candidate_shortlist_can_exceed_selection_budget():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_candidate_shortlist_can_exceed_selection_budget؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     items = [
         specialist(
             i,
@@ -211,6 +299,12 @@ def test_candidate_shortlist_can_exceed_selection_budget():
 
 
 def test_candidate_limit_is_independent_from_selection_limit():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_candidate_limit_is_independent_from_selection_limit؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     items = [
         specialist(
             i,
@@ -239,6 +333,12 @@ def test_candidate_limit_is_independent_from_selection_limit():
 
 
 def test_candidate_limit_must_be_at_least_selection_limit():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_candidate_limit_must_be_at_least_selection_limit؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     with pytest.raises(
         ValueError,
         match="candidate_limit must be >= selection_limit",
@@ -249,6 +349,12 @@ def test_candidate_limit_must_be_at_least_selection_limit():
         )
 
 def test_memory_issue_selects_memory_specialist():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_memory_issue_selects_memory_specialist؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decision = make_router(*baseline()).route(
         report=report(),
         analysis=analysis(
@@ -266,6 +372,12 @@ def test_memory_issue_selects_memory_specialist():
 
 
 def test_combined_cpu_memory_selects_both():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_combined_cpu_memory_selects_both؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decision = make_router(*baseline()).route(
         report=report(),
         analysis=analysis(
@@ -287,6 +399,12 @@ def test_combined_cpu_memory_selects_both():
 
 
 def test_domain_only_fallback_works_when_no_trigger_matches():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_domain_only_fallback_works_when_no_trigger_matches؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     custom = specialist(
         9,
         "database",
@@ -311,6 +429,12 @@ def test_domain_only_fallback_works_when_no_trigger_matches():
 
 
 def test_no_suitable_specialist_is_explicit():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_no_suitable_specialist_is_explicit؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decision = make_router(*baseline()).route(
         report=report(),
         analysis=analysis(
@@ -334,6 +458,12 @@ def test_no_suitable_specialist_is_explicit():
 
 
 def test_info_only_issue_is_not_actionable():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_info_only_issue_is_not_actionable؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     decision = make_router(*baseline()).route(
         report=report(),
         analysis=analysis(

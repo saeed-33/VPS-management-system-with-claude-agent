@@ -1,3 +1,13 @@
+"""
+Adapter لاتصال SSH وتنفيذ أوامر Linux مع timeouts ونتائج منظمة.
+
+الموقع في المعمارية: External execution infrastructure.
+يُستدعى بواسطة: Monitoring أو خدمات اختبار الاتصال.
+يعتمد مباشرة على: app.infrastructure.ssh.client.
+الحد المعماري: لا يختار profile ولا يقرر remediation.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -10,6 +20,14 @@ from app.infrastructure.ssh.client import SSHClient
 
 @dataclass(slots=True)
 class CommandExecutionResult:
+    """
+    يمثل CommandExecutionResult مسؤولية محددة داخل طبقة External execution infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Monitoring أو خدمات اختبار الاتصال
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     command_id: int | None
     command_name: str
     command_text: str
@@ -39,6 +57,13 @@ class SSHCommandExecutor:
         self,
         ssh_client: SSHClient,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة External execution infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: ssh_client.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._ssh_client = ssh_client
 
     async def execute(
@@ -52,6 +77,13 @@ class SSHCommandExecutor:
         fingerprint_strategy: str,
         fingerprint_config: dict,
     ) -> CommandExecutionResult:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة External execution infrastructure.
+
+        تُستدعى عندما يصل workflow إلى execute؛ المدخلات المهمة: command_id، command_name، command_text، execution_order، timeout_seconds، fingerprint_strategy.
+        تعيد CommandExecutionResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         started_at = datetime.now(UTC)
         started_counter = perf_counter()
 
@@ -171,6 +203,13 @@ class SSHCommandExecutor:
     def _duration_ms(
         started_counter: float,
     ) -> float:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة External execution infrastructure.
+
+        تُستدعى عندما يصل workflow إلى _duration_ms؛ المدخلات المهمة: started_counter.
+        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return round(
             (perf_counter() - started_counter) * 1000,
             2,

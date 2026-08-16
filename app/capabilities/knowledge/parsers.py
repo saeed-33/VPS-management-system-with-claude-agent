@@ -1,3 +1,13 @@
+"""
+جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+
+الموقع في المعمارية: Application capability / knowledge.
+يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
+يعتمد مباشرة على: app.capabilities.knowledge.ingestion_contracts.
+الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from html.parser import HTMLParser
@@ -17,6 +27,13 @@ _BLANKS_RE = re.compile(r"\n{3,}")
 
 
 def normalize_text(value: str) -> str:
+    """
+    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Application capability / knowledge.
+
+    تُستدعى عندما يصل workflow إلى normalize_text؛ المدخلات المهمة: value.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     lines = [
         _SPACE_RE.sub(" ", line).strip()
         for line in (
@@ -34,6 +51,14 @@ def normalize_text(value: str) -> str:
 
 
 class _HTMLTextExtractor(HTMLParser):
+    """
+    يمثل _HTMLTextExtractor مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على HTMLParser وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     BLOCK_TAGS = {
         "article", "aside", "blockquote", "br", "div",
         "footer", "h1", "h2", "h3", "h4", "h5", "h6",
@@ -44,6 +69,13 @@ class _HTMLTextExtractor(HTMLParser):
     SKIP_TAGS = {"script", "style", "noscript", "svg"}
 
     def __init__(self) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         super().__init__(convert_charrefs=True)
         self._parts: list[str] = []
         self._skip_depth = 0
@@ -55,6 +87,13 @@ class _HTMLTextExtractor(HTMLParser):
         self.headings: list[str] = []
 
     def handle_starttag(self, tag, attrs):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى handle_starttag؛ المدخلات المهمة: tag، attrs.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         tag = tag.casefold()
 
         if tag in self.SKIP_TAGS:
@@ -75,6 +114,13 @@ class _HTMLTextExtractor(HTMLParser):
             self._parts.append("\n")
 
     def handle_endtag(self, tag):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى handle_endtag؛ المدخلات المهمة: tag.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         tag = tag.casefold()
 
         if tag in self.SKIP_TAGS:
@@ -101,6 +147,13 @@ class _HTMLTextExtractor(HTMLParser):
             self._parts.append("\n")
 
     def handle_data(self, data):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى handle_data؛ المدخلات المهمة: data.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if self._skip_depth:
             return
 
@@ -119,10 +172,25 @@ class _HTMLTextExtractor(HTMLParser):
         self._parts.append(" ")
 
     def text(self) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى text؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return normalize_text("".join(self._parts))
 
 
 class KnowledgeContentParser:
+    """
+    يمثل KnowledgeContentParser مسؤولية محددة داخل طبقة Application capability / knowledge.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def parse(
         self,
         *,
@@ -131,6 +199,13 @@ class KnowledgeContentParser:
         media_type: str | None,
         title_hint: str | None = None,
     ) -> ParsedKnowledgeDocument:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى parse؛ المدخلات المهمة: content، canonical_uri، media_type، title_hint.
+        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         normalized_media_type = (
             (media_type or "")
             .split(";", 1)[0]
@@ -179,6 +254,13 @@ class KnowledgeContentParser:
         canonical_uri: str | None = None,
         title_hint: str | None = None,
     ) -> ParsedKnowledgeDocument:
+        """
+        يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى parse_file؛ المدخلات المهمة: path، canonical_uri، title_hint.
+        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         suffix = path.suffix.casefold()
         media_types = {
             ".pdf": "application/pdf",
@@ -210,6 +292,13 @@ class KnowledgeContentParser:
         media_type: str,
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _parse_text؛ المدخلات المهمة: content، canonical_uri، media_type، title_hint.
+        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         text = normalize_text(
             content.decode("utf-8", errors="replace")
         )
@@ -231,6 +320,13 @@ class KnowledgeContentParser:
         media_type: str,
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _parse_html؛ المدخلات المهمة: content، canonical_uri، media_type، title_hint.
+        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         html = content.decode("utf-8", errors="replace")
         extractor = _HTMLTextExtractor()
         extractor.feed(html)
@@ -254,6 +350,13 @@ class KnowledgeContentParser:
         canonical_uri: str,
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
+
+        تُستدعى عندما يصل workflow إلى _parse_pdf؛ المدخلات المهمة: content، canonical_uri، title_hint.
+        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         reader = PdfReader(BytesIO(content))
         pages: list[dict] = []
 

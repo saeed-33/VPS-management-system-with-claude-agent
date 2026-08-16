@@ -1,3 +1,13 @@
+"""
+Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+
+الموقع في المعمارية: HTTP interface / adapter.
+يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
+يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.specialists، app.core.contracts.specialists، app.core.exceptions، app.capabilities.investigation.specialist_service.
+الحد المعماري: لا يضع business rules أو transaction logic.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from fastapi import (
@@ -48,6 +58,13 @@ def list_specialists(
         get_specialist_definition_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى list_specialists؛ المدخلات المهمة: enabled_only، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return service.list_specialists(
         enabled_only=enabled_only
     )
@@ -63,6 +80,13 @@ def get_specialist(
         get_specialist_definition_service
     ),
 ):
+    """
+    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى get_specialist؛ المدخلات المهمة: specialist_id، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.get_specialist(
             specialist_id
@@ -85,6 +109,13 @@ def create_specialist(
         get_specialist_definition_service
     ),
 ):
+    """
+    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى create_specialist؛ المدخلات المهمة: payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.create_specialist(
             CreateSpecialistDefinitionDTO(
@@ -114,6 +145,13 @@ def update_specialist(
         get_specialist_definition_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى update_specialist؛ المدخلات المهمة: specialist_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.update_specialist(
             specialist_id,
@@ -144,6 +182,13 @@ def set_specialist_enabled(
         get_specialist_definition_service
     ),
 ):
+    """
+    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى set_specialist_enabled؛ المدخلات المهمة: specialist_id، payload، service.
+    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         return service.set_enabled(
             specialist_id,
@@ -166,6 +211,13 @@ def delete_specialist(
         get_specialist_definition_service
     ),
 ) -> Response:
+    """
+    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
+
+    تُستدعى عندما يصل workflow إلى delete_specialist؛ المدخلات المهمة: specialist_id، service.
+    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     try:
         service.delete_specialist(
             specialist_id

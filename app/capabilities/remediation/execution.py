@@ -1,3 +1,13 @@
+"""
+جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+
+الموقع في المعمارية: Application capability / remediation.
+يُستدعى بواسطة: Admin API أو MCP.
+يعتمد مباشرة على: app.core.contracts.remediation، app.infrastructure.ssh.client، app.infrastructure.ssh.command_executor.
+الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -15,6 +25,14 @@ from app.infrastructure.ssh.command_executor import SSHCommandExecutor
 
 @dataclass(frozen=True, slots=True)
 class WriteCommandResult:
+    """
+    يمثل WriteCommandResult مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     success: bool
     exit_status: int | None = None
     stdout: str = ""
@@ -24,6 +42,14 @@ class WriteCommandResult:
 
 @dataclass(frozen=True, slots=True)
 class ServiceStateObservation:
+    """
+    يمثل ServiceStateObservation مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     state: str
     stdout: str = ""
     stderr: str = ""
@@ -33,32 +59,122 @@ class ServiceStateObservation:
 
 
 class ServiceStateEvidenceCollector(Protocol):
+    """
+    يمثل ServiceStateEvidenceCollector مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def collect(self, *, server_id: int, service: str) -> ServiceStateObservation:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى collect؛ المدخلات المهمة: server_id، service.
+        تعيد ServiceStateObservation أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ...
 
 
 class WriteCommandRunner(Protocol):
+    """
+    يمثل WriteCommandRunner مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def run(self, *, server_id: int, action: RemediationAction, command: str, timeout_seconds: float) -> WriteCommandResult:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: server_id، action، command، timeout_seconds.
+        تعيد WriteCommandResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ...
 
 
 class VerificationRunner(Protocol):
+    """
+    يمثل VerificationRunner مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def verify(self, *, server_id: int, action: RemediationAction) -> tuple[bool, dict]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى verify؛ المدخلات المهمة: server_id، action.
+        تعيد tuple[bool, dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ...
 
 
 class UnavailableWriteRunner:
+    """
+    يمثل UnavailableWriteRunner مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def run(self, **_kwargs) -> WriteCommandResult:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد WriteCommandResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return WriteCommandResult(success=False, error="safe_write_runner_not_configured")
 
 
 class UnavailableVerificationRunner:
+    """
+    يمثل UnavailableVerificationRunner مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def verify(self, **_kwargs) -> tuple[bool, dict]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى verify؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد tuple[bool, dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return False, {"error": "safe_verification_runner_not_configured"}
 
 
 class UnavailableEvidenceCollector:
+    """
+    يمثل UnavailableEvidenceCollector مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def collect(self, **_kwargs) -> ServiceStateObservation:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى collect؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد ServiceStateObservation أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return ServiceStateObservation(
             state="unknown",
             error="safe_evidence_collector_not_configured",
@@ -103,8 +219,23 @@ def _resolve_runtime_file_path(value: str) -> str:
 
 
 class _SSHNamedCommandRunner:
+    """
+    يمثل _SSHNamedCommandRunner مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(self, *, server_repository, private_key_path: str, known_hosts_path: str,
                  connect_timeout_seconds: float, command_timeout_seconds: float) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: server_repository، private_key_path، known_hosts_path، connect_timeout_seconds، command_timeout_seconds.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._server_repository = server_repository
         self._private_key_path = private_key_path
         self._known_hosts_path = known_hosts_path
@@ -112,6 +243,13 @@ class _SSHNamedCommandRunner:
         self._command_timeout_seconds = command_timeout_seconds
 
     def _run_sync(self, coroutine_factory):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى _run_sync؛ المدخلات المهمة: coroutine_factory.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         try:
             asyncio.get_running_loop()
         except RuntimeError:
@@ -124,6 +262,13 @@ class _SSHNamedCommandRunner:
             return executor.submit(lambda: asyncio.run(coroutine_factory())).result()
 
     async def _execute(self, *, server_id: int, command: str, command_name: str, timeout: float):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى _execute؛ المدخلات المهمة: server_id، command، command_name، timeout.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         server = self._server_repository.get_by_id(server_id)
         if server is None:
             return WriteCommandResult(success=False, error="server_not_found")
@@ -163,14 +308,44 @@ class _SSHNamedCommandRunner:
 
 
 class SSHNamedWriteRunner(_SSHNamedCommandRunner):
+    """
+    يمثل SSHNamedWriteRunner مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على _SSHNamedCommandRunner وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def run(self, *, server_id: int, action: RemediationAction, command: str, timeout_seconds: float) -> WriteCommandResult:
+        """
+        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: server_id، action، command، timeout_seconds.
+        تعيد WriteCommandResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self._run_sync(lambda: self._execute(
             server_id=server_id, command=command, command_name=action.action_type, timeout=timeout_seconds
         ))
 
 
 class SSHServiceVerifier(_SSHNamedCommandRunner):
+    """
+    يمثل SSHServiceVerifier مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على _SSHNamedCommandRunner وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def verify(self, *, server_id: int, action: RemediationAction) -> tuple[bool, dict]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى verify؛ المدخلات المهمة: server_id، action.
+        تعيد tuple[bool, dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.verify_state(
             server_id=server_id,
             service=action.target,
@@ -178,6 +353,13 @@ class SSHServiceVerifier(_SSHNamedCommandRunner):
         )
 
     def verify_state(self, *, server_id: int, service: str, expected_state: str) -> tuple[bool, dict]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى verify_state؛ المدخلات المهمة: server_id، service، expected_state.
+        تعيد tuple[bool, dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         # The target was validated by the write registry before reaching this
         # adapter. The read command is fixed and does not accept shell text.
         result = self._run_sync(lambda: self._execute(
@@ -196,7 +378,22 @@ class SSHServiceVerifier(_SSHNamedCommandRunner):
 
 
 class SSHServiceStateEvidenceCollector(_SSHNamedCommandRunner):
+    """
+    يمثل SSHServiceStateEvidenceCollector مسؤولية محددة داخل طبقة Application capability / remediation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
+    ويعتمد على _SSHNamedCommandRunner وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def collect(self, *, server_id: int, service: str) -> ServiceStateObservation:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
+
+        تُستدعى عندما يصل workflow إلى collect؛ المدخلات المهمة: server_id، service.
+        تعيد ServiceStateObservation أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         # Evidence collection accepts only the validated service name supplied
         # by the registered remediation tool. It never accepts shell text.
         result = self._run_sync(lambda: self._execute(

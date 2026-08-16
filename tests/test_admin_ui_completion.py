@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.infrastructure.database.base، app.infrastructure.database.models.admin_auth، app.interfaces.admin.auth، app.interfaces.admin.api.servers، app.interfaces.admin.api.autonomous_remediation، app.interfaces.admin.web.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import re
@@ -24,6 +34,12 @@ from app.interfaces.admin.web import auth_router, router as web_router
 
 @pytest.fixture()
 def ui_app():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى ui_app؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -59,6 +75,12 @@ def ui_app():
 
 
 def login(client: TestClient, username: str, password: str):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى login؛ المدخلات المهمة: client، username، password.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     response = client.post(
         "/login",
         data={"username": username, "password": password, "next": "/"},
@@ -68,6 +90,12 @@ def login(client: TestClient, username: str, password: str):
 
 
 def test_all_admin_ui_pages_render_for_authenticated_roles(ui_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_all_admin_ui_pages_render_for_authenticated_roles؛ المدخلات المهمة: ui_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, _service = ui_app
     paths = [
         "/servers",
@@ -104,6 +132,12 @@ def test_all_admin_ui_pages_render_for_authenticated_roles(ui_app):
 
 
 def test_unauthenticated_new_ui_page_redirects_to_login(ui_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_unauthenticated_new_ui_page_redirects_to_login؛ المدخلات المهمة: ui_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, _service = ui_app
     response = TestClient(app).get("/autonomous-decisions", follow_redirects=False)
     assert response.status_code == 303
@@ -111,6 +145,12 @@ def test_unauthenticated_new_ui_page_redirects_to_login(ui_app):
 
 
 def test_navigation_and_ui_safety_boundaries_are_present(ui_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_navigation_and_ui_safety_boundaries_are_present؛ المدخلات المهمة: ui_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, _service = ui_app
     client = TestClient(app)
     login(client, "viewer", "ViewerPassword123!")
@@ -131,6 +171,12 @@ def test_navigation_and_ui_safety_boundaries_are_present(ui_app):
 
 
 def test_remediation_ui_has_no_issue_fingerprint_input_or_arbitrary_execution(ui_app):
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_remediation_ui_has_no_issue_fingerprint_input_or_arbitrary_execution؛ المدخلات المهمة: ui_app.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     app, _service = ui_app
     client = TestClient(app)
     login(client, "operator", "OperatorPassword123!")
@@ -142,12 +188,24 @@ def test_remediation_ui_has_no_issue_fingerprint_input_or_arbitrary_execution(ui
 
 
 def test_safe_target_comes_only_from_persisted_designation():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_safe_target_comes_only_from_persisted_designation؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert _safety_designation(SimpleNamespace(description="safe-remediation-test non-production")) == "safe_remediation_lab"
     assert _safety_designation(SimpleNamespace(description="Production target")) == "production"
     assert _safety_designation(SimpleNamespace(description="phase5-lab")) == "unclassified"
 
 
 def test_reservation_view_does_not_expose_owner_token():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_reservation_view_does_not_expose_owner_token؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     item = SimpleNamespace(
         reservation_id="r1", idempotency_key="safe-key", status="reserved",
         policy_id="p1", plan_id="plan-1", plan_fingerprint="fp",

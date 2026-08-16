@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import json
 from pathlib import Path
 
@@ -8,6 +18,12 @@ ROOT = Path(__file__).resolve().parents[1]
 def read_text(
     relative_path: str,
 ) -> str:
+    """
+    يقرأ أو يعرض state المشروع لتسهيل الفحص ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى read_text؛ المدخلات المهمة: relative_path.
+    تعيد str أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return (
         ROOT
         / relative_path
@@ -19,6 +35,12 @@ def read_text(
 def parse_frontmatter(
     text: str,
 ) -> dict[str, object]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى parse_frontmatter؛ المدخلات المهمة: text.
+    تعيد dict[str, object] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     assert text.startswith("---\n")
 
     _, frontmatter, _ = text.split(
@@ -62,6 +84,12 @@ def parse_frontmatter(
 
 
 def test_project_mcp_server_is_registered_for_claude_code():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_project_mcp_server_is_registered_for_claude_code؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     config = json.loads(
         read_text(".mcp.json")
     )
@@ -84,6 +112,12 @@ def test_project_mcp_server_is_registered_for_claude_code():
 
 
 def test_claude_settings_use_enforced_permissions():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_claude_settings_use_enforced_permissions؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     settings = json.loads(
         read_text(".claude/settings.json")
     )
@@ -105,6 +139,12 @@ def test_claude_settings_use_enforced_permissions():
 
 
 def test_claude_agents_have_frontmatter_and_tools():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_claude_agents_have_frontmatter_and_tools؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     agent_paths = [
         ".claude/agents/server-supervisor.md",
         ".claude/agents/specialist-worker.md",
@@ -132,6 +172,12 @@ def test_claude_agents_have_frontmatter_and_tools():
 
 
 def test_server_supervisor_can_delegate_only_specialist_worker():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_server_supervisor_can_delegate_only_specialist_worker؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     frontmatter = parse_frontmatter(
         read_text(
             ".claude/agents/server-supervisor.md"
@@ -157,6 +203,12 @@ def test_server_supervisor_can_delegate_only_specialist_worker():
 
 
 def test_specialist_worker_cannot_spawn_agents():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_specialist_worker_cannot_spawn_agents؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     frontmatter = parse_frontmatter(
         read_text(
             ".claude/agents/specialist-worker.md"
@@ -171,6 +223,12 @@ def test_specialist_worker_cannot_spawn_agents():
 
 
 def test_commands_are_not_a_second_workflow_surface():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_commands_are_not_a_second_workflow_surface؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert not (
         ROOT
         / ".claude"
@@ -179,6 +237,12 @@ def test_commands_are_not_a_second_workflow_surface():
 
 
 def test_global_rules_are_invariants_only():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_global_rules_are_invariants_only؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     rules_dir = (
         ROOT
         / ".claude"
@@ -197,6 +261,12 @@ def test_global_rules_are_invariants_only():
 
 
 def test_placeholder_hooks_are_not_checked_in():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_placeholder_hooks_are_not_checked_in؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     assert not (
         ROOT
         / ".claude"
@@ -206,6 +276,12 @@ def test_placeholder_hooks_are_not_checked_in():
 
 
 def test_active_runtime_instructions_do_not_claim_c1_structure_only():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_active_runtime_instructions_do_not_claim_c1_structure_only؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     claude_md = read_text("CLAUDE.md")
 
     assert "C.1 is structure-only" not in claude_md

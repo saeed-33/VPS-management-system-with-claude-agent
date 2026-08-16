@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: app.interfaces.mcp.registry.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import ast
@@ -11,6 +21,12 @@ EXPECTED_TOOL_IDS = {'get_server_context', 'start_investigation', 'get_top_simil
 
 
 def make_boundary() -> ProjectMcpToolBoundary:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى make_boundary؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد ProjectMcpToolBoundary أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return ProjectMcpToolBoundary(
         server_service=None,
         monitoring_profile_service=None,
@@ -20,6 +36,12 @@ def make_boundary() -> ProjectMcpToolBoundary:
 
 
 def test_c14_8_public_tool_contract_is_unchanged():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_8_public_tool_contract_is_unchanged؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     boundary = make_boundary()
 
     definitions = {
@@ -32,6 +54,12 @@ def test_c14_8_public_tool_contract_is_unchanged():
 
 
 def test_c14_8_project_boundary_is_thin_public_facade():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_8_project_boundary_is_thin_public_facade؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     path = ROOT / "app" / "interfaces" / "mcp" / "registry.py"
     tree = ast.parse(path.read_text(encoding="utf-8"))
 
@@ -60,6 +88,12 @@ def test_c14_8_project_boundary_is_thin_public_facade():
 
 
 def test_c14_8_bounded_modules_own_tool_implementations():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_8_bounded_modules_own_tool_implementations؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     boundary = make_boundary()
 
     expected_modules = {
@@ -89,6 +123,12 @@ def test_c14_8_bounded_modules_own_tool_implementations():
 
 
 def test_c14_8_mcp_package_export_is_lazy_and_cycle_free():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_c14_8_mcp_package_export_is_lazy_and_cycle_free؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     from app.interfaces.mcp import ProjectMcpToolBoundary as PackageBoundary
     from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 

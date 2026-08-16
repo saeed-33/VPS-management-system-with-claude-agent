@@ -1,3 +1,13 @@
+"""
+أداة CLI لإدارة database أو تشغيل MCP أو سيناريو خارجي.
+
+الموقع في المعمارية: Operational tooling.
+يُستدعى بواسطة: مشغل الأداة أو deployment workflow.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف endpoint أو capability تلقائيًا إلى التطبيق.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 #!/usr/bin/env python3
 from __future__ import annotations
 
@@ -29,10 +39,22 @@ SCENARIOS = (
 
 
 def now() -> float:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى now؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد float أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return time.time()
 
 
 def busy_worker(end_at: float) -> None:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى busy_worker؛ المدخلات المهمة: end_at.
+    تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     value = 1
     while time.time() < end_at:
         value = (
@@ -42,6 +64,12 @@ def busy_worker(end_at: float) -> None:
 
 
 def cpu_scenario(args, end_at):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى cpu_scenario؛ المدخلات المهمة: args، end_at.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     workers = max(1, min(args.cpu_workers, 8))
     processes = [
         mp.Process(
@@ -60,6 +88,12 @@ def cpu_scenario(args, end_at):
 
 
 def memory_scenario(args, end_at):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى memory_scenario؛ المدخلات المهمة: args، end_at.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     memory_mb = max(
         1,
         min(args.memory_mb, 1024),
@@ -94,6 +128,12 @@ def memory_scenario(args, end_at):
 
 
 def disk_io_scenario(args, end_at):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى disk_io_scenario؛ المدخلات المهمة: args، end_at.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     disk_mb = max(
         1,
         min(args.disk_mb, 1024),
@@ -156,6 +196,12 @@ def disk_io_scenario(args, end_at):
 
 
 def process_churn_scenario(args, end_at):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى process_churn_scenario؛ المدخلات المهمة: args، end_at.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     max_children = max(
         1,
         min(args.processes, 64),
@@ -191,6 +237,12 @@ def process_churn_scenario(args, end_at):
 
 
 def tcp_listener_scenario(args, end_at):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى tcp_listener_scenario؛ المدخلات المهمة: args، end_at.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     server = socket.socket(
         socket.AF_INET,
         socket.SOCK_STREAM,
@@ -205,6 +257,12 @@ def tcp_listener_scenario(args, end_at):
     stop = threading.Event()
 
     def accept_loop():
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+        تُستدعى عندما يصل المسار إلى accept_loop؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         nonlocal accepted
         while not stop.is_set():
             try:
@@ -252,7 +310,19 @@ def tcp_listener_scenario(args, end_at):
 class QuietHandler(
     http.server.BaseHTTPRequestHandler
 ):
+    """
+    يمثل QuietHandler جزءًا من طبقة Operational tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه مشغل الأداة أو deployment workflow. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     def do_GET(self):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+        تُستدعى عندما يصل المسار إلى do_GET؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         body = b"chat-system-test"
         self.send_response(200)
         self.send_header(
@@ -267,10 +337,22 @@ class QuietHandler(
         format,
         *args,
     ):
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+        تُستدعى عندما يصل المسار إلى log_message؛ المدخلات المهمة: format.
+        تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         return
 
 
 def http_local_scenario(args, end_at):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى http_local_scenario؛ المدخلات المهمة: args، end_at.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     server = http.server.ThreadingHTTPServer(
         ("127.0.0.1", 0),
         QuietHandler,
@@ -314,6 +396,12 @@ def http_local_scenario(args, end_at):
 
 
 def mixed_scenario(args, end_at):
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى mixed_scenario؛ المدخلات المهمة: args، end_at.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     cpu_end = min(
         end_at,
         time.time()
@@ -354,6 +442,12 @@ def mixed_scenario(args, end_at):
 
 
 def parse_args():
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى parse_args؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Generate bounded, reproducible "
@@ -410,6 +504,12 @@ def parse_args():
 
 
 def main():
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Operational tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     args = parse_args()
 
     if args.duration <= 0:

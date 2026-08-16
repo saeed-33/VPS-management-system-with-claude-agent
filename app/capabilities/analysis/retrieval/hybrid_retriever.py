@@ -1,3 +1,13 @@
+"""
+جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+
+الموقع في المعمارية: Application capability / retrieval.
+يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.full_text_retriever، app.capabilities.analysis.retrieval.rag_context، app.capabilities.analysis.retrieval.rag_retriever، app.infrastructure.database.repositories.analysis_repository، app.capabilities.analysis.retrieval.structured_compatibility، app.infrastructure.database.repositories.retrieval_repository.
+الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 import logging
 from time import perf_counter
 from dataclasses import dataclass
@@ -31,6 +41,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass(slots=True)
 class _FusionCandidate:
+    """
+    يمثل _FusionCandidate مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     analysis_id: int
     report_id: int
     vector_rank: int | None = None
@@ -40,6 +58,13 @@ class _FusionCandidate:
     vector_context: RetrievedAnalysisContext | None = None
 
     def rrf_score(self, rrf_k: int) -> float:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى rrf_score؛ المدخلات المهمة: rrf_k.
+        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         score = 0.0
 
         if self.vector_rank is not None:
@@ -52,6 +77,13 @@ class _FusionCandidate:
 
     @property
     def strategy(self) -> str:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى strategy؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if (
             self.vector_rank is not None
             and self.text_rank is not None
@@ -65,6 +97,14 @@ class _FusionCandidate:
 
 
 class HybridRetriever:
+    """
+    يمثل HybridRetriever مسؤولية محددة داخل طبقة Application capability / retrieval.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         *,
@@ -77,6 +117,13 @@ class HybridRetriever:
         rrf_k: int = 60,
         minimum_vector_score: float = 0.82,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: analysis_repository، retrieval_repository، compatibility_checker، vector_retriever، full_text_retriever، top_k.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if vector_retriever is None and full_text_retriever is None:
             raise ValueError(
                 "At least one retrieval source is required."
@@ -100,6 +147,13 @@ class HybridRetriever:
         command_set_hash: str | None,
         exclude_report_id: int,
     ) -> list[RetrievedAnalysisContext]:
+        """
+        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى retrieve؛ المدخلات المهمة: normalized_report، server_id، monitoring_profile_id، command_set_hash، exclude_report_id.
+        تعيد list[RetrievedAnalysisContext] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         candidates: dict[int, _FusionCandidate] = {}
 
         if self._vector_retriever is not None:
@@ -256,6 +310,13 @@ class HybridRetriever:
         current_normalized_report: str,
         candidate: _FusionCandidate,
     ) -> bool:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى _is_compatible؛ المدخلات المهمة: current_normalized_report، candidate.
+        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if self._compatibility_checker is None:
             return True
 
@@ -301,6 +362,13 @@ class HybridRetriever:
         candidate: _FusionCandidate,
         final_rank: int,
     ) -> RetrievedAnalysisContext | None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
+
+        تُستدعى عندما يصل workflow إلى _build_context؛ المدخلات المهمة: candidate، final_rank.
+        تعيد RetrievedAnalysisContext | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         analysis = self._analysis_repository.get_by_id(
             candidate.analysis_id
         )

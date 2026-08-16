@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.infrastructure.database.repositories.specialist_definition_repository، app.core.contracts.specialists.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -11,14 +21,36 @@ from app.core.contracts.specialists import validate_specialist_slug
 
 
 class SpecialistRegistryValidationError(ValueError):
+    """
+    يمثل SpecialistRegistryValidationError مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على ValueError وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     pass
 
 
 def _token(value: str) -> str:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _token؛ المدخلات المهمة: value.
+    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     return value.strip().casefold()
 
 
 def _string_tuple(values: Any, field_name: str, lowercase: bool = False) -> tuple[str, ...]:
+    """
+    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+    تُستدعى عندما يصل workflow إلى _string_tuple؛ المدخلات المهمة: values، field_name، lowercase.
+    تعيد tuple[str, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    """
     if not isinstance(values, list):
         raise SpecialistRegistryValidationError(
             f"{field_name} must be a JSON list."
@@ -52,6 +84,14 @@ def _string_tuple(values: Any, field_name: str, lowercase: bool = False) -> tupl
 
 @dataclass(slots=True, frozen=True)
 class SpecialistRuntimeDefinition:
+    """
+    يمثل SpecialistRuntimeDefinition مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     id: int
     slug: str
     name: str
@@ -68,6 +108,13 @@ class SpecialistRuntimeDefinition:
 
     @classmethod
     def from_model(cls, model) -> "SpecialistRuntimeDefinition":
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى from_model؛ المدخلات المهمة: model.
+        تعيد 'SpecialistRuntimeDefinition' أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not isinstance(model.id, int) or model.id < 1:
             raise SpecialistRegistryValidationError(
                 "Specialist id must be a positive integer."
@@ -138,16 +185,38 @@ class SpecialistRuntimeDefinition:
 
 @dataclass(slots=True, frozen=True)
 class SpecialistDomainMatch:
+    """
+    يمثل SpecialistDomainMatch مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     specialist: SpecialistRuntimeDefinition
     matched_domains: tuple[str, ...]
     requested_domains: tuple[str, ...]
 
     @property
     def matched_count(self) -> int:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى matched_count؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return len(self.matched_domains)
 
     @property
     def coverage(self) -> float:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى coverage؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not self.requested_domains:
             return 0.0
         return self.matched_count / len(self.requested_domains)
@@ -155,11 +224,26 @@ class SpecialistDomainMatch:
 
 @dataclass(slots=True, frozen=True)
 class SpecialistRegistrySnapshot:
+    """
+    يمثل SpecialistRegistrySnapshot مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     definitions: tuple[SpecialistRuntimeDefinition, ...]
     _by_slug: Mapping[str, SpecialistRuntimeDefinition]
 
     @classmethod
     def build(cls, definitions: Iterable[SpecialistRuntimeDefinition]) -> "SpecialistRegistrySnapshot":
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: definitions.
+        تعيد 'SpecialistRegistrySnapshot' أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         ordered = tuple(sorted(
             definitions,
             key=lambda item: (
@@ -184,9 +268,23 @@ class SpecialistRegistrySnapshot:
         )
 
     def get_by_slug(self, slug: str) -> SpecialistRuntimeDefinition | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى get_by_slug؛ المدخلات المهمة: slug.
+        تعيد SpecialistRuntimeDefinition | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self._by_slug.get(slug.strip().lower())
 
     def find_by_domain(self, domain: str) -> tuple[SpecialistRuntimeDefinition, ...]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى find_by_domain؛ المدخلات المهمة: domain.
+        تعيد tuple[SpecialistRuntimeDefinition, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         normalized = _token(domain)
         if not normalized:
             return ()
@@ -203,6 +301,13 @@ class SpecialistRegistrySnapshot:
         *,
         require_all: bool = False,
     ) -> tuple[SpecialistDomainMatch, ...]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى find_by_domains؛ المدخلات المهمة: domains، require_all.
+        تعيد tuple[SpecialistDomainMatch, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         requested_list: list[str] = []
         seen: set[str] = set()
 
@@ -259,13 +364,35 @@ class SpecialistRegistrySnapshot:
 
 
 class SpecialistRegistry:
+    """
+    يمثل SpecialistRegistry مسؤولية محددة داخل طبقة Application capability / investigation.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         repository: SpecialistDefinitionRepository,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._repository = repository
 
     def snapshot(self) -> SpecialistRegistrySnapshot:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى snapshot؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد SpecialistRegistrySnapshot أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         definitions: list[SpecialistRuntimeDefinition] = []
 
         for model in self._repository.list_enabled():
@@ -282,12 +409,33 @@ class SpecialistRegistry:
         return SpecialistRegistrySnapshot.build(definitions)
 
     def get_enabled(self) -> tuple[SpecialistRuntimeDefinition, ...]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى get_enabled؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد tuple[SpecialistRuntimeDefinition, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.snapshot().definitions
 
     def get_by_slug(self, slug: str) -> SpecialistRuntimeDefinition | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى get_by_slug؛ المدخلات المهمة: slug.
+        تعيد SpecialistRuntimeDefinition | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.snapshot().get_by_slug(slug)
 
     def find_by_domain(self, domain: str) -> tuple[SpecialistRuntimeDefinition, ...]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى find_by_domain؛ المدخلات المهمة: domain.
+        تعيد tuple[SpecialistRuntimeDefinition, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.snapshot().find_by_domain(domain)
 
     def find_by_domains(
@@ -296,6 +444,13 @@ class SpecialistRegistry:
         *,
         require_all: bool = False,
     ) -> tuple[SpecialistDomainMatch, ...]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى find_by_domains؛ المدخلات المهمة: domains، require_all.
+        تعيد tuple[SpecialistDomainMatch, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return self.snapshot().find_by_domains(
             domains,
             require_all=require_all,

@@ -1,3 +1,13 @@
+"""
+أداة تطوير/تشخيص لتشغيل workflow أو فحص contracts والبيانات أثناء التطوير.
+
+الموقع في المعمارية: Developer tooling.
+يُستدعى بواسطة: CLI أو المطور مباشرة.
+يعتمد مباشرة على: app.infrastructure.database.repositories.specialist_definition_repository، app.core.contracts.specialists.
+الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 import argparse
@@ -426,6 +436,12 @@ SPECIALISTS = [
 def build_create_dto(
     definition: dict,
 ) -> CreateSpecialistDefinitionDTO:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى build_create_dto؛ المدخلات المهمة: definition.
+    تعيد CreateSpecialistDefinitionDTO أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return CreateSpecialistDefinitionDTO(
         slug=definition["slug"],
         name=definition["name"],
@@ -449,6 +465,12 @@ def build_create_dto(
 def build_update_dto(
     definition: dict,
 ) -> UpdateSpecialistDefinitionDTO:
+    """
+    يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى build_update_dto؛ المدخلات المهمة: definition.
+    تعيد UpdateSpecialistDefinitionDTO أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     return UpdateSpecialistDefinitionDTO(
         name=definition["name"],
         description=definition["description"],
@@ -469,6 +491,12 @@ def build_update_dto(
 
 
 def main() -> int:
+    """
+    يشغّل workflow الخاص بالأداة ويحدد exit/result النهائي ضمن طبقة Developer tooling.
+
+    تُستدعى عندما يصل المسار إلى main؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد int أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Create the baseline user-defined specialist "

@@ -1,3 +1,13 @@
+"""
+مشغل acceptance/evaluation ينفذ سيناريوهات readiness أو safety ويجمع نتائج قابلة للمراجعة.
+
+الموقع في المعمارية: Acceptance tooling.
+يُستدعى بواسطة: المشغل اليدوي أو CI.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -10,6 +20,12 @@ from tools.acceptance.evaluation.contracts import (
 
 @dataclass(slots=True, frozen=True)
 class EvaluationCase:
+    """
+    يمثل EvaluationCase جزءًا من طبقة Acceptance tooling.
+
+    يجمع المسؤولية الظاهرة في هذا الملف ويستخدمه المشغل اليدوي أو CI. لا ينبغي أن يتولى
+    تغيير production behavior خارج contract الذي تثبته أو الأداة التي يشغلها.
+    """
     case_id: str
     title: str
     category: str
@@ -24,6 +40,12 @@ class EvaluationCase:
     )
 
     def __post_init__(self) -> None:
+        """
+        ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+        تُستدعى عندما يصل المسار إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد None أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+        """
         if not self.case_id.strip():
             raise ValueError(
                 "case_id must not be empty."
@@ -47,6 +69,12 @@ class EvaluationCase:
 
 def default_evaluation_cases(
 ) -> tuple[EvaluationCase, ...]:
+    """
+    ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Acceptance tooling.
+
+    تُستدعى عندما يصل المسار إلى default_evaluation_cases؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد tuple[EvaluationCase, ...] أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
+    """
     cases: list[EvaluationCase] = []
 
     # Routing recall: 10 deterministic cases.

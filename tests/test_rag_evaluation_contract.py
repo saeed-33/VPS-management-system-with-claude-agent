@@ -1,3 +1,13 @@
+"""
+اختبارات المشروع التي تثبت contracts وحدود الطبقات وسلوك workflow الظاهر في أسماء الاختبارات وimports.
+
+الموقع في المعمارية: Test suite.
+يُستدعى بواسطة: pytest أو أدوات acceptance.
+يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
+الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
+سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
+نتيجة CLI/evaluation أو assertion إلى caller.
+"""
 import ast
 from pathlib import Path
 
@@ -6,6 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_hybrid_does_not_use_rrf_as_vector_similarity():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_hybrid_does_not_use_rrf_as_vector_similarity؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     source = (
         ROOT
         / "app/capabilities/analysis/retrieval/hybrid_retriever.py"
@@ -16,6 +32,12 @@ def test_hybrid_does_not_use_rrf_as_vector_similarity():
 
 
 def test_orchestrator_persists_vector_similarity_not_rrf():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_orchestrator_persists_vector_similarity_not_rrf؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     source = (
         ROOT
         / "app/capabilities/analysis/analysis_orchestrator.py"
@@ -26,6 +48,12 @@ def test_orchestrator_persists_vector_similarity_not_rrf():
 
 
 def test_vector_repository_filters_before_limit():
+    """
+    يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.
+
+    تُستدعى عندما يصل المسار إلى test_vector_repository_filters_before_limit؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+    تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
+    """
     path = (
         ROOT
         / "app/infrastructure/database/repositories/retrieval_repository.py"

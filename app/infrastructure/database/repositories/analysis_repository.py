@@ -1,3 +1,13 @@
+"""
+Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
+
+الموقع في المعمارية: Persistence infrastructure.
+يُستدعى بواسطة: application capabilities.
+يعتمد مباشرة على: app.infrastructure.database.models.report_analysis، app.infrastructure.database.session، app.core.contracts.analysis، app.core.policies.error_classification، app.core.utils.datetime.
+الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from datetime import datetime
 
 from sqlalchemy import select
@@ -18,16 +28,38 @@ from app.core.utils.datetime import utc_now
 
 
 class AnalysisRepository:
+    """
+    يمثل AnalysisRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
+
+    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
+    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
+    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
+    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._session_factory = session_factory
 
     def get_by_id(
         self,
         analysis_id: int,
     ) -> ReportAnalysisModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: analysis_id.
+        تعيد ReportAnalysisModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             return session.get(
                 ReportAnalysisModel,
@@ -38,6 +70,13 @@ class AnalysisRepository:
         self,
         report_id: int,
     ) -> ReportAnalysisModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى get_by_report_id؛ المدخلات المهمة: report_id.
+        تعيد ReportAnalysisModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = select(
                 ReportAnalysisModel
@@ -56,6 +95,13 @@ class AnalysisRepository:
         provider_name: str,
         model_name: str,
     ) -> ReportAnalysisModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_pending؛ المدخلات المهمة: report_id، server_id، provider_name، model_name.
+        تعيد ReportAnalysisModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         model = ReportAnalysisModel(
             report_id=report_id,
             server_id=server_id,
@@ -92,6 +138,13 @@ class AnalysisRepository:
         self,
         analysis_id: int,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى mark_running؛ المدخلات المهمة: analysis_id.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.get(
                 ReportAnalysisModel,
@@ -123,6 +176,13 @@ class AnalysisRepository:
         finished_at: datetime,
         duration_ms: float,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى mark_completed؛ المدخلات المهمة: analysis_id، result، finished_at، duration_ms.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         result = classify_result(result)
 
         with self._session_factory() as session:
@@ -176,6 +236,13 @@ class AnalysisRepository:
         finished_at: datetime,
         duration_ms: float,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى mark_failed؛ المدخلات المهمة: analysis_id، error_message، finished_at، duration_ms.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.get(
                 ReportAnalysisModel,
@@ -200,6 +267,13 @@ class AnalysisRepository:
         self,
         analysis_id: int,
     ) -> None:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى reset_for_retry؛ المدخلات المهمة: analysis_id.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.get(
                 ReportAnalysisModel,
@@ -231,6 +305,13 @@ class AnalysisRepository:
     def list_pending_or_running(
         self,
     ) -> list[ReportAnalysisModel]:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى list_pending_or_running؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
+        تعيد list[ReportAnalysisModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(ReportAnalysisModel)
@@ -258,6 +339,13 @@ class AnalysisRepository:
         report_fingerprint: str,
         exclude_report_id: int | None = None,
     ) -> ReportAnalysisModel | None:
+        """
+        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى find_completed_by_fingerprint؛ المدخلات المهمة: server_id، report_fingerprint، exclude_report_id.
+        تعيد ReportAnalysisModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             statement = (
                 select(ReportAnalysisModel)
@@ -299,6 +387,13 @@ class AnalysisRepository:
         retrieval_score: float | None = None,
         llm_called: bool = True,
     ) -> None:
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_retrieval_metadata؛ المدخلات المهمة: analysis_id، report_fingerprint، normalized_report، analysis_source، reused_from_analysis_id، retrieval_strategy.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.get(
                 ReportAnalysisModel,
@@ -340,6 +435,13 @@ class AnalysisRepository:
         analysis_id: int,
         performance_metrics: dict,
     ) -> None:
+        """
+        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى update_performance_metrics؛ المدخلات المهمة: analysis_id، performance_metrics.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         with self._session_factory() as session:
             model = session.get(
                 ReportAnalysisModel,
@@ -365,6 +467,13 @@ class AnalysisRepository:
         report_fingerprint: str,
         normalized_report: str,
     ) -> ReportAnalysisModel:
+        """
+        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
+
+        تُستدعى عندما يصل workflow إلى create_reused_analysis؛ المدخلات المهمة: report_id، server_id، source_analysis، report_fingerprint، normalized_report.
+        تعيد ReportAnalysisModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         now = utc_now()
 
         model = ReportAnalysisModel(

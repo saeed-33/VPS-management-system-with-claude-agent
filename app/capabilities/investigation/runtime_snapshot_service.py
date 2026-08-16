@@ -1,3 +1,13 @@
+"""
+جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+
+الموقع في المعمارية: Application capability / investigation.
+يُستدعى بواسطة: MCP أو Analysis workflow.
+يعتمد مباشرة على: app.capabilities.investigation.correlation، app.capabilities.investigation.final_diagnosis_synthesizer، app.capabilities.investigation.execution_contracts، app.core.contracts.investigation، app.infrastructure.database.repositories.investigation_repository.
+الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
+سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
+به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+"""
 from __future__ import annotations
 
 from dataclasses import asdict
@@ -34,6 +44,13 @@ class InvestigationRuntimeSnapshotService:
         self,
         repository: InvestigationRepository,
     ) -> None:
+        """
+        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
+        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         self._repository = repository
 
     def persist(
@@ -44,6 +61,13 @@ class InvestigationRuntimeSnapshotService:
         final_diagnosis: FinalDiagnosis | None = None,
         narrative: FinalDiagnosisNarrative | None = None,
     ):
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى persist؛ المدخلات المهمة: investigation_id، execution_result، final_diagnosis، narrative.
+        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if not investigation_id.strip():
             raise ValueError(
                 "investigation_id must not be empty."
@@ -62,6 +86,13 @@ class InvestigationRuntimeSnapshotService:
         )
 
         def merge(model, metadata):
+            """
+            ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+            تُستدعى عندما يصل workflow إلى merge؛ المدخلات المهمة: model، metadata.
+            تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
+            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            """
             current = dict(metadata.get("runtime_snapshot") or {})
             if current:
                 snapshot["specialist_runs"] = self._merge_by_key(
@@ -111,6 +142,13 @@ class InvestigationRuntimeSnapshotService:
 
     @staticmethod
     def _merge_by_key(existing: list, incoming: list, *, key: str) -> list:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _merge_by_key؛ المدخلات المهمة: existing، incoming، key.
+        تعيد list أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         merged = {item.get(key): dict(item) for item in existing if isinstance(item, dict) and item.get(key)}
         for item in incoming:
             if isinstance(item, dict) and item.get(key):
@@ -124,6 +162,13 @@ class InvestigationRuntimeSnapshotService:
         final_diagnosis: FinalDiagnosis | None = None,
         narrative: FinalDiagnosisNarrative | None = None,
     ) -> dict:
+        """
+        يبني DTO أو dependency graph من المدخلات ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى build_snapshot؛ المدخلات المهمة: execution_result، final_diagnosis، narrative.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         state = execution_result.state
 
         specialist_runs = tuple(
@@ -329,6 +374,13 @@ class InvestigationRuntimeSnapshotService:
         final_diagnosis: FinalDiagnosis,
         narrative: FinalDiagnosisNarrative,
     ) -> tuple[str, dict]:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى merge_finalization؛ المدخلات المهمة: metadata، final_diagnosis، narrative.
+        تعيد tuple[str, dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         merged = dict(metadata)
         snapshot = dict(merged.get("runtime_snapshot") or {})
         snapshot["correlated_claims"] = [self._serialize_claim(item) for item in final_diagnosis.claims]
@@ -343,6 +395,13 @@ class InvestigationRuntimeSnapshotService:
         return "completed", merged
 
     def _empty_snapshot(self, model) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _empty_snapshot؛ المدخلات المهمة: model.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "version": self.SNAPSHOT_VERSION,
             "status": "investigating",
@@ -364,6 +423,13 @@ class InvestigationRuntimeSnapshotService:
         }
 
     def _serialize_accepted_run(self, task, loop_result) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_accepted_run؛ المدخلات المهمة: task، loop_result.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         result = loop_result.final_result
         return {
             "specialist_slug": task.specialist_id,
@@ -395,6 +461,13 @@ class InvestigationRuntimeSnapshotService:
         }
 
     def _serialize_finding(self, finding) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_finding؛ المدخلات المهمة: finding.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "finding_id": finding.finding_id,
             "title": finding.title,
@@ -407,6 +480,13 @@ class InvestigationRuntimeSnapshotService:
         }
 
     def _serialize_hypothesis(self, hypothesis) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_hypothesis؛ المدخلات المهمة: hypothesis.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "hypothesis_id": hypothesis.hypothesis_id,
             "statement": hypothesis.statement,
@@ -420,6 +500,13 @@ class InvestigationRuntimeSnapshotService:
         self,
         run,
     ) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_run؛ المدخلات المهمة: run.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         loop = run.loop_result
 
         return {
@@ -470,6 +557,13 @@ class InvestigationRuntimeSnapshotService:
         server_id: int,
         report_id: int,
     ) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_evidence؛ المدخلات المهمة: item، investigation_id، server_id، report_id.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         metadata = dict(item.metadata or {})
         metadata.setdefault(
             "investigation_id",
@@ -491,6 +585,13 @@ class InvestigationRuntimeSnapshotService:
         self,
         claim,
     ) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_claim؛ المدخلات المهمة: claim.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "claim_id": claim.claim_id,
             "title": claim.title,
@@ -525,6 +626,13 @@ class InvestigationRuntimeSnapshotService:
         self,
         conflict,
     ) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_conflict؛ المدخلات المهمة: conflict.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "conflict_id": (
                 conflict.conflict_id
@@ -551,6 +659,13 @@ class InvestigationRuntimeSnapshotService:
         self,
         diagnosis: FinalDiagnosis,
     ) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_final_diagnosis؛ المدخلات المهمة: diagnosis.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "investigation_id": (
                 diagnosis.investigation_id
@@ -584,6 +699,13 @@ class InvestigationRuntimeSnapshotService:
         self,
         narrative: FinalDiagnosisNarrative,
     ) -> dict:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _serialize_narrative؛ المدخلات المهمة: narrative.
+        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         return {
             "summary": narrative.summary,
             "claim_ids": list(
@@ -614,6 +736,13 @@ class InvestigationRuntimeSnapshotService:
         self,
         value: Any,
     ) -> Any:
+        """
+        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
+
+        تُستدعى عندما يصل workflow إلى _json_safe؛ المدخلات المهمة: value.
+        تعيد Any أو تحدث الأثر الذي يحدده contract هذه الدالة.
+        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        """
         if value is None:
             return None
 
