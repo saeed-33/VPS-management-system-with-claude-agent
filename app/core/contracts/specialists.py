@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقود تعريف المتخصصين الذين يحققون في مجالات مختلفة من عطل السيرفر."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -18,11 +9,10 @@ _SLUG_PATTERN = re.compile(r"^[a-z][a-z0-9_-]{0,99}$")
 
 def validate_specialist_slug(value: str) -> None:
     """
-    يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Core application contracts.
+    يتحقق من أن معرف المتخصص النصي صالح وثابت للاستخدام في التوجيه والتخزين.
 
-    تُستدعى عندما يصل workflow إلى validate_specialist_slug؛ المدخلات المهمة: value.
-    تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يضمن النمط الموحد أن يبقى المعرف آمنًا للروابط والسجلات ولا يتغير بسبب
+    اختلاف حالة الأحرف أو إدخال رموز غير متوقعة.
     """
     if not _SLUG_PATTERN.fullmatch(value):
         raise ValueError(
@@ -33,12 +23,10 @@ def validate_specialist_slug(value: str) -> None:
 @dataclass(slots=True, frozen=True)
 class CreateSpecialistDefinitionDTO:
     """
-    يمثل CreateSpecialistDefinitionDTO مسؤولية محددة داخل طبقة Core application contracts.
+    البيانات اللازمة لتسجيل متخصص ومجالاته وتلميحات تشغيله وأدواته المسموحة.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحدد العقد حدود الجولات والأفعال حتى لا يفتح تعريف المتخصص تحقيقًا بلا
+    حدود عند استخدامه لاحقًا.
     """
     slug: str
     name: str
@@ -55,13 +43,7 @@ class CreateSpecialistDefinitionDTO:
     metadata: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يطبع المعرف ويتحقق من الاسم وحدود الجولات والأفعال."""
         slug = self.slug.strip().lower()
         name = self.name.strip()
         validate_specialist_slug(slug)
@@ -78,12 +60,10 @@ class CreateSpecialistDefinitionDTO:
 @dataclass(slots=True, frozen=True)
 class UpdateSpecialistDefinitionDTO:
     """
-    يمثل UpdateSpecialistDefinitionDTO مسؤولية محددة داخل طبقة Core application contracts.
+    التغييرات الاختيارية على تعريف متخصص موجود.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    تسمح القيم المحددة بتعديل تعليماته أو مجالاته أو أدواته وحدوده، بينما تعني
+    القيم الفارغة إبقاء الحقل الحالي كما هو.
     """
     name: str | None = None
     description: str | None = None
@@ -99,13 +79,7 @@ class UpdateSpecialistDefinitionDTO:
     metadata: dict | None = None
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من الاسم الجديد وحدود الجولات والأفعال عند تقديمها."""
         if self.name is not None and not self.name.strip():
             raise ValueError("Specialist name must not be empty.")
         if self.name is not None and len(self.name.strip()) > 150:

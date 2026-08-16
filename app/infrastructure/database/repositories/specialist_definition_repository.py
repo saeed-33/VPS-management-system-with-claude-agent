@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.infrastructure.database.models.specialist_definition، app.infrastructure.database.session، app.core.contracts.specialists، app.core.utils.datetime.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم.
 """
 from __future__ import annotations
 
@@ -26,11 +19,7 @@ _LIST_FIELDS = {"domains", "trigger_hints", "knowledge_topics", "allowed_tool_id
 
 def _normalize_string_list(values: list[str]) -> list[str]:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-    تُستدعى عندما يصل workflow إلى _normalize_string_list؛ المدخلات المهمة: values.
-    تعيد list[str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يوحد قيمة مساعدة قبل استخدامها في تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم.
     """
     result = []
     seen = set()
@@ -45,41 +34,24 @@ def _normalize_string_list(values: list[str]) -> list[str]:
 
 class SpecialistDefinitionRepository:
     """
-    يمثل SpecialistDefinitionRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن تعريف المتخصصين وتفعيلهم وتحديث حدودهم وأدواتهم.
     """
     def __init__(self, session_factory: sessionmaker = SessionLocal) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
     def get_by_id(self, specialist_id: int) -> SpecialistDefinitionModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: specialist_id.
-        تعيد SpecialistDefinitionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.get(SpecialistDefinitionModel, specialist_id)
 
     def get_by_slug(self, slug: str) -> SpecialistDefinitionModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_slug؛ المدخلات المهمة: slug.
-        تعيد SpecialistDefinitionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -90,11 +62,7 @@ class SpecialistDefinitionRepository:
 
     def list_all(self) -> list[SpecialistDefinitionModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_all؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[SpecialistDefinitionModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = select(SpecialistDefinitionModel).order_by(
@@ -106,11 +74,7 @@ class SpecialistDefinitionRepository:
 
     def list_enabled(self) -> list[SpecialistDefinitionModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_enabled؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[SpecialistDefinitionModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (
@@ -126,11 +90,7 @@ class SpecialistDefinitionRepository:
 
     def create(self, data: CreateSpecialistDefinitionDTO) -> SpecialistDefinitionModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
-        تعيد SpecialistDefinitionModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = SpecialistDefinitionModel(
             slug=data.slug.strip().lower(),
@@ -159,11 +119,7 @@ class SpecialistDefinitionRepository:
 
     def update(self, specialist_id: int, data: UpdateSpecialistDefinitionDTO) -> SpecialistDefinitionModel | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: specialist_id، data.
-        تعيد SpecialistDefinitionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.get(SpecialistDefinitionModel, specialist_id)
@@ -190,11 +146,7 @@ class SpecialistDefinitionRepository:
 
     def set_enabled(self, specialist_id: int, enabled: bool) -> SpecialistDefinitionModel | None:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى set_enabled؛ المدخلات المهمة: specialist_id، enabled.
-        تعيد SpecialistDefinitionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.get(SpecialistDefinitionModel, specialist_id)
@@ -208,11 +160,7 @@ class SpecialistDefinitionRepository:
 
     def delete(self, specialist_id: int) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى delete؛ المدخلات المهمة: specialist_id.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يزيل ارتباطًا أو سجلًا من تعريفات المتخصصين ومجالاتهم وأدواتهم وحدود تحقيقهم بعد تطبيق قواعد الملكية المطلوبة.
         """
         with self._session_factory() as session:
             model = session.get(SpecialistDefinitionModel, specialist_id)

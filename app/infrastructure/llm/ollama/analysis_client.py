@@ -1,12 +1,5 @@
 """
-عميل Ollama يترجم contracts الداخلية إلى HTTP model calls ويعيد DTOs.
-
-الموقع في المعمارية: LLM infrastructure.
-يُستدعى بواسطة: capabilities عبر protocol/client factory.
-يعتمد مباشرة على: app.capabilities.analysis.llm_client، app.core.contracts.analysis.
-الحد المعماري: Ollama مزود model فقط؛ لا يمنح النص صلاحية policy أو persistence.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+إرسال تقرير المراقبة إلى Ollama وتحويل الرد إلى نتيجة تحليل منظمة.
 """
 import json
 import logging
@@ -26,12 +19,7 @@ logger = logging.getLogger(__name__)
 
 class OllamaAnalysisClient(LLMAnalysisClient):
     """
-    يمثل OllamaAnalysisClient مسؤولية محددة داخل طبقة LLM infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities عبر protocol/client factory
-    ويعتمد على LLMAnalysisClient وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عميل يطلب تحليل تقرير المراقبة من Ollama ويتحقق من JSON والنتيجة قبل إعادتها.
     """
     def __init__(
         self,
@@ -41,11 +29,7 @@ class OllamaAnalysisClient(LLMAnalysisClient):
         timeout_seconds: float,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: base_url، model، timeout_seconds.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ عميل التحليل بعنوان Ollama والنموذج وحدود القراءة والكتابة.
         """
         if not base_url.strip():
             raise ValueError(
@@ -74,22 +58,14 @@ class OllamaAnalysisClient(LLMAnalysisClient):
     @property
     def provider_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى provider_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم مزود تحليل التقارير.
         """
         return "ollama"
 
     @property
     def model_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى model_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم النموذج الذي يحلل تقرير المراقبة.
         """
         return self._model
 
@@ -98,11 +74,7 @@ class OllamaAnalysisClient(LLMAnalysisClient):
         content: str,
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى _extract_json_content؛ المدخلات المهمة: content.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يزيل غلاف Markdown من رد Ollama قبل محاولة قراءة JSON التحليل.
         """
         cleaned = content.strip()
 
@@ -129,11 +101,7 @@ class OllamaAnalysisClient(LLMAnalysisClient):
         user_prompt: str,
     ) -> ReportAnalysisResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى analyze_report؛ المدخلات المهمة: system_prompt، user_prompt.
-        تعيد ReportAnalysisResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني عقد JSON من مخطط التحليل، يطلب النتيجة من Ollama، ويعيدها بعد التحقق أو يعيد فشلًا واضحًا.
         """
         schema = (
             ReportAnalysisResult
@@ -164,11 +132,7 @@ Output requirements:
 
         def make_payload(num_predict: int) -> dict[str, Any]:
             """
-            يبني DTO أو dependency graph من المدخلات ضمن طبقة LLM infrastructure.
-
-            تُستدعى عندما يصل workflow إلى make_payload؛ المدخلات المهمة: num_predict.
-            تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            يبني جسم طلب Ollama لمحاولة تحليل واحدة مع عدد مخرجات محدد.
             """
             return {
                 "model": self._model,
@@ -315,11 +279,7 @@ Output requirements:
 
     async def health_check(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى health_check؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من وصول Ollama ومن تثبيت النموذج المطلوب قبل بدء التحليل.
         """
         try:
             response = await self._client.get(
@@ -352,10 +312,6 @@ Output requirements:
 
     async def close(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى close؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يغلق عميل HTTP الخاص بطلبات التحليل ويحرر الاتصال.
         """
         await self._client.aclose()

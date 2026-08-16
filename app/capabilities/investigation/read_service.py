@@ -1,12 +1,8 @@
 """
-جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+قراءة التحقيقات وملخصاتها وتفاصيلها.
 
-الموقع في المعمارية: Application capability / investigation.
-يُستدعى بواسطة: MCP أو Analysis workflow.
-يعتمد مباشرة على: app.infrastructure.database.repositories.investigation_repository، app.core.contracts.investigation_read_models.
-الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تجمع الخدمة البيانات المحفوظة من سجلات التحقيق والتشغيل والمرشحين والأدلة
+وتعرضها في نماذج قراءة مناسبة للواجهات.
 """
 from __future__ import annotations
 
@@ -23,23 +19,14 @@ from app.core.contracts.investigation_read_models import (
 
 class InvestigationReadService:
     """
-    يمثل InvestigationReadService مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحوّل سجلات التحقيق إلى ملخصات وتفاصيل للقراءة.
     """
     def __init__(
         self,
         repository: InvestigationRepository,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ InvestigationReadService ويربط الاعتماديات اللازمة لدورة التحقيق.
         """
         self._repository = repository
 
@@ -48,11 +35,7 @@ class InvestigationReadService:
         investigation_id: str,
     ) -> InvestigationDetailReadModel | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى get؛ المدخلات المهمة: investigation_id.
-        تعيد InvestigationDetailReadModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب تحقيقًا ويحوّله إلى تفاصيل قراءة.
         """
         model = self._repository.get_by_investigation_id(
             investigation_id
@@ -68,11 +51,7 @@ class InvestigationReadService:
         server_id: int | None = None,
     ) -> tuple[InvestigationSummaryReadModel, ...]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى list_recent؛ المدخلات المهمة: limit، server_id.
-        تعيد tuple[InvestigationSummaryReadModel, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض أحدث التحقيقات وفق حدود القراءة.
         """
         if limit < 1 or limit > 500:
             raise ValueError(
@@ -93,11 +72,7 @@ class InvestigationReadService:
         report_id: int,
     ) -> tuple[InvestigationSummaryReadModel, ...]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى list_by_report_id؛ المدخلات المهمة: report_id.
-        تعيد tuple[InvestigationSummaryReadModel, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض التحقيقات المرتبطة بتقرير مراقبة.
         """
         if report_id < 1:
             raise ValueError(
@@ -116,11 +91,7 @@ class InvestigationReadService:
         model,
     ) -> InvestigationSummaryReadModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _summary؛ المدخلات المهمة: model.
-        تعيد InvestigationSummaryReadModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني ملخص قراءة من سجل التحقيق.
         """
         metadata = dict(
             model.investigation_metadata or {}
@@ -172,11 +143,7 @@ class InvestigationReadService:
         model,
     ) -> InvestigationDetailReadModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _detail؛ المدخلات المهمة: model.
-        تعيد InvestigationDetailReadModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني تفاصيل قراءة موسعة مع الأدلة والتشغيل.
         """
         metadata = dict(
             model.investigation_metadata or {}
@@ -244,11 +211,7 @@ class InvestigationReadService:
         model,
     ) -> InvestigationCandidateReadModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _candidate؛ المدخلات المهمة: model.
-        تعيد InvestigationCandidateReadModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل مرشح التحقيق إلى عقد قراءة.
         """
         return InvestigationCandidateReadModel(
             specialist_definition_id=(
@@ -277,19 +240,11 @@ class InvestigationReadService:
         raw: dict,
     ) -> InvestigationRuntimeReadModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _runtime؛ المدخلات المهمة: raw.
-        تعيد InvestigationRuntimeReadModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل حالة التشغيل إلى عقد قراءة.
         """
         def dict_tuple(value):
             """
-            ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-            تُستدعى عندما يصل workflow إلى dict_tuple؛ المدخلات المهمة: value.
-            تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            يحوّل قيمة قائمة أو tuple من القواميس إلى tuple مستقرة لعرض حالة التشغيل.
             """
             if not isinstance(
                 value,
@@ -304,11 +259,7 @@ class InvestigationReadService:
 
         def optional_int(value):
             """
-            ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-            تُستدعى عندما يصل workflow إلى optional_int؛ المدخلات المهمة: value.
-            تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            يحوّل القيمة الرقمية الاختيارية إلى عدد صحيح أو يعيد قيمة فارغة.
             """
             if value is None:
                 return None

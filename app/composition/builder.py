@@ -1,12 +1,8 @@
 """
-يركب dependencies ويربط repositories والخدمات والـruntime.
+بناء حاوية تطبيق مراقبة السيرفر.
 
-الموقع في المعمارية: Bootstrap / dependency composition.
-يُستدعى بواسطة: app.main أو الاختبارات عند إنشاء container.
-يعتمد مباشرة على: app.composition.runtime، app.composition.analysis، app.composition.container، app.composition.services، app.composition.repositories، app.interfaces.admin.services.ssh_test_service.
-الحد المعماري: لا ينفذ workflow business؛ دوره wiring وترتيب الإنشاء.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يرتب إنشاء المستودعات والخدمات ومكونات التحليل والتشغيل ثم يعيد حاوية واحدة
+جاهزة للاستخدام من واجهة التطبيق.
 """
 from app.composition.runtime import build_runtime_composition
 from app.composition.analysis import (
@@ -30,10 +26,7 @@ logger = logging.getLogger(__name__)
 
 def build_container() -> ApplicationContainer:
     """
-    يبني جميع اعتماديات التطبيق في مكان واحد.
-
-    لا يجب إنشاء Repositories أو Services داخل Routes
-    أو داخل الوكيل مباشرة.
+    يبني المستودعات والخدمات وتركيبات التحليل ووقت التشغيل ثم يعيد حاوية التطبيق المكتملة.
     """
 
     logger.info(
@@ -41,12 +34,7 @@ def build_container() -> ApplicationContainer:
         settings.rag_policy_summary,
     )
 
-    # -------------------------------------------------
-    # Repositories
-    # -------------------------------------------------
-
-    # نبني repositories أولًا لأنها source of persistence تعتمد عليها كل
-    # services اللاحقة؛ الكائنات هنا shared داخل container الواحد.
+    # نبدأ بمصادر الحالة حتى تتعامل المراحل التالية مع سجل واحد للسيرفر والتقرير.
     repositories = build_repositories()
     server_repository = repositories.server_repository
     command_repository = repositories.command_repository
@@ -63,12 +51,7 @@ def build_container() -> ApplicationContainer:
     remediation_repository = repositories.remediation_repository
     autonomous_remediation_repository = repositories.autonomous_remediation_repository
 
-    # -------------------------------------------------
-    # Shared services
-    # -------------------------------------------------
-
-    # بعد persistence نركب services/policies التي لا تحتاج إلى تشغيل Claude
-    # بعد، ثم نمررها إلى capabilities بدل إنشائها داخل routes.
+    # بعد ذلك نجهز قواعد القرار والخدمات التي تحفظ انتقالات الرحلة التشغيلية.
     services = build_core_services(
         repositories,
         settings,
@@ -102,9 +85,7 @@ def build_container() -> ApplicationContainer:
     rag_retriever = retrieval_composition.rag_retriever
     report_pdf_service = retrieval_composition.report_pdf_service
 
-    # -------------------------------------------------
-    # Admin services
-    # -------------------------------------------------
+    # نضيف خدمات الإدارة التي تعرض حالة السيرفر وتستقبل طلبات المستخدم.
 
     ssh_test_service = SSHTestService(
         server_repository=server_repository,
@@ -122,12 +103,7 @@ def build_container() -> ApplicationContainer:
         ),
     )
 
-    # -------------------------------------------------
-    # LLM analysis
-    # -------------------------------------------------
-
-    # Retrieval/Analysis ثم Investigation تعتمد على repositories والخدمات
-    # المشتركة؛ لذلك تأتي بعدهما وقبل MCP وruntime اللذين يستهلكانها.
+    # نركب الفهم والتحقيق كي ينتقل التقرير من ملاحظة إلى دليل وتشخيص.
     analysis_composition = build_analysis_investigation_composition(
         repositories,
         services,
@@ -143,12 +119,7 @@ def build_container() -> ApplicationContainer:
     report_analyzer = analysis_composition.report_analyzer
     analysis_orchestrator = analysis_composition.analysis_orchestrator
 
-    # -------------------------------------------------
-    # Monitoring agent
-    # -------------------------------------------------
-
-    # آخر مجموعة هي supervisory runtime وMCP boundary؛ هنا فقط تتجمع كل
-    # dependencies لتصبح per-application shared services قابلة للحقن.
+    # في النهاية نربط تشغيل المهام وواجهات الأدوات بالقدرات التي تحكم أثرها.
     runtime_composition = build_runtime_composition(
         repositories=repositories,
         services=services,

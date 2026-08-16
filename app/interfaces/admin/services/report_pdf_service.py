@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+إنشاء نسخة PDF من تقرير المراقبة وتحليله.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+ينسق الملف الخطوط العربية واتجاه النص وتخطيط التقرير ومصادر التحليل في ملف
+قابل للتنزيل، دون أن يغير بيانات التقرير المحفوظة.
 """
 from io import BytesIO
 from pathlib import Path
@@ -36,11 +32,7 @@ from reportlab.platypus import (
 
 def _rtl(value: object) -> str:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى _rtl؛ المدخلات المهمة: value.
-    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يهيئ النص العربي للعرض من اليمين إلى اليسار داخل ملف PDF.
     """
     text = str(value if value is not None else "-")
     return get_display(arabic_reshaper.reshape(text))
@@ -48,12 +40,7 @@ def _rtl(value: object) -> str:
 
 class ReportPdfService:
     """
-    يمثل ReportPdfService مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يبني مستند PDF من تقرير المراقبة ونتيجة تحليله ومصادره.
     """
     def __init__(
         self,
@@ -61,11 +48,7 @@ class ReportPdfService:
         font_path: Path,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Administration interface.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: font_path.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من خط PDF ويسجله باسم ثابت لاستخدامه في المستندات العربية.
         """
         if not font_path.exists():
             raise FileNotFoundError(
@@ -87,11 +70,7 @@ class ReportPdfService:
         sources: Iterable,
     ) -> bytes:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: report، analysis، sources.
-        تعيد bytes أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ PDF من تفاصيل التقرير والتحليل ومصادره ويعيد البايتات الجاهزة للتنزيل.
         """
         buffer = BytesIO()
         document = SimpleDocTemplate(

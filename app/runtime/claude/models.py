@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+نماذج البيانات التي تصف طلب جلسة Claude ونتيجتها وحالتها.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تمنع هذه النماذج انتقال طلب ناقص أو نتيجة غير قابلة للتفسير إلى بقية رحلة
+المراقبة، وتفصل بين المخرجات الخام والنتيجة المنظمة والحالة المحفوظة.
 """
 from __future__ import annotations
 
@@ -17,12 +13,7 @@ from typing import Any
 
 class ClaudeJobStatus(StrEnum):
     """
-    يمثل ClaudeJobStatus مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    الحالات المسموح بها لدورة مهمة Claude منذ الانتظار حتى النهاية.
     """
     QUEUED = "queued"
     RUNNING = "running"
@@ -35,12 +26,7 @@ class ClaudeJobStatus(StrEnum):
 @dataclass(slots=True, frozen=True)
 class ClaudeRuntimeRequest:
     """
-    يمثل ClaudeRuntimeRequest مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    طلب يحدد نوع مهمة Claude وسياقها ووقتها وأدواتها المسموح بها.
     """
     job_id: str
     job_type: str
@@ -57,11 +43,7 @@ class ClaudeRuntimeRequest:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من هوية المهمة ونصها وحدودها وأسماء الأدوات قبل السماح بتشغيلها.
         """
         if not self.job_id.strip():
             raise ValueError(
@@ -98,12 +80,7 @@ class ClaudeRuntimeRequest:
 @dataclass(slots=True, frozen=True)
 class ClaudeRawResult:
     """
-    يمثل ClaudeRawResult مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    المخرج الخام الذي تعيده الجلسة مع معرفها وعدد جولاتها وأدواتها.
     """
     session_id: str
     content: str
@@ -115,11 +92,7 @@ class ClaudeRawResult:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من وجود معرف ومحتوى للجلسة ومن عدم سلبية عداداتها.
         """
         if not self.session_id.strip():
             raise ValueError(
@@ -145,12 +118,7 @@ class ClaudeRawResult:
 @dataclass(slots=True, frozen=True)
 class ClaudeStructuredOutput:
     """
-    يمثل ClaudeStructuredOutput مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    النتيجة التي فكها النظام من مخرج Claude وتحتوي الحالة والملخص والبيانات.
     """
     status: ClaudeJobStatus
     summary: str
@@ -163,11 +131,7 @@ class ClaudeStructuredOutput:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتأكد أن النتيجة تحمل حالة نهائية وملخصًا يمكن حفظه وعرضه.
         """
         if self.status not in {
             ClaudeJobStatus.COMPLETED,
@@ -188,12 +152,7 @@ class ClaudeStructuredOutput:
 @dataclass(slots=True, frozen=True)
 class ClaudeRuntimeResult:
     """
-    يمثل ClaudeRuntimeResult مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    النتيجة النهائية القابلة للحفظ لمهمة Claude، بما فيها الفشل أو المهلة ومؤشرات الاستخدام.
     """
     job_id: str
     job_type: str
@@ -210,11 +169,7 @@ class ClaudeRuntimeResult:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من هوية المهمة ونوعها وعدادات النتيجة النهائية قبل تسجيلها.
         """
         if not self.job_id.strip():
             raise ValueError(

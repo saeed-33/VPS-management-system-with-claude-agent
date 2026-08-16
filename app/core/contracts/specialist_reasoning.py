@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقود مخرجات تفكير المتخصص وطلبات فحوصه الإضافية."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -18,35 +9,18 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class SpecialistReasoningClient(ABC):
     """
-    يمثل SpecialistReasoningClient مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على ABC وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد لمزود يحلل سياق متخصص ويرجع نتائج مرتبطة بمعرفات أدلة معروفة.
     """
     @property
     @abstractmethod
     def provider_name(self) -> str:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى provider_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يعيد اسم مزود التفكير لتسجيل مصدر نتيجة المتخصص."""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def model_name(self) -> str:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى model_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يعيد اسم النموذج الذي أنتج نتيجة المتخصص."""
         raise NotImplementedError
 
     @abstractmethod
@@ -57,23 +31,14 @@ class SpecialistReasoningClient(ABC):
         user_prompt: str,
     ) -> "SpecialistReasoningOutput":
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى reason؛ المدخلات المهمة: system_prompt، user_prompt.
-        تعيد 'SpecialistReasoningOutput' أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحلل سياق المتخصص ويرجع نتائج وفرضيات أو طلب أداة تشخيص مسموحة.
         """
         raise NotImplementedError
 
 
 class SpecialistFindingOutput(BaseModel):
     """
-    يمثل SpecialistFindingOutput مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    نتيجة يزعم المتخصص أنها مدعومة بأدلة محددة.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -92,12 +57,7 @@ class SpecialistFindingOutput(BaseModel):
 
 class SpecialistHypothesisOutput(BaseModel):
     """
-    يمثل SpecialistHypothesisOutput مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    فرضية متخصصة مع أدلة تؤيدها وأخرى قد تناقضها.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -121,12 +81,10 @@ class SpecialistHypothesisOutput(BaseModel):
 
 class SpecialistDiagnosticToolRequestOutput(BaseModel):
     """
-    يمثل SpecialistDiagnosticToolRequestOutput مسؤولية محددة داخل طبقة Core application contracts.
+    طلب فحص إضافي يشرح المتخصص سبب حاجته إليه.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    لا يمثل الطلب إذنًا بالتنفيذ؛ تمر الأداة لاحقًا عبر سياسة التحقيق والتحقق
+    من المعاملات قبل جمع دليل جديد.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -137,12 +95,10 @@ class SpecialistDiagnosticToolRequestOutput(BaseModel):
 
 class SpecialistReasoningOutput(BaseModel):
     """
-    يمثل SpecialistReasoningOutput مسؤولية محددة داخل طبقة Core application contracts.
+    النتيجة الكاملة لجولة تفكير متخصص.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    تجمع الملخص والنتائج والفرضيات وما تم استبعاده والأدلة الناقصة وطلبات
+    الفحص اللاحقة في شكل واحد قابل للحفظ والمراجعة.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -159,12 +115,7 @@ class SpecialistReasoningOutput(BaseModel):
 
 class SpecialistFinalSynthesisOutput(BaseModel):
     """
-    يمثل SpecialistFinalSynthesisOutput مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    ملخص نهائي للمتخصص عند بلوغ حد الجولات أو الأفعال.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -177,11 +128,10 @@ class SpecialistFinalSynthesisOutput(BaseModel):
 
     def to_reasoning_output(self) -> SpecialistReasoningOutput:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+        يحول الملخص النهائي إلى نتيجة جولة لا تحتوي طلبات أدوات جديدة.
 
-        تُستدعى عندما يصل workflow إلى to_reasoning_output؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد SpecialistReasoningOutput أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        تستخدمه الحلقة لإغلاق التحقيق بقراءة الأدلة المتاحة بدل فتح جولة بعد
+        نفاد الميزانية.
         """
         return SpecialistReasoningOutput(
             summary=self.summary,

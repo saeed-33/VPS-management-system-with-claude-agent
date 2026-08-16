@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقود حفظ قرار بدء التحقيق والمرشحين الذين أنتجهم التوجيه."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -16,12 +7,10 @@ from dataclasses import dataclass, field
 @dataclass(slots=True, frozen=True)
 class PersistInvestigationCandidateDTO:
     """
-    يمثل PersistInvestigationCandidateDTO مسؤولية محددة داخل طبقة Core application contracts.
+    بيانات مرشح متخصص كما ظهر في ترتيب التوجيه قبل أو بعد الاختيار.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحفظ العقد سبب الترتيب والمجالات المتطابقة وحالة الاختيار حتى يمكن تفسير
+    لماذا شارك متخصص معين في التحقيق.
     """
     specialist_definition_id: int | None
     specialist_slug: str
@@ -36,13 +25,7 @@ class PersistInvestigationCandidateDTO:
     matched_issue_indexes: tuple[int, ...] = ()
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من ترتيب المرشح واتساق حالته مع رتبة الاختيار."""
         if not self.specialist_slug.strip():
             raise ValueError("specialist_slug must not be empty.")
         if not self.specialist_name.strip():
@@ -60,12 +43,10 @@ class PersistInvestigationCandidateDTO:
 @dataclass(slots=True, frozen=True)
 class PersistInvestigationDTO:
     """
-    يمثل PersistInvestigationDTO مسؤولية محددة داخل طبقة Core application contracts.
+    سجل قرار إنشاء التحقيق وحدوده ونتائج توجيهه.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يربط العقد التحقيق بالتقرير والتحليل، ويحفظ المجالات والأسباب والمرشحين
+    والميزانية حتى يمكن استعادة سبب بدء التحقيق واختياراته.
     """
     investigation_id: str
     server_id: int
@@ -87,13 +68,7 @@ class PersistInvestigationDTO:
     metadata: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من روابط التحقيق وحدود المرشحين وترتيب ميزانيته."""
         if not self.investigation_id.strip():
             raise ValueError("investigation_id must not be empty.")
         if self.server_id < 1:

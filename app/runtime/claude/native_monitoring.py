@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+تشغيل دورة المراقبة الفعلية لسيرفر عبر جلسة Claude.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: app.runtime.claude.exceptions، app.runtime.claude.job_service، app.runtime.claude.models، app.runtime.claude.runtime.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+ينشئ العامل طلبًا يفرض تسلسل أدوات المراقبة والتحليل والتحقيق، يحفظ انتقالات
+المهمة، ثم يعيد نتيجة موثقة أو يرفع فشلًا مضبوطًا عند عدم اكتمال الدورة.
 """
 from __future__ import annotations
 
@@ -45,7 +41,9 @@ SERVER_SUPERVISOR_ALLOWED_TOOLS = (
 
 
 class ClaudeNativeMonitoringRunner:
-    """Scheduler-facing bridge to one real per-server Claude Code session."""
+    """
+    عامل يطلق دورة مراقبة حقيقية ويضمن تسجيلها من إنشاء المهمة حتى اكتمال النتيجة.
+    """
 
     def __init__(
         self,
@@ -56,11 +54,7 @@ class ClaudeNativeMonitoringRunner:
         max_turns: int,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: runtime_adapter، agent_job_service، timeout_seconds، max_turns.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجهز مشغل المراقبة بمحرك الجلسة وخدمة حفظ المهمة وحدود الوقت والجولات.
         """
         self._runtime_adapter = runtime_adapter
         self._agent_job_service = agent_job_service
@@ -79,11 +73,7 @@ class ClaudeNativeMonitoringRunner:
 
     async def run(self, server_id: int):
         """
-        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: server_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ مهمة مراقبة للسيرفر، يشغل دورة الأدوات الإلزامية، يحفظ النتيجة، ويرفع فشلًا مضبوطًا إن لم تكتمل.
         """
         if (
             not isinstance(server_id, int)
@@ -158,11 +148,7 @@ class ClaudeNativeMonitoringRunner:
         job_id: str,
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _prompt؛ المدخلات المهمة: server_id، job_id.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني تعليمات المشرف التي تلزمه بقراءة السياق وتشغيل المراقبة والتحليل والتحقيق دون اختلاق نتائج.
         """
         return (
             "Execute one real operational monitoring cycle for "

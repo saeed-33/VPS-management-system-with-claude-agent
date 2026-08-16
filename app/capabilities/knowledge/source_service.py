@@ -1,12 +1,8 @@
 """
-جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+خدمة إدارة مصادر المعرفة.
 
-الموقع في المعمارية: Application capability / knowledge.
-يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
-يعتمد مباشرة على: app.infrastructure.database.repositories.knowledge_source_repository، app.core.contracts.knowledge_sources.
-الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+توفر عمليات القراءة والإنشاء والتعديل والتفعيل والحذف عبر مستودع المصادر،
+وتحوّل غياب المصدر إلى خطأ واضح للخدمات المستهلكة.
 """
 from __future__ import annotations
 
@@ -21,23 +17,14 @@ from app.core.contracts.knowledge_sources import (
 
 class KnowledgeSourceService:
     """
-    يمثل KnowledgeSourceService مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يدير دورة حياة مصدر المعرفة من خلال مستودع المصادر.
     """
     def __init__(
         self,
         repository: KnowledgeSourceRepository,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودع مصادر المعرفة بخدمة الإدارة.
         """
         self._repository = repository
 
@@ -47,11 +34,7 @@ class KnowledgeSourceService:
         enabled_only: bool = False,
     ):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى list_sources؛ المدخلات المهمة: enabled_only.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد كل المصادر أو المصادر المفعلة فقط بحسب خيار المستدعي.
         """
         if enabled_only:
             return (
@@ -66,11 +49,7 @@ class KnowledgeSourceService:
         source_id: int,
     ):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى get_source؛ المدخلات المهمة: source_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب مصدرًا بالمعرف ويرفع خطأ واضحًا عند عدم وجوده.
         """
         source = self._repository.get_by_id(
             source_id
@@ -88,11 +67,7 @@ class KnowledgeSourceService:
         data: CreateKnowledgeSourceDTO,
     ):
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى create_source؛ المدخلات المهمة: data.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ مصدر معرفة جديدًا عبر بيانات العقد المخصصة.
         """
         return self._repository.create(data)
 
@@ -102,11 +77,7 @@ class KnowledgeSourceService:
         data: UpdateKnowledgeSourceDTO,
     ):
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى update_source؛ المدخلات المهمة: source_id، data.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث مصدرًا موجودًا ويرفع خطأ عند فشل العثور عليه.
         """
         source = self._repository.update(
             source_id,
@@ -126,11 +97,7 @@ class KnowledgeSourceService:
         enabled: bool,
     ):
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى set_enabled؛ المدخلات المهمة: source_id، enabled.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يغير تفعيل مصدر المعرفة ويرفع خطأ إذا لم يوجد المصدر.
         """
         source = (
             self._repository
@@ -152,11 +119,7 @@ class KnowledgeSourceService:
         source_id: int,
     ) -> None:
         """
-        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى delete_source؛ المدخلات المهمة: source_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحذف مصدر المعرفة ويرفع خطأ إذا لم ينفذ المستودع الحذف.
         """
         if not self._repository.delete(
             source_id

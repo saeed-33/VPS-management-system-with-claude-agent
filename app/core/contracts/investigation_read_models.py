@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""نماذج القراءة التي تعرض تقدم التحقيق دون كشف تفاصيل التخزين الداخلية."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -17,12 +8,7 @@ from datetime import datetime
 @dataclass(slots=True, frozen=True)
 class InvestigationCandidateReadModel:
     """
-    يمثل InvestigationCandidateReadModel مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عرض مرشح متخصص مع درجته وأسباب مطابقته وحالة اختياره.
     """
     specialist_definition_id: int | None
     specialist_slug: str
@@ -40,12 +26,10 @@ class InvestigationCandidateReadModel:
 @dataclass(slots=True, frozen=True)
 class InvestigationSummaryReadModel:
     """
-    يمثل InvestigationSummaryReadModel مسؤولية محددة داخل طبقة Core application contracts.
+    ملخص حالة التحقيق المناسب للقوائم وشاشات المتابعة السريعة.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يبين هل يلزم التحقيق ومن اختير له وما إذا كان runtime والتشخيص النهائي
+    متاحين، دون تحميل الأدلة والتفاصيل التشغيلية كلها.
     """
     investigation_id: str
     server_id: int
@@ -67,12 +51,7 @@ class InvestigationSummaryReadModel:
 @dataclass(slots=True, frozen=True)
 class InvestigationRuntimeReadModel:
     """
-    يمثل InvestigationRuntimeReadModel مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    تفاصيل تشغيلية قابلة للعرض عن جولات التحقيق وأدلته ونتائجه المتعارضة.
     """
     status: str | None = None
     orchestrator: str | None = None
@@ -92,12 +71,10 @@ class InvestigationRuntimeReadModel:
 @dataclass(slots=True, frozen=True)
 class InvestigationDetailReadModel:
     """
-    يمثل InvestigationDetailReadModel مسؤولية محددة داخل طبقة Core application contracts.
+    العرض الكامل للتحقيق مع قرار التوجيه والمرشحين وحالة التنفيذ والتشخيص.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يجمع هذا العقد المعلومات التي يحتاجها المستخدم لمراجعة لماذا بدأ التحقيق،
+    من شارك فيه، وما الأدلة والنتيجة التي وصل إليها.
     """
     investigation_id: str
     server_id: int

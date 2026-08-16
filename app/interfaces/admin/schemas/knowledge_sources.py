@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مخططات إدارة مصادر المعرفة.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تتحقق من طلبات إنشاء وتعديل وتفعيل المصدر، وتحدد شكل بيانات المصدر التي تعود
+إلى الواجهة الإدارية.
 """
 from __future__ import annotations
 
@@ -22,12 +18,7 @@ from pydantic import (
 
 class KnowledgeSourceCreateRequest(BaseModel):
     """
-    يمثل KnowledgeSourceCreateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب إنشاء مصدر معرفة ومحتواه ووسومه ونطاقه.
     """
     slug: str = Field(
         min_length=1,
@@ -70,23 +61,14 @@ class KnowledgeSourceCreateRequest(BaseModel):
         value: str,
     ) -> str:
         """
-        يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Administration interface.
-
-        تُستدعى عندما يصل workflow إلى normalize_lower؛ المدخلات المهمة: value.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يطبع قيمة النص إلى أحرف صغيرة لاستخدامها في معرفات مصدر المعرفة.
         """
         return value.strip().lower()
 
 
 class KnowledgeSourceUpdateRequest(BaseModel):
     """
-    يمثل KnowledgeSourceUpdateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل الحقول القابلة للتعديل في مصدر معرفة.
     """
     name: str | None = Field(
         default=None,
@@ -110,24 +92,14 @@ class KnowledgeSourceUpdateRequest(BaseModel):
 
 class KnowledgeSourceEnabledRequest(BaseModel):
     """
-    يمثل KnowledgeSourceEnabledRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب تفعيل أو تعطيل مصدر معرفة.
     """
     enabled: bool
 
 
 class KnowledgeSourceResponse(BaseModel):
     """
-    يمثل KnowledgeSourceResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل مصدر المعرفة في استجابة API.
     """
     id: int
     slug: str

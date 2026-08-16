@@ -1,12 +1,5 @@
 """
-جزء من Monitoring لاختيار profile/commands أو تنفيذ الدورة وحفظ report.
-
-الموقع في المعمارية: Application capability / monitoring.
-يُستدعى بواسطة: Scheduler أو MCP أو Admin API.
-يعتمد مباشرة على: app.infrastructure.database.models.server، app.infrastructure.database.repositories.server_repository، app.core.contracts.servers، app.core.exceptions.
-الحد المعماري: لا يقوم بتحليل LLM أو Investigation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+إدارة هوية السيرفر وإعدادات الاتصال وتفعيل المراقبة الخاصة به.
 """
 from app.infrastructure.database.models.server import (
     ServerModel,
@@ -26,33 +19,20 @@ from app.core.exceptions import (
 
 class ServerService:
     """
-    يمثل ServerService مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    خدمة تنشئ وتعدل وتحذف السيرفرات وتتحقق من بيانات الاتصال الأولية.
     """
     def __init__(
         self,
         repository: ServerRepository,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط خدمة السيرفر بمستودع السيرفر وملفات المراقبة.
         """
         self._repository = repository
 
     def list_servers(self) -> list[ServerModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى list_servers؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[ServerModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض السيرفرات المسجلة لإدارة الاتصال والمراقبة.
         """
         return self._repository.list_all()
 
@@ -61,11 +41,7 @@ class ServerService:
         server_id: int,
     ) -> ServerModel:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى get_server؛ المدخلات المهمة: server_id.
-        تعيد ServerModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سيرفرًا محددًا أو يوضح عدم وجوده.
         """
         server = self._repository.get_by_id(
             server_id
@@ -81,11 +57,7 @@ class ServerService:
         data: CreateServerDTO,
     ) -> ServerModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى create_server؛ المدخلات المهمة: data.
-        تعيد ServerModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ سجل سيرفر بعد التحقق من بيانات الاتصال وملف المراقبة.
         """
         self._validate_create(data)
 
@@ -104,11 +76,7 @@ class ServerService:
         data: UpdateServerDTO,
     ) -> ServerModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى update_server؛ المدخلات المهمة: server_id، data.
-        تعيد ServerModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدث بيانات السيرفر أو إعداد المراقبة مع الحفاظ على تقاريره.
         """
         existing = self._repository.get_by_id(
             server_id
@@ -147,11 +115,7 @@ class ServerService:
         server_id: int,
     ) -> None:
         """
-        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى delete_server؛ المدخلات المهمة: server_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحذف سيرفرًا عندما تسمح سجلاته وعلاقاته بذلك.
         """
         deleted = self._repository.delete(
             server_id
@@ -165,11 +129,7 @@ class ServerService:
         data: CreateServerDTO,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى _validate_create؛ المدخلات المهمة: data.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من بيانات الاتصال الأولية قبل إنشاء سجل السيرفر.
         """
         if not data.name.strip():
             raise ValueError(

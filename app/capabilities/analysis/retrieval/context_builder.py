@@ -1,12 +1,8 @@
 """
-جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+تحويل نتائج الاسترجاع إلى سياق صالح لمطالبة التحليل.
 
-الموقع في المعمارية: Application capability / retrieval.
-يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.rag_context.
-الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يختار الحقول المفيدة من التحليلات السابقة ويضع حدودًا للحجم، مع إبقاء مصدر كل
+قرينة ودرجتها واضحين حتى لا تختلط الخبرة التاريخية بدليل التقرير الحالي.
 """
 from typing import Any
 
@@ -17,12 +13,7 @@ from app.capabilities.analysis.retrieval.rag_context import (
 
 class RagContextBuilder:
     """
-    يمثل RagContextBuilder مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يبني قائمة سياق مختصرة ومنظمة من نتائج التحليلات المسترجعة لإدراجها في مطالبة النموذج.
     """
     def __init__(
         self,
@@ -32,11 +23,7 @@ class RagContextBuilder:
         max_issue_characters: int = 1000,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: max_cases، max_summary_characters، max_issue_characters.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحفظ الحد الأقصى لعدد السياقات وطول كل سياق المستخدم عند بناء المطالبة.
         """
         self._max_cases = max_cases
         self._max_summary_characters = (
@@ -51,11 +38,7 @@ class RagContextBuilder:
         contexts: list[RetrievedAnalysisContext],
     ) -> list[dict[str, Any]]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: contexts.
-        تعيد list[dict[str, Any]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل السياقات المسترجعة إلى سجلات موجزة تشمل المصدر والدرجات والنتائج، ثم يحد العدد والحجم.
         """
         result: list[dict[str, Any]] = []
 

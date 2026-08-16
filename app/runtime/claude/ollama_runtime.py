@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+بناء أمر Claude الذي يستخدم Ollama كمزود للنموذج.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: app.runtime.claude.models، app.runtime.claude.command.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يتحقق الباني من مشروع التشغيل وملف MCP والمزود، ثم يثبت الأدوات والمجلد والبيئة
+التي تحتاجها جلسة مشرف السيرفر.
 """
 from __future__ import annotations
 
@@ -18,9 +14,7 @@ from app.runtime.claude.command import ClaudeProcessCommand
 
 class OllamaClaudeCommandBuilder:
     """
-    Run Claude Code directly while using Ollama as its Anthropic-compatible
-    backend. This preserves Claude Code's documented JSON envelope and avoids
-    depending on the `ollama launch claude` wrapper for MCP/stdout behavior.
+    باني يثبت إعدادات Claude وOllama وMCP داخل أمر تشغيل واحد.
     """
 
     def __init__(
@@ -33,11 +27,7 @@ class OllamaClaudeCommandBuilder:
         agent: str = "server-supervisor",
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: project_root، model، base_url، executable، agent.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من مجلد المشروع والنموذج وعنوان Ollama وملف MCP قبل السماح ببناء أمر التشغيل.
         """
         self._project_root = Path(project_root).resolve()
         self._model = model.strip()
@@ -84,11 +74,7 @@ class OllamaClaudeCommandBuilder:
         request: ClaudeRuntimeRequest,
     ) -> ClaudeProcessCommand:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: request.
-        تعيد ClaudeProcessCommand أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني معاملات Claude ومتغيرات البيئة التي تثبت Ollama ومشرف السيرفر وأدوات MCP المسموحة.
         """
         argv = (
             self._executable,

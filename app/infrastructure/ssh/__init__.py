@@ -1,4 +1,6 @@
-"""Low-level, policy-neutral SSH transport and command execution."""
+"""
+اتصال SSH وتنفيذ فحوص القراءة على السيرفرات البعيدة.
+"""
 
 from asyncssh import Error as SSHError
 

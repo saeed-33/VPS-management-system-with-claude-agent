@@ -1,12 +1,5 @@
 """
-نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
-
-الموقع في المعمارية: Persistence model.
-يُستدعى بواسطة: repositories وطبقة database.
-يعتمد مباشرة على: app.infrastructure.database.base، app.core.utils.datetime.
-الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+نماذج التحقيق ومرشحي المتخصصين الذين اختارهم التوجيه.
 """
 from __future__ import annotations
 
@@ -31,12 +24,7 @@ from app.core.utils.datetime import utc_now
 
 class InvestigationModel(Base):
     """
-    يمثل InvestigationModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    سجل تحقيق يربط السيرفر بتقرير المراقبة والتحليل وقرار التوجيه وحالة التنفيذ.
     """
     __tablename__ = "investigations"
     __table_args__ = (
@@ -94,12 +82,7 @@ class InvestigationModel(Base):
 
 class InvestigationSpecialistCandidateModel(Base):
     """
-    يمثل InvestigationSpecialistCandidateModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مرشح متخصص محفوظ مع درجة المطابقة وأسبابها وحالة اختياره للتحقيق.
     """
     __tablename__ = "investigation_specialist_candidates"
     __table_args__ = (

@@ -1,12 +1,8 @@
 """
-جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+نماذج وحالات دورة إدخال وثائق المعرفة.
 
-الموقع في المعمارية: Application capability / knowledge.
-يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تصف الحالة مراحل الوثيقة من الانتظار حتى الفهرسة أو الفشل، وتتحقق نماذج
+المستند والمقطع من القيم الأساسية قبل تمريرها إلى الخدمات والمستودعات.
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -14,12 +10,7 @@ from enum import StrEnum
 
 class KnowledgeDocumentStatus(StrEnum):
     """
-    يمثل KnowledgeDocumentStatus مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل الحالات المتتابعة لوثيقة المعرفة أثناء الإدخال والمعالجة والفهرسة.
     """
     PENDING = "pending"
     FETCHED = "fetched"
@@ -31,12 +22,7 @@ class KnowledgeDocumentStatus(StrEnum):
 @dataclass(slots=True, frozen=True)
 class ParsedKnowledgeDocument:
     """
-    يمثل ParsedKnowledgeDocument مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحمل النص المحلل للوثيقة وURI ونوع الوسيط والعنوان والصفحات والبيانات الوصفية.
     """
     canonical_uri: str
     title: str | None
@@ -49,11 +35,7 @@ class ParsedKnowledgeDocument:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من URI والنص وعدد الصفحات في وثيقة المعرفة المنشأة.
         """
         if not self.canonical_uri.strip():
             raise ValueError("canonical_uri must not be empty.")
@@ -65,12 +47,7 @@ class ParsedKnowledgeDocument:
 @dataclass(slots=True, frozen=True)
 class KnowledgeChunkDraft:
     """
-    يمثل KnowledgeChunkDraft مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل مسودة مقطع قبل تخزينه مع موضعه ومحتواه وعنوانه وحجمه وبياناته.
     """
     chunk_index: int
     content: str
@@ -81,11 +58,7 @@ class KnowledgeChunkDraft:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من موضع المقطع ومحتواه ورقم الصفحة وعدد الرموز عند توفرها.
         """
         if self.chunk_index < 0:
             raise ValueError("chunk_index must be >= 0.")

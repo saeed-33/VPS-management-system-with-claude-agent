@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مخططات تعريفات الاختصاصيين.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تحدد طلبات إنشاء وتعديل وتفعيل الاختصاصي، وتطبع المعرف والاسم قبل تمريرهما إلى
+خدمة تعريفات المجال.
 """
 from __future__ import annotations
 
@@ -22,12 +18,7 @@ from pydantic import (
 
 class SpecialistCreateRequest(BaseModel):
     """
-    يمثل SpecialistCreateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب إنشاء تعريف اختصاصي.
     """
     slug: str = Field(
         min_length=1,
@@ -73,11 +64,7 @@ class SpecialistCreateRequest(BaseModel):
         value: str,
     ) -> str:
         """
-        يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Administration interface.
-
-        تُستدعى عندما يصل workflow إلى normalize_slug؛ المدخلات المهمة: value.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يطبع slug الاختصاصي ويضمن شكله المخصص للمعرف.
         """
         return value.strip().lower()
 
@@ -88,23 +75,14 @@ class SpecialistCreateRequest(BaseModel):
         value: str,
     ) -> str:
         """
-        يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Administration interface.
-
-        تُستدعى عندما يصل workflow إلى normalize_name؛ المدخلات المهمة: value.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينظف اسم الاختصاصي قبل التحقق والحفظ.
         """
         return value.strip()
 
 
 class SpecialistUpdateRequest(BaseModel):
     """
-    يمثل SpecialistUpdateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب تعديل تعريف اختصاصي.
     """
     name: str | None = Field(
         default=None,
@@ -132,24 +110,14 @@ class SpecialistUpdateRequest(BaseModel):
 
 class SpecialistEnabledRequest(BaseModel):
     """
-    يمثل SpecialistEnabledRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب تفعيل أو تعطيل اختصاصي.
     """
     enabled: bool
 
 
 class SpecialistResponse(BaseModel):
     """
-    يمثل SpecialistResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل تعريف الاختصاصي في استجابة API.
     """
     id: int
     slug: str

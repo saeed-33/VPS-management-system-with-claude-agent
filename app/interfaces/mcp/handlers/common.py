@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+أدوات التحقق المشترك لمعالجات MCP.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تقرأ الوسائط المطلوبة والاختيارية من طلب الأداة وتتحقق من أنواعها، كما تضمن
+توفر الاعتماديات المطلوبة قبل تنفيذ المعالج.
 """
 from __future__ import annotations
 
@@ -15,12 +11,7 @@ from typing import Any
 
 class BoundaryCommonMixin:
     """
-    يمثل BoundaryCommonMixin مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يوفر تحقق الوسائط والاعتماديات المشترك لكل حدود الأدوات.
     """
     @staticmethod
     def _required_int(
@@ -28,11 +19,7 @@ class BoundaryCommonMixin:
         name: str,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _required_int؛ المدخلات المهمة: arguments، name.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ وسيطًا صحيحًا مطلوبًا ويرفض النوع أو الغياب برسالة MCP واضحة.
         """
         value = arguments.get(
             name
@@ -56,11 +43,7 @@ class BoundaryCommonMixin:
         name: str,
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _required_string؛ المدخلات المهمة: arguments، name.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ نصًا مطلوبًا غير فارغ من وسائط الأداة.
         """
         value = arguments.get(name)
         if not isinstance(value, str) or not value.strip():
@@ -75,11 +58,7 @@ class BoundaryCommonMixin:
         name: str,
     ) -> list[str]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _required_string_list؛ المدخلات المهمة: arguments، name.
-        تعيد list[str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ قائمة نصوص مطلوبة ويتحقق من عناصرها.
         """
         value = arguments.get(name)
         if not isinstance(value, list) or not value:
@@ -103,11 +82,7 @@ class BoundaryCommonMixin:
         default: int,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _optional_int؛ المدخلات المهمة: arguments، name، default.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ وسيطًا صحيحًا اختياريًا مع قيمة افتراضية مناسبة.
         """
         value = arguments.get(
             name,
@@ -132,11 +107,7 @@ class BoundaryCommonMixin:
         name: str,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _require_dependency؛ المدخلات المهمة: dependency، name.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من توفر اعتماد boundary قبل استخدامه في تنفيذ الأداة.
         """
         if dependency is None:
             raise ValueError(

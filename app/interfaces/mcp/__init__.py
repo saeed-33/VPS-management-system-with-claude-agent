@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+واجهة MCP الخاصة بالمشروع.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: app.interfaces.mcp.registry، app.interfaces.mcp.schemas.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تجمع حدود الأدوات ومخططاتها ومسلسلاتها وخادم البروتوكول، بحيث تصل الأدوات
+الخارجية إلى خدمات التطبيق عبر أسماء وعقود محددة قابلة للتدقيق.
 """
 from __future__ import annotations
 

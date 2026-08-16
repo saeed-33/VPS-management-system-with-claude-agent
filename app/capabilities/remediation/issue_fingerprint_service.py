@@ -1,12 +1,8 @@
 """
-جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+حساب بصمة مستقرة للمشكلة المكتشفة.
 
-الموقع في المعمارية: Application capability / remediation.
-يُستدعى بواسطة: Admin API أو MCP.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تطبع الخدمة الحالة والمشكلة والإجراء المقترح ومعرفات الأدلة، ثم تنتج بصمة
+تساعد على منع التكرار وربط الخطط المتشابهة.
 """
 from __future__ import annotations
 
@@ -17,22 +13,22 @@ import unicodedata
 
 
 class IssueFingerprintService:
-    """Derive a stable issue identity from persisted structured diagnosis claims."""
+    """
+    يحوّل عناصر المشكلة التشغيلية إلى بصمة قابلة للمقارنة ومنع التكرار.
+    """
 
     _SCHEMA = "issue-fingerprint-v1"
 
     def __init__(self, *, investigation_read_service) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: investigation_read_service.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحفظ استراتيجية التطبيع أو الإصدار المستخدم لبصمة المشكلة.
         """
         self._investigation_read_service = investigation_read_service
 
     def derive(self, investigation_id: str) -> str | None:
-        """Return a versioned SHA-256 identity, or None when diagnosis is unusable."""
+        """
+        يطبع المشكلة والأدلة والإجراء المقترح وينتج بصمة SHA ثابتة.
+        """
         if not investigation_id or not investigation_id.strip():
             return None
 
@@ -77,11 +73,7 @@ class IssueFingerprintService:
     @staticmethod
     def _normalize_text(value) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _normalize_text؛ المدخلات المهمة: value.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يوحد حالة النص والفراغات والقيم المتغيرة قبل إدخالها في البصمة.
         """
         text = unicodedata.normalize("NFKC", str(value or ""))
         return re.sub(r"\s+", " ", text.strip()).casefold()

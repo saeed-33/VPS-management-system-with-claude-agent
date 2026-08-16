@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: app.infrastructure.database.repositories.agent_job_repository.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تجمع الخدمة حالة المهمة والجلسة والأدوات والمدة والاستخدام في بيانات تساعد على
+معرفة ما حدث أثناء المراقبة دون الخلط بين أثر التشغيل وتشخيص السيرفر.
 """
 from __future__ import annotations
 
@@ -20,7 +16,9 @@ from app.infrastructure.database.repositories.agent_job_repository import (
 
 
 class ClaudeAgentObservabilityService:
-    """Read-only projection over persisted Claude agent jobs."""
+    """
+    خدمة تلخص آثار مهام Claude لتوضيح ما شغلته الجلسة وما انتهت إليه.
+    """
 
     REQUIRED_OPERATIONAL_TOOLS = (
         "mcp__vps__run_monitoring",
@@ -32,11 +30,7 @@ class ClaudeAgentObservabilityService:
         repository: AgentJobRepository,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجهز مصادر قراءة المهام والتقارير اللازمة لبناء أثر تشغيل قابل للمراجعة.
         """
         self._repository = repository
 
@@ -45,11 +39,7 @@ class ClaudeAgentObservabilityService:
         job_id: str,
     ) -> dict[str, Any] | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى get_trace؛ المدخلات المهمة: job_id.
-        تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع الأثر التفصيلي لمهمة Claude واحدة مع حالتها وجلسة التنفيذ والنتيجة.
         """
         if not job_id.strip():
             raise ValueError(
@@ -73,11 +63,7 @@ class ClaudeAgentObservabilityService:
         status: str | None = None,
     ) -> list[dict[str, Any]]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى list_recent_traces؛ المدخلات المهمة: limit، server_id، status.
-        تعيد list[dict[str, Any]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض آثار المهام الحديثة بترتيب يساعد على متابعة نشاط المراقبة عبر الزمن.
         """
         if limit < 1 or limit > 500:
             raise ValueError(
@@ -119,11 +105,7 @@ class ClaudeAgentObservabilityService:
         server_id: int | None = None,
     ) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى summarize_recent؛ المدخلات المهمة: limit، server_id.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع الآثار الحديثة في ملخص يوضح الحالات والمهل والأدوات ومعدل نجاح التشغيل.
         """
         traces = self.list_recent_traces(
             limit=limit,
@@ -224,11 +206,7 @@ class ClaudeAgentObservabilityService:
         model,
     ) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _serialize_job؛ المدخلات المهمة: model.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحول سجل المهمة إلى بيانات عرض موحدة دون فقدان سبب الفشل أو سياق السيرفر.
         """
         usage = dict(
             getattr(
@@ -366,9 +344,8 @@ class ClaudeAgentObservabilityService:
                     for item in mcp_servers
                 )
             ),
-            # Agent delegation and the bounded MCP call are two observability
-            # events for one worker execution; prefer the accepted MCP count
-            # and never double-count both surfaces.
+            # قد تظهر المهمة ونداء الأداة كسجلين لنفس الفحص؛ نعد النداء المقبول
+            # مرة واحدة حتى لا نضخم صورة نشاط العامل.
             "specialist_delegation_count": (
                 specialist_mcp_count
                 if specialist_mcp_count
@@ -422,11 +399,7 @@ class ClaudeAgentObservabilityService:
         usage: dict[str, Any],
     ) -> list[str]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _tool_names؛ المدخلات المهمة: usage.
-        تعيد list[str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج أسماء الأدوات المستخدمة من بيانات المهمة بصيغة مستقرة للعرض والعد.
         """
         raw = usage.get("event_tool_names")
 
@@ -445,11 +418,7 @@ class ClaudeAgentObservabilityService:
         usage: dict[str, Any],
     ) -> list[dict[str, Any]]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _mcp_servers؛ المدخلات المهمة: usage.
-        تعيد list[dict[str, Any]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يلخص خوادم MCP التي ظهرت في أثر الجلسة وحالتها التشغيلية.
         """
         raw = usage.get("event_mcp_servers")
 
@@ -477,11 +446,7 @@ class ClaudeAgentObservabilityService:
         completed_at: datetime | None,
     ) -> float | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _duration_ms؛ المدخلات المهمة: started_at، completed_at.
-        تعيد float | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب مدة المهمة بالميلي ثانية من أوقاتها المحفوظة أو يعيد قيمة فارغة عند غيابها.
         """
         if (
             started_at is None
@@ -498,11 +463,7 @@ class ClaudeAgentObservabilityService:
         value: Any,
     ) -> int | float | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _number؛ المدخلات المهمة: value.
-        تعيد int | float | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ قيمة رقمية من بيانات الأثر مع منع القيم غير الصالحة من إفساد الملخص.
         """
         if isinstance(value, bool):
             return None
@@ -517,11 +478,7 @@ class ClaudeAgentObservabilityService:
         value: datetime | None,
     ) -> str | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _iso؛ المدخلات المهمة: value.
-        تعيد str | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحول وقت المهمة إلى نص زمني موحد للاستخدام في سجل الأثر.
         """
         if value is None:
             return None

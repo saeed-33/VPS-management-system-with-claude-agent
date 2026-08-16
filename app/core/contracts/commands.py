@@ -1,25 +1,14 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقود تعريف فحوص المراقبة وتحديد كيفية تنفيذها على السيرفر."""
 from dataclasses import dataclass, field
 
 
 @dataclass(slots=True, frozen=True)
 class CreateCommandDTO:
     """
-    يمثل CreateCommandDTO مسؤولية محددة داخل طبقة Core application contracts.
+    البيانات المطلوبة لتسجيل فحص جديد يمكن لملف المراقبة تشغيله.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يجمع العقد نص الفحص وحده الزمني وطريقة بصم مخرجه، حتى يمكن مقارنة النتائج
+    الحالية بالسابقة دون فقدان تعريف الفحص الذي أنتجها.
     """
     name: str
     command: str
@@ -35,12 +24,10 @@ class CreateCommandDTO:
 @dataclass(slots=True, frozen=True)
 class UpdateCommandDTO:
     """
-    يمثل UpdateCommandDTO مسؤولية محددة داخل طبقة Core application contracts.
+    التغييرات الاختيارية التي يمكن تطبيقها على فحص مراقبة مسجل.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    تمثل القيم الفارغة عدم تغيير الحقل، بينما تسمح القيم المحددة بتعديل اسم
+    الفحص أو نصه أو مهلة تنفيذه أو سياسة بصمته.
     """
     name: str | None = None
     command: str | None = None
@@ -55,12 +42,10 @@ class UpdateCommandDTO:
 @dataclass(slots=True, frozen=True)
 class CommandExecutionConfig:
     """
-    يمثل CommandExecutionConfig مسؤولية محددة داخل طبقة Core application contracts.
+    نسخة تنفيذية من فحص اختاره ملف مراقبة لسيرفر محدد.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يضيف العقد ترتيب التنفيذ والمهلة إلى تعريف الفحص حتى تنفذ دورة المراقبة
+    الخطوات بالترتيب المسجل.
     """
     id: int
     name: str

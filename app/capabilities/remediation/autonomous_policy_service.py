@@ -1,12 +1,8 @@
 """
-جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+إدارة سياسات المعالجة الآلية.
 
-الموقع في المعمارية: Application capability / remediation.
-يُستدعى بواسطة: Admin API أو MCP.
-يعتمد مباشرة على: app.core.contracts.autonomous_remediation.
-الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تنشئ الخدمة السياسات وتتحقق من شروطها وتغيّر حالات التفعيل أو التعليق مع تسجيل
+أحداث التدقيق، حتى يبقى نطاق الأفعال المسموحة صريحًا.
 """
 from __future__ import annotations
 
@@ -21,56 +17,38 @@ from app.core.contracts.autonomous_remediation import (
 
 
 class AutonomousPolicyService:
-    """Human/admin policy registry. Claude never receives this service."""
+    """
+    ينفذ عمليات إدارة سياسة المعالجة الآلية والتحقق من صلاحيتها وتسجيل تغييراتها.
+    """
 
     def __init__(self, *, repository) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودع السياسات ومستودع تدقيقها والساعة الافتراضية.
         """
         self._repository = repository
 
     def create(self, **values):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ سياسة معالجة آلية بعد التحقق من اسمها وأفعالها وحدودها.
         """
         policy = self._validate(values, policy_id=values.get("policy_id") or str(uuid4()), version=1)
         return self._repository.create_policy(policy)
 
     def get(self, policy_id: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى get؛ المدخلات المهمة: policy_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب سياسة بالمعرف ويرفع خطأ عند عدم وجودها.
         """
         return self._repository.get_policy(policy_id)
 
     def list(self, *, status: str | None = None):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list؛ المدخلات المهمة: status.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض سياسات المعالجة مع خيار الاقتصار على المفعلة.
         """
         return self._repository.list_policies(status=status)
 
     def update(self, policy_id: str, **updates):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: policy_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث خصائص سياسة موجودة ثم يسجل التغيير.
         """
         current = self._repository.get_policy(policy_id)
         if current is None:
@@ -82,11 +60,7 @@ class AutonomousPolicyService:
 
     def enable(self, policy_id: str, *, actor: str = "admin"):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى enable؛ المدخلات المهمة: policy_id، actor.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفعّل سياسة صالحة ويسجل انتقال حالتها.
         """
         current = self._require(policy_id)
         result = self._repository.resume_policy(policy_id)
@@ -95,11 +69,7 @@ class AutonomousPolicyService:
 
     def disable(self, policy_id: str, *, actor: str = "admin"):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى disable؛ المدخلات المهمة: policy_id، actor.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعطل سياسة ويمنع استخدامها في قرارات لاحقة.
         """
         current = self._require(policy_id)
         result = self._repository.update_policy(
@@ -110,11 +80,7 @@ class AutonomousPolicyService:
 
     def suspend(self, policy_id: str, *, reason: str, actor: str = "admin"):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى suspend؛ المدخلات المهمة: policy_id، reason، actor.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعلّق سياسة مؤقتًا بسبب ضابط أو حادث تشغيلي.
         """
         current = self._require(policy_id)
         result = self._repository.update_policy(policy_id, updates={"status": AutonomousPolicyStatus.SUSPENDED.value}, version=current.version)
@@ -123,11 +89,7 @@ class AutonomousPolicyService:
 
     def resume(self, policy_id: str, *, actor: str = "admin"):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى resume؛ المدخلات المهمة: policy_id، actor.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد سياسة معلقة إلى حالة تسمح باستخدامها وفق شروطها.
         """
         current = self._require(policy_id)
         result = self._repository.resume_policy(policy_id)
@@ -136,11 +98,7 @@ class AutonomousPolicyService:
 
     def _audit_policy(self, policy, event_type: str, payload: dict, *, actor: str = "admin") -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _audit_policy؛ المدخلات المهمة: policy، event_type، payload، actor.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسجل حدثًا يصف إنشاء أو تعديل أو انتقال حالة سياسة.
         """
         append = getattr(self._repository, "append_policy_audit_event", None)
         if append is not None:
@@ -154,11 +112,7 @@ class AutonomousPolicyService:
 
     def _require(self, policy_id: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _require؛ المدخلات المهمة: policy_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب سياسة مطلوبة ويتحقق من وجودها.
         """
         current = self._repository.get_policy(policy_id)
         if current is None:
@@ -168,11 +122,7 @@ class AutonomousPolicyService:
     @staticmethod
     def _model_to_contract(model):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _model_to_contract؛ المدخلات المهمة: model.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل نموذج السياسة إلى عقد API آمن للعرض.
         """
         if model is None:
             return None
@@ -195,11 +145,7 @@ class AutonomousPolicyService:
     @staticmethod
     def _validate(values: dict, *, policy_id: str, version: int) -> AutonomousRemediationPolicy:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _validate؛ المدخلات المهمة: values، policy_id، version.
-        تعيد AutonomousRemediationPolicy أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من قيم السياسة والأفعال والحدود قبل حفظها.
         """
         action = str(values.get("allowed_action_type") or "")
         if action not in V1_AUTONOMOUS_ACTIONS:
@@ -236,11 +182,7 @@ class AutonomousPolicyService:
     @staticmethod
     def _model_values(model) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _model_values؛ المدخلات المهمة: model.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج قيم السياسة الحالية لاستخدامها في التحديث والتحقق.
         """
         return {key: getattr(model, key) for key in (
             "name", "description", "status", "issue_fingerprint", "allowed_action_type", "allowed_target_pattern", "maximum_risk",

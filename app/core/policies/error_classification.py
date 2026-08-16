@@ -1,12 +1,8 @@
 """
-Policy أو registry حتمي يقرر السماح أو الرفض أو التصنيف قبل التنفيذ.
+تصنيف أولي لمخاطر المشكلات التي أخرجها تحليل التقرير.
 
-الموقع في المعمارية: Core policy.
-يُستدعى بواسطة: capabilities وMCP handlers.
-يعتمد مباشرة على: app.core.contracts.analysis.
-الحد المعماري: لا تنفذ SSH أو LLM أو persistence.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يميز التصنيف بين مشكلة عادية أو خطرة أو حساسة، حتى لا تمر حالات انقطاع الخدمة
+أو تسرب الأسرار إلى مسار معالجة ذاتية غير مناسب.
 """
 from __future__ import annotations
 
@@ -59,7 +55,9 @@ _DANGEROUS_MARKERS = (
 
 
 def classify_issue(issue: AnalysisIssue) -> ErrorClassification:
-    """Derive the specification class without changing severity or risk."""
+    """
+    يفحص نص المشكلة وقرينتها لتمييز الحالة الحساسة أو الخطرة قبل اقتراح المعالجة.
+    """
     text = " ".join(
         value
         for value in (
@@ -81,7 +79,9 @@ def classify_issue(issue: AnalysisIssue) -> ErrorClassification:
 
 
 def classify_result(result: ReportAnalysisResult) -> ReportAnalysisResult:
-    """Return a result with every issue carrying a deterministic class."""
+    """
+    ينسخ نتيجة التحليل مع إضافة تصنيف خطر لكل مشكلة دون تغيير بقية النتيجة.
+    """
     return result.model_copy(
         update={
             "issues": [

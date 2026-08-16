@@ -1,12 +1,8 @@
 """
-جزء من Analysis لتحويل report إلى analysis مع Retrieval وLLM.
+إنشاء عميل التحليل المعتمد على النموذج اللغوي.
 
-الموقع في المعمارية: Application capability / analysis.
-يُستدعى بواسطة: MCP أو مسارات ما بعد Monitoring.
-يعتمد مباشرة على: app.capabilities.analysis.llm_client، app.infrastructure.llm.ollama.analysis_client، app.core.config.
-الحد المعماري: لا ينفذ SSH أو Investigation أو Remediation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يتحقق المصنع من تفعيل التحليل ومزوّده، ثم يبني العميل الذي يطابق إعدادات
+التطبيق قبل تمريره إلى خدمة تحليل التقارير.
 """
 from app.capabilities.analysis.llm_client import (
     LLMAnalysisClient,
@@ -21,11 +17,7 @@ def create_llm_analysis_client(
     settings: Settings,
 ) -> LLMAnalysisClient:
     """
-    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / analysis.
-
-    تُستدعى عندما يصل workflow إلى create_llm_analysis_client؛ المدخلات المهمة: settings.
-    تعيد LLMAnalysisClient أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يتحقق من إعدادات التحليل ومزوّد النموذج ثم ينشئ عميل Ollama بالإعدادات والمهلة المحددة.
     """
     if not settings.llm_enabled:
         raise RuntimeError(

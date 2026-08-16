@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+خدمات مساندة لواجهات الإدارة.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: app.interfaces.admin.services.ssh_test_service.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تصدّر خدمات إنشاء PDF واختبار اتصال SSH التي تحتاجها مسارات الإدارة، مع إبقاء
+التكاملات الخارجية خلف واجهات خدمات قابلة للحقن.
 """
 from app.interfaces.admin.services.ssh_test_service import (
     SSHTestResult,

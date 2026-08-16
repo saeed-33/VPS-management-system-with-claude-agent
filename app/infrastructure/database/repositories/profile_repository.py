@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.infrastructure.database.models.monitor_command، app.infrastructure.database.models.monitoring_profile، app.infrastructure.database.models.profile_command، app.infrastructure.database.models.server، app.infrastructure.database.session، app.core.contracts.profiles.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
 """
 from dataclasses import asdict
 from sqlalchemy import delete, func, select
@@ -36,23 +29,14 @@ from app.core.utils.datetime import utc_now
 
 class MonitoringProfileRepository:
     """
-    يمثل MonitoringProfileRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن ملفات المراقبة وعلاقاتها بالفحوص والسيرفرات.
     """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
@@ -61,11 +45,7 @@ class MonitoringProfileRepository:
         profile_id: int,
     ) -> MonitoringProfileModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: profile_id.
-        تعيد MonitoringProfileModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.get(
@@ -78,11 +58,7 @@ class MonitoringProfileRepository:
         name: str,
     ) -> MonitoringProfileModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_name؛ المدخلات المهمة: name.
-        تعيد MonitoringProfileModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             statement = select(
@@ -97,11 +73,7 @@ class MonitoringProfileRepository:
         self,
     ) -> list[MonitoringProfileModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_all؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[MonitoringProfileModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (
@@ -120,11 +92,7 @@ class MonitoringProfileRepository:
         data: CreateMonitoringProfileDTO,
     ) -> MonitoringProfileModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
-        تعيد MonitoringProfileModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = MonitoringProfileModel(
             name=data.name.strip(),
@@ -145,11 +113,7 @@ class MonitoringProfileRepository:
         data: UpdateMonitoringProfileDTO,
     ) -> MonitoringProfileModel | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: profile_id، data.
-        تعيد MonitoringProfileModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.get(
@@ -184,11 +148,7 @@ class MonitoringProfileRepository:
         profile_id: int,
     ) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى delete؛ المدخلات المهمة: profile_id.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يزيل ارتباطًا أو سجلًا من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها بعد تطبيق قواعد الملكية المطلوبة.
         """
         with self._session_factory() as session:
             model = session.get(
@@ -216,11 +176,7 @@ class MonitoringProfileRepository:
         ) = None,
     ) -> MonitoringProfileCommandModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى assign_command؛ المدخلات المهمة: profile_id، command_id، execution_order، enabled، custom_timeout_seconds.
-        تعيد MonitoringProfileCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط عنصرًا من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها بالسيرفر أو الملف أو التحقيق الذي سيستخدمه.
         """
         model = MonitoringProfileCommandModel(
             profile_id=profile_id,
@@ -255,11 +211,7 @@ class MonitoringProfileRepository:
         command_id: int,
     ) -> bool:
         """
-        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى remove_command؛ المدخلات المهمة: profile_id، command_id.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يزيل ارتباطًا أو سجلًا من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها بعد تطبيق قواعد الملكية المطلوبة.
         """
         with self._session_factory() as session:
             statement = delete(
@@ -286,11 +238,7 @@ class MonitoringProfileRepository:
         ]
     ]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_profile_commands؛ المدخلات المهمة: profile_id.
-        تعيد list[tuple[MonitorCommandModel, MonitoringProfileCommandModel]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (
@@ -321,11 +269,7 @@ class MonitoringProfileRepository:
         server_id: int,
     ) -> list[MonitoringProfileCommandConfig]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_enabled_commands_for_server؛ المدخلات المهمة: server_id.
-        تعيد list[MonitoringProfileCommandConfig] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (
@@ -403,11 +347,7 @@ class MonitoringProfileRepository:
         profile_id: int | None,
     ) -> ServerModel | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى assign_profile_to_server؛ المدخلات المهمة: server_id، profile_id.
-        تعيد ServerModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط عنصرًا من ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها بالسيرفر أو الملف أو التحقيق الذي سيستخدمه.
         """
         with self._session_factory() as session:
             server = session.get(
@@ -447,11 +387,7 @@ class MonitoringProfileRepository:
         update_custom_timeout: bool = False,
     ) -> MonitoringProfileCommandModel | None:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update_command_assignment؛ المدخلات المهمة: profile_id، command_id، execution_order، enabled، custom_timeout_seconds، update_custom_timeout.
-        تعيد MonitoringProfileCommandModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             statement = select(
@@ -492,11 +428,7 @@ class MonitoringProfileRepository:
         profile_id: int,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى count_servers؛ المدخلات المهمة: profile_id.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب عدد سجلات ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها اللازمة لعرض الحالة أو تطبيق حد من حدودها.
         """
         with self._session_factory() as session:
             statement = select(

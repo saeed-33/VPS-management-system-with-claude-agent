@@ -1,12 +1,8 @@
 """
-يركب dependencies ويربط repositories والخدمات والـruntime.
+تركيب حزمة خدمات المجال الأساسية.
 
-الموقع في المعمارية: Bootstrap / dependency composition.
-يُستدعى بواسطة: app.main أو الاختبارات عند إنشاء container.
-يعتمد مباشرة على: app.composition.repositories، app.core.policies.diagnostic_policy، app.core.policies.diagnostic_tools، app.capabilities.investigation.evidence_collection، app.capabilities.investigation.investigation_router، app.capabilities.investigation.persistence_service.
-الحد المعماري: لا ينفذ workflow business؛ دوره wiring وترتيب الإنشاء.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+ينشئ خدمات المراقبة والتقارير والأوامر والملفات والتحقيق والمعالجة، ويمرر إليها
+المستودعات والسياسات والعملاء التي تحتاجها.
 """
 from __future__ import annotations
 
@@ -58,12 +54,7 @@ from app.capabilities.investigation.specialist_service import SpecialistDefiniti
 @dataclass(slots=True, frozen=True)
 class CoreServiceBundle:
     """
-    يمثل CoreServiceBundle مسؤولية محددة داخل طبقة Bootstrap / dependency composition.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه app.main أو الاختبارات عند إنشاء container
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل خدمات المجال الأساسية الجاهزة للحقن في طبقات API ووقت التشغيل.
     """
     server_service: ServerService
     command_service: CommandService
@@ -98,11 +89,7 @@ def build_core_services(
     settings: Settings,
 ) -> CoreServiceBundle:
     """
-    يبني DTO أو dependency graph من المدخلات ضمن طبقة Bootstrap / dependency composition.
-
-    تُستدعى عندما يصل workflow إلى build_core_services؛ المدخلات المهمة: repositories، settings.
-    تعيد CoreServiceBundle أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينشئ خدمات المراقبة والتقارير والتحقيق والمعالجة ويدمجها في حزمة الخدمات الأساسية.
     """
     server_service = ServerService(
         repository=repositories.server_repository,

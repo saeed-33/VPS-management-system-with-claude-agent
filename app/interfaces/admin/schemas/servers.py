@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مخططات إدارة السيرفرات واختبار SSH.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تتحقق من طلبات إنشاء وتعديل السيرفر وتصف الاستجابة الإدارية ونتيجة اختبار
+الاتصال دون تضمين منطق الاتصال داخل النماذج.
 """
 from datetime import datetime
 
@@ -15,12 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class ServerCreateRequest(BaseModel):
     """
-    يمثل ServerCreateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب إضافة سيرفر للمراقبة.
     """
     name: str = Field(
         min_length=1,
@@ -61,12 +52,7 @@ class ServerCreateRequest(BaseModel):
 
 class ServerUpdateRequest(BaseModel):
     """
-    يمثل ServerUpdateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب تعديل بيانات سيرفر.
     """
     name: str | None = Field(
         default=None,
@@ -104,12 +90,7 @@ class ServerUpdateRequest(BaseModel):
 
 class ServerResponse(BaseModel):
     """
-    يمثل ServerResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل السيرفر وبيانات حالته وتصنيف سلامته في API.
     """
     id: int
     name: str
@@ -141,12 +122,7 @@ class ServerResponse(BaseModel):
 
 class SSHTestResponse(BaseModel):
     """
-    يمثل SSHTestResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل نتيجة اختبار اتصال SSH الإداري.
     """
     success: bool
     message: str

@@ -1,13 +1,4 @@
-"""
-بنية قاعدة البيانات من engine/session/base.
-
-الموقع في المعمارية: Database infrastructure.
-يُستدعى بواسطة: composition وrepositories.
-يعتمد مباشرة على: app.core.config، app.infrastructure.database.base.
-الحد المعماري: لا يقرر domain behavior؛ يوفر الاتصال والجلسات.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""إنشاء محرك الاتصال بقاعدة البيانات وتهيئة جداول الحالة التشغيلية."""
 from sqlalchemy import create_engine
 
 from app.core.config import settings
@@ -26,13 +17,12 @@ engine = create_engine(
 
 def create_database_tables() -> None:
     """
-    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Database infrastructure.
+    ينشئ جداول نماذج التطبيق عند بدء الخدمة إذا لم تكن موجودة.
 
-    تُستدعى عندما يصل workflow إلى create_database_tables؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحمّل جميع نماذج قاعدة البيانات قبل إنشاء الجداول حتى تعرف metadata علاقات
+    السيرفر والتقرير والتحليل والتحقيق والمعالجة كاملة.
     """
-    # مهم: يجب استيراد جميع Models قبل create_all
+    # يجب تسجيل جميع النماذج قبل الإنشاء حتى لا يبدأ التخزين بجداول ناقصة.
     import app.infrastructure.database.models  # noqa: F401
 
     Base.metadata.create_all(engine)

@@ -1,12 +1,8 @@
 """
-جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+ربط نتائج الاختصاصيين في تشخيص نهائي قابل للتدقيق.
 
-الموقع في المعمارية: Application capability / investigation.
-يُستدعى بواسطة: MCP أو Analysis workflow.
-يعتمد مباشرة على: app.core.contracts.investigation، app.capabilities.investigation.execution_contracts.
-الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يقارن الملف الادعاءات والأدلة والتعارضات بين الاختصاصيين، ويمنع بناء نتيجة
+نهائية من ملاحظة لا تحمل مرجع دليل صالحًا.
 """
 from __future__ import annotations
 
@@ -26,12 +22,7 @@ from app.capabilities.investigation.execution_contracts import (
 
 class DiagnosisCertainty(StrEnum):
     """
-    يمثل DiagnosisCertainty مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل درجات اليقين الممكنة في ادعاء التشخيص النهائي.
     """
     CONFIRMED = "confirmed"
     PROBABLE = "probable"
@@ -41,12 +32,7 @@ class DiagnosisCertainty(StrEnum):
 @dataclass(slots=True, frozen=True)
 class DiagnosisConflict:
     """
-    يمثل DiagnosisConflict مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل تعارضًا بين نتائج اختصاصيين حول الحقل أو السبب أو الدليل.
     """
     conflict_id: str
     title: str
@@ -58,11 +44,7 @@ class DiagnosisConflict:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من صحة بيانات DiagnosisConflict قبل استخدامها في التحقيق.
         """
         if not self.conflict_id.strip():
             raise ValueError(
@@ -81,12 +63,7 @@ class DiagnosisConflict:
 @dataclass(slots=True, frozen=True)
 class CorrelatedDiagnosisClaim:
     """
-    يمثل CorrelatedDiagnosisClaim مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل ادعاء تشخيصي بعد ربطه بمصادر وأدلة الاختصاصيين.
     """
     claim_id: str
     title: str
@@ -101,11 +78,7 @@ class CorrelatedDiagnosisClaim:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من صحة بيانات CorrelatedDiagnosisClaim قبل استخدامها في التحقيق.
         """
         if not self.claim_id.strip():
             raise ValueError(
@@ -134,12 +107,7 @@ class CorrelatedDiagnosisClaim:
 @dataclass(slots=True, frozen=True)
 class FinalDiagnosis:
     """
-    يمثل FinalDiagnosis مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل التشخيص النهائي المجمع مع الادعاءات والتعارضات ومواقع المصادر.
     """
     investigation_id: str
     summary: str
@@ -161,11 +129,7 @@ class FinalDiagnosis:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من صحة بيانات FinalDiagnosis قبل استخدامها في التحقيق.
         """
         if not self.investigation_id.strip():
             raise ValueError(
@@ -185,20 +149,7 @@ class FinalDiagnosis:
 
 class CrossSpecialistCorrelator:
     """
-    Deterministic, provenance-first cross-Specialist correlator.
-
-    Certainty:
-    - confirmed: live Evidence and confidence >= 0.80;
-    - probable: live Evidence and confidence < 0.80;
-    - unknown: no live Evidence, or an explicit conflict.
-
-    Conflict detection is explicit rather than inferred from prose.
-    Specialists may attach:
-
-        metadata={"diagnostic_state": "present"}
-
-    or another domain-specific state. Different non-empty states for
-    the same correlation key create a DiagnosisConflict.
+    يجمع نتائج الاختصاصيين في ادعاءات وتشخيص نهائي مع التحقق من الأدلة.
     """
 
     def correlate(
@@ -206,11 +157,7 @@ class CrossSpecialistCorrelator:
         result: InvestigationExecutionResult,
     ) -> FinalDiagnosis:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى correlate؛ المدخلات المهمة: result.
-        تعيد FinalDiagnosis أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط نتائج الاختصاصيين ويحسب الادعاءات والتعارضات والتشخيص النهائي.
         """
         evidence_by_id = {
             item.evidence_id: item
@@ -370,11 +317,7 @@ class CrossSpecialistCorrelator:
         ],
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _validate_finding_evidence؛ المدخلات المهمة: finding، evidence_by_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من أن كل ملاحظة تشخيصية تشير إلى دليل قابل للتتبع.
         """
         unknown = [
             evidence_id
@@ -408,11 +351,7 @@ class CrossSpecialistCorrelator:
         DiagnosisConflict | None,
     ]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _build_claim؛ المدخلات المهمة: investigation_id، index، correlation_key، items.
-        تعيد tuple[CorrelatedDiagnosisClaim, DiagnosisConflict | None] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني ادعاء تشخيص من نتيجة اختصاصي ومراجعها.
         """
         specialist_slugs = tuple(
             dict.fromkeys(
@@ -574,11 +513,7 @@ class CrossSpecialistCorrelator:
     @staticmethod
     def _code_locations_from_claims(claims) -> list[dict]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _code_locations_from_claims؛ المدخلات المهمة: claims.
-        تعيد list[dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع مواقع المصادر من الادعاءات المرتبطة.
         """
         locations = []
         seen = set()
@@ -598,11 +533,7 @@ class CrossSpecialistCorrelator:
     @staticmethod
     def _code_locations(items) -> list[dict]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _code_locations؛ المدخلات المهمة: items.
-        تعيد list[dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج مواقع الملفات والأسطر من نصوص الأدلة.
         """
         locations = []
         seen = set()
@@ -630,11 +561,7 @@ class CrossSpecialistCorrelator:
         finding: InvestigationFinding,
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _correlation_key؛ المدخلات المهمة: finding.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ مفتاح تجميع ثابتًا لادعاء أو ملاحظة تشخيصية.
         """
         text = finding.title.lower()
 
@@ -693,11 +620,7 @@ class CrossSpecialistCorrelator:
         ],
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _build_summary؛ المدخلات المهمة: claims، conflicts، completed_specialists.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ ملخصًا موجزًا للتشخيص من الادعاءات المقبولة.
         """
         if not completed_specialists:
             return (

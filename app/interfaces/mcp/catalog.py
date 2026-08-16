@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+كتالوج مجموعات أدوات MCP.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يعرّف مجموعات الأدوات المتاحة في المشروع ويربط اسم الأداة بالمجموعة التي
+تنتمي إليها لاستخدامها في العرض والتحقق قبل التنفيذ.
 """
 from __future__ import annotations
 
@@ -20,12 +16,7 @@ if TYPE_CHECKING:
 @dataclass(slots=True, frozen=True)
 class ProjectToolGroup:
     """
-    يمثل ProjectToolGroup مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل مجموعة وظيفية لأدوات MCP مثل المراقبة أو التحليل أو المعالجة.
     """
     name: str
     tool_ids: tuple[str, ...]
@@ -94,11 +85,7 @@ def tool_group_for(
     tool_id: str,
 ) -> str:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-    تُستدعى عندما يصل workflow إلى tool_group_for؛ المدخلات المهمة: tool_id.
-    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد المجموعة التي تنتمي إليها أداة MCP أو قيمة فارغة للأداة غير المعروفة.
     """
     for group in PROJECT_TOOL_GROUPS:
         if tool_id in group.tool_ids:
@@ -113,11 +100,7 @@ def group_definitions(
     definitions: list[ProjectToolDefinition],
 ) -> dict[str, list[ProjectToolDefinition]]:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-    تُستدعى عندما يصل workflow إلى group_definitions؛ المدخلات المهمة: definitions.
-    تعيد dict[str, list[ProjectToolDefinition]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد تعريفات مجموعات الأدوات المتاحة للاستخدام في الكتالوج.
     """
     by_id = {
         item.tool_id: item

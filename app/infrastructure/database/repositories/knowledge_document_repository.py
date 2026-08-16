@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.capabilities.knowledge.ingestion_contracts، app.infrastructure.database.models.knowledge_document، app.infrastructure.database.session، app.core.utils.datetime.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها.
 """
 from __future__ import annotations
 
@@ -27,23 +20,14 @@ from app.core.utils.datetime import utc_now
 
 class KnowledgeDocumentRepository:
     """
-    يمثل KnowledgeDocumentRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن دورة وثيقة المعرفة من التحليل إلى المقاطع والفهرسة أو الفشل.
     """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
@@ -52,11 +36,7 @@ class KnowledgeDocumentRepository:
         document_id: int,
     ) -> KnowledgeDocumentModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: document_id.
-        تعيد KnowledgeDocumentModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             model = session.get(
@@ -76,11 +56,7 @@ class KnowledgeDocumentRepository:
         canonical_uri: str,
     ) -> KnowledgeDocumentModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_source_uri؛ المدخلات المهمة: source_id، canonical_uri.
-        تعيد KnowledgeDocumentModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -100,11 +76,7 @@ class KnowledgeDocumentRepository:
         fetched_at,
     ) -> KnowledgeDocumentModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى upsert_parsed؛ المدخلات المهمة: source_id، parsed، content_hash، fetched_at.
-        تعيد KnowledgeDocumentModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         with self._session_factory() as session:
             model = session.scalar(
@@ -151,11 +123,7 @@ class KnowledgeDocumentRepository:
         error_message: str,
     ) -> KnowledgeDocumentModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى mark_failed؛ المدخلات المهمة: source_id، canonical_uri، error_message.
-        تعيد KnowledgeDocumentModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينقل سجلًا من وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها إلى حالة تشغيلية جديدة مع حفظ سبب الانتقال.
         """
         with self._session_factory() as session:
             model = session.scalar(
@@ -189,11 +157,7 @@ class KnowledgeDocumentRepository:
         chunks: list[dict],
     ) -> KnowledgeDocumentModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى replace_chunks؛ المدخلات المهمة: document_id، source_id، chunks.
-        تعيد KnowledgeDocumentModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستبدل مجموعة عناصر مرتبطة بـوثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها في عملية واحدة تحفظ الحالة الجديدة كاملة.
         """
         with self._session_factory() as session:
             document = session.get(
@@ -252,11 +216,7 @@ class KnowledgeDocumentRepository:
         dimensions: int,
     ) -> None:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update_chunk_embedding؛ المدخلات المهمة: chunk_id، embedding، provider، model، dimensions.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             chunk = session.get(
@@ -279,11 +239,7 @@ class KnowledgeDocumentRepository:
         document_id: int,
     ) -> KnowledgeDocumentModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى mark_indexed؛ المدخلات المهمة: document_id.
-        تعيد KnowledgeDocumentModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينقل سجلًا من وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها إلى حالة تشغيلية جديدة مع حفظ سبب الانتقال.
         """
         with self._session_factory() as session:
             document = session.get(

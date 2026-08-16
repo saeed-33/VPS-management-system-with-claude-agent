@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+نماذج عقود MCP الداخلية.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تصف تعريف الأداة واستدعاءها ونتيجتها، وتتحقق من المعرفات والوسائط والحمولات
+قبل أن تدخل إلى حدود الأدوات أو تخرج منها.
 """
 from __future__ import annotations
 
@@ -17,12 +13,7 @@ from typing import Any
 @dataclass(slots=True, frozen=True)
 class ProjectToolDefinition:
     """
-    يمثل ProjectToolDefinition مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل تعريف أداة MCP ووسائطها ووصف نتيجة استخدامها.
     """
     tool_id: str
     description: str
@@ -31,11 +22,7 @@ class ProjectToolDefinition:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من صحة اسم تعريف الأداة ووصفها ومخطط وسائطها قبل التسجيل.
         """
         if not self.tool_id.strip():
             raise ValueError(
@@ -51,12 +38,7 @@ class ProjectToolDefinition:
 @dataclass(slots=True, frozen=True)
 class ProjectToolCall:
     """
-    يمثل ProjectToolCall مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب استدعاء أداة باسمها ووسائطها.
     """
     tool_id: str
     arguments: dict[str, Any] = field(
@@ -65,11 +47,7 @@ class ProjectToolCall:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من اسم الأداة ووسائط الاستدعاء قبل توجيه الطلب.
         """
         if not self.tool_id.strip():
             raise ValueError(
@@ -80,12 +58,7 @@ class ProjectToolCall:
 @dataclass(slots=True, frozen=True)
 class ProjectToolResult:
     """
-    يمثل ProjectToolResult مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل نتيجة الأداة مع النجاح أو الخطأ والحمولة القابلة للتسلسل.
     """
     tool_id: str
     success: bool
@@ -97,11 +70,7 @@ class ProjectToolResult:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من اتساق النجاح أو الخطأ والحمولة القابلة للتسلسل في النتيجة.
         """
         if not self.tool_id.strip():
             raise ValueError(

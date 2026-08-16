@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مصانع اعتماديات واجهة الإدارة.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: app.runtime.claude.observability، app.capabilities.investigation.read_service، app.runtime.claude.supervisor، app.interfaces.mcp.registry، app.capabilities.knowledge.source_service، app.capabilities.investigation.specialist_service.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تعيد هذه الدوال الخدمات والمستودعات من حاوية التطبيق، وتوفر اعتماديات FastAPI
+للهوية الحالية والخدمات الإدارية دون إنشاء نسخ مستقلة لكل طلب.
 """
 from fastapi import Request
 
@@ -61,65 +57,41 @@ from app.interfaces.admin.auth import (
 def get_monitoring_profile_service(
 ) -> MonitoringProfileService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_monitoring_profile_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد MonitoringProfileService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة ملفات المراقبة من حاوية التطبيق.
     """
     return container.monitoring_profile_service
 
 def get_server_service() -> ServerService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_server_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد ServerService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة إدارة السيرفرات من الحاوية.
     """
     return container.server_service
 
 
 def get_command_service() -> CommandService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_command_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد CommandService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة أوامر المراقبة من الحاوية.
     """
     return container.command_service
 
 
 def get_report_query_service() -> ReportQueryService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_report_query_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد ReportQueryService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة الاستعلام عن تقارير المراقبة.
     """
     return container.report_query_service
 
 
 def get_ssh_test_service() -> SSHTestService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_ssh_test_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد SSHTestService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة اختبار اتصال SSH.
     """
     return container.ssh_test_service
 
 
 def get_analysis_repository() -> AnalysisRepository:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_analysis_repository؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد AnalysisRepository أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد مستودع التحليلات المرتبط بقاعدة البيانات.
     """
     return container.analysis_repository
 
@@ -127,22 +99,14 @@ def get_analysis_repository() -> AnalysisRepository:
 def get_analysis_source_repository(
 ) -> AnalysisSourceRepository:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_analysis_source_repository؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد AnalysisSourceRepository أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد مستودع مصادر التحليل والتدقيق.
     """
     return container.analysis_source_repository
 
 
 def get_report_pdf_service() -> ReportPdfService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_report_pdf_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد ReportPdfService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة توليد تقارير PDF الإدارية.
     """
     service = container.report_pdf_service
 
@@ -156,22 +120,14 @@ def get_report_pdf_service() -> ReportPdfService:
 def get_specialist_definition_service(
 ) -> SpecialistDefinitionService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_specialist_definition_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد SpecialistDefinitionService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة تعريفات الاختصاصيين.
     """
     return container.specialist_definition_service
 
 def get_knowledge_source_service(
 ) -> KnowledgeSourceService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_knowledge_source_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد KnowledgeSourceService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة مصادر المعرفة.
     """
     return container.knowledge_source_service
 
@@ -179,22 +135,14 @@ def get_knowledge_source_service(
 def get_investigation_read_service(
 ) -> InvestigationReadService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_investigation_read_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد InvestigationReadService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة قراءة التحقيقات ونتائجها.
     """
     return container.investigation_read_service
 
 
 def get_claude_supervisor() -> ClaudeSupervisor:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_claude_supervisor؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد ClaudeSupervisor أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد مشرف تشغيل Claude من الحاوية.
     """
     return container.claude_supervisor
 
@@ -202,88 +150,56 @@ def get_claude_supervisor() -> ClaudeSupervisor:
 def get_project_tool_boundary(
 ) -> ProjectMcpToolBoundary:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_project_tool_boundary؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد ProjectMcpToolBoundary أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد حد أدوات MCP المسموح لمشروع التطبيق.
     """
     return container.project_mcp_tool_boundary
 
 
 def get_remediation_service() -> RemediationService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_remediation_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد RemediationService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة خطط المعالجة والتنفيذ والتراجع.
     """
     return container.remediation_service
 
 
 def get_autonomous_policy_service() -> AutonomousPolicyService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_autonomous_policy_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد AutonomousPolicyService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة سياسات المعالجة الآلية.
     """
     return container.autonomous_policy_service
 
 
 def get_autonomous_candidate_service() -> AutonomousCandidateService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_autonomous_candidate_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد AutonomousCandidateService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة مرشحي المعالجة الآلية.
     """
     return container.autonomous_candidate_service
 
 
 def get_autonomous_execution_service() -> AutonomousExecutionService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_autonomous_execution_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد AutonomousExecutionService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة تقييم وتنفيذ القرارات الآلية.
     """
     return container.autonomous_execution_service
 
 
 def get_admin_auth_service(request: Request) -> AdminAuthService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_admin_auth_service؛ المدخلات المهمة: request.
-    تعيد AdminAuthService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة مصادقة الإدارة والجلسات.
     """
     return request.app.state.admin_auth_service
 
 
 def get_current_admin(request: Request) -> AdminPrincipal:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_current_admin؛ المدخلات المهمة: request.
-    تعيد AdminPrincipal أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد اعتماد FastAPI الذي يحمّل الهوية الإدارية الحالية.
     """
     return get_admin_principal(request)
 
 def get_claude_agent_observability_service(
 ) -> ClaudeAgentObservabilityService:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى get_claude_agent_observability_service؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد ClaudeAgentObservabilityService أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد خدمة مراقبة تنفيذ وكيل Claude.
     """
     return ClaudeAgentObservabilityService(
         container.agent_job_repository

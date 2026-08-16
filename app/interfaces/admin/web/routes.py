@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مسارات صفحات لوحة الإدارة.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تربط عناوين الويب بقوالب المراقبة والتقارير والتحقيق والمعرفة والمعالجة وحالة
+النظام، وتضع المعرفات المطلوبة في سياق القالب دون تنفيذ منطق المجال.
 """
 from pathlib import Path
 
@@ -37,11 +33,7 @@ async def dashboard_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى dashboard_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض لوحة الإدارة الرئيسية.
     """
     return templates.TemplateResponse(
         request=request,
@@ -58,11 +50,7 @@ async def servers_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى servers_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة إدارة السيرفرات.
     """
     return templates.TemplateResponse(
         request=request,
@@ -79,11 +67,7 @@ async def commands_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى commands_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة إدارة أوامر المراقبة.
     """
     return templates.TemplateResponse(
         request=request,
@@ -100,11 +84,7 @@ async def investigations_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى investigations_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة قائمة التحقيقات.
     """
     return templates.TemplateResponse(
         request=request,
@@ -121,11 +101,7 @@ async def reports_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى reports_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة قائمة تقارير المراقبة.
     """
     return templates.TemplateResponse(
         request=request,
@@ -142,11 +118,7 @@ async def system_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى system_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة حالة النظام.
     """
     return templates.TemplateResponse(
         request=request,
@@ -161,11 +133,7 @@ async def monitoring_profiles_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى monitoring_profiles_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة ملفات المراقبة.
     """
     return templates.TemplateResponse(
         request=request,
@@ -181,11 +149,7 @@ async def investigation_details_page(
     investigation_id: str,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى investigation_details_page؛ المدخلات المهمة: request، investigation_id.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة تفاصيل تحقيق محدد مع معرفه.
     """
     return templates.TemplateResponse(
         request=request,
@@ -205,11 +169,7 @@ async def report_details_page(
     report_id: int,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى report_details_page؛ المدخلات المهمة: request، report_id.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة تفاصيل تقرير محدد مع معرفه.
     """
     return templates.TemplateResponse(
         request=request,
@@ -227,11 +187,7 @@ async def specialists_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى specialists_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة تعريفات الاختصاصيين.
     """
     return templates.TemplateResponse(
         request=request,
@@ -247,11 +203,7 @@ async def knowledge_sources_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى knowledge_sources_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة مصادر المعرفة.
     """
     return templates.TemplateResponse(
         request=request,
@@ -268,11 +220,7 @@ async def agent_runs_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى agent_runs_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة آثار تشغيل وكيل Claude.
     """
     return templates.TemplateResponse(
         request=request,
@@ -289,11 +237,7 @@ async def remediation_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى remediation_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة خطط المعالجة ونتائجها.
     """
     return templates.TemplateResponse(
         request=request,
@@ -310,11 +254,7 @@ async def runtime_policies_page(
     request: Request,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى runtime_policies_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد توجيه صفحة السياسات القديمة إلى عرض وقت التشغيل الحالي.
     """
     return RedirectResponse("/autonomous-runtime", status_code=307)
 
@@ -325,11 +265,7 @@ async def runtime_policies_page(
 )
 async def autonomous_policies_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى autonomous_policies_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة سياسات المعالجة الآلية.
     """
     return templates.TemplateResponse(request=request, name="autonomous_policies.html", context={})
 
@@ -340,11 +276,7 @@ async def autonomous_policies_page(request: Request):
 )
 async def autonomous_candidates_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى autonomous_candidates_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة مرشحي المعالجة الآلية.
     """
     return templates.TemplateResponse(request=request, name="autonomous_candidates.html", context={})
 
@@ -355,11 +287,7 @@ async def autonomous_candidates_page(request: Request):
 )
 async def autonomous_history_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى autonomous_history_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة تاريخ المعالجة الآلية.
     """
     return templates.TemplateResponse(request=request, name="autonomous_history.html", context={})
 
@@ -370,11 +298,7 @@ async def autonomous_history_page(request: Request):
 )
 async def autonomous_decisions_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى autonomous_decisions_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة قرارات المعالجة الآلية.
     """
     return templates.TemplateResponse(request=request, name="autonomous_decisions.html", context={})
 
@@ -385,11 +309,7 @@ async def autonomous_decisions_page(request: Request):
 )
 async def autonomous_runtime_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى autonomous_runtime_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة حالة تشغيل المعالجة الآلية.
     """
     return templates.TemplateResponse(request=request, name="autonomous_runtime.html", context={})
 
@@ -400,11 +320,7 @@ async def autonomous_runtime_page(request: Request):
 )
 async def autonomous_reservations_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى autonomous_reservations_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة حجوزات التنفيذ الآلي.
     """
     return templates.TemplateResponse(request=request, name="autonomous_reservations.html", context={})
 
@@ -415,11 +331,7 @@ async def autonomous_reservations_page(request: Request):
 )
 async def autonomous_authorizations_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى autonomous_authorizations_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة تفويضات التنفيذ الآلي.
     """
     return templates.TemplateResponse(request=request, name="autonomous_authorizations.html", context={})
 
@@ -430,10 +342,6 @@ async def autonomous_authorizations_page(request: Request):
 )
 async def audit_page(request: Request):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Administration interface.
-
-    تُستدعى عندما يصل workflow إلى audit_page؛ المدخلات المهمة: request.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض صفحة سجل التدقيق الإداري.
     """
     return templates.TemplateResponse(request=request, name="audit.html", context={})

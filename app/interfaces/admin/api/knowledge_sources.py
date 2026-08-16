@@ -1,12 +1,8 @@
 """
-Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+نقاط API لإدارة مصادر المعرفة.
 
-الموقع في المعمارية: HTTP interface / adapter.
-يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
-يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.knowledge_sources، app.core.contracts.knowledge_sources، app.capabilities.knowledge.source_service.
-الحد المعماري: لا يضع business rules أو transaction logic.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تدير قراءة وإنشاء وتعديل وتفعيل وحذف مصادر المعرفة، وتحوّل أخطاء التكرار أو
+غياب المصدر إلى استجابات HTTP مناسبة.
 """
 from __future__ import annotations
 
@@ -57,11 +53,7 @@ def list_knowledge_sources(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_knowledge_sources؛ المدخلات المهمة: enabled_only، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد مصادر المعرفة مع خيار الاقتصار على المفعلة.
     """
     return service.list_sources(
         enabled_only=enabled_only
@@ -79,11 +71,7 @@ def get_knowledge_source(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_knowledge_source؛ المدخلات المهمة: source_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يجلب مصدر معرفة بالمعرف أو يعيد HTTP 404.
     """
     try:
         return service.get_source(
@@ -108,11 +96,7 @@ def create_knowledge_source(
     ),
 ):
     """
-    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى create_knowledge_source؛ المدخلات المهمة: payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينشئ مصدر معرفة ويحوّل تعارض المعرف أو الرابط إلى HTTP 409.
     """
     try:
         return service.create_source(
@@ -167,11 +151,7 @@ def update_knowledge_source(
     ),
 ):
     """
-    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى update_knowledge_source؛ المدخلات المهمة: source_id، payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحدّث مصدر معرفة ويعالج الغياب والتعارض باستجابة HTTP.
     """
     try:
         return service.update_source(
@@ -241,11 +221,7 @@ def set_knowledge_source_enabled(
     ),
 ):
     """
-    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى set_knowledge_source_enabled؛ المدخلات المهمة: source_id، payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يغير تفعيل مصدر المعرفة.
     """
     try:
         return service.set_enabled(
@@ -270,11 +246,7 @@ def delete_knowledge_source(
     ),
 ) -> Response:
     """
-    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى delete_knowledge_source؛ المدخلات المهمة: source_id، service.
-    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحذف مصدر معرفة ويعيد استجابة فارغة عند النجاح.
     """
     try:
         service.delete_source(

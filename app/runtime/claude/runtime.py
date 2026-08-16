@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+تنسيق دورة جلسة Claude من الطلب حتى النتيجة المحفوظة.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: app.runtime.claude.exceptions، app.runtime.claude.models، app.runtime.claude.result_parser.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يفرض محرك التشغيل حدود الوقت وصلاحية الأدوات، يلغي الجلسة عند المهلة، يفسر
+المخرج المنظم، ويحوّل كل فشل إلى نتيجة تشغيل قابلة للتسجيل.
 """
 from __future__ import annotations
 
@@ -31,34 +27,28 @@ from app.runtime.claude.result_parser import (
 
 class ClaudeSessionRunner(Protocol):
     """
-    يمثل ClaudeSessionRunner مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد لتشغيل جلسة Claude أو إلغائها مع إعادة المخرج الخام.
     """
     async def run(
         self,
         request: ClaudeRuntimeRequest,
     ) -> ClaudeRawResult:
-        """Run one bounded Claude session and return raw output."""
+        """
+        يشغل طلب جلسة Claude ويعيد المخرج الخام قبل تفسيره إلى نتيجة تشغيل.
+        """
 
     async def cancel(
         self,
         identifier: str,
     ) -> None:
-        """Best-effort cancellation by current runtime identifier."""
+        """
+        يلغي جلسة مرتبطة بمعرف مهمة حتى لا تستمر بعد انتهاء وقتها أو إلغاء الطلب.
+        """
 
 
 class ClaudeRuntimeAdapter:
     """
-    يمثل ClaudeRuntimeAdapter مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    محول يطبق حدود الأمان والوقت ويفسر مخرج الجلسة إلى نتيجة قابلة للحفظ.
     """
     def __init__(
         self,
@@ -68,11 +58,7 @@ class ClaudeRuntimeAdapter:
         operational_tools_enabled: bool = False,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: runner، parser، operational_tools_enabled.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجهز مشغل الجلسة ومحلل النتائج وعلم السماح بالأدوات التشغيلية.
         """
         self._runner = runner
         self._parser = (
@@ -89,11 +75,7 @@ class ClaudeRuntimeAdapter:
         request: ClaudeRuntimeRequest,
     ) -> ClaudeRuntimeResult:
         """
-        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى execute؛ المدخلات المهمة: request.
-        تعيد ClaudeRuntimeResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يشغل الجلسة ضمن المهلة، يلغيها عند التأخر، يفسر مخرجها، ويعيد نجاحًا أو فشلًا موحدًا.
         """
         try:
             self._validate_tool_access(
@@ -108,8 +90,8 @@ class ClaudeRuntimeAdapter:
             )
 
         try:
-            # يفصل adapter بين Claude orchestration وprocess runner؛ Ollama
-            # يحدد provider، بينما timeout/cancellation والتحقق حتمية هنا.
+            # يفصل هذا المسار جلسة Claude عن تشغيل العملية؛ يحدد المزود طريقة
+            # الجلسة، بينما تفرض هذه الخدمة المهلة والإلغاء والتحقق.
             raw_result = await asyncio.wait_for(
                 self._runner.run(
                     request
@@ -203,18 +185,14 @@ class ClaudeRuntimeAdapter:
         identifier: str,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _best_effort_cancel؛ المدخلات المهمة: identifier.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحاول إيقاف الجلسة بعد المهلة دون أن يخفي نتيجة المهلة إذا تعذر الإلغاء.
         """
         try:
             await self._runner.cancel(
                 identifier
             )
         except Exception:
-            # The primary controlled outcome remains timeout.
+            # تبقى المهلة هي النتيجة الأساسية عندما لا تنتهي الجلسة في وقتها.
             pass
 
     def _validate_tool_access(
@@ -222,11 +200,7 @@ class ClaudeRuntimeAdapter:
         request: ClaudeRuntimeRequest,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _validate_tool_access؛ المدخلات المهمة: request.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يرفض الطلب الذي يحتوي أدوات تشغيلية عندما لا يكون runtime مفعّلًا للوصول إليها.
         """
         if (
             request.allowed_tools
@@ -251,11 +225,7 @@ class ClaudeRuntimeAdapter:
         usage_metadata: dict | None = None,
     ) -> ClaudeRuntimeResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _failure؛ المدخلات المهمة: request، status، session_id، structured_output، error_code، error_message.
-        تعيد ClaudeRuntimeResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ نتيجة فشل موحدة تحفظ الحالة والسبب والمعرف والعدادات المتاحة.
         """
         return ClaudeRuntimeResult(
             job_id=request.job_id,

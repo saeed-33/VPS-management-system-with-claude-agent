@@ -1,1 +1,6 @@
-"""Application capabilities: bounded business execution used by interfaces."""
+"""
+حزمة قدرات التطبيق.
+
+تجمع مراحل المراقبة والتحليل والتحقيق والمعرفة والمعالجة، مع إبقاء كل قدرة
+مسؤولة عن منطق مجالها وحدود تكاملها.
+"""

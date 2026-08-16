@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.infrastructure.database.models.knowledge_source، app.infrastructure.database.session، app.core.contracts.knowledge_sources، app.core.utils.datetime.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل.
 """
 from __future__ import annotations
 
@@ -29,23 +22,14 @@ from app.core.utils.datetime import utc_now
 
 class KnowledgeSourceRepository:
     """
-    يمثل KnowledgeSourceRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن تعريف مصادر المعرفة وحالتها وإتاحتها للتحليل.
     """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
@@ -54,11 +38,7 @@ class KnowledgeSourceRepository:
         source_id: int,
     ) -> KnowledgeSourceModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: source_id.
-        تعيد KnowledgeSourceModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.get(
@@ -71,11 +51,7 @@ class KnowledgeSourceRepository:
         slug: str,
     ) -> KnowledgeSourceModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_slug؛ المدخلات المهمة: slug.
-        تعيد KnowledgeSourceModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -90,11 +66,7 @@ class KnowledgeSourceRepository:
         self,
     ) -> list[KnowledgeSourceModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_all؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[KnowledgeSourceModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             return list(
@@ -112,11 +84,7 @@ class KnowledgeSourceRepository:
         self,
     ) -> list[KnowledgeSourceModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_enabled؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[KnowledgeSourceModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             return list(
@@ -139,11 +107,7 @@ class KnowledgeSourceRepository:
         data: CreateKnowledgeSourceDTO,
     ) -> KnowledgeSourceModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
-        تعيد KnowledgeSourceModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = KnowledgeSourceModel(
             slug=data.slug,
@@ -186,11 +150,7 @@ class KnowledgeSourceRepository:
         data: UpdateKnowledgeSourceDTO,
     ) -> KnowledgeSourceModel | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: source_id، data.
-        تعيد KnowledgeSourceModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.get(
@@ -243,11 +203,7 @@ class KnowledgeSourceRepository:
         enabled: bool,
     ) -> KnowledgeSourceModel | None:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى set_enabled؛ المدخلات المهمة: source_id، enabled.
-        تعيد KnowledgeSourceModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.get(
@@ -269,11 +225,7 @@ class KnowledgeSourceRepository:
         source_id: int,
     ) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى delete؛ المدخلات المهمة: source_id.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يزيل ارتباطًا أو سجلًا من مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل بعد تطبيق قواعد الملكية المطلوبة.
         """
         with self._session_factory() as session:
             model = session.get(

@@ -1,12 +1,8 @@
 """
-جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+فحص جاهزية بيئة التحقق المعزولة المحلية.
 
-الموقع في المعمارية: Application capability / remediation.
-يُستدعى بواسطة: Admin API أو MCP.
-يعتمد مباشرة على: app.core.contracts.sandbox_validation.
-الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يتحقق وقت التشغيل من المسار والأدوات المطلوبة وحدود البيئة، ويعيد نتيجة منظمة
+توضح إن كانت المعالجة التجريبية قابلة للتنفيذ.
 """
 from __future__ import annotations
 
@@ -18,21 +14,13 @@ from app.core.contracts.sandbox_validation import SandboxRuntimeCheck
 
 
 class NativeSandboxRuntime:
-    """Fail-closed attestation for Claude Code native sandbox execution.
-
-    Claude's supported CLI surface supplies settings/MCP loading, but the
-    installed CLI does not expose a native-sandbox flag. Runtime evidence is
-    consequently produced by the project probe from inside the sandbox and
-    consumed here; this layer never authorizes a write by itself.
+    """
+    يفحص قدرة البيئة المحلية على تشغيل تحقق معزول بالمتطلبات المحددة.
     """
 
     def check(self) -> SandboxRuntimeCheck:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى check؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد SandboxRuntimeCheck أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفحص وجود runtime والأدوات والمسارات المطلوبة ويعيد نتيجة جاهزية البيئة المعزولة.
         """
         path_value = os.getenv("PHASE6_NATIVE_SANDBOX_ATTESTATION_FILE", "").strip()
         if not path_value:

@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقود نتيجة تحليل تقرير المراقبة قبل بدء التحقيق المتخصص."""
 from enum import StrEnum
 from datetime import datetime
 
@@ -20,12 +11,7 @@ from pydantic import (
 
 class AnalysisHealthStatus(StrEnum):
     """
-    يمثل AnalysisHealthStatus مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    التقييم العام لصحة السيرفر كما ظهر من تقرير المراقبة.
     """
     HEALTHY = "healthy"
     WARNING = "warning"
@@ -35,12 +21,7 @@ class AnalysisHealthStatus(StrEnum):
 
 class AnalysisSeverity(StrEnum):
     """
-    يمثل AnalysisSeverity مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    شدة ملاحظة أو مشكلة اكتشفها تحليل التقرير.
     """
     INFO = "info"
     WARNING = "warning"
@@ -49,12 +30,7 @@ class AnalysisSeverity(StrEnum):
 
 class ErrorClassification(StrEnum):
     """
-    يمثل ErrorClassification مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    تصنيف أولي لطبيعة المشكلة قبل أن يثبت التحقيق سببها.
     """
     NORMAL = "normal"
     DANGEROUS = "dangerous"
@@ -63,12 +39,10 @@ class ErrorClassification(StrEnum):
 
 class AnalysisIssue(BaseModel):
     """
-    يمثل AnalysisIssue مسؤولية محددة داخل طبقة Core application contracts.
+    مشكلة مستخرجة من تقرير المراقبة مع شدتها ووصفها وقرينتها الأولية.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    قد تحمل توصية مبدئية، لكنها لا تتحول إلى معالجة معتمدة قبل أن يراجعها
+    التحقيق والأدلة الحالية.
     """
     severity: AnalysisSeverity
     classification: ErrorClassification | None = None
@@ -92,12 +66,10 @@ class AnalysisIssue(BaseModel):
 
 class ReportAnalysisResult(BaseModel):
     """
-    يمثل ReportAnalysisResult مسؤولية محددة داخل طبقة Core application contracts.
+    ملخص التحليل الذي يحدد صحة السيرفر وما يستحق التحقيق.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يفصل العقد بين المشكلات والنتائج الإيجابية والأفعال المقترحة، حتى لا تختلط
+    ملاحظة التقرير بتشخيص نهائي أو تغيير منفذ.
     """
     health_status: AnalysisHealthStatus
 
@@ -124,12 +96,10 @@ class ReportAnalysisResult(BaseModel):
 
 class StoredReportAnalysis(BaseModel):
     """
-    يمثل StoredReportAnalysis مسؤولية محددة داخل طبقة Core application contracts.
+    تحليل محفوظ مرتبط بتقرير وسيرفر ومزود النموذج الذي أنتجه.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحافظ على الحالة والملخص والأخطاء والأزمنة وعدد المحاولات حتى يمكن إعادة
+    استخدام تحليل مطابق أو معرفة لماذا لم يكتمل.
     """
     id: int
     report_id: int

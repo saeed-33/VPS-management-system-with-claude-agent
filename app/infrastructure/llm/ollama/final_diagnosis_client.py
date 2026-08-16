@@ -1,12 +1,5 @@
 """
-عميل Ollama يترجم contracts الداخلية إلى HTTP model calls ويعيد DTOs.
-
-الموقع في المعمارية: LLM infrastructure.
-يُستدعى بواسطة: capabilities عبر protocol/client factory.
-يعتمد مباشرة على: app.core.contracts.final_diagnosis.
-الحد المعماري: Ollama مزود model فقط؛ لا يمنح النص صلاحية policy أو persistence.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+طلب سرد تشخيص نهائي من Ollama اعتمادًا على الادعاءات والتعارضات المحفوظة.
 """
 from __future__ import annotations
 
@@ -21,12 +14,7 @@ class OllamaFinalDiagnosisNarrativeClient(
     FinalDiagnosisNarrativeClient
 ):
     """
-    يمثل OllamaFinalDiagnosisNarrativeClient مسؤولية محددة داخل طبقة LLM infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities عبر protocol/client factory
-    ويعتمد على FinalDiagnosisNarrativeClient وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عميل يصوغ سرد التشخيص النهائي من سياق التحقيق دون إضافة أدلة أو إجراءات.
     """
     def __init__(
         self,
@@ -36,11 +24,7 @@ class OllamaFinalDiagnosisNarrativeClient(
         timeout_seconds: float,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: base_url، model، timeout_seconds.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ عميل صياغة التشخيص بعنوان Ollama والنموذج والمهلة.
         """
         self._model = model
         self._client = httpx.AsyncClient(
@@ -56,22 +40,14 @@ class OllamaFinalDiagnosisNarrativeClient(
     @property
     def provider_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى provider_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم مزود السرد التشخيصي النهائي.
         """
         return "ollama"
 
     @property
     def model_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى model_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم النموذج الذي يصوغ التشخيص النهائي.
         """
         return self._model
 
@@ -82,11 +58,7 @@ class OllamaFinalDiagnosisNarrativeClient(
         user_prompt: str,
     ) -> FinalDiagnosisNarrativeOutput:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى synthesize؛ المدخلات المهمة: system_prompt، user_prompt.
-        تعيد FinalDiagnosisNarrativeOutput أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يرسل سياق التحقيق إلى Ollama ويقبل JSON التشخيص المحدد دون إضافة ادعاءات جديدة.
         """
         contract = (
             '{"summary":"brief server-level diagnosis",'
@@ -163,11 +135,7 @@ class OllamaFinalDiagnosisNarrativeClient(
 
     async def close(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى close؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يغلق عميل HTTP الخاص بصياغة التشخيص النهائي.
         """
         await self._client.aclose()
 

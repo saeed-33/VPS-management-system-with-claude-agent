@@ -1,12 +1,8 @@
 """
-يركب dependencies ويربط repositories والخدمات والـruntime.
+تعريف حاوية اعتماديات التطبيق.
 
-الموقع في المعمارية: Bootstrap / dependency composition.
-يُستدعى بواسطة: app.main أو الاختبارات عند إنشاء container.
-يعتمد مباشرة على: app.interfaces.admin.services.report_pdf_service، app.interfaces.admin.services.ssh_test_service، app.capabilities.remediation.autonomous_policy_service، app.capabilities.remediation.autonomous_history_service، app.capabilities.remediation.autonomous_candidate_service، app.capabilities.remediation.autonomous_authorization_service.
-الحد المعماري: لا ينفذ workflow business؛ دوره wiring وترتيب الإنشاء.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تحمل الحاوية الحزم المشتركة لمكونات المراقبة والتحليل والتحقيق والمعالجة
+والتشغيل، لتُمرر صراحة إلى الطبقات المستهلكة.
 """
 from __future__ import annotations
 
@@ -64,12 +60,7 @@ from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 @dataclass(slots=True)
 class ApplicationContainer:
     """
-    يمثل ApplicationContainer مسؤولية محددة داخل طبقة Bootstrap / dependency composition.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه app.main أو الاختبارات عند إنشاء container
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يجمع حزم الاعتماديات الأساسية والتحليل والاسترجاع والتحقيق ووقت التشغيل في كائن واحد.
     """
     server_repository: ServerRepository
     command_repository: CommandRepository

@@ -1,12 +1,8 @@
 """
-Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+نقاط API لقراءة تقارير المراقبة وتحليلاتها.
 
-الموقع في المعمارية: HTTP interface / adapter.
-يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
-يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.reports، app.interfaces.admin.services.report_pdf_service، app.infrastructure.database.repositories.analysis_repository، app.infrastructure.database.repositories.analysis_source_repository، app.core.exceptions.
-الحد المعماري: لا يضع business rules أو transaction logic.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+توفر القوائم والتفاصيل ومصادر التحليل والملخص وتصدير PDF، وتفصل عرض التقرير
+المحفوظ عن منطق التحليل والتخزين الموجود في الخدمات والمستودعات.
 """
 from typing import Annotated
 
@@ -80,11 +76,7 @@ def list_reports(
     ] = 50,
 ) -> PaginatedReportsResponse:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_reports؛ المدخلات المهمة: service، server_id، report_status، page، page_size.
-    تعيد PaginatedReportsResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد صفحة من تقارير المراقبة مع مرشحات السيرفر والحالة والتاريخ.
     """
     try:
         items, total = service.list_reports(
@@ -120,11 +112,7 @@ def get_report(
     ],
 ) -> ReportDetailsResponse:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_report؛ المدخلات المهمة: report_id، service.
-    تعيد ReportDetailsResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد تفاصيل تقرير مراقبة محدد أو HTTP 404 عند غيابه.
     """
     try:
         return service.get_report(report_id)
@@ -148,11 +136,7 @@ def get_report_analysis(
     ],
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_report_analysis؛ المدخلات المهمة: report_id، repository.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد نتيجة التحليل المرتبطة بالتقرير مع معالجة حالة عدم وجودها.
     """
     analysis = repository.get_by_report_id(
         report_id
@@ -186,11 +170,7 @@ def get_report_analysis_sources(
     ],
 ) -> ReportAnalysisSourcesResponse:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_report_analysis_sources؛ المدخلات المهمة: report_id، analysis_repository، source_repository.
-    تعيد ReportAnalysisSourcesResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد مصادر السياق التي استخدمت في تحليل التقرير.
     """
     analysis = analysis_repository.get_by_report_id(
         report_id
@@ -235,11 +215,7 @@ def export_report_pdf(
     ],
 ) -> Response:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى export_report_pdf؛ المدخلات المهمة: report_id، report_service، analysis_repository، source_repository، pdf_service.
-    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينشئ استجابة PDF لتقرير المراقبة مع اسم ملف مناسب للتنزيل.
     """
     try:
         report = report_service.get_report(report_id)
@@ -295,11 +271,7 @@ def get_report_analysis_summary(
     ],
 ) -> dict:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_report_analysis_summary؛ المدخلات المهمة: report_id، repository.
-    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد ملخصًا موجزًا لتحليل التقرير للاستخدام في الواجهات الإدارية.
     """
     analysis = repository.get_by_report_id(
         report_id

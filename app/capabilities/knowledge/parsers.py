@@ -1,12 +1,8 @@
 """
-جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+تحليل محتوى مصادر المعرفة إلى نص موحد.
 
-الموقع في المعمارية: Application capability / knowledge.
-يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
-يعتمد مباشرة على: app.capabilities.knowledge.ingestion_contracts.
-الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يدعم النص وHTML وPDF، ويستخرج العناوين والصفحات والبيانات الوصفية التي تحتاجها
+مرحلة التقطيع، مع استبدال اختلافات الترميز والفراغات بتمثيل ثابت.
 """
 from __future__ import annotations
 
@@ -28,11 +24,7 @@ _BLANKS_RE = re.compile(r"\n{3,}")
 
 def normalize_text(value: str) -> str:
     """
-    يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Application capability / knowledge.
-
-    تُستدعى عندما يصل workflow إلى normalize_text؛ المدخلات المهمة: value.
-    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يوحد فواصل الأسطر والفراغات والأسطر الفارغة في النص قبل تخزينه أو تقطيعه.
     """
     lines = [
         _SPACE_RE.sub(" ", line).strip()
@@ -52,12 +44,7 @@ def normalize_text(value: str) -> str:
 
 class _HTMLTextExtractor(HTMLParser):
     """
-    يمثل _HTMLTextExtractor مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على HTMLParser وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يستخرج نص HTML والعنوان والعناوين مع تجاهل عناصر السكربت والتنسيق.
     """
     BLOCK_TAGS = {
         "article", "aside", "blockquote", "br", "div",
@@ -70,11 +57,7 @@ class _HTMLTextExtractor(HTMLParser):
 
     def __init__(self) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ محلل HTML ومكدسات النص والعنوان والعناوين التي سيستخرجها.
         """
         super().__init__(convert_charrefs=True)
         self._parts: list[str] = []
@@ -88,11 +71,7 @@ class _HTMLTextExtractor(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى handle_starttag؛ المدخلات المهمة: tag، attrs.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعالج بداية عنصر HTML لتحديد عناصر التجاهل والعنوان والقسم والفاصل النصي.
         """
         tag = tag.casefold()
 
@@ -115,11 +94,7 @@ class _HTMLTextExtractor(HTMLParser):
 
     def handle_endtag(self, tag):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى handle_endtag؛ المدخلات المهمة: tag.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يغلق حالة عنصر HTML ويحفظ العنوان أو العنوان الفرعي ويضيف فاصل الكتلة عند الحاجة.
         """
         tag = tag.casefold()
 
@@ -148,11 +123,7 @@ class _HTMLTextExtractor(HTMLParser):
 
     def handle_data(self, data):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى handle_data؛ المدخلات المهمة: data.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع النص المرئي داخل HTML ويغذي العنوان والقسم النشطين مع تجاهل العناصر المحظورة.
         """
         if self._skip_depth:
             return
@@ -173,23 +144,14 @@ class _HTMLTextExtractor(HTMLParser):
 
     def text(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى text؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد النص المرئي المستخرج من HTML بعد تطبيعه.
         """
         return normalize_text("".join(self._parts))
 
 
 class KnowledgeContentParser:
     """
-    يمثل KnowledgeContentParser مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يختار محلل النص أو HTML أو PDF وينتج وثيقة معرفة موحدة.
     """
     def parse(
         self,
@@ -200,11 +162,7 @@ class KnowledgeContentParser:
         title_hint: str | None = None,
     ) -> ParsedKnowledgeDocument:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى parse؛ المدخلات المهمة: content، canonical_uri، media_type، title_hint.
-        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يختار استراتيجية التحليل حسب نوع الوسيط ويرفض الأنواع غير المدعومة.
         """
         normalized_media_type = (
             (media_type or "")
@@ -255,11 +213,7 @@ class KnowledgeContentParser:
         title_hint: str | None = None,
     ) -> ParsedKnowledgeDocument:
         """
-        يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى parse_file؛ المدخلات المهمة: path، canonical_uri، title_hint.
-        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدد نوع الوسيط من امتداد الملف ثم يقرأه ويمرره إلى المحلل الموحد.
         """
         suffix = path.suffix.casefold()
         media_types = {
@@ -293,11 +247,7 @@ class KnowledgeContentParser:
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _parse_text؛ المدخلات المهمة: content، canonical_uri، media_type، title_hint.
-        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفك بايتات النص بترميز UTF-8 مرن وينشئ وثيقة نصية محللة.
         """
         text = normalize_text(
             content.decode("utf-8", errors="replace")
@@ -321,11 +271,7 @@ class KnowledgeContentParser:
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _parse_html؛ المدخلات المهمة: content، canonical_uri، media_type، title_hint.
-        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج النص والعنوان والعناوين من HTML وينشئ وثيقة مع بياناتها الوصفية.
         """
         html = content.decode("utf-8", errors="replace")
         extractor = _HTMLTextExtractor()
@@ -351,11 +297,7 @@ class KnowledgeContentParser:
         title_hint: str | None,
     ) -> ParsedKnowledgeDocument:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _parse_pdf؛ المدخلات المهمة: content، canonical_uri، title_hint.
-        تعيد ParsedKnowledgeDocument أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج نص كل صفحة وبيانات PDF الوصفية وينشئ وثيقة تحمل الصفحات والعنوان.
         """
         reader = PdfReader(BytesIO(content))
         pages: list[dict] = []

@@ -1,12 +1,8 @@
 """
-نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
+نماذج دورة المعالجة من الخطة والاختبار والموافقة حتى التنفيذ والتحقق والتراجع.
 
-الموقع في المعمارية: Persistence model.
-يُستدعى بواسطة: repositories وطبقة database.
-يعتمد مباشرة على: app.infrastructure.database.base، app.core.utils.datetime.
-الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تضم أيضًا سجلات قرار المعالجة الذاتية وحجوزها وحالتها وأحداث تدقيقها، حتى يكون
+كل تغيير على السيرفر قابلًا للمراجعة وربطه بالتشخيص والخطة.
 """
 from __future__ import annotations
 
@@ -29,12 +25,7 @@ from app.core.utils.datetime import utc_now
 
 class RemediationPlanModel(Base):
     """
-    يمثل RemediationPlanModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    خطة تغيير تربط التشخيص بالأفعال والخطر وحالة الموافقة والتنفيذ.
     """
     __tablename__ = "remediation_plans"
     __table_args__ = (
@@ -197,12 +188,7 @@ class RemediationPlanModel(Base):
 
 class RemediationSandboxResultModel(Base):
     """
-    يمثل RemediationSandboxResultModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    نتيجة اختبار أولي للخطة في بيئة معزولة مع أدلة الحالة قبل وبعد.
     """
     __tablename__ = "remediation_sandbox_results"
     __table_args__ = (
@@ -266,12 +252,7 @@ class RemediationSandboxResultModel(Base):
 
 class RemediationApprovalModel(Base):
     """
-    يمثل RemediationApprovalModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    موافقة مشغل مرتبطة بخطة وبصمتها ونطاقها ووقت انتهائها.
     """
     __tablename__ = "remediation_approvals"
     __table_args__ = (
@@ -294,12 +275,7 @@ class RemediationApprovalModel(Base):
 
 class RemediationExecutionModel(Base):
     """
-    يمثل RemediationExecutionModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    سجل تنفيذ فعلي لخطة المعالجة ونتيجته وأثره على السيرفر.
     """
     __tablename__ = "remediation_executions"
     __table_args__ = (
@@ -331,12 +307,7 @@ class RemediationExecutionModel(Base):
 
 class RemediationEvidenceModel(Base):
     """
-    يمثل RemediationEvidenceModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    دليل تشغيلي يجمعه مسار المعالجة قبل التغيير أو أثناءه أو بعده.
     """
     __tablename__ = "remediation_evidence"
     __table_args__ = (
@@ -359,12 +330,7 @@ class RemediationEvidenceModel(Base):
 
 class SandboxValidationModel(Base):
     """
-    يمثل SandboxValidationModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    إثبات أن خطة محددة اجتازت اختبار sandbox المرتبط بهدفها وبصمتها.
     """
     __tablename__ = "sandbox_validations"
     __table_args__ = (
@@ -397,12 +363,7 @@ class SandboxValidationModel(Base):
 
 class RemediationVerificationModel(Base):
     """
-    يمثل RemediationVerificationModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    نتيجة فحص حالة السيرفر بعد التنفيذ لتحديد نجاح التغيير أو الحاجة للتراجع.
     """
     __tablename__ = "remediation_verifications"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -417,12 +378,7 @@ class RemediationVerificationModel(Base):
 
 class RemediationRollbackModel(Base):
     """
-    يمثل RemediationRollbackModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    سجل محاولة إعادة السيرفر إلى الحالة السابقة بعد فشل التحقق.
     """
     __tablename__ = "remediation_rollbacks"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -437,12 +393,7 @@ class RemediationRollbackModel(Base):
 
 class RemediationAuditEventModel(Base):
     """
-    يمثل RemediationAuditEventModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    حدث تدقيق يغطي انتقالات خطة المعالجة والفاعل والجلسة والأثر.
     """
     __tablename__ = "remediation_audit_events"
     __table_args__ = (
@@ -464,12 +415,7 @@ class RemediationAuditEventModel(Base):
 
 class AutonomousRemediationPolicyModel(Base):
     """
-    يمثل AutonomousRemediationPolicyModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    سياسة محفوظة تحدد متى يسمح علاج معين بالتنفيذ الذاتي.
     """
     __tablename__ = "autonomous_remediation_policies"
     __table_args__ = (
@@ -510,12 +456,7 @@ class AutonomousRemediationPolicyModel(Base):
 
 class AutonomousPolicyDecisionModel(Base):
     """
-    يمثل AutonomousPolicyDecisionModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    قرار تقييم سياسة المعالجة الذاتية مع رموز أسبابه وارتباطاته.
     """
     __tablename__ = "autonomous_policy_decisions"
     __table_args__ = (
@@ -544,12 +485,7 @@ class AutonomousPolicyDecisionModel(Base):
 
 class AutonomousAuthorizationModel(Base):
     """
-    يمثل AutonomousAuthorizationModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    تفويض قصير العمر يثبت صلاحية تنفيذ خطة ذاتية محددة مرة واحدة.
     """
     __tablename__ = "autonomous_authorizations"
     __table_args__ = (
@@ -577,12 +513,7 @@ class AutonomousAuthorizationModel(Base):
 
 class AutonomousPolicyExecutionReservationModel(Base):
     """
-    يمثل AutonomousPolicyExecutionReservationModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    حجز يمنع تكرار التنفيذ الذاتي لخطة أو مفتاح idempotency نفسه.
     """
     __tablename__ = "autonomous_policy_execution_reservations"
     __table_args__ = (
@@ -610,12 +541,7 @@ class AutonomousPolicyExecutionReservationModel(Base):
 
 class AutonomousPolicyRuntimeStateModel(Base):
     """
-    يمثل AutonomousPolicyRuntimeStateModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    حالة تشغيلية متراكمة لنجاحات وفشل وحدود سياسة المعالجة الذاتية.
     """
     __tablename__ = "autonomous_policy_runtime_state"
 
@@ -631,7 +557,9 @@ class AutonomousPolicyRuntimeStateModel(Base):
 
 
 class AutonomousPolicyAuditEventModel(Base):
-    """Durable audit record for operator-level autonomous policy changes."""
+    """
+    حدث تدقيق لقرارات وحجوز وتنفيذات المعالجة الذاتية.
+    """
 
     __tablename__ = "autonomous_policy_audit_events"
     __table_args__ = (

@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+معالجات أدوات المعالجة في MCP.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: app.interfaces.mcp.schemas، app.interfaces.mcp.serializers.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تقترح خطة المعالجة وتنشئها وتختبرها وتطلب موافقة المستخدم أو تطبق الخطة
+المعتمدة، مع إبقاء ضوابط السلامة في خدمات المجال.
 """
 from __future__ import annotations
 
@@ -18,20 +14,11 @@ from app.interfaces.mcp.serializers import serialize_value
 
 class RemediationToolsMixin:
     """
-    يمثل RemediationToolsMixin مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يوفر معالجات اقتراح واختبار وموافقة وتنفيذ المعالجة.
     """
     async def _attempt_autonomous_remediation(self, arguments: dict[str, Any]) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _attempt_autonomous_remediation؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقيم أو يحاول تنفيذ معالجة آلية ضمن سياسة وتفويض محددين.
         """
         self._require_dependency(self._autonomous_execution_service, "autonomous_execution_service")
         result = self._autonomous_execution_service.attempt(
@@ -52,11 +39,7 @@ class RemediationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _propose_remediation؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يولد اقتراح معالجة من نتيجة التشخيص والأدلة الحالية.
         """
         self._require_dependency(
             self._remediation_service,
@@ -102,11 +85,7 @@ class RemediationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _create_remediation_plan؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ خطة معالجة قابلة للتحقق من اقتراح معتمد.
         """
         self._require_dependency(
             self._remediation_service,
@@ -175,11 +154,7 @@ class RemediationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _test_remediation_in_sandbox؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يختبر خطة المعالجة في بيئة معزولة.
         """
         self._require_dependency(
             self._remediation_service,
@@ -194,7 +169,7 @@ class RemediationToolsMixin:
                 target_service=self._required_string(arguments, "target_service"),
             )
         else:
-            # Preserve the Phase 5 dry-run contract for existing callers.
+            # نحافظ على عقد المعاينة للطلبات القديمة قبل السماح بأي أثر فعلي.
             result = self._remediation_service.test_in_sandbox(plan_id=plan_id)
 
         return ProjectToolResult(
@@ -217,11 +192,7 @@ class RemediationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_sandbox_result؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ نتيجة آخر اختبار معزول لخطة المعالجة.
         """
         self._require_dependency(
             self._remediation_service,
@@ -276,11 +247,7 @@ class RemediationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _request_user_approval؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ طلب موافقة مستخدم قبل تطبيق المعالجة.
         """
         self._require_dependency(
             self._remediation_service,
@@ -318,11 +285,7 @@ class RemediationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _apply_approved_remediation؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يطبق خطة معالجة بعد التحقق من الموافقة والضوابط.
         """
         self._require_dependency(
             self._remediation_service,

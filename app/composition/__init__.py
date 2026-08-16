@@ -1,15 +1,10 @@
 """
-يركب dependencies ويربط repositories والخدمات والـruntime.
+نقطة الدخول إلى تركيب تطبيق مراقبة السيرفر.
 
-الموقع في المعمارية: Bootstrap / dependency composition.
-يُستدعى بواسطة: app.main أو الاختبارات عند إنشاء container.
-يعتمد مباشرة على: app.composition.builder.
-الحد المعماري: لا ينفذ workflow business؛ دوره wiring وترتيب الإنشاء.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تنشئ الحاوية العامة التي تربط المستودعات والخدمات ومكونات التشغيل، وتعرضها
+لواجهات التطبيق دون نقل منطق المجال إلى طبقة التركيب.
 """
-# Application composition root.
-# This package owns dependency construction and wiring only.
+# نقطة تجميع رحلة مراقبة السيرفر وربط مراحلها بخدماتها المشتركة.
 
 from app.composition.builder import (
     ApplicationContainer,

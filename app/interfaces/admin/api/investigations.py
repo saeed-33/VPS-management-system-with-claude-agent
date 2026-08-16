@@ -1,12 +1,8 @@
 """
-Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+نقاط API لقراءة التحقيقات.
 
-الموقع في المعمارية: HTTP interface / adapter.
-يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
-يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.investigations، app.capabilities.investigation.read_service.
-الحد المعماري: لا يضع business rules أو transaction logic.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تقدم قوائم التحقيقات والتفاصيل والتحقيقات المرتبطة بتقرير مراقبة، مع ترك
+التنفيذ والتجميع والحفظ لخدمات طبقة التحقيق.
 """
 from __future__ import annotations
 
@@ -37,11 +33,7 @@ def list_investigations(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_investigations؛ المدخلات المهمة: limit، server_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد قائمة التحقيقات مع مرشحات السيرفر والحالة والتاريخ.
     """
     return service.list_recent(
         limit=limit,
@@ -60,11 +52,7 @@ def get_investigation(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_investigation؛ المدخلات المهمة: investigation_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد تفاصيل تحقيق محدد أو HTTP 404 عند غيابه.
     """
     investigation_id = investigation_id.strip()
 
@@ -96,11 +84,7 @@ def list_report_investigations(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_report_investigations؛ المدخلات المهمة: report_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض التحقيقات المرتبطة بتقرير مراقبة محدد.
     """
     if report_id < 1:
         raise HTTPException(

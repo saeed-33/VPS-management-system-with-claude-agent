@@ -1,12 +1,8 @@
 """
-Policy أو registry حتمي يقرر السماح أو الرفض أو التصنيف قبل التنفيذ.
+سياسة السماح بطلبات أدوات التحقيق.
 
-الموقع في المعمارية: Core policy.
-يُستدعى بواسطة: capabilities وMCP handlers.
-يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_tools.
-الحد المعماري: لا تنفذ SSH أو LLM أو persistence.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تتحقق من وجود الأداة وخطرها ومنحها للمتخصص وصحة معاملاتها وحدود الجولات
+والأفعال، ولا تعرض الأمر التنفيذي إلا إذا اجتازت كل الشروط.
 """
 from __future__ import annotations
 
@@ -24,12 +20,7 @@ from app.core.policies.diagnostic_tools import (
 
 class SpecialistPolicyDefinition(Protocol):
     """
-    يمثل SpecialistPolicyDefinition مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد يزود سياسة التشخيص بحدود المتخصص وأدواته المسموحة.
     """
     slug: str
     max_rounds: int
@@ -39,12 +30,7 @@ class SpecialistPolicyDefinition(Protocol):
 
 class DiagnosticPolicyDecision(StrEnum):
     """
-    يمثل DiagnosticPolicyDecision مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    القرار النهائي بشأن السماح بطلب أداة تشخيص أو منعه.
     """
     ALLOW = "allow"
     DENY = "deny"
@@ -52,12 +38,7 @@ class DiagnosticPolicyDecision(StrEnum):
 
 class DiagnosticPolicyReason(StrEnum):
     """
-    يمثل DiagnosticPolicyReason مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    الأسباب التي تشرح رفض طلب تشخيص أو السماح به.
     """
     ALLOWED = "allowed"
     UNKNOWN_TOOL = "unknown_tool"
@@ -73,12 +54,7 @@ class DiagnosticPolicyReason(StrEnum):
 @dataclass(slots=True, frozen=True)
 class DiagnosticPolicyRequest:
     """
-    يمثل DiagnosticPolicyRequest مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    بيانات طلب أداة تشخيص مع الجولة والعدادات والميزانية الحالية.
     """
     call: DiagnosticToolCall
     round_number: int
@@ -88,11 +64,7 @@ class DiagnosticPolicyRequest:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من أن عدادات طلب التشخيص ورقم جولته لا تحمل قيمًا غير صالحة.
         """
         if self.round_number < 1:
             raise ValueError("round_number must be >= 1.")
@@ -105,12 +77,7 @@ class DiagnosticPolicyRequest:
 @dataclass(slots=True, frozen=True)
 class DiagnosticPolicyResult:
     """
-    يمثل DiagnosticPolicyResult مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    نتيجة تقييم طلب التشخيص، ولا تكشف الأمر إلا عند السماح.
     """
     decision: DiagnosticPolicyDecision
     reasons: tuple[DiagnosticPolicyReason, ...]
@@ -124,21 +91,13 @@ class DiagnosticPolicyResult:
     @property
     def allowed(self) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى allowed؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدد هل نتيجة السياسة تسمح بتنفيذ أداة التشخيص.
         """
         return self.decision == DiagnosticPolicyDecision.ALLOW
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من أن عدادات طلب التشخيص ورقم جولته لا تحمل قيمًا غير صالحة.
         """
         if not self.specialist_slug.strip():
             raise ValueError("specialist_slug must not be empty.")
@@ -177,12 +136,7 @@ class DiagnosticPolicyResult:
 
 class DiagnosticPolicyEngine:
     """
-    يمثل DiagnosticPolicyEngine مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    محرك يفرض الصلاحيات والمخاطر والميزانية قبل تشغيل أداة تشخيص.
     """
     def __init__(
         self,
@@ -193,11 +147,7 @@ class DiagnosticPolicyEngine:
         ),
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: registry، allowed_risks.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجهز سجل الأدوات ومجموعة مستويات الخطر التي يسمح بها التحقيق.
         """
         self._registry = registry
         self._allowed_risks = frozenset(allowed_risks)
@@ -214,11 +164,7 @@ class DiagnosticPolicyEngine:
         request: DiagnosticPolicyRequest,
     ) -> DiagnosticPolicyResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى evaluate؛ المدخلات المهمة: specialist، request.
-        تعيد DiagnosticPolicyResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفحص الأداة والمتخصص والميزانية والمعاملات، ثم يعيد أمرًا مضبوطًا فقط عند اجتياز كل البوابات.
         """
         tool_id = request.call.tool_id.strip().casefold()
         reasons: list[DiagnosticPolicyReason] = []
@@ -340,11 +286,7 @@ class DiagnosticPolicyEngine:
         error: str | None = None,
     ) -> DiagnosticPolicyResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى _deny؛ المدخلات المهمة: specialist، tool_id، reasons، request، definition، error.
-        تعيد DiagnosticPolicyResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني نتيجة رفض تحفظ أسباب المنع والعدادات والخطر دون كشف أمر قابل للتنفيذ.
         """
         metadata: dict[str, Any] = {
             "round_number": request.round_number,

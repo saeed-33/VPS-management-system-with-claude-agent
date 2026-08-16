@@ -1,12 +1,8 @@
 """
-Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+نقاط API لمراقبة آثار وظائف وكيل Claude.
 
-الموقع في المعمارية: HTTP interface / adapter.
-يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
-يعتمد مباشرة على: app.interfaces.admin.dependencies، app.runtime.claude.observability.
-الحد المعماري: لا يضع business rules أو transaction logic.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تستقبل هذه المسارات مرشحات التتبع وتعيد تفاصيل الوظائف وملخصات المراقبة عبر
+خدمة الرصد، دون أن تنفذ الوظيفة نفسها أو تغير حالة الوكيل.
 """
 from __future__ import annotations
 
@@ -50,11 +46,7 @@ async def list_agent_job_traces(
     ),
 ) -> dict:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_agent_job_traces؛ المدخلات المهمة: limit، server_id، status، service.
-    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد آثار وظائف الوكيل وفق حد النتائج والسيرفر والحالة المطلوبة.
     """
     traces = service.list_recent_traces(
         limit=limit,
@@ -76,11 +68,7 @@ async def get_agent_job_trace(
     ),
 ) -> dict:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_agent_job_trace؛ المدخلات المهمة: job_id، service.
-    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد تفاصيل أثر وظيفة وكيل محددة أو استجابة عدم العثور عليها.
     """
     trace = service.get_trace(job_id)
 
@@ -112,11 +100,7 @@ async def get_agent_observability_summary(
     ),
 ) -> dict:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_agent_observability_summary؛ المدخلات المهمة: limit، server_id، service.
-    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد ملخصًا تجميعيًا لمراقبة وظائف الوكيل ضمن المرشحات المطلوبة.
     """
     return service.summarize_recent(
         limit=limit,

@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مخططات أوامر المراقبة وربطها بالسيرفرات.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تصف طلبات إنشاء وتعديل الأوامر وطلبات الربط والاستجابات التي تعرض الأمر
+وإعدادات تشغيله دون تنفيذ منطق الخدمة داخل المخطط.
 """
 from datetime import datetime
 
@@ -24,12 +20,7 @@ FingerprintStrategyValue = Literal[
 
 class CommandCreateRequest(BaseModel):
     """
-    يمثل CommandCreateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب إنشاء أمر مراقبة جديد.
     """
     name: str = Field(
         min_length=1,
@@ -58,12 +49,7 @@ class CommandCreateRequest(BaseModel):
 
 class CommandUpdateRequest(BaseModel):
     """
-    يمثل CommandUpdateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب تعديل أمر مراقبة موجود.
     """
     name: str | None = Field(
         default=None,
@@ -88,12 +74,7 @@ class CommandUpdateRequest(BaseModel):
 
 class CommandResponse(BaseModel):
     """
-    يمثل CommandResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل أمر مراقبة كما تعرضه API.
     """
     id: int
     name: str
@@ -112,12 +93,7 @@ class CommandResponse(BaseModel):
 
 class AssignCommandRequest(BaseModel):
     """
-    يمثل AssignCommandRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب ربط أمر مراقبة بسيرفر.
     """
     execution_order: int = Field(
         default=1,
@@ -134,12 +110,7 @@ class AssignCommandRequest(BaseModel):
 
 class UpdateCommandAssignmentRequest(BaseModel):
     """
-    يمثل UpdateCommandAssignmentRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل تعديلات إعدادات ربط الأمر بالسيرفر.
     """
     execution_order: int | None = Field(
         default=None,
@@ -156,12 +127,7 @@ class UpdateCommandAssignmentRequest(BaseModel):
 
 class ServerCommandAssignmentResponse(BaseModel):
     """
-    يمثل ServerCommandAssignmentResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل نتيجة ربط أمر مراقبة بسيرفر.
     """
     command_id: int
     name: str

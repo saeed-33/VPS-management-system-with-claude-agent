@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+بناء تعريفات أدوات MCP.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: app.interfaces.mcp.schemas.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+ينشئ هذا المعالج وصف الأدوات وأشكال مدخلاتها ومخرجاتها ليستخدمها الكتالوج
+والعميل قبل طلب التنفيذ.
 """
 from __future__ import annotations
 
@@ -15,23 +11,14 @@ from app.interfaces.mcp.schemas import ProjectToolDefinition
 
 class BoundaryDefinitionsMixin:
     """
-    يمثل BoundaryDefinitionsMixin مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يوفر تعريفات الأدوات وأشكالها لحد MCP.
     """
     @staticmethod
     def _build_definitions() -> list[
         ProjectToolDefinition
     ]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _build_definitions؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[ProjectToolDefinition] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني تعريفات الأدوات من mixins والخدمات المسموحة وواجهات الإدخال والإخراج.
         """
         integer_id = {
             "type": "object",

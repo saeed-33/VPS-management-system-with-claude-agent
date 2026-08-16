@@ -1,13 +1,7 @@
-"""
-مكوّن مشترك مثل config أو exceptions أو logging.
+"""مصدر إعدادات التطبيق وقواعد صلاحية تشغيله.
 
-الموقع في المعمارية: Core foundation.
-يُستدعى بواسطة: الطبقات الأعلى.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا يعتمد على capabilities أو infrastructure.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+تجمع `Settings` إعدادات قاعدة البيانات وSSH وLLM وRAG والمراقبة والمعالجة،
+وتتحقق من أن التركيبات غير الآمنة لا تسمح للتطبيق بالبدء بحالة مضللة أو خطرة."""
 from pathlib import Path
 from typing import Literal
 from pydantic import Field, model_validator
@@ -24,12 +18,10 @@ ENV_FILE = PROJECT_ROOT / ".env"
 
 class Settings(BaseSettings):
     """
-    يمثل Settings مسؤولية محددة داخل طبقة Core foundation.
+    يمثل الإعدادات التي تحكم رحلة المراقبة والتحليل والمعالجة في بيئة التشغيل.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه الطبقات الأعلى
-    ويعتمد على BaseSettings وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    لا تكتفي هذه البيانات بتوفير القيم؛ فالمراجعات اللاحقة تمنع تفعيل RAG أو
+    runtime أو المعالجة الذاتية عندما تكون شروط السلامة والاعتماد غير مكتملة.
     """
     llm_enabled: bool = False
 
@@ -51,7 +43,7 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "qwen3:8b"
 
-    # C.14.7 real Claude Code runtime.
+    # إعدادات تشغيل جلسة Claude الفعلية.
     claude_runtime_enabled: bool = False
     claude_runtime_model: str | None = None
     claude_runtime_timeout_seconds: float = Field(
@@ -69,8 +61,8 @@ class Settings(BaseSettings):
         "server-supervisor",
     ] = "server-supervisor"
 
-    # Explicit double-opt-in real Phase 5 acceptance. These values are inert
-    # unless the opt-in test is deliberately selected.
+    # قبول اختبارات المعالجة الفعلية يحتاج اختيارًا صريحًا من إعدادين؛ تبقى
+    # القيم غير مؤثرة ما لم يطلب المستخدم اختبار الأثر عمدًا.
     real_phase5_acceptance_enabled: bool = False
     automatic_remediation_allowed: bool = False
     autonomous_remediation_max_risk: Literal["low"] = "low"
@@ -82,7 +74,7 @@ class Settings(BaseSettings):
     phase6_require_wsl2: bool = True
 
     app_name: str = "AI VPS Management"
-    # Production-safe default. Local development may explicitly set DEBUG=true.
+    # القيمة الافتراضية آمنة للإنتاج، ويمكن للتطوير المحلي تفعيل التصحيح صراحة.
     debug: bool = False
 
     postgres_host: str = "127.0.0.1"
@@ -161,9 +153,8 @@ class Settings(BaseSettings):
 
     database_echo: bool = False
 
-    # Admin authentication is intentionally independent from Claude/MCP.
-    # An empty secret creates a process-local secret, which invalidates all
-    # sessions after restart; deployments should configure a stable secret.
+    # مصادقة الإدارة مستقلة عن جلسة Claude وأدوات MCP. السر الفارغ يجعل
+    # الجلسات مؤقتة وتنتهي بعد إعادة التشغيل، لذلك يضبط النشر سرًا ثابتًا.
     admin_session_secret: str = ""
     admin_session_cookie_name: str = "admin_session"
     admin_session_ttl_seconds: int = Field(
@@ -175,11 +166,10 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_rag_policy(self) -> "Settings":
         """
-        يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Core foundation.
+        يتحقق من أن إعدادات استرجاع المعرفة يمكنها إنتاج سياق موثوق للتحليل.
 
-        تُستدعى عندما يصل workflow إلى validate_rag_policy؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد 'Settings' أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يضمن أن البحث المساعد يمر عبر البحث الدلالي، وأن حجم السياق لا يتجاوز
+        مجموعة المرشحين المؤهلين قبل وصولها إلى النموذج.
         """
         if (
             self.rag_assisted_enabled
@@ -217,11 +207,10 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_admin_deployment_security(self) -> "Settings":
         """
-        يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Core foundation.
+        يمنع تشغيل الإدارة في بيئة الإنتاج بإعداد جلسة ضعيف أو غير آمن.
 
-        تُستدعى عندما يصل workflow إلى validate_admin_deployment_security؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد 'Settings' أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسمح بإعدادات التطوير المرنة، لكنه يفرض سرًا ثابتًا وcookie آمنة عند
+        تعطيل وضع التصحيح حتى لا يمكن انتحال جلسة المدير.
         """
         secret = self.admin_session_secret.strip()
 
@@ -247,11 +236,10 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_claude_runtime(self) -> "Settings":
         """
-        يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Core foundation.
+        يتحقق من شروط تشغيل Claude قبل بدء دورة مراقبة فعلية.
 
-        تُستدعى عندما يصل workflow إلى validate_claude_runtime؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد 'Settings' أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط تفعيل runtime بتفعيل LLM ومزود Ollama ونموذج صالح، حتى لا تبدأ
+        الجدولة بمشغل لا يستطيع تنفيذ الأدوات المطلوبة.
         """
         if not self.claude_runtime_enabled:
             return self
@@ -280,13 +268,7 @@ class Settings(BaseSettings):
 
     @property
     def effective_claude_runtime_model(self) -> str:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core foundation.
-
-        تُستدعى عندما يصل workflow إلى effective_claude_runtime_model؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يعيد نموذج runtime الصريح أو نموذج Ollama الافتراضي عند غيابه."""
         configured = (
             self.claude_runtime_model or ""
         ).strip()
@@ -298,13 +280,7 @@ class Settings(BaseSettings):
 
     @property
     def rag_retrieval_enabled(self) -> bool:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core foundation.
-
-        تُستدعى عندما يصل workflow إلى rag_retrieval_enabled؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يحدد هل يوجد مسار بحث واحد على الأقل يمكنه تزويد التحليل بسياق سابق."""
         return (
             self.rag_vector_enabled
             or self.rag_full_text_enabled
@@ -312,13 +288,7 @@ class Settings(BaseSettings):
 
     @property
     def rag_candidate_budget(self) -> int:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core foundation.
-
-        تُستدعى عندما يصل workflow إلى rag_candidate_budget؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يحسب الحد المجمع للمرشحين الذين قد تدخلهم سياسة الاسترجاع للمقارنة."""
         total = 0
 
         if self.rag_vector_enabled:
@@ -331,13 +301,7 @@ class Settings(BaseSettings):
 
     @property
     def rag_policy_summary(self) -> dict[str, object]:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core foundation.
-
-        تُستدعى عندما يصل workflow إلى rag_policy_summary؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد dict[str, object] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يعرض إعدادات RAG الفعالة في شكل مناسب للسجل وفحص الحالة."""
         return {
             "exact_reuse": self.rag_exact_reuse_enabled,
             "assisted": self.rag_assisted_enabled,
@@ -361,13 +325,7 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> URL:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core foundation.
-
-        تُستدعى عندما يصل workflow إلى database_url؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد URL أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يبني عنوان اتصال PostgreSQL من أجزاء إعدادات قاعدة البيانات."""
         return URL.create(
             drivername="postgresql+psycopg",
             username=self.postgres_user,

@@ -1,12 +1,8 @@
 """
-جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+البحث النصي عن تحليلات سابقة مشابهة لتقرير المراقبة.
 
-الموقع في المعمارية: Application capability / retrieval.
-يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
-يعتمد مباشرة على: app.infrastructure.database.repositories.retrieval_repository، app.capabilities.analysis.retrieval.performance_profiler.
-الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يستخرج المصطلحات التشغيلية من التقرير المنظم، يمررها إلى بحث النص الكامل، ثم
+يعيد المرشحين مع ترتيبهم وحالة التحليل التاريخي.
 """
 import json
 import logging
@@ -28,12 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass(slots=True, frozen=True)
 class FullTextCandidate:
     """
-    يمثل FullTextCandidate مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل مرشحًا أعاده البحث النصي مع هويته وترتيبه وحالة تحليله التاريخي.
     """
     report_id: int
     analysis_id: int
@@ -43,20 +34,11 @@ class FullTextCandidate:
 
 class FullTextQueryBuilder:
     """
-    يمثل FullTextQueryBuilder مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يستخرج من التقرير الحقول النصية الأكثر فائدة لبناء استعلام البحث الكامل.
     """
     def build(self, normalized_report: str) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: normalized_report.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفك التقرير المنظم ويجمع رسالة الخطأ وحقول التنفيذ النصية في استعلام محدود الحجم.
         """
         try:
             payload = json.loads(normalized_report)
@@ -85,12 +67,7 @@ class FullTextQueryBuilder:
 
 class FullTextRetriever:
     """
-    يمثل FullTextRetriever مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    ينفذ البحث النصي ويحوّل صفوف المستودع إلى مرشحين موحدين للاستخدام في الدمج.
     """
     def __init__(
         self,
@@ -101,11 +78,7 @@ class FullTextRetriever:
         minimum_rank: float = 0.0,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: retrieval_repository، query_builder، candidate_limit، minimum_rank.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودع البحث وباني الاستعلام ويضبط عدد المرشحين وأدنى ترتيب مقبول.
         """
         self._retrieval_repository = retrieval_repository
         self._query_builder = (
@@ -125,11 +98,7 @@ class FullTextRetriever:
         exclude_report_id: int,
     ) -> list[FullTextCandidate]:
         """
-        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى retrieve؛ المدخلات المهمة: normalized_report، server_id، monitoring_profile_id، command_set_hash، exclude_report_id.
-        تعيد list[FullTextCandidate] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني الاستعلام ويبحث ضمن قيود السيرفر والملف ومجموعة الأوامر ثم يعيد المرشحين المرتبين.
         """
         query_started = perf_counter()
         query_text = self._query_builder.build(

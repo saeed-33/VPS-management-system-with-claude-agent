@@ -1,4 +1,9 @@
-"""Validated native Claude CLI process command contract."""
+"""
+تعريف الأمر التنفيذي الذي ستشغله جلسة Claude.
+
+يحوّل باني الأمر طلب التشغيل إلى برنامج ومجلد عمل ومتغيرات بيئة محددة، بحيث
+تبدأ الجلسة من سياق مشروع معروف ولا تستقبل أمرًا حرًا من المستخدم.
+"""
 
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -10,12 +15,7 @@ from app.runtime.claude.models import ClaudeRuntimeRequest
 @dataclass(slots=True, frozen=True)
 class ClaudeProcessCommand:
     """
-    يمثل ClaudeProcessCommand مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    قيمة غير قابلة للتغيير تصف البرنامج ومجلد العمل والبيئة اللازمة لتشغيل Claude.
     """
     argv: tuple[str, ...]
     cwd: Path | None = None
@@ -23,11 +23,7 @@ class ClaudeProcessCommand:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من وجود برنامج صالح في الأمر ويحول مجلد العمل إلى مسار مطلق قبل تثبيت القيمة.
         """
         if not self.argv:
             raise ValueError("Claude process argv must not be empty.")
@@ -44,12 +40,9 @@ class ClaudeProcessCommand:
 
 class ClaudeProcessCommandBuilder(Protocol):
     """
-    يمثل ClaudeProcessCommandBuilder مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد يبني أمر العملية من طلب جلسة Claude قبل تشغيلها.
     """
     def build(self, request: ClaudeRuntimeRequest) -> ClaudeProcessCommand:
-        """Build one process command without executing it."""
+        """
+        ينشئ وصف العملية من طلب الجلسة، بما في ذلك البرنامج والمجلد ومتغيرات البيئة.
+        """

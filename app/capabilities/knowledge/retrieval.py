@@ -1,12 +1,8 @@
 """
-جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+استرجاع مقاطع المعرفة بالبحث المتجهي والنصي الهجين.
 
-الموقع في المعمارية: Application capability / knowledge.
-يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.embedding_client، app.infrastructure.database.repositories.knowledge_retrieval_repository.
-الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يجمع النتائج بالتوازي، يحسب ترتيب RRF مع تعزيز تطابق الاختصاص والمجال، ثم
+يعيد سياقًا غنيًا بالمصدر والرتبة والاستراتيجية المستخدمة.
 """
 from __future__ import annotations
 
@@ -23,12 +19,7 @@ from app.infrastructure.database.repositories.knowledge_retrieval_repository imp
 @dataclass(slots=True, frozen=True)
 class KnowledgeRetrievalContext:
     """
-    يمثل KnowledgeRetrievalContext مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل مقطع معرفة مسترجعًا مع بيانات المصدر والدرجات والمراتب والتطابقات.
     """
     chunk_id: int
     document_id: int
@@ -56,12 +47,7 @@ class KnowledgeRetrievalContext:
 @dataclass(slots=True)
 class _FusionCandidate:
     """
-    يمثل _FusionCandidate مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يجمع نتائج البحث المتجهي والنصي لمقطع واحد قبل إعادة ترتيبه.
     """
     row: KnowledgeSearchRow
     vector_rank: int | None = None
@@ -71,11 +57,7 @@ class _FusionCandidate:
 
     def rrf_score(self, rrf_k: int) -> float:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى rrf_score؛ المدخلات المهمة: rrf_k.
-        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب درجة Reciprocal Rank Fusion للمقطع حسب رتبته في البحث المتجهي والنصي.
         """
         score = 0.0
         if self.vector_rank is not None:
@@ -87,11 +69,7 @@ class _FusionCandidate:
     @property
     def strategy(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى strategy؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدد استراتيجية وصول المقطع: متجهي أو نصي أو هجين.
         """
         if self.vector_rank is not None and self.text_rank is not None:
             return "hybrid"
@@ -102,12 +80,7 @@ class _FusionCandidate:
 
 class KnowledgeHybridRetriever:
     """
-    يمثل KnowledgeHybridRetriever مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    ينفذ البحث الهجين في مقاطع المعرفة ويعيد أفضل السياقات وفق الاختصاص والمجالات.
     """
     def __init__(
         self,
@@ -122,11 +95,7 @@ class KnowledgeHybridRetriever:
         hnsw_ef_search: int = 100,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository، embedding_client، vector_candidate_limit، full_text_candidate_limit، top_k، rrf_k.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودع بحث المعرفة وعميل embedding ويضبط حدود المرشحين والدمج والتشابه.
         """
         self._repository = repository
         self._embedding_client = embedding_client
@@ -145,11 +114,7 @@ class KnowledgeHybridRetriever:
         domains: tuple[str, ...] = (),
     ) -> list[KnowledgeRetrievalContext]:
         """
-        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى retrieve؛ المدخلات المهمة: query، specialist_slug، domains.
-        تعيد list[KnowledgeRetrievalContext] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ البحث النصي والمتجهي بالتوازي، يدمج النتائج ويعزز التطابقات ثم يعيد أفضل السياقات.
         """
         query = query.strip()
         if not query:
@@ -281,11 +246,7 @@ class KnowledgeHybridRetriever:
         domains: tuple[str, ...],
     ) -> float:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _rerank_score؛ المدخلات المهمة: item، specialist_slug، domains.
-        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب ترتيب المرشح من RRF مع تعزيز الاختصاص والمجالات وأولوية المصدر.
         """
         score = item.rrf_score(self._rrf_k)
 

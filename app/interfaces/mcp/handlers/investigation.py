@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+معالجات أدوات التحقيق في MCP.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: app.core.contracts.investigation، app.interfaces.mcp.schemas، app.interfaces.mcp.serializers.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تبدأ التحقيق وتقرأ حالته وأدلته واختصاصييه، وتنفذ اختصاصيًا أو تعرض تقدمه
+مع إبقاء دورة التحقيق داخل خدمات المجال.
 """
 from __future__ import annotations
 
@@ -27,23 +23,14 @@ from app.interfaces.mcp.serializers import (
 
 class InvestigationToolsMixin:
     """
-    يمثل InvestigationToolsMixin مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يوفر معالجات دورة التحقيق والاختصاصيين والأدلة.
     """
     async def _start_investigation(
         self,
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _start_investigation؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ تحقيقًا جديدًا من التقرير والسيرفر والسياق المطلوب.
         """
         self._require_dependency(
             self._investigation_router,
@@ -155,11 +142,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_investigation؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب تفاصيل تحقيق محدد ويعيدها لعميل MCP.
         """
         detail = self._read_investigation(
             arguments
@@ -188,11 +171,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_investigation_status؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد الحالة المرحلية والنتيجة الحالية للتحقيق.
         """
         detail = self._read_investigation(
             arguments
@@ -237,11 +216,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_evidence؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد الأدلة المجموعة للتحقيق وفق المرشحات المطلوبة.
         """
         detail = self._read_investigation(
             arguments
@@ -282,11 +257,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_available_specialists؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض الاختصاصيين المتاحين للمشاركة في التحقيق.
         """
         self._require_dependency(
             self._specialist_registry,
@@ -331,11 +302,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_specialist_definition؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب تعريف اختصاصي محدد للعرض أو الاختيار.
         """
         specialist = self._specialist_by_slug(
             arguments
@@ -369,11 +336,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _run_specialist؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يشغل اختصاصيًا ضمن تحقيق وفق وسائط الأداة.
         """
         self._require_dependency(
             self._specialist_investigation_loop,
@@ -600,11 +563,7 @@ class InvestigationToolsMixin:
 
     def _specialist_progress(self, detail):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _specialist_progress؛ المدخلات المهمة: detail.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد تقدم تنفيذ اختصاصي داخل حلقة التحقيق.
         """
         selected = [
             candidate.specialist_slug
@@ -639,11 +598,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _specialist_by_slug؛ المدخلات المهمة: arguments.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبحث عن اختصاصي بمعرفه النصي المطبع.
         """
         self._require_dependency(
             self._specialist_registry,
@@ -669,11 +624,7 @@ class InvestigationToolsMixin:
         arguments: dict[str, Any],
     ):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _read_investigation؛ المدخلات المهمة: arguments.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ التحقيق من خدمة المجال ويعيد تمثيله القابل للتسلسل.
         """
         self._require_dependency(
             self._investigation_read_service,

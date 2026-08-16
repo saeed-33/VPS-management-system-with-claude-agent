@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+حفظ دورة حياة مهمة Claude في سجل التشغيل.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: app.runtime.claude.models، app.infrastructure.database.repositories.agent_job_repository، app.core.contracts.agent_jobs.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+ينشئ السجل عند وضع الانتظار، يثبته عند بدء الجلسة، يحفظ النتيجة النهائية،
+ويغلق المهام التي بقيت معلقة بعد إعادة تشغيل التطبيق.
 """
 from __future__ import annotations
 
@@ -28,23 +24,14 @@ from app.core.contracts.agent_jobs import (
 
 class ClaudeAgentJobService:
     """
-    يمثل ClaudeAgentJobService مسؤولية محددة داخل طبقة Claude supervisory runtime.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه composition أو Scheduler
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    خدمة تحفظ انتقال مهمة Claude بين الانتظار والتشغيل والنجاح والفشل.
     """
     def __init__(
         self,
         repository: AgentJobRepository,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحتفظ بمخزن المهام الذي ستسجل فيه انتقالات دورة Claude.
         """
         self._repository = repository
 
@@ -55,11 +42,7 @@ class ClaudeAgentJobService:
         server_id: int | None = None,
     ):
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى create_from_request؛ المدخلات المهمة: request، server_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسجل المهمة بحالة الانتظار ويربطها بالسيرفر وسياق الطلب والأدوات المتاحة.
         """
         return self._repository.create(
             CreateAgentJobDTO(
@@ -91,11 +74,7 @@ class ClaudeAgentJobService:
         session_id: str | None = None,
     ):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى mark_running؛ المدخلات المهمة: job_id، session_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينقل المهمة إلى التشغيل ويحفظ معرف جلسة Claude عندما يبدأ التنفيذ.
         """
         return self._repository.update(
             job_id,
@@ -112,11 +91,7 @@ class ClaudeAgentJobService:
         result: ClaudeRuntimeResult,
     ):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى complete_from_result؛ المدخلات المهمة: result.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحفظ الحالة النهائية للجلسة ورسالتها وعداداتها وبيانات استخدامها.
         """
         return self._repository.update(
             result.job_id,
@@ -142,11 +117,7 @@ class ClaudeAgentJobService:
         self,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى recover_interrupted_jobs؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يغلق المهام التي كانت معلقة عند إعادة تشغيل التطبيق ويثبت سبب انقطاعها.
         """
         return (
             self._repository

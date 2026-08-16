@@ -1,12 +1,8 @@
 """
-Policy أو registry حتمي يقرر السماح أو الرفض أو التصنيف قبل التنفيذ.
+قائمة أفعال التغيير المسموحة وأهداف خدماتها.
 
-الموقع في المعمارية: Core policy.
-يُستدعى بواسطة: capabilities وMCP handlers.
-يعتمد مباشرة على: app.core.contracts.remediation.
-الحد المعماري: لا تنفذ SSH أو LLM أو persistence.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+لا تسمح هذه الوحدة إلا بأفعال مسماة مثل بدء خدمة أو إيقافها، وتتحقق من اسم
+الخدمة والمعاملات قبل توليد أمر systemctl ثابت.
 """
 from __future__ import annotations
 
@@ -22,12 +18,7 @@ SERVICE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.@-]{0,127}$")
 
 class RemediationToolValidationError(ValueError):
     """
-    يمثل RemediationToolValidationError مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على ValueError وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    خطأ يوضح أن فعل تغيير أو هدفه لا يطابق قائمة الأفعال المسموحة.
     """
     pass
 
@@ -35,12 +26,7 @@ class RemediationToolValidationError(ValueError):
 @dataclass(frozen=True, slots=True)
 class NamedWriteTool:
     """
-    يمثل NamedWriteTool مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    فعل تغيير مسمى يحدد خطر التنفيذ ووقته وإمكان التراجع وأثره المتوقع.
     """
     name: str
     risk_level: str
@@ -50,11 +36,7 @@ class NamedWriteTool:
 
     def validate(self, action: RemediationAction) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى validate؛ المدخلات المهمة: action.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من تطابق الفعل مع الأداة ومن سلامة اسم الخدمة ومعاملاتها.
         """
         if action.action_type != self.name:
             raise RemediationToolValidationError("Action type does not match the registered tool.")
@@ -71,54 +53,33 @@ class NamedWriteTool:
 
     def command_for(self, action: RemediationAction) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى command_for؛ المدخلات المهمة: action.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يولد أمر systemctl ثابتًا بعد اجتياز التحقق، ولا يقبل نص أوامر من الطلب.
         """
         self.validate(action)
-        # The target has already passed a strict allow-list. No caller can
-        # provide a command, shell fragment, or executable path.
+        # اجتاز الهدف قائمة مسموحة ضيقة؛ لا يستطيع الطلب تمرير أمر أو جزء
+        # من shell أو مسار تنفيذي من الخارج.
         return f"systemctl {self.name.removesuffix('_service')} {action.target}"
 
 
 class NamedWriteToolRegistry:
     """
-    يمثل NamedWriteToolRegistry مسؤولية محددة داخل طبقة Core policy.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وMCP handlers
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    سجل الأفعال الكتابية المسموحة الذي يمنع تنفيذ فعل غير معروف.
     """
     def __init__(self, tools: tuple[NamedWriteTool, ...]) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: tools.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني سجل الأفعال المسماة التي يمكن لخدمات المعالجة حلها.
         """
         self._tools = {tool.name: tool for tool in tools}
 
     def get(self, name: str) -> NamedWriteTool | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى get؛ المدخلات المهمة: name.
-        تعيد NamedWriteTool | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبحث عن فعل تغيير مسجل دون اعتبار غيابه إذنًا بالتنفيذ.
         """
         return self._tools.get(name)
 
     def require(self, name: str) -> NamedWriteTool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى require؛ المدخلات المهمة: name.
-        تعيد NamedWriteTool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع فعلًا مسجلًا أو يرفض الطلب إذا كان نوع التغيير مجهولًا.
         """
         tool = self.get(name)
         if tool is None:
@@ -127,11 +88,7 @@ class NamedWriteToolRegistry:
 
     def resolve(self, action: RemediationAction) -> NamedWriteTool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى resolve؛ المدخلات المهمة: action.
-        تعيد NamedWriteTool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحل فعل الخطة إلى تعريفه المسجل ويعيد التحقق من هدفه قبل التنفيذ.
         """
         tool = self.require(action.action_type)
         tool.validate(action)
@@ -139,32 +96,23 @@ class NamedWriteToolRegistry:
 
     def names(self) -> tuple[str, ...]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى names؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد tuple[str, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد أسماء أفعال التغيير المسجلة لعرضها أو مطابقتها مع السياسة.
         """
         return tuple(sorted(self._tools))
 
 
 def build_default_write_tool_registry() -> NamedWriteToolRegistry:
     """
-    يبني DTO أو dependency graph من المدخلات ضمن طبقة Core policy.
-
-    تُستدعى عندما يصل workflow إلى build_default_write_tool_registry؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد NamedWriteToolRegistry أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يبني القائمة القياسية لأفعال الخدمات المسموحة ومستويات خطرها وإمكان التراجع.
     """
     return NamedWriteToolRegistry(
         (
-            # Phase 7 V1's only autonomous action is this explicitly
-            # allowlisted, low-risk named tool.
+            # الفعل الآلي الوحيد هنا أداة مسماة منخفضة الخطر ومذكورة صراحة في
+            # القائمة المسموحة.
             NamedWriteTool("start_service", RemediationRisk.LOW.value, 30.0, "stop_service", "active"),
             NamedWriteTool("stop_service", RemediationRisk.HIGH.value, 30.0, "start_service", "inactive"),
-            # Repeating restart/reload does not restore a prior known state.
-            # They remain registered actions, but cannot claim rollback support
-            # until a real previous-process/config restoration exists.
+            # تكرار إعادة التشغيل أو التحميل لا يعيد الحالة السابقة؛ لذلك لا
+            # نعد بدعم التراجع حتى تتوفر استعادة حقيقية للعملية والإعدادات.
             NamedWriteTool("restart_service", RemediationRisk.HIGH.value, 45.0, None, "active"),
             NamedWriteTool("reload_service", RemediationRisk.MEDIUM.value, 30.0, None, "active"),
         )
@@ -173,11 +121,7 @@ def build_default_write_tool_registry() -> NamedWriteToolRegistry:
 
 def action_from_tool_arguments(arguments: dict[str, Any]) -> RemediationAction:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-    تُستدعى عندما يصل workflow إلى action_from_tool_arguments؛ المدخلات المهمة: arguments.
-    تعيد RemediationAction أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحول معاملات طلب أداة المعالجة إلى فعل مسمى يخضع لبقية التحققات.
     """
     action_type = arguments.get("action_type") or arguments.get("tool")
     if not isinstance(action_type, str) or not action_type.strip():

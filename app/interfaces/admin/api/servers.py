@@ -1,12 +1,8 @@
 """
-Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+نقاط API لإدارة السيرفرات واختبار SSH.
 
-الموقع في المعمارية: HTTP interface / adapter.
-يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
-يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.servers، app.interfaces.admin.services.ssh_test_service، app.core.contracts.servers، app.core.exceptions، app.capabilities.monitoring.server_service.
-الحد المعماري: لا يضع business rules أو transaction logic.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تحول المسارات طلبات إنشاء وتعديل وحذف السيرفر إلى خدمة المجال، وتضيف تصنيف
+السلامة للعرض وتعرض نتيجة اتصال SSH دون كشف تفاصيل التنفيذ الداخلية.
 """
 from fastapi import (
     APIRouter,
@@ -49,7 +45,9 @@ router = APIRouter(
 
 
 def _safety_designation(server) -> str:
-    """Read the persisted safe-target designation without hostname inference."""
+    """
+    يستنتج تصنيف سلامة السيرفر من وصفه لتمييز الإنتاج وبيئات الاختبار.
+    """
     designation = str(getattr(server, "description", None) or "").casefold()
     if "safe-remediation-test" in designation and "non-production" in designation:
         return "safe_remediation_lab"
@@ -62,11 +60,7 @@ def _safety_designation(server) -> str:
 
 def _server_response(server) -> ServerResponse:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى _server_response؛ المدخلات المهمة: server.
-    تعيد ServerResponse أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحوّل نموذج السيرفر إلى مخطط API ويضيف تصنيف السلامة المحسوب.
     """
     response = ServerResponse.model_validate(server)
     return response.model_copy(update={"safety_designation": _safety_designation(server)})
@@ -82,11 +76,7 @@ def list_servers(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_servers؛ المدخلات المهمة: service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد قائمة السيرفرات مع تصنيف السلامة لكل عنصر.
     """
     return [_server_response(item) for item in service.list_servers()]
 
@@ -102,11 +92,7 @@ def get_server(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_server؛ المدخلات المهمة: server_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يجلب سيرفرًا بالمعرف ويحوّل غيابه إلى HTTP 404.
     """
     try:
         return _server_response(service.get_server(server_id))
@@ -129,11 +115,7 @@ def create_server(
     ),
 ):
     """
-    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى create_server؛ المدخلات المهمة: payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينشئ سيرفرًا من طلب API ويحوّل تعارض الاسم أو المضيف إلى HTTP 409.
     """
     try:
         return _server_response(service.create_server(CreateServerDTO(**payload.model_dump())))
@@ -161,11 +143,7 @@ def update_server(
     ),
 ):
     """
-    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى update_server؛ المدخلات المهمة: server_id، payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحدّث بيانات سيرفر موجود ويترجم أخطاء الغياب والتكرار إلى HTTP.
     """
     try:
         return _server_response(service.update_server(
@@ -202,11 +180,7 @@ def delete_server(
     ),
 ) -> Response:
     """
-    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى delete_server؛ المدخلات المهمة: server_id، service.
-    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحذف سيرفرًا ويعيد استجابة فارغة عند النجاح.
     """
     try:
         service.delete_server(server_id)
@@ -232,11 +206,7 @@ async def test_ssh_connection(
     ),
 ):
     """
-    يتحقق من contract أو سلوك محدد عبر الحالة الاختبارية ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى test_ssh_connection؛ المدخلات المهمة: server_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    يفشل الاختبار عند خرق الـcontract، ولا يغير production state إلا إذا صمم لذلك.
+    يشغل اختبار اتصال SSH لسيرفر ويعيد النتيجة الإدارية المنظمة.
     """
     try:
         result = await service.test(server_id)

@@ -1,12 +1,5 @@
 """
-جزء من Monitoring لاختيار profile/commands أو تنفيذ الدورة وحفظ report.
-
-الموقع في المعمارية: Application capability / monitoring.
-يُستدعى بواسطة: Scheduler أو MCP أو Admin API.
-يعتمد مباشرة على: app.infrastructure.ssh.command_executor، app.core.contracts.reports.
-الحد المعماري: لا يقوم بتحليل LLM أو Investigation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تجميع نتائج دورة المراقبة في تقرير يصف الاتصال والفحوص دون تشخيص السبب.
 """
 from datetime import UTC, datetime
 
@@ -22,12 +15,7 @@ from app.core.contracts.reports import (
 
 class ReportService:
     """
-    يمثل ReportService مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    خدمة تبني حالات التقرير المختلفة من نتائج الاتصال والفحوص.
     """
     def build_successful_connection_report(
         self,
@@ -39,11 +27,7 @@ class ReportService:
         executions: list[CommandExecutionResult],
     ) -> MonitoringReportData:
         """
-        يبني DTO أو dependency graph من المدخلات ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى build_successful_connection_report؛ المدخلات المهمة: server_id، started_at، finished_at، duration_ms، executions.
-        تعيد MonitoringReportData أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني تقريرًا من اتصال ناجح ونتائج الفحوص التي نفذت.
         """
         execution_data = [
             CommandExecutionData(
@@ -110,11 +94,7 @@ class ReportService:
         error: Exception,
     ) -> MonitoringReportData:
         """
-        يبني DTO أو dependency graph من المدخلات ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى build_connection_failure_report؛ المدخلات المهمة: server_id، started_at، duration_ms، error.
-        تعيد MonitoringReportData أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني تقريرًا يثبت فشل الاتصال قبل تنفيذ الفحوص على السيرفر.
         """
         return MonitoringReportData(
             server_id=server_id,
@@ -143,11 +123,7 @@ class ReportService:
         error: Exception,
     ) -> MonitoringReportData:
         """
-        يبني DTO أو dependency graph من المدخلات ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى build_unexpected_failure_report؛ المدخلات المهمة: server_id، started_at، duration_ms، error.
-        تعيد MonitoringReportData أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني تقرير فشل مضبوطًا عندما تتوقف الدورة بسبب خطأ غير متوقع.
         """
         return MonitoringReportData(
             server_id=server_id,

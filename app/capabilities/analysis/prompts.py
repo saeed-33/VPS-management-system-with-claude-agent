@@ -1,12 +1,8 @@
 """
-جزء من Analysis لتحويل report إلى analysis مع Retrieval وLLM.
+قوالب التعليمات الموجهة إلى محلل تقارير المراقبة.
 
-الموقع في المعمارية: Application capability / analysis.
-يُستدعى بواسطة: MCP أو مسارات ما بعد Monitoring.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا ينفذ SSH أو Investigation أو Remediation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تجمع التعليمات الثوابت المتعلقة بقراءة الأدلة الحالية، وتضيف التقرير والسياق
+التاريخي بصيغة منظمة مع قيود تمنع اختلاق الأسباب أو اقتراح أوامر مدمرة.
 """
 import json
 from typing import Any
@@ -54,11 +50,7 @@ def build_analysis_prompt(
     historical_cases: list[dict[str, Any]] | None = None,
 ) -> str:
     """
-    يبني DTO أو dependency graph من المدخلات ضمن طبقة Application capability / analysis.
-
-    تُستدعى عندما يصل workflow إلى build_analysis_prompt؛ المدخلات المهمة: report_payload، historical_cases.
-    تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يسلسل التقرير والسياق التاريخي ويكوّن مطالبة تفرض تفسير الأدلة الحالية وإرجاع JSON موجز وآمن.
     """
     serialized_report = json.dumps(
         report_payload,

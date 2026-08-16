@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.infrastructure.database.models.report_analysis_source، app.infrastructure.database.session.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+المصادر التي استند إليها تحليل تقرير معين.
 """
 from sqlalchemy import delete, select
 from sqlalchemy.orm import sessionmaker
@@ -19,23 +12,14 @@ from app.infrastructure.database.session import SessionLocal
 
 class AnalysisSourceRepository:
     """
-    يمثل AnalysisSourceRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن ربط التحليل بالمصادر التي دعمت سياقه.
     """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع المصادر التي استند إليها تحليل تقرير معين بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
@@ -46,11 +30,7 @@ class AnalysisSourceRepository:
         sources: list[dict],
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى replace_for_analysis؛ المدخلات المهمة: analysis_id، sources.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستبدل مجموعة عناصر مرتبطة بـالمصادر التي استند إليها تحليل تقرير معين في عملية واحدة تحفظ الحالة الجديدة كاملة.
         """
         with self._session_factory() as session:
             session.execute(
@@ -73,11 +53,7 @@ class AnalysisSourceRepository:
         analysis_id: int,
     ) -> list[ReportAnalysisSourceModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_by_analysis_id؛ المدخلات المهمة: analysis_id.
-        تعيد list[ReportAnalysisSourceModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من المصادر التي استند إليها تحليل تقرير معين مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (

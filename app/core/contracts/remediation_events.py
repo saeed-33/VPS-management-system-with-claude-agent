@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقد سجل الأحداث الذي يتتبع خطة المعالجة من الاقتراح حتى التراجع."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -17,12 +8,7 @@ from typing import Any
 
 class RemediationEventType(StrEnum):
     """
-    يمثل RemediationEventType مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    أنواع انتقال خطة المعالجة ونتيجة تنفيذها والتحقق منها.
     """
     PROPOSED = "proposed"
     SANDBOX_PASSED = "sandbox_passed"
@@ -42,12 +28,10 @@ class RemediationEventType(StrEnum):
 @dataclass(frozen=True, slots=True)
 class RemediationEvent:
     """
-    يمثل RemediationEvent مسؤولية محددة داخل طبقة Core application contracts.
+    حدث تدقيق يربط انتقال الخطة بالفاعل والسيرفر والجلسة والبيانات المساندة.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يسمح السجل بإعادة بناء ما حدث قبل التغيير وأثناءه وبعده، بما في ذلك نتيجة
+    التحقق أو التراجع.
     """
     event_type: RemediationEventType
     plan_id: str

@@ -1,12 +1,8 @@
 """
-جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+إدارة دورة معالجة المشكلة بعد التشخيص.
 
-الموقع في المعمارية: Application capability / remediation.
-يُستدعى بواسطة: Admin API أو MCP.
-يعتمد مباشرة على: app.capabilities.remediation.execution، app.capabilities.remediation.sandbox_runtime، app.core.contracts.sandbox_validation، app.core.policies.sandbox_validation، app.core.contracts.remediation، app.core.contracts.autonomous_remediation.
-الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تنشئ الخدمة خطة قابلة للفحص، تتحقق منها في بيئة معزولة، تطلب الموافقة قبل
+التغيير، تنفذ الخطة المعتمدة، وتتحقق من النتيجة أو تنفذ التراجع مع سجل تدقيق.
 """
 from __future__ import annotations
 
@@ -58,12 +54,7 @@ from app.infrastructure.database.repositories.remediation_repository import Reme
 
 class RemediationService:
     """
-    يمثل RemediationService مسؤولية محددة داخل طبقة Application capability / remediation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Admin API أو MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    ينسق اقتراح خطة المعالجة والتحقق والموافقة والتنفيذ والتراجع والتدقيق.
     """
     def __init__(
         self,
@@ -79,11 +70,7 @@ class RemediationService:
         issue_fingerprint_service=None,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository، automatic_remediation_allowed، write_tool_registry، write_runner، verification_runner، evidence_collector.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودعات الخطط والموافقات والتنفيذ والتدقيق والتشخيص ومكونات التحقق والمنفذين.
         """
         self._repository = repository
         self._automatic_remediation_allowed = automatic_remediation_allowed
@@ -100,11 +87,7 @@ class RemediationService:
     def propose_remediation(self, *, investigation_id: str, problem_summary: str,
                             diagnosis_claim_ids: list[str], evidence_ids: list[str]) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى propose_remediation؛ المدخلات المهمة: investigation_id، problem_summary، diagnosis_claim_ids، evidence_ids.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ اقتراح معالجة من التشخيص والأدلة دون تنفيذ أي تغيير.
         """
         self._validate_links(diagnosis_claim_ids=diagnosis_claim_ids, evidence_ids=evidence_ids)
         if not investigation_id.strip():
@@ -127,11 +110,7 @@ class RemediationService:
                     plan_id: str | None = None, server_id: int | None = None,
                     error_classification: str | None = None):
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى create_plan؛ المدخلات المهمة: investigation_id، title، problem_summary، proposed_actions، diagnosis_claim_ids، evidence_ids.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ خطة معالجة مرتبطة بالتشخيص والسيرفر والأفعال القابلة للتحقق.
         """
         self._validate_links(diagnosis_claim_ids=diagnosis_claim_ids, evidence_ids=evidence_ids)
         self._validate_actions(proposed_actions)
@@ -140,7 +119,7 @@ class RemediationService:
         deterministic_risk = self._risk_classifier.classify_actions(action_models)
         requested_risk = RemediationRisk(risk_level)
         effective_risk = deterministic_risk if all(registered) else requested_risk
-        # User-supplied risk may only increase the deterministic result.
+        # لا يستطيع تقدير المستخدم خفض مستوى الخطر الذي قررته قواعد المعالجة.
         risk_order = {risk: index for index, risk in enumerate(RemediationRisk)}
         if risk_order[requested_risk] > risk_order[effective_risk]:
             effective_risk = requested_risk
@@ -179,11 +158,7 @@ class RemediationService:
                                  evidence_ids: list[str], server_id: int | None = None,
                                  plan_id: str | None = None):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى record_no_solution_found؛ المدخلات المهمة: investigation_id، title، problem_summary، diagnosis_claim_ids، evidence_ids، server_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسجل أن التحليل لم ينتج حلًا قابلًا للتنفيذ.
         """
         self._validate_links(diagnosis_claim_ids=diagnosis_claim_ids, evidence_ids=evidence_ids)
         return self._repository.create_no_solution_plan(
@@ -195,11 +170,7 @@ class RemediationService:
 
     def test_in_sandbox(self, *, plan_id: str):
         """
-        يتحقق من contract أو سلوك محدد عبر الحالة الاختبارية ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى test_in_sandbox؛ المدخلات المهمة: plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        يفشل الاختبار عند خرق الـcontract، ولا يغير production state إلا إذا صمم لذلك.
+        ينفذ اختبار الخطة في بيئة معزولة ويسجل النتيجة دون أثر على السيرفر الحقيقي.
         """
         plan = self._require_plan(plan_id)
         actions = plan.proposed_actions or []
@@ -234,42 +205,26 @@ class RemediationService:
 
     def get_plan(self, plan_id: str):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى get_plan؛ المدخلات المهمة: plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب خطة معالجة ويرفع خطأ عند عدم وجودها.
         """
         return self._repository.get_plan(plan_id)
 
     def get_approval(self, approval_id: str | None = None, *, plan_id: str | None = None):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى get_approval؛ المدخلات المهمة: approval_id، plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب طلب الموافقة المرتبط بالخطة.
         """
         return self._repository.get_approval(approval_id, plan_id=plan_id)
 
     def get_latest_execution(self, plan_id: str):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى get_latest_execution؛ المدخلات المهمة: plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد آخر تنفيذ مسجل لخطة المعالجة.
         """
         return self._repository.get_latest_execution_for_plan(plan_id)
 
     def collect_service_evidence(self, *, plan_id: str, server_id: int,
                                  service: str, phase: str = "preflight"):
         """
-        يجمع Evidence أو facts من المصدر المحدد ثم يعيدها منظمة ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى collect_service_evidence؛ المدخلات المهمة: plan_id، server_id، service، phase.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع دليل حالة الخدمة من السيرفر قبل التنفيذ أو بعده.
         """
         plan = self._require_plan(plan_id)
         self._write_tools.require("start_service").validate(
@@ -285,21 +240,13 @@ class RemediationService:
 
     def list_plans(self, *, limit: int = 100, status: str | None = None):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_plans؛ المدخلات المهمة: limit، status.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض خطط المعالجة مع المرشحات الإدارية المتاحة.
         """
         return self._repository.list_plans(limit=limit, status=status)
 
     def get_sandbox_result(self, result_id: str | None = None, *, plan_id: str | None = None):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى get_sandbox_result؛ المدخلات المهمة: result_id، plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب نتيجة اختبار الخطة في البيئة المعزولة.
         """
         if result_id is not None:
             return self._repository.get_sandbox_result(result_id)
@@ -309,11 +256,7 @@ class RemediationService:
 
     def get_sandbox_validation(self, validation_id: str | None = None, *, plan_id: str | None = None):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى get_sandbox_validation؛ المدخلات المهمة: validation_id، plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب سجل التحقق المعزول المرتبط بالخطة.
         """
         if validation_id is not None:
             return self._repository.get_sandbox_validation(validation_id)
@@ -325,11 +268,7 @@ class RemediationService:
                                      target_server_name: str, target_service: str,
                                      runtime_check: SandboxRuntimeCheck | None = None):
         """
-        يقيّم أو يتحقق من شرط حتمي قبل السماح بالخطوة التالية ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى validate_in_isolated_sandbox؛ المدخلات المهمة: plan_id، target_server_id، target_server_name، target_service، runtime_check.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ التحقق المعزول ويسجل جاهزية البيئة ونتيجة الأفعال المقترحة.
         """
         plan = self._require_plan(plan_id)
         actions = [RemediationAction.from_dict(item) for item in (plan.proposed_actions or [])]
@@ -431,11 +370,7 @@ class RemediationService:
 
     def _finish_sandbox_validation(self, plan, data: dict, event_type: str | None):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _finish_sandbox_validation؛ المدخلات المهمة: plan، data، event_type.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث سجل التحقق المعزول بنتيجة النجاح أو الفشل والتفاصيل.
         """
         data["finished_at"] = utc_now()
         model = self._repository.finalize_sandbox_validation(**data)
@@ -448,11 +383,7 @@ class RemediationService:
 
     def request_approval(self, *, plan_id: str, expires_in_seconds: int = 3600, scope: dict | None = None):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى request_approval؛ المدخلات المهمة: plan_id، expires_in_seconds، scope.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ طلب موافقة قبل السماح بتطبيق خطة المعالجة.
         """
         plan = self._require_plan(plan_id)
         validation = self._repository.get_latest_sandbox_validation(plan_id)
@@ -480,11 +411,7 @@ class RemediationService:
 
     def approve(self, *, approval_id: str, approver: str, comment: str | None = None, scope: dict | None = None):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى approve؛ المدخلات المهمة: approval_id، approver، comment، scope.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقبل طلب الموافقة بعد التحقق من حالته وصلاحية الخطة.
         """
         if not approver.strip():
             raise ValueError("approver must not be empty.")
@@ -507,11 +434,7 @@ class RemediationService:
 
     def reject(self, *, approval_id: str, approver: str, comment: str | None = None):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى reject؛ المدخلات المهمة: approval_id، approver، comment.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يرفض طلب الموافقة ويسجل سبب الرفض.
         """
         if not approver.strip():
             raise ValueError("approver must not be empty.")
@@ -525,11 +448,7 @@ class RemediationService:
 
     def expire_approval(self, *, approval_id: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى expire_approval؛ المدخلات المهمة: approval_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينقل موافقة منتهية إلى حالة الانتهاء ويمنع استخدامها.
         """
         approval = self._repository.expire_approval(approval_id)
         plan = self._require_plan(approval.plan_id)
@@ -542,11 +461,7 @@ class RemediationService:
                        agent_job_id: str | None = None,
                        autonomous_authorization: AutonomousAuthorization | None = None) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى apply_approved؛ المدخلات المهمة: plan_id، approval_id، approved_by، server_id، actor، idempotency_key.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ الخطة بعد التحقق من الموافقة والروابط والأدلة، ثم يسجل النتيجة.
         """
         plan = self._require_plan(plan_id)
         if plan.status == RemediationPlanStatus.SANDBOX_FAILED.value:
@@ -563,8 +478,8 @@ class RemediationService:
             if plan.status not in {RemediationPlanStatus.SANDBOX_PASSED.value, RemediationPlanStatus.APPROVED.value}:
                 return self._blocked(plan_id, "plan_not_ready", "Autonomous execution requires a passed sandbox plan.")
         elif approval_id is None:
-            # Legacy callers cannot self-approve. Preserve the historical
-            # response shape while requiring the new persisted approval path.
+            # لا تكفي الطلبات القديمة لاعتماد التغيير؛ نحافظ على شكل الرد
+            # ونطلب في الوقت نفسه موافقة محفوظة يمكن مراجعتها.
             if plan.risk_level in {RemediationRisk.HIGH.value, RemediationRisk.CRITICAL.value}:
                 return self._blocked(plan_id, "approval_required", "Explicit persisted user approval is required.")
             return self._blocked(plan_id, "policy_denied", "Production remediation requires persisted human approval.")
@@ -680,11 +595,7 @@ class RemediationService:
 
     def rollback(self, *, plan_id: str, execution_id: str, actor: str | None = None, server_id: int | None = None) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى rollback؛ المدخلات المهمة: plan_id، execution_id، actor، server_id.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ إجراء التراجع المناسب ويتحقق من عودة حالة الخدمة.
         """
         plan = self._require_plan(plan_id)
         execution = self._repository.get_execution(execution_id)
@@ -748,11 +659,7 @@ class RemediationService:
 
     def list_audit_events(self, plan_id: str):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_audit_events؛ المدخلات المهمة: plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض أحداث التدقيق الخاصة بخطة معالجة معينة.
         """
         return self._repository.list_audit_events(plan_id)
 
@@ -760,11 +667,7 @@ class RemediationService:
         self, *, plan_id: str | None = None, event_type: str | None = None, limit: int = 100
     ):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_all_audit_events؛ المدخلات المهمة: plan_id، event_type، limit.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض أحداث التدقيق عبر خطط المعالجة مع المرشحات.
         """
         return self._repository.list_all_audit_events(
             plan_id=plan_id, event_type=event_type, limit=min(max(limit, 1), 500)
@@ -772,21 +675,13 @@ class RemediationService:
 
     def recover_interrupted_executions(self) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى recover_interrupted_executions؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعالج تنفيذات توقفت أثناء العمل ويحدث حالتها بما يمنع فقدان الأثر.
         """
         return self._repository.mark_interrupted_executions()
 
     def _blocked(self, plan_id: str, code: str, message: str) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _blocked؛ المدخلات المهمة: plan_id، code، message.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ نتيجة أو خطأ يوضح أن الخطة محجوبة بضابط أمان أو حالة غير صالحة.
         """
         self._repository.update_plan_status(plan_id, RemediationPlanStatus.BLOCKED.value, denial_reason=message)
         return {"applied": False, "plan_id": plan_id, "blocked_reason": code, "message": message}
@@ -794,11 +689,7 @@ class RemediationService:
     def _collect_evidence(self, *, plan, execution_id: str | None, server_id: int,
                           service: str, phase: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _collect_evidence؛ المدخلات المهمة: plan، execution_id، server_id، service، phase.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع الأدلة المطلوبة لتنفيذ الخطة والتحقق من أثرها.
         """
         try:
             observation = self._evidence_collector.collect(server_id=server_id, service=service)
@@ -822,11 +713,7 @@ class RemediationService:
     def _evidence_belongs_to(evidence, *, plan_id: str, execution_id: str,
                              server_id: int, service: str) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _evidence_belongs_to؛ المدخلات المهمة: evidence، plan_id، execution_id، server_id، service.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من أن دليل الحالة يخص الخطة والسيرفر المطلوبين.
         """
         return (
             evidence.plan_id == plan_id
@@ -840,44 +727,32 @@ class RemediationService:
     @staticmethod
     def _resolve_state_aware_rollback(action: RemediationAction, before_state: str) -> str | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _resolve_state_aware_rollback؛ المدخلات المهمة: action، before_state.
-        تعيد str | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يختار إجراء التراجع بناءً على حالة الخدمة المرصودة قبل التنفيذ وبعده.
         """
         if action.action_type == "start_service" and before_state == "inactive":
             return "stop_service"
         if action.action_type == "stop_service" and before_state == "active":
             return "start_service"
-        # Restart and reload do not restore the prior process/config state.
+        # إعادة التشغيل أو التحميل لا تعيد حالة العملية والإعدادات السابقة.
         return None
 
     def _verify_state(self, *, server_id: int, action: RemediationAction,
                       expected_state: str) -> tuple[bool, dict]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _verify_state؛ المدخلات المهمة: server_id، action، expected_state.
-        تعيد tuple[bool, dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقارن الحالة المرصودة بالحالة المتوقعة ويحدد نجاح التحقق.
         """
         verify_state = getattr(self._verification_runner, "verify_state", None)
         if callable(verify_state):
             return verify_state(server_id=server_id, service=action.target, expected_state=expected_state)
-        # Legacy adapters only know how to verify active. Fail closed for an
-        # inactive expected state rather than claiming a false rollback.
+        # إذا لم يستطع الفحص القديم إثبات الحالة غير النشطة، نفشل بأمان بدل
+        # الادعاء بأن التراجع نجح.
         if expected_state != "active":
             return False, {"expected": expected_state, "error": "state_aware_verifier_not_configured"}
         return self._verification_runner.verify(server_id=server_id, action=action)
 
     def _require_plan(self, plan_id: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _require_plan؛ المدخلات المهمة: plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب خطة مطلوبة ويتحقق من وجودها وروابطها الأساسية.
         """
         if not plan_id.strip():
             raise ValueError("plan_id must not be empty.")
@@ -889,11 +764,7 @@ class RemediationService:
     def _audit(self, plan, event_type: str, payload: dict, actor: str | None = None,
                runtime_session_id: str | None = None, agent_job_id: str | None = None) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _audit؛ المدخلات المهمة: plan، event_type، payload، actor، runtime_session_id، agent_job_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسجل حدث تدقيق لدورة المعالجة مع الفاعل والخطة والتفاصيل.
         """
         try:
             self._repository.append_audit_event(plan_id=plan.plan_id, event_type=event_type, actor=actor,
@@ -901,24 +772,20 @@ class RemediationService:
                                                 runtime_session_id=runtime_session_id,
             agent_job_id=agent_job_id, payload=payload)
         except OperationalError:
-            # C.14 legacy test databases contain only the two original
-            # remediation tables. The Phase 5 migration creates the audit
-            # table; do not make legacy read/sandbox behavior unusable while
-            # that additive migration is being applied.
+            # قد تفتقد قاعدة قديمة جدول التدقيق الجديد؛ نبقي القراءة واختبار
+            # الخطة ممكنين أثناء ترقية السجل الإضافي.
             return
 
     def audit_autonomous(self, *, plan_id: str, event_type: str, payload: dict) -> None:
-        """Append a Phase 7 event through the existing remediation audit sink."""
+        """
+        يسجل حدث تدقيق خاص بتنفيذ آلي مرتبط بالمعالجة.
+        """
         self._audit(self._require_plan(plan_id), event_type, payload, actor="autonomous-policy")
 
     @staticmethod
     def _validate_links(*, diagnosis_claim_ids: list[str], evidence_ids: list[str]) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _validate_links؛ المدخلات المهمة: diagnosis_claim_ids، evidence_ids.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من تطابق هوية الخطة والتشخيص والسيرفر قبل المتابعة.
         """
         if not diagnosis_claim_ids:
             raise ValueError("diagnosis_claim_ids must not be empty.")
@@ -928,11 +795,7 @@ class RemediationService:
     @staticmethod
     def _validate_actions(proposed_actions: list[dict]) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _validate_actions؛ المدخلات المهمة: proposed_actions.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من أن أفعال الخطة معروفة ومسموحة وقابلة للتنفيذ أو التراجع.
         """
         if not proposed_actions:
             raise ValueError("proposed_actions must not be empty.")

@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: app.runtime.claude.exceptions، app.runtime.claude.models.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تستخرج معرف الجلسة والنتيجة والعدادات والأدوات وخوادم MCP، وترفض الجلسة التي
+لا تثبت اتصال أداة VPS وتنفيذ الفحوص التشغيلية المطلوبة.
 """
 from __future__ import annotations
 
@@ -18,16 +14,7 @@ from app.runtime.claude.models import ClaudeRawResult
 
 class ClaudeCliJsonDecoder:
     """
-    Decode Claude Code output for C.14.7.
-
-    The operational runtime uses stream-json. For compatibility, this decoder
-    also accepts the single-object JSON envelope and the batched event-array
-    shape observed from Claude Code 2.1.175.
-
-    VPS operational sessions are fail-closed: success requires a connected
-    `vps` MCP server plus authoritative calls to run_monitoring and
-    analyze_report. The returned structured envelope is synthesized from
-    runtime evidence, not from free-form model claims.
+    محلل يتحقق من بنية مخرجات Claude ويستخرج منها دليل تنفيذ دورة VPS التشغيلية.
     """
 
     _REQUIRED_VPS_TOOLS = frozenset(
@@ -42,11 +29,7 @@ class ClaudeCliJsonDecoder:
         stdout: str,
     ) -> ClaudeRawResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى decode؛ المدخلات المهمة: stdout.
-        تعيد ClaudeRawResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدد شكل مخرج Claude ثم يحوله إلى نتيجة خام سواء كان JSON مفردًا أو stream من الأحداث.
         """
         events = self._parse_stdout(
             stdout
@@ -66,11 +49,7 @@ class ClaudeCliJsonDecoder:
         stdout: str,
     ) -> dict | list[dict]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _parse_stdout؛ المدخلات المهمة: stdout.
-        تعيد dict | list[dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفك JSON المفرد أو الدفعة أو الأسطر المتتابعة ويرفض المخرج الفارغ أو غير الصالح.
         """
         stripped = stdout.strip()
 
@@ -79,8 +58,7 @@ class ClaudeCliJsonDecoder:
                 "Claude process returned empty stdout."
             )
 
-        # First accept a normal JSON object or the batched array observed in
-        # Claude Code 2.1.175.
+        # نقبل شكل الرسالة المفردة أو الدفعة التي قد تعيدها جلسة Claude.
         try:
             payload = json.loads(
                 stripped
@@ -101,7 +79,7 @@ class ClaudeCliJsonDecoder:
                 )
             return payload
 
-        # Official stream-json is newline-delimited JSON.
+        # تصل أحداث الجلسة كسجلات JSON مفصولة بأسطر.
         events: list[dict] = []
 
         for line_number, line in enumerate(
@@ -142,11 +120,7 @@ class ClaudeCliJsonDecoder:
         payload: dict,
     ) -> ClaudeRawResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _decode_single_envelope؛ المدخلات المهمة: payload.
-        تعيد ClaudeRawResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج الجلسة والنتيجة والعدادات من غلاف JSON واحد بعد فحص خطئه.
         """
         session_id = self._session_id(
             payload
@@ -182,11 +156,7 @@ class ClaudeCliJsonDecoder:
         events: list[dict],
     ) -> ClaudeRawResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _decode_event_sequence؛ المدخلات المهمة: events.
-        تعيد ClaudeRawResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يطابق أحداث البدء والنتيجة ويتحقق من ثبات معرف الجلسة قبل إنشاء المخرج الخام.
         """
         init_events = [
             event
@@ -303,11 +273,7 @@ class ClaudeCliJsonDecoder:
         tool_names: list[str],
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _operational_vps_content؛ المدخلات المهمة: session_id، vps_server، tool_names.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يثبت اتصال خادم VPS واستدعاء أدوات المراقبة المطلوبة ثم يبني نتيجة تشغيل موثقة.
         """
         status = vps_server.get(
             "status"
@@ -334,10 +300,8 @@ class ClaudeCliJsonDecoder:
                 + ", ".join(missing)
             )
 
-        # This is deliberately not a diagnosis. Authoritative report,
-        # analysis, investigation, and evidence live in project persistence.
-        # The envelope only certifies that the bounded operational workflow
-        # actually executed through the project MCP boundary.
+        # هذا الغلاف ليس تشخيصًا؛ التقرير والتحليل والتحقيق والأدلة محفوظة في
+        # حالة المشروع. وظيفته إثبات أن مسارًا تشغيليًا محدودًا نفذ فعلًا.
         envelope = {
             "status": "completed",
             "summary": (
@@ -375,11 +339,7 @@ class ClaudeCliJsonDecoder:
         events: list[dict],
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _event_content؛ المدخلات المهمة: result_event، events.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج المحتوى من حدث النتيجة أو يستخدم آخر نص مساعد آمن عند غياب الحقل المتوقع.
         """
         try:
             return self._content_from_envelope(
@@ -403,11 +363,7 @@ class ClaudeCliJsonDecoder:
         events: list[dict],
     ) -> str | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _final_assistant_text؛ المدخلات المهمة: events.
-        تعيد str | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبحث من نهاية الأحداث عن نص مساعد نهائي لا يزال يطلب أداة أخرى.
         """
         for event in reversed(
             events
@@ -435,8 +391,7 @@ class ClaudeCliJsonDecoder:
             ):
                 continue
 
-            # Do not mistake an intermediate tool-use turn for the final
-            # assistant response.
+            # لا نعد رسالة طلب أداة في منتصف الجلسة جوابًا نهائيًا.
             if any(
                 isinstance(block, dict)
                 and block.get("type") == "tool_use"
@@ -485,11 +440,7 @@ class ClaudeCliJsonDecoder:
         events: list[dict],
     ) -> list[str]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _event_tool_names؛ المدخلات المهمة: events.
-        تعيد list[str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع أسماء الأدوات التي طلبتها الجلسة من أحداث المساعد لاستخدامها في التحقق والتتبع.
         """
         names: list[str] = []
 
@@ -552,11 +503,7 @@ class ClaudeCliJsonDecoder:
         init_event: dict,
     ) -> list[dict]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _mcp_servers؛ المدخلات المهمة: init_event.
-        تعيد list[dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج قائمة خوادم MCP من حدث بدء الجلسة بصيغة آمنة.
         """
         value = init_event.get(
             "mcp_servers",
@@ -583,11 +530,7 @@ class ClaudeCliJsonDecoder:
         payload: dict,
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _session_id؛ المدخلات المهمة: payload.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ معرف الجلسة ويمنع قبول مخرج لا يمكن ربطه بمهمة محددة.
         """
         value = payload.get(
             "session_id"
@@ -611,11 +554,7 @@ class ClaudeCliJsonDecoder:
         payload: dict,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _raise_for_result_error؛ المدخلات المهمة: payload.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفحص حالة حدث النتيجة ويرفع فشلًا إذا أعلنت Claude نهاية غير ناجحة.
         """
         if payload.get(
             "type"
@@ -657,11 +596,7 @@ class ClaudeCliJsonDecoder:
         payload: dict,
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _content_from_envelope؛ المدخلات المهمة: payload.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يستخرج JSON المنظم أو النص النهائي من غلاف النتيجة ويخفق عند غيابهما.
         """
         structured = payload.get(
             "structured_output"
@@ -708,11 +643,7 @@ class ClaudeCliJsonDecoder:
         fallback_key: str | None = None,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _non_negative_int؛ المدخلات المهمة: payload، key، fallback_key.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ عدادًا غير سالب مع دعم اسم بديل وإظهار القيمة غير الصالحة كخطأ.
         """
         value = payload.get(
             key
@@ -751,11 +682,7 @@ class ClaudeCliJsonDecoder:
         payload: dict,
     ) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Claude supervisory runtime.
-
-        تُستدعى عندما يصل workflow إلى _usage_metadata؛ المدخلات المهمة: payload.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع بيانات الاستخدام وحالة التوقف من مخرج الجلسة في قاموس قابل للحفظ.
         """
         usage = payload.get(
             "usage",

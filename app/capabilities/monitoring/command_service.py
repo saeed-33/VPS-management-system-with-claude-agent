@@ -1,12 +1,5 @@
 """
-جزء من Monitoring لاختيار profile/commands أو تنفيذ الدورة وحفظ report.
-
-الموقع في المعمارية: Application capability / monitoring.
-يُستدعى بواسطة: Scheduler أو MCP أو Admin API.
-يعتمد مباشرة على: app.infrastructure.database.models.monitor_command، app.infrastructure.database.models.profile_command، app.infrastructure.database.repositories.command_repository، app.infrastructure.database.repositories.server_repository، app.core.contracts.commands، app.core.exceptions.
-الحد المعماري: لا يقوم بتحليل LLM أو Investigation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+إدارة تعريفات فحوص المراقبة وربطها بالسيرفرات.
 """
 from app.infrastructure.database.models.monitor_command import (
     MonitorCommandModel,
@@ -33,12 +26,7 @@ from app.core.exceptions import (
 
 class CommandService:
     """
-    يمثل CommandService مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    خدمة تدير فحوص المراقبة وقواعد ربطها بالسيرفرات.
     """
     def __init__(
         self,
@@ -46,11 +34,7 @@ class CommandService:
         server_repository: ServerRepository,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: command_repository، server_repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط خدمة الفحوص بمستودع الأوامر والسيرفرات وملفات المراقبة.
         """
         self._command_repository = (
             command_repository
@@ -63,11 +47,7 @@ class CommandService:
         self,
     ) -> list[MonitorCommandModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى list_commands؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[MonitorCommandModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض تعريفات الفحوص المسجلة لإدارتها أو اختيارها في ملف مراقبة.
         """
         return self._command_repository.list_all()
 
@@ -76,11 +56,7 @@ class CommandService:
         command_id: int,
     ) -> MonitorCommandModel:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى get_command؛ المدخلات المهمة: command_id.
-        تعيد MonitorCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع فحصًا واحدًا أو يرفع خطأ مجال واضحًا عند غيابه.
         """
         command = (
             self._command_repository.get_by_id(
@@ -98,11 +74,7 @@ class CommandService:
         data: CreateCommandDTO,
     ) -> MonitorCommandModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى create_command؛ المدخلات المهمة: data.
-        تعيد MonitorCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ فحصًا مسجلًا بعد التحقق من اسمه ونصه وإعدادات بصمته.
         """
         self._validate_create(data)
 
@@ -127,11 +99,7 @@ class CommandService:
         data: UpdateCommandDTO,
     ) -> MonitorCommandModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى update_command؛ المدخلات المهمة: command_id، data.
-        تعيد MonitorCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدث تعريف فحص دون فقدان علاقاته وتقاريره السابقة.
         """
         existing = (
             self._command_repository.get_by_id(
@@ -173,11 +141,7 @@ class CommandService:
         command_id: int,
     ) -> None:
         """
-        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى delete_command؛ المدخلات المهمة: command_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحذف فحصًا عندما تسمح علاقاته الحالية بذلك.
         """
         deleted = (
             self._command_repository.delete(
@@ -200,11 +164,7 @@ class CommandService:
         ) = None,
     ) -> MonitoringProfileCommandModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى assign_command_to_server؛ المدخلات المهمة: server_id، command_id، execution_order، enabled، custom_timeout_seconds.
-        تعيد MonitoringProfileCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط فحصًا بسيرفر ويحدد إعدادات تشغيله داخل المراقبة.
         """
         if (
             self._server_repository.get_by_id(
@@ -257,11 +217,7 @@ class CommandService:
         command_id: int,
     ) -> None:
         """
-        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى remove_command_from_server؛ المدخلات المهمة: server_id، command_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يزيل فحصًا من سيرفر دون حذف تعريف الفحص العام.
         """
         removed = (
             self._command_repository
@@ -279,11 +235,7 @@ class CommandService:
         data: CreateCommandDTO,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى _validate_create؛ المدخلات المهمة: data.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من قيم تعريف الفحص قبل إدخاله إلى سجل المراقبة.
         """
         if not data.name.strip():
             raise ValueError(

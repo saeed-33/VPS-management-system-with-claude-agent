@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.infrastructure.database.models.investigation، app.infrastructure.database.session، app.core.contracts.investigations.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم.
 """
 from __future__ import annotations
 
@@ -26,30 +19,17 @@ from app.core.contracts.investigations import PersistInvestigationDTO
 
 class InvestigationRepository:
     """
-    يمثل InvestigationRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن حفظ حالة التحقيق ومنع تكرار تشغيل المتخصص وتثبيت نتائجه.
     """
     def __init__(self, session_factory: sessionmaker = SessionLocal) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
     def create(self, data: PersistInvestigationDTO) -> InvestigationModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
-        تعيد InvestigationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = InvestigationModel(
             investigation_id=data.investigation_id,
@@ -102,11 +82,7 @@ class InvestigationRepository:
         metadata: dict,
     ) -> InvestigationModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update_runtime_snapshot؛ المدخلات المهمة: investigation_id، status، metadata.
-        تعيد InvestigationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.scalar(
@@ -152,7 +128,12 @@ class InvestigationRepository:
         status: str,
         merge: Callable[[InvestigationModel, dict], dict],
     ) -> InvestigationModel:
-        """Lock, merge, and commit the current metadata in one short transaction."""
+        """
+        يدمج تحديثًا جزئيًا في لقطة تشغيل التحقيق دون حذف الأدلة أو النتائج السابقة.
+
+        يستخدم الدمج لاستقبال تقدم متزامن من المتخصصين مع إبقاء الحالة الكاملة
+        قابلة للقراءة بعد كل تحديث.
+        """
         with self._session_factory() as session:
             with session.begin():
                 model = session.scalar(
@@ -181,11 +162,8 @@ class InvestigationRepository:
         ownership_token: str,
         lease_seconds: int = 900,
     ) -> dict:
-        """Short transaction that claims one Specialist execution.
-
-        The lease is stored beside the runtime projection so a crashed worker
-        cannot permanently strand a selected Specialist. The expensive loop
-        is intentionally never run while this row lock is held.
+        """
+        يحجز سجلًا في حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم لمنع تنفيذ متزامن أو تكرار الأثر نفسه.
         """
         now = datetime.now(timezone.utc)
         expires = now + timedelta(seconds=lease_seconds)
@@ -259,7 +237,9 @@ class InvestigationRepository:
         ownership_token: str,
         merge: Callable[[InvestigationModel, dict], tuple[str, dict]],
     ) -> InvestigationModel:
-        """Atomically merge one accepted result and release its lease."""
+        """
+        يثبت النتيجة النهائية في حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم قبل إعلان اكتمال المرحلة التالية.
+        """
         with self._session_factory() as session:
             with session.begin():
                 model = session.scalar(
@@ -304,7 +284,9 @@ class InvestigationRepository:
         investigation_id: str,
         merge: Callable[[InvestigationModel, dict], tuple[str, dict]],
     ) -> InvestigationModel:
-        """Atomically attach deterministic diagnosis/narrative to latest state."""
+        """
+        يثبت النتيجة النهائية في حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم قبل إعلان اكتمال المرحلة التالية.
+        """
         with self._session_factory() as session:
             with session.begin():
                 model = session.scalar(
@@ -328,11 +310,7 @@ class InvestigationRepository:
         investigation_id: str,
     ) -> InvestigationModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_investigation_id؛ المدخلات المهمة: investigation_id.
-        تعيد InvestigationModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             model = session.scalar(
@@ -351,11 +329,7 @@ class InvestigationRepository:
         server_id: int | None = None,
     ) -> list[InvestigationModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_recent؛ المدخلات المهمة: limit، server_id.
-        تعيد list[InvestigationModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         if limit < 1:
             raise ValueError("limit must be >= 1.")
@@ -384,11 +358,7 @@ class InvestigationRepository:
 
     def list_by_report_id(self, report_id: int) -> list[InvestigationModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_by_report_id؛ المدخلات المهمة: report_id.
-        تعيد list[InvestigationModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             models = list(

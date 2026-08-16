@@ -1,12 +1,8 @@
 """
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
+عقود بيانات مصادر المعرفة.
 
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تحدد نماذج إنشاء وتعديل المصدر وقواعد تطبيع القوائم والتحقق من نوع المصدر
+ومحتواه قبل وصول البيانات إلى الخدمات والمستودعات.
 """
 from __future__ import annotations
 
@@ -26,11 +22,7 @@ def _normalize_list(
     lowercase: bool = True,
 ) -> tuple[str, ...]:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-    تُستدعى عندما يصل workflow إلى _normalize_list؛ المدخلات المهمة: values، lowercase.
-    تعيد tuple[str, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يطبع قائمة نصية ويزيل القيم الفارغة والمكررة قبل تخزينها.
     """
     result: list[str] = []
     seen: set[str] = set()
@@ -63,12 +55,7 @@ def _normalize_list(
 @dataclass(slots=True, frozen=True)
 class CreateKnowledgeSourceDTO:
     """
-    يمثل CreateKnowledgeSourceDTO مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل بيانات إنشاء مصدر معرفة مع نوعه ومحتواه ونطاقاته ووسومه.
     """
     slug: str
     name: str
@@ -85,11 +72,7 @@ class CreateKnowledgeSourceDTO:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من معرف المصدر واسمه ونوعه ومحتواه وأولويته ويطبع القوائم المرتبطة.
         """
         slug = self.slug.strip().lower()
         name = self.name.strip()
@@ -177,12 +160,7 @@ class CreateKnowledgeSourceDTO:
 @dataclass(slots=True, frozen=True)
 class UpdateKnowledgeSourceDTO:
     """
-    يمثل UpdateKnowledgeSourceDTO مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل الحقول الاختيارية لتعديل مصدر معرفة قائم.
     """
     name: str | None = None
     description: str | None = None
@@ -198,11 +176,7 @@ class UpdateKnowledgeSourceDTO:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من الحقول المقدمة في تعديل المصدر ويطبع النوع والقيم النصية والقوائم.
         """
         if (
             self.priority is not None

@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقد يحدد موضع الدليل داخل ملف أو مخرج أو وظيفة مرتبطة بالتحقيق."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,7 +6,12 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class SourceLocation:
-    """A bounded, provenance-bound application error location."""
+    """
+    موقع قابل للتتبع يشرح أين ظهرت المعلومة التي استند إليها التحقيق.
+
+    يجمع الملف والسطر والمصدر والسبب ومعرفات الأدلة حتى يستطيع المراجع العودة
+    إلى أصل الاستنتاج بدل الاكتفاء بنصه المختصر.
+    """
 
     file_path: str
     line_number: int
@@ -28,13 +24,7 @@ class SourceLocation:
     evidence_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من وجود مصدر وسبب وموقع سطر صالح للدليل."""
         if not self.file_path.strip():
             raise ValueError("file_path must not be empty.")
         if self.line_number < 1:
@@ -48,11 +38,10 @@ class SourceLocation:
 
     def to_dict(self) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+        يحول موضع الدليل إلى بيانات قابلة للحفظ أو الإرسال إلى واجهة العرض.
 
-        تُستدعى عندما يصل workflow إلى to_dict؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحول مجموعة معرفات الأدلة إلى قائمة حتى يبقى شكل الرد مناسبًا للتخزين
+        وواجهات JSON.
         """
         return {
             "file_path": self.file_path,

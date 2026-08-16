@@ -1,12 +1,8 @@
 """
-جزء من Analysis لتحويل report إلى analysis مع Retrieval وLLM.
+تنفيذ تحليل تقرير مراقبة وحفظ نتيجته.
 
-الموقع في المعمارية: Application capability / analysis.
-يُستدعى بواسطة: MCP أو مسارات ما بعد Monitoring.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.performance_profiler، app.capabilities.analysis.llm_client، app.capabilities.analysis.prompts، app.capabilities.analysis.report_serializer، app.infrastructure.database.repositories.analysis_repository، app.core.contracts.analysis.
-الحد المعماري: لا ينفذ SSH أو Investigation أو Remediation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يجلب التقرير، يزيل منه الأسرار ويحد حجمه، يبني مطالبة التحليل، يستدعي العميل
+اللغوي، ثم يدير حالات التحليل المعلّق والجاري والمكتمل أو الفاشل.
 """
 import json
 import logging
@@ -44,12 +40,7 @@ logger = logging.getLogger(__name__)
 
 class ReportAnalyzer:
     """
-    يمثل ReportAnalyzer مسؤولية محددة داخل طبقة Application capability / analysis.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو مسارات ما بعد Monitoring
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يدير دورة حياة تحليل تقرير واحد من إنشاء السجل حتى حفظ النتيجة أو تسجيل الفشل.
     """
     def __init__(
         self,
@@ -60,11 +51,7 @@ class ReportAnalyzer:
         max_report_characters: int,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / analysis.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: report_query_service، analysis_repository، llm_client، max_report_characters.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ خدمات جلب التقارير وحفظ التحليل وعميل النموذج ومحوّل الحمولة المحدودة.
         """
         self._report_query_service = (
             report_query_service
@@ -85,22 +72,14 @@ class ReportAnalyzer:
     @property
     def provider_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / analysis.
-
-        تُستدعى عندما يصل workflow إلى provider_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم المزوّد من عميل النموذج المهيأ.
         """
         return self._llm_client.provider_name
 
     @property
     def model_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / analysis.
-
-        تُستدعى عندما يصل workflow إلى model_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم النموذج من عميل النموذج المهيأ.
         """
         return self._llm_client.model_name
 
@@ -113,11 +92,7 @@ class ReportAnalyzer:
         rag_context: list[dict] | None = None,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / analysis.
-
-        تُستدعى عندما يصل workflow إلى analyze؛ المدخلات المهمة: report_id، server_id، force، rag_context.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يستعيد سجل التحليل، يبني المطالبة، يستدعي النموذج، ويحفظ النجاح أو الفشل مع المدة والبيانات الوصفية.
         """
         stored_analysis = (
             self._analysis_repository

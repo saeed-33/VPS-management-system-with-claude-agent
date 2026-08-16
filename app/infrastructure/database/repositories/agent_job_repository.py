@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.infrastructure.database.models.agent_job، app.infrastructure.database.session، app.core.contracts.agent_jobs.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها.
 """
 from __future__ import annotations
 
@@ -30,11 +23,7 @@ _MAX_ERROR_MESSAGE_LENGTH = 2000
 
 def _bounded_error_message(value: str | None) -> str | None:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-    تُستدعى عندما يصل workflow إلى _bounded_error_message؛ المدخلات المهمة: value.
-    تعيد str | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينفذ تحققًا داخليًا لازمًا لحفظ أو قراءة سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها.
     """
     if value is None:
         return None
@@ -43,23 +32,14 @@ def _bounded_error_message(value: str | None) -> str | None:
 
 class AgentJobRepository:
     """
-    يمثل AgentJobRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن دورة حفظ مهام Claude من الإنشاء إلى الاكتمال أو الانقطاع.
     """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
@@ -68,11 +48,7 @@ class AgentJobRepository:
         data: CreateAgentJobDTO,
     ) -> AgentJobModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
-        تعيد AgentJobModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = AgentJobModel(
             job_id=data.job_id,
@@ -103,11 +79,7 @@ class AgentJobRepository:
         data: UpdateAgentJobDTO,
     ) -> AgentJobModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: job_id، data.
-        تعيد AgentJobModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.scalar(
@@ -160,11 +132,7 @@ class AgentJobRepository:
         job_id: str,
     ) -> AgentJobModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_job_id؛ المدخلات المهمة: job_id.
-        تعيد AgentJobModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -181,11 +149,7 @@ class AgentJobRepository:
         status: str | None = None,
     ) -> list[AgentJobModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_recent؛ المدخلات المهمة: limit، server_id، status.
-        تعيد list[AgentJobModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         if limit < 1:
             raise ValueError(
@@ -228,11 +192,7 @@ class AgentJobRepository:
         error_message: str,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى mark_unfinished_after_restart؛ المدخلات المهمة: statuses، failed_status، error_code، error_message.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينقل سجلًا من سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها إلى حالة تشغيلية جديدة مع حفظ سبب الانتقال.
         """
         updated = 0
 

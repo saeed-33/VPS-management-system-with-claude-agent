@@ -1,12 +1,8 @@
 """
-جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+إنشاء عميل reasoning للاختصاصيين.
 
-الموقع في المعمارية: Application capability / investigation.
-يُستدعى بواسطة: MCP أو Analysis workflow.
-يعتمد مباشرة على: app.core.config، app.core.contracts.specialist_reasoning.
-الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يختار المصنع العميل اللغوي وفق إعدادات التطبيق ويعرض استيرادًا كسولًا للعقد
+المتاح، دون وضع منطق الاستدعاء داخل طبقة التوجيه.
 """
 from __future__ import annotations
 
@@ -21,11 +17,7 @@ def create_specialist_reasoning_client(
     settings: Settings,
 ) -> SpecialistReasoningClient:
     """
-    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / investigation.
-
-    تُستدعى عندما يصل workflow إلى create_specialist_reasoning_client؛ المدخلات المهمة: settings.
-    تعيد SpecialistReasoningClient أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينشئ عميل reasoning الاختصاصي وفق إعدادات النموذج.
     """
     from app.infrastructure.llm.ollama.specialist_reasoning_client import (
         OllamaSpecialistReasoningClient,
@@ -50,11 +42,7 @@ def create_specialist_reasoning_client(
 
 def __getattr__(name: str):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-    تُستدعى عندما يصل workflow إلى __getattr__؛ المدخلات المهمة: name.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يوفر استيرادًا كسولًا للعميل اللغوي الخاص بالاختصاصيين.
     """
     if name == 'OllamaSpecialistReasoningClient':
         from app.infrastructure.llm.ollama.specialist_reasoning_client import (

@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مخططات عرض التحقيقات.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تجمع نماذج المرشح والملخص والحالة التشغيلية والتفاصيل الكاملة للتحقيق كي
+تستطيع API عرض دورة التحقيق دون كشف نماذج قاعدة البيانات مباشرة.
 """
 from __future__ import annotations
 
@@ -18,12 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class InvestigationCandidateResponse(BaseModel):
     """
-    يمثل InvestigationCandidateResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل مرشح تحقيق مقترحًا للعرض الإداري.
     """
     model_config = ConfigDict(from_attributes=True)
 
@@ -42,12 +33,7 @@ class InvestigationCandidateResponse(BaseModel):
 
 class InvestigationSummaryResponse(BaseModel):
     """
-    يمثل InvestigationSummaryResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل ملخص التحقيق وحالته ونتيجته الأساسية.
     """
     model_config = ConfigDict(from_attributes=True)
 
@@ -70,12 +56,7 @@ class InvestigationSummaryResponse(BaseModel):
 
 class InvestigationRuntimeResponse(BaseModel):
     """
-    يمثل InvestigationRuntimeResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل بيانات التشغيل المرحلية للتحقيق.
     """
     model_config = ConfigDict(from_attributes=True)
 
@@ -96,12 +77,7 @@ class InvestigationRuntimeResponse(BaseModel):
 
 class InvestigationDetailResponse(BaseModel):
     """
-    يمثل InvestigationDetailResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل تفاصيل التحقيق الموسعة مع الأدلة والاختصاصات والنتيجة.
     """
     model_config = ConfigDict(from_attributes=True)
 

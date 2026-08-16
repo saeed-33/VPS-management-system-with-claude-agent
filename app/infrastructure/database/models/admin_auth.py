@@ -1,12 +1,5 @@
 """
-نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
-
-الموقع في المعمارية: Persistence model.
-يُستدعى بواسطة: repositories وطبقة database.
-يعتمد مباشرة على: app.core.utils.datetime، app.infrastructure.database.base.
-الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+نماذج مستخدمي الإدارة وجلساتهم وأحداث المصادقة.
 """
 from __future__ import annotations
 
@@ -28,7 +21,9 @@ from app.infrastructure.database.base import Base
 
 
 class AdminUserModel(Base):
-    """Persisted local Admin operator identity and password verifier."""
+    """
+    سجل حساب إداري يمكنه طلب ومراجعة عمليات إدارة السيرفر.
+    """
 
     __tablename__ = "admin_users"
     __table_args__ = (
@@ -58,7 +53,9 @@ class AdminUserModel(Base):
 
 
 class AdminSessionModel(Base):
-    """Server-side session record; only a digest of the cookie is persisted."""
+    """
+    جلسة دخول إدارية مرتبطة بمستخدم ووقت انتهاء وآخر استخدام.
+    """
 
     __tablename__ = "admin_sessions"
     __table_args__ = (
@@ -90,7 +87,9 @@ class AdminSessionModel(Base):
 
 
 class AdminAuthAuditEventModel(Base):
-    """Audit record for authentication and privileged Admin attempts."""
+    """
+    حدث تدقيق يثبت محاولات الدخول والخروج ونتائجها.
+    """
 
     __tablename__ = "admin_auth_audit_events"
     __table_args__ = (

@@ -1,13 +1,4 @@
-"""
-بنية قاعدة البيانات من engine/session/base.
-
-الموقع في المعمارية: Database infrastructure.
-يُستدعى بواسطة: composition وrepositories.
-يعتمد مباشرة على: app.infrastructure.database.engine.
-الحد المعماري: لا يقرر domain behavior؛ يوفر الاتصال والجلسات.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""توفير جلسات قاعدة البيانات لخدمات ومستودعات التطبيق."""
 from collections.abc import Generator
 
 from sqlalchemy.orm import Session, sessionmaker
@@ -30,11 +21,10 @@ def get_database_session() -> Generator[
     None,
 ]:
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Database infrastructure.
+    يفتح جلسة قاعدة بيانات للطلب ثم يغلقها مهما كانت نتيجة العملية.
 
-    تُستدعى عندما يصل workflow إلى get_database_session؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد Generator[Session, None, None] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    تستخدم المستودعات الجلسة لقراءة وحفظ التقارير والحالات، بينما يضمن الإغلاق
+    النهائي عدم بقاء اتصال أو موارد مرتبطة بطلب انتهى.
     """
     session = SessionLocal()
 

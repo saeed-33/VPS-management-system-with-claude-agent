@@ -1,12 +1,8 @@
 """
-جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+فحص التوافق التشغيلي بين تقرير حالي ومرشح تاريخي.
 
-الموقع في المعمارية: Application capability / retrieval.
-يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تقارن الأعلام الأساسية ونجاح الأوامر وتصنيف حالات الخروج وتوقيعات الأخطاء،
+وتعيد التعارضات المفصلة التي تمنع استخدام السياق التاريخي.
 """
 import json
 from dataclasses import dataclass, field
@@ -16,12 +12,7 @@ from typing import Any
 @dataclass(slots=True, frozen=True)
 class CompatibilityConflict:
     """
-    يمثل CompatibilityConflict مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل اختلافًا محددًا بين قيمة التقرير الحالي والقيمة التاريخية مع أمر اختياري.
     """
     field: str
     current: Any
@@ -32,12 +23,7 @@ class CompatibilityConflict:
 @dataclass(slots=True, frozen=True)
 class CompatibilityResult:
     """
-    يمثل CompatibilityResult مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحمل نتيجة فحص التوافق وقائمة التعارضات التي تفسر الرفض عند حدوثه.
     """
     compatible: bool
     conflicts: list[CompatibilityConflict] = field(
@@ -47,12 +33,7 @@ class CompatibilityResult:
 
 class StructuredCompatibilityChecker:
     """
-    يمثل StructuredCompatibilityChecker مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يقارن البنية التشغيلية لتقريرين ويمنع تمرير سياق تاريخي يناقض الأدلة الحالية.
     """
     def check(
         self,
@@ -61,11 +42,7 @@ class StructuredCompatibilityChecker:
         historical_normalized_report: str,
     ) -> CompatibilityResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى check؛ المدخلات المهمة: current_normalized_report، historical_normalized_report.
-        تعيد CompatibilityResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفحص صحة التقريرين ويقارن الاتصال والتنفيذات وتصنيف الخروج وتوقيعات الأخطاء ويعيد التعارضات.
         """
         current = self._parse(current_normalized_report)
         historical = self._parse(historical_normalized_report)
@@ -152,11 +129,7 @@ class StructuredCompatibilityChecker:
     @staticmethod
     def _parse(value: str) -> dict | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى _parse؛ المدخلات المهمة: value.
-        تعيد dict | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفك النص المطبع ويتأكد من أنه كائن JSON قبل استخدامه في المقارنة.
         """
         try:
             parsed = json.loads(value)
@@ -175,11 +148,7 @@ class StructuredCompatibilityChecker:
         command_id: int | None = None,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى _compare_scalar؛ المدخلات المهمة: conflicts، field_name، current، historical، command_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسجل اختلاف قيمة مفردة عندما تكون القيمتان متاحتين وغير متساويتين.
         """
         if current is None or historical is None:
             return
@@ -197,11 +166,7 @@ class StructuredCompatibilityChecker:
     @staticmethod
     def _execution_map(payload: dict) -> dict[int, dict]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى _execution_map؛ المدخلات المهمة: payload.
-        تعيد dict[int, dict] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني فهرسًا للتنفيذات القابلة للمقارنة حسب معرّف الأمر.
         """
         result: dict[int, dict] = {}
 
@@ -218,11 +183,7 @@ class StructuredCompatibilityChecker:
     @staticmethod
     def _exit_class(value: Any) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى _exit_class؛ المدخلات المهمة: value.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يصنف حالة الخروج إلى نجاح أو فشل مع الحفاظ على القيم غير الرقمية كما هي.
         """
         try:
             numeric = int(value)
@@ -234,11 +195,7 @@ class StructuredCompatibilityChecker:
     @staticmethod
     def _error_signatures(payload: dict) -> set[str]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى _error_signatures؛ المدخلات المهمة: payload.
-        تعيد set[str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع رسائل الخطأ وstderr غير الفارغة لاستخدامها في مقارنة الأدلة التاريخية.
         """
         signatures: set[str] = set()
 

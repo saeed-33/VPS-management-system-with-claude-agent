@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.core.contracts.reports، app.infrastructure.database.models.command_execution، app.infrastructure.database.models.monitoring_report، app.infrastructure.database.models.server، app.infrastructure.database.session.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تقارير المراقبة ونتائج الفحوص وملخصات عرضها.
 """
 from sqlalchemy import func, select
 from sqlalchemy.orm import (
@@ -29,23 +22,14 @@ from app.infrastructure.database.session import SessionLocal
 
 class ReportRepository:
     """
-    يمثل ReportRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن حفظ تقارير المراقبة وقراءة تفاصيلها وقوائمها.
     """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع تقارير المراقبة ونتائج الفحوص وملخصات عرضها بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
@@ -54,11 +38,7 @@ class ReportRepository:
         report: MonitoringReportData,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: report.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في تقارير المراقبة ونتائج الفحوص وملخصات عرضها ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         report_model = MonitoringReportModel(
             server_id=report.server_id,
@@ -121,11 +101,7 @@ class ReportRepository:
         report_id: int,
     ) -> MonitoringReportModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: report_id.
-        تعيد MonitoringReportModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من تقارير المراقبة ونتائج الفحوص وملخصات عرضها بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             statement = (
@@ -154,11 +130,7 @@ class ReportRepository:
         tuple[MonitoringReportModel, ServerModel]
     ]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_reports؛ المدخلات المهمة: server_id، status، offset، limit.
-        تعيد list[tuple[MonitoringReportModel, ServerModel]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من تقارير المراقبة ونتائج الفحوص وملخصات عرضها مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (
@@ -201,11 +173,7 @@ class ReportRepository:
         status: str | None = None,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى count_reports؛ المدخلات المهمة: server_id، status.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب عدد سجلات تقارير المراقبة ونتائج الفحوص وملخصات عرضها اللازمة لعرض الحالة أو تطبيق حد من حدودها.
         """
         with self._session_factory() as session:
             statement = select(
@@ -238,11 +206,7 @@ class ReportRepository:
         ServerModel,
     ] | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_with_server؛ المدخلات المهمة: report_id.
-        تعيد tuple[MonitoringReportModel, ServerModel] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من تقارير المراقبة ونتائج الفحوص وملخصات عرضها بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             statement = (

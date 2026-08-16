@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.infrastructure.database.models.server، app.infrastructure.database.session، app.core.contracts.servers، app.core.utils.datetime.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة.
 """
 from datetime import datetime
 from dataclasses import asdict
@@ -26,23 +19,14 @@ from app.core.utils.datetime import utc_now
 
 class ServerRepository:
     """
-    يمثل ServerRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن هوية السيرفر وإعداد المراقبة وحالة آخر دورة.
     """
     def __init__(
         self,
         session_factory: sessionmaker = SessionLocal,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
@@ -51,11 +35,7 @@ class ServerRepository:
         server_id: int,
     ) -> ServerModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: server_id.
-        تعيد ServerModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.get(
@@ -68,11 +48,7 @@ class ServerRepository:
         name: str,
     ) -> ServerModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_by_name؛ المدخلات المهمة: name.
-        تعيد ServerModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             statement = select(ServerModel).where(
@@ -83,11 +59,7 @@ class ServerRepository:
 
     def list_all(self) -> list[ServerModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_all؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[ServerModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (
@@ -103,11 +75,7 @@ class ServerRepository:
         self,
     ) -> list[ServerModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_enabled_servers؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[ServerModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (
@@ -130,11 +98,7 @@ class ServerRepository:
         data: CreateServerDTO,
     ) -> ServerModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: data.
-        تعيد ServerModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = ServerModel(
             name=data.name.strip(),
@@ -160,11 +124,7 @@ class ServerRepository:
         data: UpdateServerDTO,
     ) -> ServerModel | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update؛ المدخلات المهمة: server_id، data.
-        تعيد ServerModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.get(
@@ -199,11 +159,7 @@ class ServerRepository:
         server_id: int,
     ) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى delete؛ المدخلات المهمة: server_id.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يزيل ارتباطًا أو سجلًا من سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة بعد تطبيق قواعد الملكية المطلوبة.
         """
         with self._session_factory() as session:
             model = session.get(
@@ -230,11 +186,7 @@ class ServerRepository:
         report_id: int | None,
     ) -> None:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update_monitoring_status؛ المدخلات المهمة: server_id، status، checked_at، success_at، error_message، report_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.get(

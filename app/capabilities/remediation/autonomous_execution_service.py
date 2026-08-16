@@ -1,12 +1,8 @@
 """
-جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+تنفيذ المعالجة الآلية تحت الحجز والسياسة والتدقيق.
 
-الموقع في المعمارية: Application capability / remediation.
-يُستدعى بواسطة: Admin API أو MCP.
-يعتمد مباشرة على: app.core.contracts.autonomous_remediation، app.core.contracts.remediation، app.core.policies.autonomous_remediation، app.core.utils.datetime.
-الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تقيّم الخدمة أهلية التنفيذ، تمنع الحجوزات المتكررة، تستدعي المنفذ المصرح،
+وتسجل القرار والنتيجة وحالة التشغيل والتاريخ.
 """
 from __future__ import annotations
 
@@ -25,15 +21,13 @@ from app.core.utils.datetime import utc_now
 
 
 class AutonomousExecutionService:
-    """Phase 7 coordinator; all writes remain in RemediationService."""
+    """
+    ينسق تقييم وتنفيذ القرارات الآلية مع الحجز والتدقيق وحالة التشغيل والتاريخ.
+    """
 
     def __init__(self, *, repository, remediation_repository, remediation_service, policy_service, history_service, candidate_service, authorization_service, evaluator=None, automatic_remediation_allowed=False):
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository، remediation_repository، remediation_service، policy_service، history_service، candidate_service.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودعات القرار والحجز والتفويض والتدقيق والسياسة والمنفذ وحالة التشغيل والتاريخ.
         """
         self._repository = repository
         self._remediation_repository = remediation_repository
@@ -47,11 +41,7 @@ class AutonomousExecutionService:
 
     def evaluate(self, *, plan_id: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى evaluate؛ المدخلات المهمة: plan_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقيّم خطة المعالجة مقابل السياسة والحالة والأدلة ويصدر قرارًا مسجلًا دون أثر تنفيذي.
         """
         plan = self._remediation_repository.get_plan(plan_id)
         if plan is None:
@@ -96,12 +86,8 @@ class AutonomousExecutionService:
 
     @staticmethod
     def _select_policy(matches):
-        """Select one policy deterministically after exact structural matching.
-
-        Enabled policies are the only policies that can create autonomous
-        ambiguity. Disabled and suspended policies remain selectable when no
-        enabled policy exists so the evaluator can preserve their explicit
-        deny semantics. Unknown statuses fail closed as ambiguity.
+        """
+        يختار السياسة الفعالة المطابقة لسياق الخطة والأفعال المقترحة.
         """
         enabled = []
         inactive = []
@@ -130,11 +116,7 @@ class AutonomousExecutionService:
 
     def attempt(self, *, plan_id: str, actor: str = "autonomous-policy", idempotency_key: str | None = None):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى attempt؛ المدخلات المهمة: plan_id، actor، idempotency_key.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ قرارًا آليًا مصرحًا مع حجز يمنع التكرار ثم يسجل النتيجة والتحقق.
         """
         plan = self._remediation_repository.get_plan(plan_id)
         if plan is None:
@@ -264,8 +246,8 @@ class AutonomousExecutionService:
                 authorization.server_id, authorization.action_type, authorization.target
             ) or current_sandbox.validation_id != authorization.sandbox_validation_id:
                 raise ValueError("authorization_stale:binding")
-            # لا تكفي autonomous decision وحدها: نعيد فحص binding للـpolicy
-            # والنسخة والـsandbox قبل أي write operation ثم نسجل النتيجة.
+            # لا تكفي الموافقة النظرية: نعيد فحص أن الخطة والاختبار والسياسة
+            # تخص الحالة نفسها قبل أي تغيير فعلي.
             outcome = self._remediation_service.apply_approved(
                 plan_id=plan.plan_id, server_id=plan.server_id, actor=actor,
                 idempotency_key=key, autonomous_authorization=authorization,
@@ -274,8 +256,8 @@ class AutonomousExecutionService:
                 rollback = self._remediation_service.rollback(plan_id=plan.plan_id, execution_id=outcome["execution_id"], actor=actor, server_id=plan.server_id)
                 outcome["autonomous_rollback"] = rollback
             success = bool(outcome.get("applied"))
-            # reservation تمنع concurrent execution لنفس idempotency key؛
-            # finalize تربط execution_id بسجل التدقيق وتحفظ success/failure.
+            # يمنع الحجز تكرار التغيير نفسه، ثم تحفظ النتيجة ما حدث حتى يمكن
+            # تدقيقه أو التراجع عنه.
             self._repository.finalize_reservation(reservation.reservation_id, owner_token=owner_token, status="completed" if success else "failed", execution_id=outcome.get("execution_id"))
             self._record_runtime(
                 policy, decision, success, outcome.get("execution_id"),
@@ -305,7 +287,9 @@ class AutonomousExecutionService:
             return {"outcome": "deny", "decision": decision, "authorization_id": locals().get("authorization", None).authorization_id if locals().get("authorization") else None, "error": str(exc)}
 
     def _replay_existing_reservation(self, *, existing, plan, action, idempotency_key: str, decision=None):
-        """Return an exact reservation replay without evaluation or re-execution."""
+        """
+        يعيد عرض نتيجة حجز سابق عند اكتشاف محاولة تنفيذ مكررة.
+        """
         if not self._reservation_matches(
             reservation=existing, plan=plan, action=action, idempotency_key=idempotency_key,
         ):
@@ -357,11 +341,7 @@ class AutonomousExecutionService:
     @staticmethod
     def _reservation_lease_stale(reservation, *, now) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _reservation_lease_stale؛ المدخلات المهمة: reservation، now.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من انتهاء مدة حجز تنفيذ سابق وإمكانية استعادته.
         """
         if reservation.status not in {"reserved", "in_progress"}:
             return False
@@ -375,11 +355,7 @@ class AutonomousExecutionService:
     @staticmethod
     def _reservation_matches(*, reservation, plan, action, idempotency_key: str) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _reservation_matches؛ المدخلات المهمة: reservation، plan، action، idempotency_key.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من أن الحجز يخص الخطة والسيرفر والتشخيص والقرار الحاليين.
         """
         return (
             reservation.idempotency_key == idempotency_key
@@ -393,11 +369,7 @@ class AutonomousExecutionService:
     @staticmethod
     def _execution_matches(*, execution, reservation, plan, action) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _execution_matches؛ المدخلات المهمة: execution، reservation، plan، action.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من ارتباط سجل التنفيذ بنفس هوية الخطة والقرار والحجز.
         """
         return (
             execution.execution_id == reservation.execution_id
@@ -409,61 +381,37 @@ class AutonomousExecutionService:
 
     def candidates(self):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى candidates؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض مرشحي المعالجة الآلية المتاحين لسياق محدد.
         """
         return self._candidate_service.list_candidates()
 
     def list_decisions(self, *, plan_id: str | None = None, limit: int = 100):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_decisions؛ المدخلات المهمة: plan_id، limit.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد قرارات التقييم والتنفيذ مع مرشحات السيرفر أو التشخيص.
         """
         return self._repository.list_decisions(plan_id=plan_id, limit=min(max(limit, 1), 500))
 
     def get_decision(self, decision_id: str):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى get_decision؛ المدخلات المهمة: decision_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجلب قرارًا آليًا واحدًا ويرفع خطأ عند عدم وجوده.
         """
         return self._repository.get_decision(decision_id)
 
     def list_reservations(self, *, policy_id: str | None = None, plan_id: str | None = None, limit: int = 100):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_reservations؛ المدخلات المهمة: policy_id، plan_id، limit.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض حجوزات التنفيذ الآلي لتتبع التكرار والمهل.
         """
         return self._repository.list_reservations(policy_id=policy_id, plan_id=plan_id, limit=min(max(limit, 1), 500))
 
     def list_authorizations(self, *, limit: int = 100):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_authorizations؛ المدخلات المهمة: limit.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض التفويضات الآلية حسب سياق الخطة أو السيرفر.
         """
         return self._repository.list_authorizations(limit=min(max(limit, 1), 500))
 
     def list_policy_audit_events(self, *, policy_id: str | None = None, limit: int = 100):
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_policy_audit_events؛ المدخلات المهمة: policy_id، limit.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض أحداث تدقيق السياسات المرتبطة بالتنفيذ الآلي.
         """
         return self._repository.list_all_policy_audit_events(
             policy_id=policy_id, limit=min(max(limit, 1), 500)
@@ -471,31 +419,19 @@ class AutonomousExecutionService:
 
     def runtime_state(self, policy_id: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى runtime_state؛ المدخلات المهمة: policy_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد حالة التشغيل الحالية المرتبطة بتنفيذ آلي أو خطة.
         """
         return self._repository.get_runtime_state(policy_id)
 
     def history(self, *, issue_fingerprint: str, action_type: str, target: str):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى history؛ المدخلات المهمة: issue_fingerprint، action_type، target.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد لقطة تاريخية لعمليات المعالجة الآلية.
         """
         return self._history_service.snapshot(issue_fingerprint=issue_fingerprint, action_type=action_type, target=target)
 
     def _audit(self, plan_id: str, event_type: str, payload: dict) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _audit؛ المدخلات المهمة: plan_id، event_type، payload.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسجل حدث تدقيق لقرار أو تنفيذ آلي مع تفاصيله.
         """
         try:
             self._remediation_service.audit_autonomous(plan_id=plan_id, event_type=event_type, payload=payload)
@@ -505,11 +441,7 @@ class AutonomousExecutionService:
     @staticmethod
     def _reservation_view(reservation) -> dict:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _reservation_view؛ المدخلات المهمة: reservation.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل سجل الحجز الداخلي إلى عرض عقدي آمن.
         """
         return {
             "reservation_id": reservation.reservation_id,
@@ -529,11 +461,8 @@ class AutonomousExecutionService:
         self, policy, decision, success: bool, execution_id: str | None,
         *, failure_key: str | None = None,
     ):
-        """Record one terminal result with DB-side dedupe and breaker trip.
-
-        The SSH/MCP call has already ended before this method runs.  The
-        repository transaction therefore stays short and can safely lock the
-        policy/runtime rows while concurrent workers finalize the same result.
+        """
+        يحفظ انتقال حالة التشغيل ونتيجته ضمن سجل التنفيذ.
         """
         if success:
             recorder = getattr(self._repository, "record_autonomous_success", None)
@@ -541,8 +470,8 @@ class AutonomousExecutionService:
                 try:
                     return recorder(policy_id=policy.policy_id, policy_version=getattr(decision, "policy_version", None))
                 except OperationalError:
-                    # Legacy unit schemas may omit the additive Phase 7
-                    # policy table; retain their runtime-only compatibility.
+                    # قد تفتقد بعض السجلات القديمة جدول سياسة المعالجة؛ نحافظ
+                    # على قراءة الحالة دون اعتبار ذلك إذنًا لتغيير السيرفر.
                     pass
             return self._repository.update_runtime_state(
                 policy.policy_id, last_execution_at=utc_now(), consecutive_failures=0,
@@ -602,11 +531,7 @@ class AutonomousExecutionService:
     @staticmethod
     def _single_action(plan):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _single_action؛ المدخلات المهمة: plan.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ فعلًا آليًا واحدًا مع حدود السياسة والتحقق المطلوبة.
         """
         actions = [RemediationAction.from_dict(item) for item in (plan.proposed_actions or [])]
         if len(actions) != 1:
@@ -616,11 +541,7 @@ class AutonomousExecutionService:
     @staticmethod
     def _history_dict(history):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى _history_dict؛ المدخلات المهمة: history.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل سجلًا تاريخيًا داخليًا إلى قاموس قابل للعرض والتسجيل.
         """
         return {"issue_fingerprint": history.issue_fingerprint, "action_type": history.action_type, "target": history.target,
                 "supervised_execution_count": history.supervised_execution_count, "verified_success_count": history.verified_success_count,

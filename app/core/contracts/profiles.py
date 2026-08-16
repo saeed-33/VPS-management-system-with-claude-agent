@@ -1,25 +1,11 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقود إنشاء ملفات المراقبة وتحديد الفحوص التي تنتمي إليها."""
 from dataclasses import dataclass
 
 
 @dataclass(slots=True, frozen=True)
 class CreateMonitoringProfileDTO:
     """
-    يمثل CreateMonitoringProfileDTO مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    البيانات اللازمة لإنشاء مجموعة فحوص يمكن ربطها بسيرفر.
     """
     name: str
     description: str | None = None
@@ -29,12 +15,7 @@ class CreateMonitoringProfileDTO:
 @dataclass(slots=True, frozen=True)
 class UpdateMonitoringProfileDTO:
     """
-    يمثل UpdateMonitoringProfileDTO مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    التغييرات الاختيارية على اسم ملف المراقبة ووصفه وحالته.
     """
     name: str | None = None
     description: str | None = None
@@ -44,12 +25,10 @@ class UpdateMonitoringProfileDTO:
 @dataclass(slots=True, frozen=True)
 class MonitoringProfileCommandConfig:
     """
-    يمثل MonitoringProfileCommandConfig مسؤولية محددة داخل طبقة Core application contracts.
+    تعريف فحص بعد اختياره داخل ملف مراقبة.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يثبت العقد ترتيب الفحص ومهلته وسياسة بصمة مخرجه قبل تحويله إلى نتيجة
+    داخل تقرير المراقبة.
     """
     id: int
     name: str

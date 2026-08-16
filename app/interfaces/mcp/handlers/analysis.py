@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+معالجات أدوات التحليل والاسترجاع في MCP.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: app.interfaces.mcp.schemas، app.interfaces.mcp.serializers.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تبحث عن تقارير مطابقة أو مشابهة، تبدأ التحليل وتقرأ نتائجه، وتسترجع سياق
+المعرفة دون نقل قرار التشخيص إلى طبقة البروتوكول.
 """
 from __future__ import annotations
 
@@ -22,23 +18,14 @@ from app.interfaces.mcp.serializers import (
 
 class AnalysisToolsMixin:
     """
-    يمثل AnalysisToolsMixin مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يوفر معالجات أدوات البحث والتحليل وسياق المعرفة.
     """
     async def _find_exact_report_match(
         self,
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _find_exact_report_match؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبحث عن تقرير مطابق وفق بصمته وسياقه لاستعمال التحليل القابل لإعادة الاستخدام.
         """
         self._require_dependency(
             self._analysis_repository,
@@ -88,11 +75,7 @@ class AnalysisToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _search_similar_incidents؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع حوادث أو تحليلات مشابهة لتقرير أو وصف حالي.
         """
         return await self._search_incidents(
             tool_id="search_similar_incidents",
@@ -104,11 +87,7 @@ class AnalysisToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_top_similar_reports؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد أعلى التقارير تشابهًا ضمن حدود البحث المطلوبة.
         """
         return await self._search_incidents(
             tool_id="get_top_similar_reports",
@@ -132,11 +111,7 @@ class AnalysisToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _search_incidents؛ المدخلات المهمة: tool_id، arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ بحث الحوادث ويطبع نتائجها لحمولة MCP.
         """
         self._require_dependency(
             self._incident_retriever,
@@ -198,11 +173,7 @@ class AnalysisToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _analyze_report؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبدأ تحليل تقرير مراقبة ويعيد معرف التحليل وحالته.
         """
         self._require_dependency(
             self._analysis_orchestrator,
@@ -255,11 +226,7 @@ class AnalysisToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _get_analysis؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يقرأ تحليلًا محفوظًا ويعيد تمثيله للأداة.
         """
         self._require_dependency(
             self._analysis_repository,
@@ -314,11 +281,7 @@ class AnalysisToolsMixin:
         arguments: dict[str, Any],
     ) -> ProjectToolResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _search_knowledge؛ المدخلات المهمة: arguments.
-        تعيد ProjectToolResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبحث في مصادر المعرفة وفق الاستعلام والاختصاص والمجالات.
         """
         self._require_dependency(
             self._knowledge_retriever,

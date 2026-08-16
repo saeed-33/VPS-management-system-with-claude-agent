@@ -1,12 +1,8 @@
 """
-جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+استخراج مواقع المصادر من نصوص نتائج التحقيق.
 
-الموقع في المعمارية: Application capability / investigation.
-يُستدعى بواسطة: MCP أو Analysis workflow.
-يعتمد مباشرة على: app.core.contracts.source_location.
-الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تتعرف الدالة على مراجع الملفات والأسطر في النصوص وتعيدها بصيغة موحدة لربط
+الادعاءات بمواقع يمكن تدقيقها.
 """
 from __future__ import annotations
 
@@ -56,11 +52,8 @@ def extract_source_locations(
     *,
     evidence_ids: tuple[str, ...] = (),
 ) -> tuple[SourceLocation, ...]:
-    """Extract at most one recognizable application source location.
-
-    The parser accepts Python traceback frames and a narrow, extension-
-    allowlisted ``path:line[:column]`` form. It intentionally ignores plain
-    SSH transport failures and arbitrary numeric log text.
+    """
+    يستخرج مراجع الملفات والأسطر من نص الدليل.
     """
     if not text.strip():
         return ()

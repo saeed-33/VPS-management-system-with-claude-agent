@@ -1,12 +1,8 @@
 """
-جزء من Remediation من التشخيص والاقتراح حتى sandbox/authorization والتنفيذ.
+عرض مرشحي المعالجة الآلية.
 
-الموقع في المعمارية: Application capability / remediation.
-يُستدعى بواسطة: Admin API أو MCP.
-يعتمد مباشرة على: app.core.contracts.autonomous_remediation.
-الحد المعماري: لا يسمح write operation بمجرد اقتراح LLM.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تحوّل الخدمة نتائج المستودع إلى مرشحين يمكن لطبقة القرار فحصهم دون تنفيذ
+التغيير أو تجاوز سياسة الموافقة.
 """
 from __future__ import annotations
 
@@ -14,25 +10,19 @@ from app.core.contracts.autonomous_remediation import AutonomousPolicyCandidate
 
 
 class AutonomousCandidateService:
-    """Read-only advisory discovery; it never creates or enables policies."""
+    """
+    يقرأ مرشحي المعالجة الآلية ويعيدهم بصيغة العقود المخصصة للقرار.
+    """
 
     def __init__(self, *, repository) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودع مرشحي المعالجة الآلية.
         """
         self._repository = repository
 
     def list_candidates(self) -> list[AutonomousPolicyCandidate]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / remediation.
-
-        تُستدعى عندما يصل workflow إلى list_candidates؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[AutonomousPolicyCandidate] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد المرشحين المسموحين ضمن سياق السيرفر والتشخيص والحد المطلوب.
         """
         result = []
         for (fingerprint, action_type, target), data in self._repository.candidate_keys().items():

@@ -1,12 +1,8 @@
 """
-جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+تنفيذ رحلة إدخال مصدر معرفة إلى وثيقة قابلة للمعالجة.
 
-الموقع في المعمارية: Application capability / knowledge.
-يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
-يعتمد مباشرة على: app.capabilities.knowledge.parsers، app.capabilities.knowledge.source_loader، app.infrastructure.database.repositories.knowledge_document_repository، app.infrastructure.database.repositories.knowledge_source_repository، app.core.utils.datetime.
-الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يحمل المصدر ويفك محتواه ويحسب بصمة النص ثم يحفظ النسخة المحللة، ويسجل الفشل
+مع عنوان بديل عند تعذر أي مرحلة من مراحل الإدخال.
 """
 from __future__ import annotations
 
@@ -29,12 +25,7 @@ from app.core.utils.datetime import utc_now
 
 class KnowledgeIngestionService:
     """
-    يمثل KnowledgeIngestionService مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    ينسق تحميل المصدر وتحليله وحفظ وثيقة المعرفة الناتجة أو تسجيل فشل الإدخال.
     """
     def __init__(
         self,
@@ -45,11 +36,7 @@ class KnowledgeIngestionService:
         parser: KnowledgeContentParser,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: source_repository، document_repository، loader، parser.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودعي المصادر والوثائق ومحمّل المحتوى ومحلله.
         """
         self._source_repository = source_repository
         self._document_repository = document_repository
@@ -61,11 +48,7 @@ class KnowledgeIngestionService:
         source_id: int,
     ):
         """
-        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى ingest_source؛ المدخلات المهمة: source_id.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من المصدر، يحمل محتواه ويفككه، يحسب بصمة النص، ثم يحفظ الوثيقة أو يسجل الفشل.
         """
         source = self._source_repository.get_by_id(
             source_id

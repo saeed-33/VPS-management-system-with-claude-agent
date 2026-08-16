@@ -1,12 +1,5 @@
 """
-Repository يدير قراءة أو كتابة entity محددة عبر SQLModel/SQLAlchemy.
-
-الموقع في المعمارية: Persistence infrastructure.
-يُستدعى بواسطة: application capabilities.
-يعتمد مباشرة على: app.core.contracts.remediation، app.core.utils.datetime، app.infrastructure.database.models.remediation، app.infrastructure.database.models.server، app.infrastructure.database.session.
-الحد المعماري: لا يقرر policy أو workflow؛ يحول persistence semantics إلى واجهة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
 """
 from __future__ import annotations
 
@@ -44,30 +37,17 @@ from app.infrastructure.database.session import SessionLocal
 
 class RemediationRepository:
     """
-    يمثل RemediationRepository مسؤولية محددة داخل طبقة Persistence infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه application capabilities
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مسؤول عن كل سجل ينتج من خطة المعالجة حتى التحقق أو التراجع والتدقيق.
     """
     def __init__(self, session_factory: sessionmaker = SessionLocal) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: session_factory.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ مستودع خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بمصدر الجلسات الذي سيستخدمه في القراءة والحفظ.
         """
         self._session_factory = session_factory
 
     def create_plan(self, data: CreateRemediationPlanDTO) -> RemediationPlanModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_plan؛ المدخلات المهمة: data.
-        تعيد RemediationPlanModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         fingerprint = data.plan_fingerprint or remediation_fingerprint(
             plan_id=data.plan_id,
@@ -104,11 +84,7 @@ class RemediationRepository:
 
     def get_plan(self, plan_id: str) -> RemediationPlanModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_plan؛ المدخلات المهمة: plan_id.
-        تعيد RemediationPlanModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(select(RemediationPlanModel).where(RemediationPlanModel.plan_id == plan_id))
@@ -117,11 +93,7 @@ class RemediationRepository:
                                 problem_summary: str, diagnosis_claim_ids: list[str],
                                 evidence_ids: list[str], server_id: int | None = None) -> RemediationPlanModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_no_solution_plan؛ المدخلات المهمة: plan_id، investigation_id، title، problem_summary، diagnosis_claim_ids، evidence_ids.
-        تعيد RemediationPlanModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = RemediationPlanModel(
             plan_id=plan_id,
@@ -149,11 +121,7 @@ class RemediationRepository:
 
     def list_plans(self, *, limit: int = 100, status: str | None = None) -> list[RemediationPlanModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_plans؛ المدخلات المهمة: limit، status.
-        تعيد list[RemediationPlanModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = select(RemediationPlanModel).order_by(RemediationPlanModel.created_at.desc()).limit(limit)
@@ -163,11 +131,7 @@ class RemediationRepository:
 
     def create_sandbox_result(self, data: CreateSandboxResultDTO) -> RemediationSandboxResultModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_sandbox_result؛ المدخلات المهمة: data.
-        تعيد RemediationSandboxResultModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = RemediationSandboxResultModel(
             result_id=data.result_id,
@@ -196,22 +160,14 @@ class RemediationRepository:
 
     def get_sandbox_result(self, result_id: str) -> RemediationSandboxResultModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_sandbox_result؛ المدخلات المهمة: result_id.
-        تعيد RemediationSandboxResultModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(select(RemediationSandboxResultModel).where(RemediationSandboxResultModel.result_id == result_id))
 
     def get_latest_sandbox_result_for_plan(self, plan_id: str) -> RemediationSandboxResultModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_latest_sandbox_result_for_plan؛ المدخلات المهمة: plan_id.
-        تعيد RemediationSandboxResultModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -222,11 +178,7 @@ class RemediationRepository:
 
     def create_sandbox_validation(self, **data) -> SandboxValidationModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_sandbox_validation؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد SandboxValidationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = SandboxValidationModel(**data)
         with self._session_factory() as session:
@@ -236,7 +188,9 @@ class RemediationRepository:
             return model
 
     def finalize_sandbox_validation(self, **data) -> SandboxValidationModel:
-        """Persist validation and promote only the exact current plan on a valid pass."""
+        """
+        يثبت النتيجة النهائية في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع قبل إعلان اكتمال المرحلة التالية.
+        """
         with self._session_factory() as session:
             plan = session.scalar(
                 select(RemediationPlanModel)
@@ -269,7 +223,9 @@ class RemediationRepository:
 
     @staticmethod
     def _sandbox_pass_invalid_reason(*, plan, data: dict, session) -> str | None:
-        """Return a fail-closed reason unless a passed validation binds to its plan."""
+        """
+        ينفذ تحققًا داخليًا لازمًا لحفظ أو قراءة خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
+        """
         if data.get("plan_fingerprint") != plan.plan_fingerprint:
             return "plan_fingerprint_changed"
         if data.get("server_id") != plan.server_id:
@@ -337,11 +293,7 @@ class RemediationRepository:
 
     def get_sandbox_validation(self, validation_id: str) -> SandboxValidationModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_sandbox_validation؛ المدخلات المهمة: validation_id.
-        تعيد SandboxValidationModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         try:
             with self._session_factory() as session:
@@ -353,11 +305,7 @@ class RemediationRepository:
 
     def get_latest_sandbox_validation(self, plan_id: str) -> SandboxValidationModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_latest_sandbox_validation؛ المدخلات المهمة: plan_id.
-        تعيد SandboxValidationModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         try:
             with self._session_factory() as session:
@@ -371,11 +319,7 @@ class RemediationRepository:
 
     def list_sandbox_validations(self, plan_id: str) -> list[SandboxValidationModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_sandbox_validations؛ المدخلات المهمة: plan_id.
-        تعيد list[SandboxValidationModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             return list(session.scalars(
@@ -386,11 +330,7 @@ class RemediationRepository:
 
     def update_sandbox_validation(self, validation_id: str, **updates) -> SandboxValidationModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update_sandbox_validation؛ المدخلات المهمة: validation_id.
-        تعيد SandboxValidationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.scalar(select(SandboxValidationModel).where(
@@ -410,11 +350,7 @@ class RemediationRepository:
                            denial_reason: str | None = None, approval_requested: bool = False,
                            **updates) -> RemediationPlanModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update_plan_status؛ المدخلات المهمة: plan_id، status، approved_by، denial_reason، approval_requested.
-        تعيد RemediationPlanModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             plan = session.scalar(select(RemediationPlanModel).where(RemediationPlanModel.plan_id == plan_id))
@@ -439,11 +375,7 @@ class RemediationRepository:
     def create_approval(self, *, plan_id: str, plan_fingerprint: str, expires_at: datetime | None = None,
                         scope: dict | None = None) -> RemediationApprovalModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_approval؛ المدخلات المهمة: plan_id، plan_fingerprint، expires_at، scope.
-        تعيد RemediationApprovalModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = RemediationApprovalModel(
             approval_id=str(uuid4()),
@@ -471,11 +403,7 @@ class RemediationRepository:
 
     def get_approval(self, approval_id: str | None = None, *, plan_id: str | None = None) -> RemediationApprovalModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_approval؛ المدخلات المهمة: approval_id، plan_id.
-        تعيد RemediationApprovalModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             if approval_id:
@@ -490,11 +418,7 @@ class RemediationRepository:
 
     def get_latest_execution_for_plan(self, plan_id: str) -> RemediationExecutionModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_latest_execution_for_plan؛ المدخلات المهمة: plan_id.
-        تعيد RemediationExecutionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -506,11 +430,7 @@ class RemediationRepository:
     def decide_approval(self, approval_id: str, *, status: str, approver: str, comment: str | None = None,
                         scope: dict | None = None) -> RemediationApprovalModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى decide_approval؛ المدخلات المهمة: approval_id، status، approver، comment، scope.
-        تعيد RemediationApprovalModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يثبت قرارًا على سجل خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع مع الفاعل وسبب القرار ونطاقه.
         """
         if status not in {ApprovalStatus.APPROVED.value, ApprovalStatus.REJECTED.value, ApprovalStatus.CANCELLED.value}:
             raise ValueError("Invalid approval decision.")
@@ -544,11 +464,9 @@ class RemediationRepository:
 
     def sandbox_evidence_belongs(self, *, validation) -> bool:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
+        يتحقق من أن أدلة before وafter تخص اختبار sandbox المكتمل للخطة نفسها.
 
-        تُستدعى عندما يصل workflow إلى sandbox_evidence_belongs؛ المدخلات المهمة: validation.
-        تعيد bool أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يمنع هذا الفحص استخدام دليل اختبار من خطة أخرى لإصدار موافقة أو تنفيذ.
         """
         if validation is None:
             return False
@@ -565,11 +483,7 @@ class RemediationRepository:
 
     def expire_approval(self, approval_id: str) -> RemediationApprovalModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى expire_approval؛ المدخلات المهمة: approval_id.
-        تعيد RemediationApprovalModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعالج حالة معلقة أو منتهية في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع حتى لا تبقى الحالة مضللة بعد الانقطاع.
         """
         with self._session_factory() as session:
             approval = session.scalar(select(RemediationApprovalModel).where(RemediationApprovalModel.approval_id == approval_id))
@@ -591,11 +505,7 @@ class RemediationRepository:
 
     def create_execution(self, **data) -> RemediationExecutionModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_execution؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد RemediationExecutionModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = RemediationExecutionModel(**data)
         with self._session_factory() as session:
@@ -616,11 +526,7 @@ class RemediationRepository:
 
     def get_execution(self, execution_id: str | None = None, *, idempotency_key: str | None = None) -> RemediationExecutionModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_execution؛ المدخلات المهمة: execution_id، idempotency_key.
-        تعيد RemediationExecutionModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             if execution_id:
@@ -631,11 +537,7 @@ class RemediationRepository:
 
     def create_evidence(self, **data) -> RemediationEvidenceModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_evidence؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد RemediationEvidenceModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = RemediationEvidenceModel(**data)
         with self._session_factory() as session:
@@ -646,11 +548,7 @@ class RemediationRepository:
 
     def get_evidence(self, evidence_id: str) -> RemediationEvidenceModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_evidence؛ المدخلات المهمة: evidence_id.
-        تعيد RemediationEvidenceModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -661,11 +559,7 @@ class RemediationRepository:
 
     def list_evidence(self, *, plan_id: str, execution_id: str | None = None) -> list[RemediationEvidenceModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_evidence؛ المدخلات المهمة: plan_id، execution_id.
-        تعيد list[RemediationEvidenceModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = select(RemediationEvidenceModel).where(
@@ -677,11 +571,7 @@ class RemediationRepository:
 
     def update_execution(self, execution_id: str, **updates) -> RemediationExecutionModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى update_execution؛ المدخلات المهمة: execution_id.
-        تعيد RemediationExecutionModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدّث انتقالًا أو إعدادًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع دون فقدان السجل السابق المرتبط به.
         """
         with self._session_factory() as session:
             model = session.scalar(select(RemediationExecutionModel).where(RemediationExecutionModel.execution_id == execution_id))
@@ -696,7 +586,9 @@ class RemediationRepository:
             return model
 
     def mark_interrupted_executions(self) -> int:
-        """Fail closed after process restart; never replay a write."""
+        """
+        ينقل سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع إلى حالة تشغيلية جديدة مع حفظ سبب الانتقال.
+        """
         with self._session_factory() as session:
             models = list(session.scalars(
                 select(RemediationExecutionModel).where(
@@ -721,11 +613,7 @@ class RemediationRepository:
 
     def create_verification(self, **data) -> RemediationVerificationModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_verification؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد RemediationVerificationModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = RemediationVerificationModel(**data)
         with self._session_factory() as session:
@@ -736,11 +624,7 @@ class RemediationRepository:
 
     def create_rollback(self, **data) -> RemediationRollbackModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى create_rollback؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد RemediationRollbackModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يحدث سجلًا في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع ويربطه بالسيرفر أو التقرير أو الخطة المناسبة.
         """
         model = RemediationRollbackModel(**data)
         with self._session_factory() as session:
@@ -751,11 +635,7 @@ class RemediationRepository:
 
     def get_rollback(self, rollback_id: str) -> RemediationRollbackModel | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى get_rollback؛ المدخلات المهمة: rollback_id.
-        تعيد RemediationRollbackModel | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع سجلًا من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع بالمعرف أو المفتاح المطلوب دون اختلاق نتيجة عند غيابه.
         """
         with self._session_factory() as session:
             return session.scalar(
@@ -768,11 +648,7 @@ class RemediationRepository:
                            server_id: int | None = None, runtime_session_id: str | None = None,
                            agent_job_id: str | None = None, payload: dict | None = None) -> RemediationAuditEventModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى append_audit_event؛ المدخلات المهمة: plan_id، event_type، actor، server_id، runtime_session_id، agent_job_id.
-        تعيد RemediationAuditEventModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسجل حدثًا أو نتيجة جديدة في خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع مع إبقاء أثرها قابلًا للمراجعة.
         """
         model = RemediationAuditEventModel(
             event_id=str(uuid4()), plan_id=plan_id, event_type=event_type, actor=actor,
@@ -787,11 +663,7 @@ class RemediationRepository:
 
     def list_audit_events(self, plan_id: str) -> list[RemediationAuditEventModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_audit_events؛ المدخلات المهمة: plan_id.
-        تعيد list[RemediationAuditEventModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             return list(session.scalars(
@@ -804,11 +676,7 @@ class RemediationRepository:
         self, *, plan_id: str | None = None, event_type: str | None = None, limit: int = 100
     ) -> list[RemediationAuditEventModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Persistence infrastructure.
-
-        تُستدعى عندما يصل workflow إلى list_all_audit_events؛ المدخلات المهمة: plan_id، event_type، limit.
-        تعيد list[RemediationAuditEventModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض قائمة مرتبة من خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.
         """
         with self._session_factory() as session:
             statement = (

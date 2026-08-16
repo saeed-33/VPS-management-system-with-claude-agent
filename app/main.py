@@ -1,13 +1,8 @@
-"""
-نقطة تشغيل تطبيق FastAPI وتسجيل واجهات HTTP وMCP.
+"""نقطة دخول خدمة مراقبة السيرفر وإدارة رحلة التشخيص والمعالجة.
 
-الموقع في المعمارية: Bootstrap / composition.
-يُستدعى بواسطة: خادم ASGI.
-يعتمد مباشرة على: app.interfaces.admin.api، app.interfaces.admin.auth، app.interfaces.admin.web، app.composition، app.core.config، app.infrastructure.database.engine.
-الحد المعماري: لا يحتوي منطق capability أو SQL.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+ينشئ هذا الملف تطبيق FastAPI، يهيئ التخزين والخدمات، يستعيد المهام التي انقطعت،
+ويبدأ جدولة المراقبة عند توفر مشغل Claude. كما يسجل مسارات الإدارة وفحص الصحة
+دون تنفيذ منطق المراقبة أو التشخيص داخل طبقة الدخول نفسها."""
 import asyncio
 import logging
 from contextlib import asynccontextmanager
@@ -65,16 +60,12 @@ async def lifespan(
     app: FastAPI,
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Bootstrap / composition.
+    يدير بداية التطبيق ونهايته مع الحفاظ على حالة المهام والمعالجات.
 
-    تُستدعى عندما يصل workflow إلى lifespan؛ المدخلات المهمة: app.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينشئ جداول التخزين، يغلق المهام والتنفيذات التي انقطعت سابقًا، يبدأ المجدول
+    عندما يكون runtime متاحًا، ثم يوقفه بأمان عند إغلاق التطبيق.
     """
-    # Application lifecycle after C.14.9:
-    # - create database tables;
-    # - start periodic scheduling only when the Claude runtime is active;
-    # - no Python analysis-agent queue recovery or draining.
+    # نهيئ التخزين ونغلق الحالات المعلقة قبل قبول طلبات جديدة من المستخدم.
 
     logger.info(
         "Application startup started."
@@ -202,11 +193,10 @@ app.include_router(autonomous_remediation_router)
 )
 async def health_check() -> dict:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Bootstrap / composition.
+    يعيد صورة مختصرة عن جاهزية التطبيق لتشغيل المراقبة والتحليل.
 
-    تُستدعى عندما يصل workflow إلى health_check؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-    تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يوضح الرد حالة مشغل Claude والمجدول ومزود التحليل، ولا يدعي أن أي سيرفر
+    سليم أو أن تشخيصًا معينًا قد اكتمل.
     """
     supervisor_status = (
         container.claude_supervisor.status

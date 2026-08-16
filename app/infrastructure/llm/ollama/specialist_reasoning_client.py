@@ -1,12 +1,5 @@
 """
-عميل Ollama يترجم contracts الداخلية إلى HTTP model calls ويعيد DTOs.
-
-الموقع في المعمارية: LLM infrastructure.
-يُستدعى بواسطة: capabilities عبر protocol/client factory.
-يعتمد مباشرة على: app.core.contracts.specialist_reasoning.
-الحد المعماري: Ollama مزود model فقط؛ لا يمنح النص صلاحية policy أو persistence.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+إدارة جلسة تفكير متخصص مع Ollama وإرجاع نتائج مرتبطة بمعرفات الأدلة.
 """
 from __future__ import annotations
 
@@ -25,12 +18,7 @@ class OllamaSpecialistReasoningClient(
     SpecialistReasoningClient
 ):
     """
-    يمثل OllamaSpecialistReasoningClient مسؤولية محددة داخل طبقة LLM infrastructure.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities عبر protocol/client factory
-    ويعتمد على SpecialistReasoningClient وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عميل يشغل تفكير المتخصص ويقبل فقط مخرجًا منظمًا بمعرفات أدلة صريحة.
     """
     def __init__(
         self,
@@ -40,11 +28,7 @@ class OllamaSpecialistReasoningClient(
         timeout_seconds: float,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: base_url، model، timeout_seconds.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ عميل تفكير المتخصص ويحتفظ بقدرة المزود على قبول مخطط JSON.
         """
         self._base_url = base_url.rstrip("/")
         self._model = model
@@ -64,22 +48,14 @@ class OllamaSpecialistReasoningClient(
     @property
     def provider_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى provider_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم مزود تفكير المتخصص.
         """
         return "ollama"
 
     @property
     def model_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى model_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم النموذج الذي يفسر سياق المتخصص.
         """
         return self._model
 
@@ -90,11 +66,7 @@ class OllamaSpecialistReasoningClient(
         user_prompt: str,
     ) -> SpecialistReasoningOutput:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى reason؛ المدخلات المهمة: system_prompt، user_prompt.
-        تعيد SpecialistReasoningOutput أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يرسل سياق المتخصص إلى Ollama، يعيد المحاولة عند مخرج ناقص، ويتحقق من الأدلة وطلبات الأدوات.
         """
         schema = SpecialistReasoningOutput.model_json_schema()
 
@@ -338,11 +310,7 @@ class OllamaSpecialistReasoningClient(
 
     async def close(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة LLM infrastructure.
-
-        تُستدعى عندما يصل workflow إلى close؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يغلق عميل HTTP الخاص بجلسات تفكير المتخصص.
         """
         await self._client.aclose()
 

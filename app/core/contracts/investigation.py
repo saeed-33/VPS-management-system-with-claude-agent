@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""نماذج الحالة والأدلة والنتائج التي تدير دورة التحقيق في عطل السيرفر."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -17,12 +8,7 @@ from typing import Any
 
 class InvestigationStatus(StrEnum):
     """
-    يمثل InvestigationStatus مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    حالات التحقيق من إنشائه حتى اكتماله أو توقفه.
     """
     CREATED = "created"
     INVESTIGATING = "investigating"
@@ -34,12 +20,7 @@ class InvestigationStatus(StrEnum):
 
 class SpecialistTaskStatus(StrEnum):
     """
-    يمثل SpecialistTaskStatus مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    حالات مهمة المتخصص أثناء طلب الفحص وتحليل نتيجته.
     """
     PENDING = "pending"
     RUNNING = "running"
@@ -50,12 +31,10 @@ class SpecialistTaskStatus(StrEnum):
 
 class EvidenceKind(StrEnum):
     """
-    يمثل EvidenceKind مسؤولية محددة داخل طبقة Core application contracts.
+    مصادر الدليل التي يمكن أن يستند إليها التحقيق.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يوضح النوع هل الدليل تقرير مراقبة، نتيجة أمر، تحليل، حادثة تاريخية، وثيقة
+    معرفة، أم نتيجة مشتقة من أدلة أخرى.
     """
     MONITORING_REPORT = "monitoring_report"
     COMMAND_RESULT = "command_result"
@@ -67,12 +46,7 @@ class EvidenceKind(StrEnum):
 
 class KnowledgeSourceType(StrEnum):
     """
-    يمثل KnowledgeSourceType مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على StrEnum وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    نوع المرجع المعرفي الذي يساند تفسير حالة السيرفر.
     """
     INCIDENT = "incident"
     INTERNAL_DOCUMENT = "internal_document"
@@ -83,25 +57,14 @@ class KnowledgeSourceType(StrEnum):
 @dataclass(slots=True, frozen=True)
 class InvestigationBudget:
     """
-    يمثل InvestigationBudget مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    حدود تمنع التحقيق من تجاوز عدد المتخصصين أو الجولات أو الأفعال المسموحة.
     """
     max_specialists: int = 4
     max_rounds: int = 3
     max_actions: int = 12
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من أن حدود التحقيق موجبة أو غير سالبة حسب طبيعة كل حد."""
         if self.max_specialists < 1:
             raise ValueError(
                 "max_specialists must be >= 1."
@@ -119,12 +82,10 @@ class InvestigationBudget:
 @dataclass(slots=True, frozen=True)
 class EvidenceReference:
     """
-    يمثل EvidenceReference مسؤولية محددة داخل طبقة Core application contracts.
+    مرجع قابل للتتبع إلى دليل جمعه التحقيق أو ورثه من مرحلة سابقة.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يربط المعرف والعنوان والنوع والمصدر والاقتباس ما سيقرأه التشخيص بما قيس
+    فعليًا أو استُرجع من مصدر معروف.
     """
     evidence_id: str
     kind: EvidenceKind
@@ -136,13 +97,7 @@ class EvidenceReference:
     )
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من وجود معرف وعنوان يمكن الرجوع إليهما في سجل التحقيق."""
         if not self.evidence_id.strip():
             raise ValueError(
                 "evidence_id must not be empty."
@@ -156,12 +111,7 @@ class EvidenceReference:
 @dataclass(slots=True, frozen=True)
 class KnowledgeSourceReference:
     """
-    يمثل KnowledgeSourceReference مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    وصف لمصدر معرفة يمكن استخدامه لتفسير دليل أو مقارنة حالة سابقة.
     """
     source_id: str
     source_type: KnowledgeSourceType
@@ -177,13 +127,7 @@ class KnowledgeSourceReference:
     )
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من وجود معرف وعنوان للمصدر قبل ربطه باستنتاج."""
         if not self.source_id.strip():
             raise ValueError(
                 "source_id must not be empty."
@@ -197,12 +141,10 @@ class KnowledgeSourceReference:
 @dataclass(slots=True, frozen=True)
 class InvestigationFinding:
     """
-    يمثل InvestigationFinding مسؤولية محددة داخل طبقة Core application contracts.
+    نتيجة مثبتة نسبيًا يخرج بها التحقيق مع مستوى ثقة ومراجعها.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحتفظ العقد بالأدلة المساندة ومصادر المعرفة والأدلة الناقصة حتى يعرف قارئ
+    التشخيص ما الذي ثبت وما الذي ما زال يحتاج فحصًا.
     """
     finding_id: str
     title: str
@@ -216,13 +158,7 @@ class InvestigationFinding:
     )
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من هوية النتيجة ونصها وأن الثقة ضمن المجال المعروف."""
         if not self.finding_id.strip():
             raise ValueError(
                 "finding_id must not be empty."
@@ -240,12 +176,10 @@ class InvestigationFinding:
 @dataclass(slots=True, frozen=True)
 class InvestigationHypothesis:
     """
-    يمثل InvestigationHypothesis مسؤولية محددة داخل طبقة Core application contracts.
+    تفسير محتمل لسبب المشكلة لم يصل بعد إلى مستوى النتيجة المثبتة.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يميز العقد بين الأدلة التي تدعم الفرضية وتلك التي تناقضها، حتى لا يساوي
+    التشخيص بين الاحتمال والدليل.
     """
     hypothesis_id: str
     statement: str
@@ -257,13 +191,7 @@ class InvestigationHypothesis:
     )
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من هوية الفرضية ونصها وأن مستوى الثقة صالح."""
         if not self.hypothesis_id.strip():
             raise ValueError(
                 "hypothesis_id must not be empty."
@@ -281,12 +209,10 @@ class InvestigationHypothesis:
 @dataclass(slots=True, frozen=True)
 class SpecialistTask:
     """
-    يمثل SpecialistTask مسؤولية محددة داخل طبقة Core application contracts.
+    طلب تحقيق موجه إلى متخصص حول سيرفر وتقرير وهدف محدد.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يربط العقد المهمة بجولة التحقيق والأدلة المتاحة والميزانية حتى لا يعمل
+    المتخصص خارج الحالة التي طلبته.
     """
     task_id: str
     investigation_id: str
@@ -306,13 +232,7 @@ class SpecialistTask:
     )
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من ارتباط المهمة بالتحقيق والسيرفر والتقرير ومن صحة الجولة."""
         if not self.task_id.strip():
             raise ValueError(
                 "task_id must not be empty."
@@ -346,12 +266,10 @@ class SpecialistTask:
 @dataclass(slots=True, frozen=True)
 class SpecialistResult:
     """
-    يمثل SpecialistResult مسؤولية محددة داخل طبقة Core application contracts.
+    النتيجة النهائية لمهمة متخصص مع ملخص ونتائج وفرضيات وأدلة ناقصة.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    لا يسمح العقد بحفظ نتيجة ما زالت معلقة، ويجعل مستوى الثقة والمراجع جزءًا من
+    المادة التي سيستخدمها التجميع النهائي للتشخيص.
     """
     task_id: str
     specialist_id: str
@@ -376,13 +294,7 @@ class SpecialistResult:
     )
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من هوية المهمة والمتخصص وملخص النتيجة وحالتها وثقتها."""
         if not self.task_id.strip():
             raise ValueError(
                 "task_id must not be empty."
@@ -409,12 +321,10 @@ class SpecialistResult:
 @dataclass(slots=True)
 class ServerInvestigationState:
     """
-    يمثل ServerInvestigationState مسؤولية محددة داخل طبقة Core application contracts.
+    الحالة الكاملة لتحقيق مرتبط بسيرفر وتقرير وتحليل.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    تجمع الحالة الأدلة ومصادر المعرفة ومهام المتخصصين ونتائجهم، وتفرض حدود
+    التحقيق وروابط الهوية قبل السماح بإضافة أي عنصر جديد.
     """
     investigation_id: str
     server_id: int
@@ -450,13 +360,7 @@ class ServerInvestigationState:
     )
 
     def __post_init__(self) -> None:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يتحقق من هوية التحقيق وروابط السيرفر والتقرير والتحليل ورقم الجولة."""
         if not self.investigation_id.strip():
             raise ValueError(
                 "investigation_id must not be empty."
@@ -484,11 +388,9 @@ class ServerInvestigationState:
         evidence: EvidenceReference,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+        يضيف دليلًا جديدًا إلى التحقيق بعد منع تكرار معرفه.
 
-        تُستدعى عندما يصل workflow إلى add_evidence؛ المدخلات المهمة: evidence.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يضمن ذلك أن كل دليل يمكن ربطه مرة واحدة بالاستنتاجات اللاحقة.
         """
         if any(
             item.evidence_id == evidence.evidence_id
@@ -506,11 +408,7 @@ class ServerInvestigationState:
         source: KnowledgeSourceReference,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى add_knowledge_source؛ المدخلات المهمة: source.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مصدر معرفة بالتحقيق بعد منع تكرار معرف المصدر.
         """
         if any(
             item.source_id == source.source_id
@@ -528,11 +426,10 @@ class ServerInvestigationState:
         task: SpecialistTask,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+        يسجل مهمة متخصص بعد التحقق من هويتها وميزانية التحقيق.
 
-        تُستدعى عندما يصل workflow إلى add_task؛ المدخلات المهمة: task.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يرفض العقد مهمة تخص سيرفرًا أو تقريرًا آخر، أو تتجاوز عدد الجولات أو
+        عدد المتخصصين المسموحين.
         """
         if task.investigation_id != self.investigation_id:
             raise ValueError(
@@ -583,11 +480,10 @@ class ServerInvestigationState:
         result: SpecialistResult,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
+        يثبت نتيجة متخصص لمهمة معروفة مرة واحدة فقط.
 
-        تُستدعى عندما يصل workflow إلى add_result؛ المدخلات المهمة: result.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يطابق العقد معرف المهمة والمتخصص قبل إلحاق النتيجة حتى لا يدخل تشخيص
+        مبني على نتيجة تخص تحقيقًا أو متخصصًا آخر.
         """
         matching_task = next(
             (

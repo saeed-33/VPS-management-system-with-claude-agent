@@ -1,12 +1,5 @@
 """
-نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
-
-الموقع في المعمارية: Persistence model.
-يُستدعى بواسطة: repositories وطبقة database.
-يعتمد مباشرة على: app.infrastructure.database.base، app.core.utils.datetime.
-الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+نموذج سجل مهمة Claude أو العامل التشغيلي من الانتظار حتى النهاية.
 """
 from __future__ import annotations
 
@@ -28,12 +21,7 @@ from app.core.utils.datetime import utc_now
 
 class AgentJobModel(Base):
     """
-    يمثل AgentJobModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    سجل مهمة Claude أو العامل التشغيلي مع سياقها وحالتها ونتيجتها وعدادات الجلسة.
     """
     __tablename__ = "agent_jobs"
     __table_args__ = (

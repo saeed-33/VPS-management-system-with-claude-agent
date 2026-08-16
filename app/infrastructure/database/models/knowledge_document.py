@@ -1,12 +1,5 @@
 """
-نموذج persistence يطابق entity أو projection مخزنة في PostgreSQL.
-
-الموقع في المعمارية: Persistence model.
-يُستدعى بواسطة: repositories وطبقة database.
-يعتمد مباشرة على: app.infrastructure.database.base، app.core.utils.datetime.
-الحد المعماري: لا يحتوي على orchestration أو اتصال خارجي.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+نماذج وثائق المعرفة ومقاطعها التي يمكن استرجاعها أثناء التحليل والتحقيق.
 """
 from __future__ import annotations
 from datetime import datetime
@@ -19,12 +12,7 @@ from app.core.utils.datetime import utc_now
 
 class KnowledgeDocumentModel(Base):
     """
-    يمثل KnowledgeDocumentModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    وثيقة معرفة محفوظة بمصدرها ونسختها ونصها وحالتها القابلة للفهرسة.
     """
     __tablename__ = "knowledge_documents"
     __table_args__ = (
@@ -55,12 +43,7 @@ class KnowledgeDocumentModel(Base):
 
 class KnowledgeChunkModel(Base):
     """
-    يمثل KnowledgeChunkModel مسؤولية محددة داخل طبقة Persistence model.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه repositories وطبقة database
-    ويعتمد على Base وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    مقطع من وثيقة معرفة يستخدم كوحدة استرجاع وسياق للتحليل.
     """
     __tablename__ = "knowledge_chunks"
     __table_args__ = (

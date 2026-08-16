@@ -1,12 +1,8 @@
 """
-جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+حجز تنفيذ الاختصاصي وإنهاؤه.
 
-الموقع في المعمارية: Application capability / investigation.
-يُستدعى بواسطة: MCP أو Analysis workflow.
-يعتمد مباشرة على: app.capabilities.investigation.correlation، app.capabilities.investigation.execution_contracts، app.capabilities.investigation.final_diagnosis_synthesizer، app.capabilities.investigation.runtime_snapshot_service، app.capabilities.investigation.specialist_investigation_loop، app.core.contracts.investigation.
-الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تمنع الخدمة التنفيذ المكرر، تحفظ رمز الحجز، وتحوّل نجاح الاختصاصي أو فشله إلى
+سجلات تشغيل قابلة للعرض في دورة التحقيق.
 """
 from __future__ import annotations
 
@@ -47,18 +43,15 @@ from app.infrastructure.database.repositories.investigation_repository import (
 
 class SpecialistExecutionInProgress(RuntimeError):
     """
-    يمثل SpecialistExecutionInProgress مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على RuntimeError وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل حجز تنفيذ اختصاصي لم يكتمل بعد.
     """
     pass
 
 
 class SpecialistExecutionService:
-    """Own the reserve -> execute -> atomic finalize lifecycle."""
+    """
+    ينسق حجز تنفيذ الاختصاصي وإنهائه أو تسجيل فشله.
+    """
 
     def __init__(
         self,
@@ -69,11 +62,7 @@ class SpecialistExecutionService:
         synthesizer: FinalDiagnosisSynthesizer | None = None,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: repository، snapshot_service، correlator، synthesizer.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ SpecialistExecutionService ويربط الاعتماديات اللازمة لدورة التحقيق.
         """
         self._repository = repository
         self._snapshot_service = snapshot_service
@@ -82,15 +71,11 @@ class SpecialistExecutionService:
 
     def reserve_with_token(self, *, investigation_id: str, specialist_slug: str) -> dict:
         """
-        يدير reservation/finalization مع مراعاة idempotency وconcurrency ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى reserve_with_token؛ المدخلات المهمة: investigation_id، specialist_slug.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحجز تنفيذ اختصاصي برمز يمنع التشغيل المتكرر.
         """
         token = str(uuid4())
-        # الحجز قصير وذري داخل repository؛ التنفيذ وLLM يحدثان بعده خارج
-        # transaction حتى لا يبقى DB lock أثناء انتظار reasoning أو Evidence.
+        # نحجز المهمة قبل تشغيل المتخصص حتى لا يعمل التحقيق نفسه مرتين عند
+        # وصول طلبين متزامنين.
         result = self._repository.reserve_specialist(
             investigation_id=investigation_id,
             specialist_slug=specialist_slug,
@@ -109,14 +94,10 @@ class SpecialistExecutionService:
         ownership_token: str,
     ) -> dict:
         """
-        يدير reservation/finalization مع مراعاة idempotency وconcurrency ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى finalize؛ المدخلات المهمة: task، loop_result، selected_specialists، ownership_token.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينهي حجز الاختصاصي ويسجل النتيجة الناجحة.
         """
-        # finalization تعيد النتيجة وEvidence إلى persistence قبل إعلان
-        # Specialist مكتملًا، ثم يبدأ synthesis فقط إذا اكتملت المجموعة كلها.
+        # لا نعلن اكتمال المتخصص قبل حفظ نتيجته وأدلته، حتى لا يبني التشخيص
+        # على نتيجة مفقودة.
         model = self._repository.finalize_specialist(
             investigation_id=task.investigation_id,
             specialist_slug=task.specialist_id,
@@ -135,8 +116,8 @@ class SpecialistExecutionService:
         if snapshot.get("status") == InvestigationStatus.COMPLETED.value:
             execution = self._execution_from_snapshot(model, snapshot)
             diagnosis = self._correlator.correlate(execution)
-            # The narrative call is intentionally after the short DB finalize
-            # transaction. It cannot create claims or Evidence.
+            # يأتي التلخيص بعد تثبيت الأدلة، لذلك يصف ما حفظه التحقيق ولا ينشئ
+            # دليلًا جديدًا من تلقاء نفسه.
             narrative = await self._synthesizer.synthesize(diagnosis)
             model = self._repository.persist_finalization(
                 investigation_id=task.investigation_id,
@@ -168,11 +149,7 @@ class SpecialistExecutionService:
         ownership_token: str,
     ) -> dict:
         """
-        يدير reservation/finalization مع مراعاة idempotency وconcurrency ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى finalize_failure؛ المدخلات المهمة: task، reason، selected_specialists، ownership_token.
-        تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينهي الحجز مع تسجيل فشل التنفيذ وسببه.
         """
         result = SpecialistResult(
             task_id=task.task_id,
@@ -202,11 +179,7 @@ class SpecialistExecutionService:
 
     def _execution_from_snapshot(self, model, snapshot: dict) -> InvestigationExecutionResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _execution_from_snapshot؛ المدخلات المهمة: model، snapshot.
-        تعيد InvestigationExecutionResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب أو يجهز قيمة داخلية لمسار التحقيق (execution from snapshot).
         """
         evidence = tuple(
             EvidenceReference(
@@ -243,11 +216,7 @@ class SpecialistExecutionService:
 
     def _run_from_record(self, model, record: dict) -> InvestigationSpecialistRun:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _run_from_record؛ المدخلات المهمة: model، record.
-        تعيد InvestigationSpecialistRun أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب أو يجهز قيمة داخلية لمسار التحقيق (run from record).
         """
         task_data = dict(record.get("task") or {})
         slug = str(record["specialist_slug"])

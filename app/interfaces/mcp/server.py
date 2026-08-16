@@ -1,12 +1,8 @@
 """
-حد MCP يكشف Project capabilities لـClaude عبر أدوات typed ومتحقق منها.
+خادم MCP الخاص بالمشروع.
 
-الموقع في المعمارية: MCP capability boundary.
-يُستدعى بواسطة: Claude أو خادم MCP.
-يعتمد مباشرة على: app.interfaces.mcp.schemas.
-الحد المعماري: MCP exposure ليس enforcement أمنيًا مستقلًا؛ التحقق الفعلي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يتعامل مع رسائل initialize وtools/list وtools/call، ويحوّلها إلى نتائج JSON-RPC
+مع رسائل خطأ منظمة، ويوفر تشغيلًا عبر stdin/stdout.
 """
 from __future__ import annotations
 
@@ -25,12 +21,7 @@ from app.interfaces.mcp.schemas import (
 
 class ProjectMcpProtocolServer:
     """
-    يمثل ProjectMcpProtocolServer مسؤولية محددة داخل طبقة MCP capability boundary.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Claude أو خادم MCP
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    ينفذ رسائل MCP الأساسية ويربطها بحد أدوات المشروع.
     """
     def __init__(
         self,
@@ -40,11 +31,7 @@ class ProjectMcpProtocolServer:
         version: str = "0.1.0",
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: tool_boundary، server_name، version.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط حدود الأدوات ويجهز إصدار بروتوكول MCP وبيانات الخادم.
         """
         self._tool_boundary = tool_boundary
         self._server_name = server_name
@@ -55,14 +42,10 @@ class ProjectMcpProtocolServer:
         message: dict[str, Any],
     ) -> dict[str, Any] | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى handle_message؛ المدخلات المهمة: message.
-        تعيد dict[str, Any] | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفك رسالة JSON-RPC ويوجه initialize أو tools/list أو tools/call.
         """
-        # هذا هو protocol boundary: يترجم JSON-RPC ويستدعي registry، بينما
-        # business result وauthorization يظلان داخل handlers/capabilities.
+        # يحول هذا الحد طلب Claude إلى قدرة من قدرات النظام، بينما يبقى قرار
+        # الأثر والصلاحية داخل منطق المشروع.
         message_id = message.get("id")
         method = message.get("method")
 
@@ -109,11 +92,7 @@ class ProjectMcpProtocolServer:
 
     def _initialize_result(self) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _initialize_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني استجابة تهيئة MCP ومعلومات القدرات.
         """
         return {
             "protocolVersion": "2024-11-05",
@@ -128,11 +107,7 @@ class ProjectMcpProtocolServer:
 
     def _tools_list_result(self) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _tools_list_result؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني استجابة قائمة الأدوات بصيغة MCP.
         """
         return {
             "tools": [
@@ -150,11 +125,7 @@ class ProjectMcpProtocolServer:
         params: dict[str, Any],
     ) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _tools_call_result؛ المدخلات المهمة: params.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ استدعاء أداة ويبني نتيجة MCP القابلة للعرض.
         """
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
@@ -185,11 +156,7 @@ class ProjectMcpProtocolServer:
         definition: ProjectToolDefinition,
     ) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _serialize_tool_definition؛ المدخلات المهمة: definition.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل تعريف الأداة الداخلي إلى شكل MCP العام.
         """
         return {
             "name": definition.tool_id,
@@ -202,11 +169,7 @@ class ProjectMcpProtocolServer:
         result: ProjectToolResult,
     ) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _serialize_tool_result؛ المدخلات المهمة: result.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل نتيجة الحد إلى محتوى استجابة MCP.
         """
         payload = asdict(result)
 
@@ -231,11 +194,7 @@ class ProjectMcpProtocolServer:
         message: str,
     ) -> dict[str, Any]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-        تُستدعى عندما يصل workflow إلى _error_response؛ المدخلات المهمة: message_id، code، message.
-        تعيد dict[str, Any] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يبني استجابة JSON-RPC خطأ بالرمز والرسالة والبيانات المناسبة.
         """
         return {
             "jsonrpc": "2.0",
@@ -254,11 +213,7 @@ async def run_stdio_server(
     stdout: TextIO = sys.stdout,
 ) -> None:
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة MCP capability boundary.
-
-    تُستدعى عندما يصل workflow إلى run_stdio_server؛ المدخلات المهمة: server، stdin، stdout.
-    تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يشغل خادم MCP على stdin/stdout ويعالج الرسائل حتى انتهاء الإدخال.
     """
     while True:
         line = await asyncio.to_thread(

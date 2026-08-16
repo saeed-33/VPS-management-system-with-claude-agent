@@ -1,2 +1,5 @@
-"""Shared contracts used across capabilities and adapters."""
+"""عقود البيانات التي تصل بين مراحل إدارة السيرفر.
+
+تعيد الحزمة تصدير نماذج العقود المشتركة حتى تستخدم الخدمات والواجهات نفس
+التمثيل للتقارير والمهام والأوامر وملفات المراقبة والسيرفرات."""
 from app.core.contracts.investigation import *  # noqa: F401,F403

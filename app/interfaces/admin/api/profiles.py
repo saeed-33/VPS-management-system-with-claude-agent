@@ -1,12 +1,8 @@
 """
-Endpoint من Admin API يحول HTTP إلى application service ويعيد schema للمشغل.
+نقاط API لإدارة ملفات المراقبة.
 
-الموقع في المعمارية: HTTP interface / adapter.
-يُستدعى بواسطة: عميل الإدارة عبر FastAPI.
-يعتمد مباشرة على: app.interfaces.admin.dependencies، app.interfaces.admin.schemas.profiles، app.core.contracts.profiles، app.core.exceptions، app.capabilities.monitoring.profile_service.
-الحد المعماري: لا يضع business rules أو transaction logic.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تدير هذه المسارات ملفات الأوامر وربطها بالسيرفرات، وتحوّل طلبات الإدارة إلى
+عمليات خدمة مع الحفاظ على أخطاء الربط والموارد غير الموجودة.
 """
 from dataclasses import asdict
 
@@ -63,11 +59,7 @@ def list_profiles(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_profiles؛ المدخلات المهمة: service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعيد ملفات المراقبة المتاحة للإدارة.
     """
     return service.list_profiles()
 
@@ -83,11 +75,7 @@ def get_profile(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى get_profile؛ المدخلات المهمة: profile_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يجلب ملف مراقبة بالمعرف ويحوّل غيابه إلى HTTP 404.
     """
     try:
         return service.get_profile(profile_id)
@@ -110,11 +98,7 @@ def create_profile(
     ),
 ):
     """
-    ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى create_profile؛ المدخلات المهمة: payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    ينشئ ملف مراقبة جديدًا من طلب API ويعالج تعارض الاسم.
     """
     try:
         return service.create_profile(
@@ -146,11 +130,7 @@ def update_profile(
     ),
 ):
     """
-    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى update_profile؛ المدخلات المهمة: profile_id، payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحدّث ملف مراقبة ويحوّل غياب الملف أو تعارض الاسم إلى استجابة مناسبة.
     """
     try:
         return service.update_profile(
@@ -182,11 +162,7 @@ def delete_profile(
     ),
 ) -> Response:
     """
-    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى delete_profile؛ المدخلات المهمة: profile_id، service.
-    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحذف ملف مراقبة ويرجع نجاحًا فارغًا أو خطأ المورد.
     """
     try:
         service.delete_profile(profile_id)
@@ -213,11 +189,7 @@ def list_profile_commands(
     ),
 ):
     """
-    يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى list_profile_commands؛ المدخلات المهمة: profile_id، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعرض الأوامر المرتبطة بملف مراقبة مع بيانات الترتيب والتفعيل.
     """
     try:
         rows = service.list_profile_commands(
@@ -266,11 +238,7 @@ def assign_command(
     ),
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى assign_command؛ المدخلات المهمة: profile_id، command_id، payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يربط أمرًا بملف مراقبة وفق طلب الإدارة.
     """
     try:
         assignment = service.assign_command(
@@ -338,11 +306,7 @@ def update_command_assignment(
     ),
 ):
     """
-    يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى update_command_assignment؛ المدخلات المهمة: profile_id، command_id، payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يعدّل إعدادات ربط أمر بملف مراقبة.
     """
     supplied_fields = payload.model_fields_set
 
@@ -412,11 +376,7 @@ def remove_command(
     ),
 ) -> Response:
     """
-    يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى remove_command؛ المدخلات المهمة: profile_id، command_id، service.
-    تعيد Response أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يزيل ربط أمر من ملف مراقبة.
     """
     try:
         service.remove_command(
@@ -446,11 +406,7 @@ def assign_profile_to_server(
     ),
 ):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة HTTP interface / adapter.
-
-    تُستدعى عندما يصل workflow إلى assign_profile_to_server؛ المدخلات المهمة: server_id، payload، service.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يربط ملف مراقبة بسيرفر ويعالج غياب أي من الموردين.
     """
     try:
         server = service.assign_profile_to_server(

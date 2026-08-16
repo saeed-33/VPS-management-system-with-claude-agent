@@ -1,12 +1,8 @@
 """
-جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+تحويل reasoning الاختصاصي إلى نتيجة تشخيصية منظمة.
 
-الموقع في المعمارية: Application capability / investigation.
-يُستدعى بواسطة: MCP أو Analysis workflow.
-يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_tools، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_reasoning_client، app.core.contracts.specialist_reasoning، app.capabilities.investigation.source_location.
-الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يتحقق الوكيل من مراجع الأدلة ومواقع المصادر وتوصيات الاختصاصي، ثم يعيد نتيجة
+قابلة للحفظ والتجميع مع عدم اختلاق مراجع.
 """
 from __future__ import annotations
 
@@ -89,12 +85,7 @@ response does not create or execute any additional specialist.
 @dataclass(slots=True, frozen=True)
 class SpecialistDiagnosticToolRequest:
     """
-    يمثل SpecialistDiagnosticToolRequest مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب الاختصاصي لتشغيل أداة تشخيصية.
     """
     call: DiagnosticToolCall
     rationale: str
@@ -103,12 +94,7 @@ class SpecialistDiagnosticToolRequest:
 @dataclass(slots=True, frozen=True)
 class SpecialistReasoningExecution:
     """
-    يمثل SpecialistReasoningExecution مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل استجابة reasoning الاختصاصي مع الادعاءات والتوصيات والمراجع.
     """
     result: SpecialistResult
     provider: str
@@ -121,12 +107,7 @@ class SpecialistReasoningExecution:
 
 class SpecialistReasoningAgent:
     """
-    يمثل SpecialistReasoningAgent مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يتحقق من استجابة الاختصاصي ويحوّلها إلى نتيجة تشخيصية قابلة للحفظ.
     """
     def __init__(
         self,
@@ -134,11 +115,7 @@ class SpecialistReasoningAgent:
         client: SpecialistReasoningClient,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: client.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ SpecialistReasoningAgent ويربط الاعتماديات اللازمة لدورة التحقيق.
         """
         self._client = client
 
@@ -151,11 +128,7 @@ class SpecialistReasoningAgent:
         force_final_synthesis: bool = False,
     ) -> SpecialistReasoningExecution:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى reason؛ المدخلات المهمة: context، allowed_specialist_slugs، diagnostic_tool_catalog، force_final_synthesis.
-        تعيد SpecialistReasoningExecution أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ reasoning الاختصاصي ويتحقق من المراجع ويعيد النتيجة المنظمة.
         """
         user_prompt = (
             "## Mandatory Investigation Objective\n"
@@ -314,11 +287,7 @@ class SpecialistReasoningAgent:
         allowed_specialist_slugs: tuple[str, ...],
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _validate_references؛ المدخلات المهمة: output، context، allowed_specialist_slugs.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من أن مراجع النتيجة تشير إلى أدلة أو مواقع موجودة.
         """
         evidence_ids = {
             item.evidence_id
@@ -336,11 +305,7 @@ class SpecialistReasoningAgent:
             allowed: set[str],
         ) -> str:
             """
-            يحوّل البيانات إلى الشكل الذي تحتاجه الطبقة التالية مع الحفاظ على provenance ضمن طبقة Application capability / investigation.
-
-            تُستدعى عندما يصل workflow إلى normalize_reference؛ المدخلات المهمة: value، namespace، allowed.
-            تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            يطبع مرجعًا ويزيل بادئته مع التأكد من بقائه ضمن الأدلة المسموحة.
             """
             candidate = value.strip()
 
@@ -349,9 +314,8 @@ class SpecialistReasoningAgent:
             if candidate.startswith(prefix):
                 suffix = candidate[len(prefix):]
 
-                # Compatibility normalization is permitted only
-                # when the stripped value is already a real ID
-                # present in the supplied context.
+                # لا نقبل تطبيع المعرف إلا إذا ظل يشير إلى دليل حقيقي موجود
+                # في سياق التحقيق المقدم.
                 if suffix in allowed:
                     return suffix
 
@@ -433,11 +397,7 @@ class SpecialistReasoningAgent:
         allowed_specialist_slugs: tuple[str, ...],
     ) -> tuple[tuple[str, ...], tuple[str, ...]]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _normalize_specialist_recommendations؛ المدخلات المهمة: recommendations، allowed_specialist_slugs.
-        تعيد tuple[tuple[str, ...], tuple[str, ...]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يطبع توصيات الاختصاصي إلى شكل آمن موحد.
         """
         allowed = {
             value.strip().casefold()
@@ -495,11 +455,7 @@ class SpecialistReasoningAgent:
         dropped_specialist_recommendations: tuple[str, ...] = (),
     ) -> SpecialistResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _to_result؛ المدخلات المهمة: output، context، dropped_specialist_recommendations.
-        تعيد SpecialistResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل استجابة النموذج إلى عقد تنفيذ اختصاصي.
         """
         evidence_by_id = {
             item.evidence_id: item
@@ -508,11 +464,7 @@ class SpecialistReasoningAgent:
 
         def finding_metadata(evidence_ids: tuple[str, ...]) -> dict:
             """
-            ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-            تُستدعى عندما يصل workflow إلى finding_metadata؛ المدخلات المهمة: evidence_ids.
-            تعيد dict أو تحدث الأثر الذي يحدده contract هذه الدالة.
-            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            يجمع البيانات الوصفية لمواقع الأدلة التي استند إليها الاكتشاف.
             """
             locations = []
             for evidence_id in evidence_ids:

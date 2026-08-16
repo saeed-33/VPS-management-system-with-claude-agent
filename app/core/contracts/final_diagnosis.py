@@ -1,13 +1,4 @@
-"""
-عقود وDTOs مشتركة لنقل البيانات بين الطبقات.
-
-الموقع في المعمارية: Core application contracts.
-يُستدعى بواسطة: capabilities وinterfaces وadapters.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا تنفذ I/O أو workflow.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
-"""
+"""عقود صياغة التشخيص النهائي من نتائج المتخصصين والأدلة المتعارضة."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -18,12 +9,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class FinalDiagnosisNarrativeOutput(BaseModel):
     """
-    يمثل FinalDiagnosisNarrativeOutput مسؤولية محددة داخل طبقة Core application contracts.
+    النص المنظم الذي يعيده مزود صياغة التشخيص النهائي.
 
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يقتصر على ملخص ومعرفات الادعاءات والتعارضات وملاحظات المشغل، ولا يسمح
+    بإضافة دليل أو إجراء غير موجود في حالة التحقيق.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -36,12 +25,7 @@ class FinalDiagnosisNarrativeOutput(BaseModel):
 @dataclass(slots=True, frozen=True)
 class FinalDiagnosisNarrative:
     """
-    يمثل FinalDiagnosisNarrative مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    صياغة تشخيص نهائي محفوظة مع مصدر النموذج وبيان استخدام fallback.
     """
     summary: str
     claim_ids: tuple[str, ...]
@@ -55,35 +39,18 @@ class FinalDiagnosisNarrative:
 
 class FinalDiagnosisNarrativeClient(ABC):
     """
-    يمثل FinalDiagnosisNarrativeClient مسؤولية محددة داخل طبقة Core application contracts.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه capabilities وinterfaces وadapters
-    ويعتمد على ABC وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد لمزود يحول نتائج التحقيق إلى سرد تشخيصي قابل للعرض.
     """
     @property
     @abstractmethod
     def provider_name(self) -> str:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى provider_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يعيد اسم مزود صياغة التشخيص المستخدم للتتبع والمراجعة."""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def model_name(self) -> str:
-        """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى model_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
-        """
+        """يعيد اسم النموذج الذي صاغ السرد النهائي."""
         raise NotImplementedError
 
     @abstractmethod
@@ -94,10 +61,6 @@ class FinalDiagnosisNarrativeClient(ABC):
         user_prompt: str,
     ) -> FinalDiagnosisNarrativeOutput:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core application contracts.
-
-        تُستدعى عندما يصل workflow إلى synthesize؛ المدخلات المهمة: system_prompt، user_prompt.
-        تعيد FinalDiagnosisNarrativeOutput أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يصوغ ملخصًا نهائيًا من سياق التحقيق المقدم دون إنشاء ادعاءات جديدة.
         """
         raise NotImplementedError

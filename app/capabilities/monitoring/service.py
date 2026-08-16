@@ -1,12 +1,8 @@
 """
-جزء من Monitoring لاختيار profile/commands أو تنفيذ الدورة وحفظ report.
+تنفيذ دورة مراقبة كاملة لسيرفر واحد.
 
-الموقع في المعمارية: Application capability / monitoring.
-يُستدعى بواسطة: Scheduler أو MCP أو Admin API.
-يعتمد مباشرة على: app.capabilities.monitoring.report_service، app.infrastructure.ssh، app.infrastructure.ssh.client، app.infrastructure.ssh.command_executor، app.core.contracts.reports.
-الحد المعماري: لا يقوم بتحليل LLM أو Investigation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يقرأ الإعدادات، ينفذ الفحوص عبر SSH، يجمع نتائجها في تقرير، ثم يحدث حالة
+السيرفر. هذا الملف يصف ما قيس فقط؛ أما تفسير السبب فيبدأ في مرحلة التحليل.
 """
 import logging
 from datetime import UTC, datetime
@@ -34,12 +30,7 @@ logger = logging.getLogger(__name__)
 
 class ServerRecord(Protocol):
     """
-    يمثل ServerRecord مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد يمثل الحد الأدنى من بيانات السيرفر اللازمة لدورة المراقبة.
     """
     id: int
     host: str
@@ -54,12 +45,7 @@ class ServerRecord(Protocol):
 
 class MonitoringCommandRecord(Protocol):
     """
-    يمثل MonitoringCommandRecord مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد يمثل فحصًا مفعّلًا مع نصه وترتيبه ومهلة تنفيذه.
     """
     id: int
     name: str
@@ -70,23 +56,14 @@ class MonitoringCommandRecord(Protocol):
 
 class ServerRepositoryProtocol(Protocol):
     """
-    يمثل ServerRepositoryProtocol مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد القراءة والتحديث الذي تحتاجه دورة المراقبة من مستودع السيرفر.
     """
     def get_by_id(
         self,
         server_id: int,
     ) -> ServerRecord | None:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى get_by_id؛ المدخلات المهمة: server_id.
-        تعيد ServerRecord | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع قيمة من دورة مراقبة السيرفر مرتبطة بالمعرف أو المفتاح المطلوب.
         """
         ...
 
@@ -101,11 +78,7 @@ class ServerRepositoryProtocol(Protocol):
         report_id: int | None,
     ) -> None:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى update_monitoring_status؛ المدخلات المهمة: server_id، status، checked_at، success_at، error_message، report_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يغير حالة أو علاقة في دورة مراقبة السيرفر مع الحفاظ على اتساق السجلات المرتبطة.
         """
         ...
 
@@ -114,64 +87,35 @@ class MonitoringProfileRepositoryProtocol(
     Protocol
 ):
     """
-    يمثل MonitoringProfileRepositoryProtocol مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد يجلب الفحوص المفعلة المرتبطة بسيرفر.
     """
     def list_enabled_commands_for_server(
         self,
         server_id: int,
     ) -> list[MonitoringCommandRecord]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى list_enabled_commands_for_server؛ المدخلات المهمة: server_id.
-        تعيد list[MonitoringCommandRecord] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض بيانات دورة مراقبة السيرفر التي تحتاجها واجهة الإدارة أو الجدولة.
         """
         ...
 
 
 class ReportRepositoryProtocol(Protocol):
     """
-    يمثل ReportRepositoryProtocol مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على Protocol وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    عقد يحفظ تقرير القياسات الناتج من دورة المراقبة.
     """
     def create(
         self,
         report: MonitoringReportData,
     ) -> int:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى create؛ المدخلات المهمة: report.
-        تعيد int أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ أو يربط سجلًا داخل دورة مراقبة السيرفر بعد تحقق القيم اللازمة.
         """
         ...
 
 
 class MonitoringService:
     """
-    ينفذ دورة مراقبة واحدة لسيرفر واحد.
-
-    المسؤوليات:
-    - تحميل السيرفر.
-    - تحميل أوامر ملف المراقبة.
-    - فتح اتصال SSH.
-    - تنفيذ الأوامر بالتسلسل.
-    - إنشاء التقرير.
-    - حفظ التقرير.
-    - تحديث حالة السيرفر.
-
-    لا يحتوي على منطق SQL مباشر.
+    خدمة تنفذ فحوص السيرفر وتجمعها في تقرير واحد وتحدث حالته.
     """
 
     def __init__(
@@ -187,11 +131,7 @@ class MonitoringService:
         connection_timeout_seconds: float,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: server_repository، profile_repository، report_repository، default_private_key_path، known_hosts_path، connection_timeout_seconds.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجهز دورة المراقبة بمصادر السيرفر والفحوص والتقارير وإعدادات الاتصال.
         """
         self._server_repository = server_repository
         self._profile_repository = (
@@ -216,11 +156,7 @@ class MonitoringService:
         server_id: int,
     ) -> MonitoringReportData:
         """
-        يشغّل workflow هذه الطبقة ويربط مراحله ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى run؛ المدخلات المهمة: server_id.
-        تعيد MonitoringReportData أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ دورة الفحص لسيرفر واحد، يحفظ التقرير، ويحدث حالته بما يصف القياس الحالي فقط.
         """
         cycle_started_at = datetime.now(UTC)
         cycle_counter = perf_counter()
@@ -254,8 +190,7 @@ class MonitoringService:
             )
         )
 
-        # profile/commands تحدد ما الذي يجب قياسه؛ نبقي اختيار القياسات
-        # منفصلًا عن تنفيذ SSH حتى تبقى Monitoring قابلة للاختبار.
+        # يحدد الملف المختار والفحوص المفعلة ما الذي نريد معرفته عن السيرفر.
 
         if not commands:
             logger.warning(
@@ -282,8 +217,8 @@ class MonitoringService:
         )
 
         try:
-            # تتحول نتائج SSH الخام إلى report موحد قبل الحفظ، ليصبح report_id
-            # رابطًا قابلًا للتتبع لمراحل Analysis وواجهات القراءة اللاحقة.
+            # تجمع الدورة نتائج الفحوص في تقرير واحد حتى تستخدم المراحل التالية
+            # صورة السيرفر نفسها بدل إعادة قراءة نتائج متفرقة.
             executions = await self._execute_commands(
                 connection_config=connection_config,
                 commands=commands,
@@ -346,7 +281,7 @@ class MonitoringService:
                 )
             )
 
-        # نحفظ التقرير قبل تحديث حالة السيرفر حتى تشير الحالة إلى report موجود.
+        # نحفظ التقرير أولًا حتى تشير حالة السيرفر إلى صورة موجودة يمكن تحليلها.
         report_id = self._report_repository.create(
             report
         )
@@ -375,11 +310,7 @@ class MonitoringService:
         commands: list[MonitoringCommandRecord],
     ) -> list[CommandExecutionResult]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى _execute_commands؛ المدخلات المهمة: connection_config، commands.
-        تعيد list[CommandExecutionResult] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينفذ الفحوص المفعلة بالترتيب ويعيد نتيجة كل فحص حتى لا تضيع مخرجات أو أخطاء الدورة.
         """
         executions: list[
             CommandExecutionResult
@@ -440,11 +371,7 @@ class MonitoringService:
         report_id: int,
     ) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى _update_server_status؛ المدخلات المهمة: server_id، report، report_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدث حالة السيرفر بعد التقرير مع إبقاء الحالة مرتبطة بآخر نتيجة مراقبة محفوظة.
         """
         now = datetime.now(UTC)
 
@@ -499,11 +426,7 @@ class MonitoringService:
         started_counter: float,
     ) -> float:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى _duration_ms؛ المدخلات المهمة: started_counter.
-        تعيد float أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحسب مدة دورة المراقبة بالميلي ثانية لتظهر في التقرير.
         """
         return round(
             (

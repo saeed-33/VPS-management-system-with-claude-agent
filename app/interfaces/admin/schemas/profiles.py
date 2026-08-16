@@ -1,12 +1,8 @@
 """
-جزء من واجهة الإدارة يعرّف route أو payload أو عرضًا للمشغل.
+مخططات ملفات المراقبة وربط الأوامر والسيرفرات.
 
-الموقع في المعمارية: Administration interface.
-يُستدعى بواسطة: FastAPI أو متصفح الإدارة.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: العرض والتحقق الشكلي لا يمنحان صلاحية تنفيذ؛ authorization في الخدمة.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تحدد شكل طلبات إدارة الملف وإعدادات الأمر والاستجابة التي تعرض الترتيب
+والتفعيل والعلاقات الإدارية.
 """
 from datetime import datetime
 
@@ -19,12 +15,7 @@ from pydantic import (
 
 class MonitoringProfileCreateRequest(BaseModel):
     """
-    يمثل MonitoringProfileCreateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب إنشاء ملف مراقبة.
     """
     name: str = Field(
         min_length=1,
@@ -37,12 +28,7 @@ class MonitoringProfileCreateRequest(BaseModel):
 
 class MonitoringProfileUpdateRequest(BaseModel):
     """
-    يمثل MonitoringProfileUpdateRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب تعديل ملف مراقبة.
     """
     name: str | None = Field(
         default=None,
@@ -56,12 +42,7 @@ class MonitoringProfileUpdateRequest(BaseModel):
 
 class MonitoringProfileResponse(BaseModel):
     """
-    يمثل MonitoringProfileResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل ملف المراقبة كما تعرضه API.
     """
     id: int
     name: str
@@ -77,12 +58,7 @@ class MonitoringProfileResponse(BaseModel):
 
 class AssignProfileCommandRequest(BaseModel):
     """
-    يمثل AssignProfileCommandRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب إضافة أمر إلى ملف مراقبة.
     """
     execution_order: int = Field(
         default=1,
@@ -99,12 +75,7 @@ class AssignProfileCommandRequest(BaseModel):
 
 class UpdateProfileCommandRequest(BaseModel):
     """
-    يمثل UpdateProfileCommandRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل تعديلات ترتيب أو تفعيل أمر داخل ملف مراقبة.
     """
     execution_order: int | None = Field(
         default=None,
@@ -117,12 +88,7 @@ class UpdateProfileCommandRequest(BaseModel):
 
 class ProfileCommandResponse(BaseModel):
     """
-    يمثل ProfileCommandResponse مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل أمرًا مرتبطًا بملف مراقبة مع إعدادات الربط.
     """
     assignment_id: int
     command_id: int
@@ -138,11 +104,6 @@ class ProfileCommandResponse(BaseModel):
 
 class AssignServerProfileRequest(BaseModel):
     """
-    يمثل AssignServerProfileRequest مسؤولية محددة داخل طبقة Administration interface.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه FastAPI أو متصفح الإدارة
-    ويعتمد على BaseModel وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يمثل طلب إسناد ملف مراقبة إلى سيرفر.
     """
     profile_id: int | None

@@ -1,12 +1,8 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+تشغيل جلسات Claude المستخدمة في دورة مراقبة السيرفر.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: app.runtime.claude.job_service، app.runtime.claude.models، app.runtime.claude.native_monitoring، app.runtime.claude.runtime، app.runtime.claude.session_runner، app.runtime.claude.supervisor.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تجمع ملفات هذه الحزمة الطلبات، وأوامر العملية، وحفظ المهمة، وقراءة النتائج،
+وتسجيل ما حدث دون اعتبار جلسة Claude مصدرًا مستقلًا للتشخيص أو الصلاحيات.
 """
 from app.runtime.claude.job_service import (
     ClaudeAgentJobService,

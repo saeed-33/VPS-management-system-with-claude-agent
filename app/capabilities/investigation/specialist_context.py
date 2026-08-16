@@ -1,12 +1,8 @@
 """
-جزء من Investigation/Specialist لتوجيه التحقيق وجمع Evidence وبناء التشخيص.
+بناء سياق محدود لتنفيذ الاختصاصي.
 
-الموقع في المعمارية: Application capability / investigation.
-يُستدعى بواسطة: MCP أو Analysis workflow.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.rag_context، app.core.contracts.investigation، app.capabilities.knowledge.retrieval، app.capabilities.investigation.specialist_registry.
-الحد المعماري: لا يتجاوز Diagnostic Policy؛ Python يتحقق وينفذ collection.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تختار الخدمة الأدلة والحوادث والمعرفة المناسبة ضمن ميزانية النص، وتضيف مراجع
+المصادر حتى يستطيع الاختصاصي الاستدلال دون تجاوز حجم السياق.
 """
 from __future__ import annotations
 
@@ -34,12 +30,7 @@ from app.capabilities.investigation.specialist_registry import (
 @dataclass(slots=True, frozen=True)
 class SpecialistContextBudget:
     """
-    يمثل SpecialistContextBudget مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يضبط حدود النص وعدد الأدلة والحوادث والمعرفة في سياق الاختصاصي.
     """
     max_evidence_items: int = 8
     max_evidence_chars: int = 4_000
@@ -51,11 +42,7 @@ class SpecialistContextBudget:
 
     def __post_init__(self) -> None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __post_init__؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من صحة بيانات SpecialistContextBudget قبل استخدامها في التحقيق.
         """
         for field_name in (
             "max_evidence_items",
@@ -77,12 +64,7 @@ class SpecialistContextBudget:
 @dataclass(slots=True, frozen=True)
 class SpecialistContextSnapshot:
     """
-    يمثل SpecialistContextSnapshot مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحمل الأدلة والحوادث والمعرفة المختارة لسياق اختصاصي واحد.
     """
     task_id: str
     investigation_id: str
@@ -104,12 +86,7 @@ class SpecialistContextSnapshot:
 
 class SpecialistKnowledgeQueryBuilder:
     """
-    يمثل SpecialistKnowledgeQueryBuilder مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يبني استعلام المعرفة من اختصاصي وإشارات التحقيق.
     """
     def build(
         self,
@@ -122,11 +99,7 @@ class SpecialistKnowledgeQueryBuilder:
         evidence: tuple[EvidenceReference, ...],
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: task، specialist، domains، initial_analysis_summary، initial_analysis_issues، evidence.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يختار الأدلة والحوادث والمعرفة ويبني النص النهائي لسياق الاختصاصي.
         """
         parts: list[str] = [
             f"Specialist: {specialist.name}",
@@ -194,12 +167,7 @@ class SpecialistKnowledgeQueryBuilder:
 
 class SpecialistContextBuilder:
     """
-    يمثل SpecialistContextBuilder مسؤولية محددة داخل طبقة Application capability / investigation.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو Analysis workflow
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    ينشئ سياق الاختصاصي المحدود والمنظم من مصادر التحقيق والمعرفة.
     """
     def __init__(
         self,
@@ -209,11 +177,7 @@ class SpecialistContextBuilder:
         budget: SpecialistContextBudget | None = None,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: knowledge_retriever، query_builder، budget.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يهيئ SpecialistContextBuilder ويربط الاعتماديات اللازمة لدورة التحقيق.
         """
         self._knowledge_retriever = (
             knowledge_retriever
@@ -242,11 +206,7 @@ class SpecialistContextBuilder:
         ] = (),
     ) -> SpecialistContextSnapshot:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى build؛ المدخلات المهمة: task، specialist، detected_domains، evidence، initial_analysis_summary، initial_analysis_issues.
-        تعيد SpecialistContextSnapshot أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يختار الأدلة والحوادث والمعرفة ويبني النص النهائي لسياق الاختصاصي.
         """
         if (
             task.specialist_id.strip().casefold()
@@ -375,11 +335,7 @@ class SpecialistContextBuilder:
         detected_domains: tuple[str, ...],
     ) -> tuple[str, ...]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _effective_domains؛ المدخلات المهمة: specialist، detected_domains.
-        تعيد tuple[str, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدد المجالات الفعالة من تعريف الاختصاصي وسياق التحقيق.
         """
         detected = tuple(
             dict.fromkeys(
@@ -408,11 +364,7 @@ class SpecialistContextBuilder:
         evidence: tuple[EvidenceReference, ...],
     ) -> tuple[EvidenceReference, ...]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _select_evidence؛ المدخلات المهمة: task، evidence.
-        تعيد tuple[EvidenceReference, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينتقي الأدلة الأعلى صلة ضمن ميزانية السياق.
         """
         if task.evidence_ids:
             allowed = set(
@@ -467,11 +419,7 @@ class SpecialistContextBuilder:
         ...
     ]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _select_incidents؛ المدخلات المهمة: incidents.
-        تعيد tuple[RetrievedAnalysisContext, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينتقي الحوادث التاريخية التي تساعد الاختصاصي.
         """
         selected = []
         used_chars = 0
@@ -521,11 +469,7 @@ class SpecialistContextBuilder:
         ...
     ]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _select_knowledge؛ المدخلات المهمة: chunks.
-        تعيد tuple[KnowledgeRetrievalContext, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينتقي مقاطع المعرفة المطابقة للمجالات والاختصاص.
         """
         selected = []
         used_chars = 0
@@ -562,11 +506,7 @@ class SpecialistContextBuilder:
         ...
     ]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _knowledge_references؛ المدخلات المهمة: chunks.
-        تعيد tuple[KnowledgeSourceReference, ...] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ مراجع مختصرة لمصادر المعرفة المختارة.
         """
         result: list[
             KnowledgeSourceReference
@@ -654,11 +594,7 @@ class SpecialistContextBuilder:
         ],
     ) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-        تُستدعى عندما يصل workflow إلى _render؛ المدخلات المهمة: task، specialist، domains، initial_analysis_summary، initial_analysis_issues، evidence.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينسق مكونات السياق في نص مطالبة منظم.
         """
         sections: list[str] = []
 

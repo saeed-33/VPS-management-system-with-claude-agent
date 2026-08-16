@@ -1,4 +1,9 @@
-"""Investigation capability package with lazy public exports."""
+"""
+واجهة قدرات التحقيق وجمع الأدلة.
+
+توفّر استيرادًا كسولًا لمكونات التوجيه والتحقيق والاختصاصيين والتشخيص النهائي،
+مع إبقاء دورة التحقيق منفصلة عن طبقات API والتخزين.
+"""
 
 from importlib import import_module
 
@@ -20,11 +25,7 @@ _MODULES = (
 
 def __getattr__(name: str):
     """
-    ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / investigation.
-
-    تُستدعى عندما يصل workflow إلى __getattr__؛ المدخلات المهمة: name.
-    تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-    قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+    يحمّل وحدات التحقيق المعروفة عند الطلب ويعيد الرمز الذي تصدّره.
     """
     for module_name in _MODULES:
         module = import_module(f"{__name__}.{module_name}")

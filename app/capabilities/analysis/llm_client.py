@@ -1,12 +1,8 @@
 """
-جزء من Analysis لتحويل report إلى analysis مع Retrieval وLLM.
+العقد المجرد لعملاء تحليل تقارير المراقبة.
 
-الموقع في المعمارية: Application capability / analysis.
-يُستدعى بواسطة: MCP أو مسارات ما بعد Monitoring.
-يعتمد مباشرة على: app.core.contracts.analysis.
-الحد المعماري: لا ينفذ SSH أو Investigation أو Remediation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يحدد هذا الملف البيانات الوصفية للمزوّد والنموذج، وطريقة إرسال المطالبات
+وإرجاع نتيجة تحليل منظمة، مع فحص صحة اختياري للتكامل.
 """
 from abc import ABC, abstractmethod
 
@@ -17,22 +13,13 @@ from app.core.contracts.analysis import (
 
 class LLMAnalysisClient(ABC):
     """
-    يمثل LLMAnalysisClient مسؤولية محددة داخل طبقة Application capability / analysis.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه MCP أو مسارات ما بعد Monitoring
-    ويعتمد على ABC وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يعرّف الواجهة التي يجب أن يطبقها أي مزوّد لتحليل تقرير المراقبة وإرجاع النتيجة المنظمة.
     """
     @property
     @abstractmethod
     def provider_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / analysis.
-
-        تُستدعى عندما يصل workflow إلى provider_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد الاسم الثابت لمزوّد النموذج الذي ينفذ عقد التحليل.
         """
         raise NotImplementedError
 
@@ -40,11 +27,7 @@ class LLMAnalysisClient(ABC):
     @abstractmethod
     def model_name(self) -> str:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / analysis.
-
-        تُستدعى عندما يصل workflow إلى model_name؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعيد اسم النموذج المستخدم لتحليل التقارير.
         """
         raise NotImplementedError
 
@@ -56,17 +39,12 @@ class LLMAnalysisClient(ABC):
         user_prompt: str,
     ) -> ReportAnalysisResult:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / analysis.
-
-        تُستدعى عندما يصل workflow إلى analyze_report؛ المدخلات المهمة: system_prompt، user_prompt.
-        تعيد ReportAnalysisResult أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يرسل تعليمات النظام والمستخدم إلى المزوّد ويعيد نتيجة التحليل المنظمة.
         """
         raise NotImplementedError
 
     async def health_check(self) -> None:
         """
-        Raises an exception when the provider
-        cannot be reached or is misconfigured.
+        يوفّر نقطة فحص صحة افتراضية للتكاملات التي لا تحتاج طلبًا إضافيًا.
         """
         return None

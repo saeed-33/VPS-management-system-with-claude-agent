@@ -1,12 +1,5 @@
 """
-جزء من Monitoring لاختيار profile/commands أو تنفيذ الدورة وحفظ report.
-
-الموقع في المعمارية: Application capability / monitoring.
-يُستدعى بواسطة: Scheduler أو MCP أو Admin API.
-يعتمد مباشرة على: app.infrastructure.database.models.monitor_command، app.infrastructure.database.models.monitoring_profile، app.infrastructure.database.models.profile_command، app.infrastructure.database.models.server، app.infrastructure.database.repositories.command_repository، app.infrastructure.database.repositories.profile_repository.
-الحد المعماري: لا يقوم بتحليل LLM أو Investigation.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+إدارة ملفات المراقبة والفحوص التي تنتمي إليها وربطها بالسيرفر.
 """
 from app.infrastructure.database.models.monitor_command import (
     MonitorCommandModel,
@@ -44,12 +37,7 @@ from app.core.exceptions import (
 
 class MonitoringProfileService:
     """
-    يمثل MonitoringProfileService مسؤولية محددة داخل طبقة Application capability / monitoring.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Scheduler أو MCP أو Admin API
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    خدمة تدير ملفات المراقبة وفحوصها وربطها بالسيرفرات.
     """
     def __init__(
         self,
@@ -59,11 +47,7 @@ class MonitoringProfileService:
         server_repository: ServerRepository,
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: profile_repository، command_repository، server_repository.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط خدمة ملفات المراقبة بمستودعات الملفات والفحوص والسيرفرات.
         """
         self._profile_repository = profile_repository
         self._command_repository = command_repository
@@ -73,11 +57,7 @@ class MonitoringProfileService:
         self,
     ) -> list[MonitoringProfileModel]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى list_profiles؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
-        تعيد list[MonitoringProfileModel] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض ملفات المراقبة التي يمكن ربطها بالسيرفرات.
         """
         return self._profile_repository.list_all()
 
@@ -86,11 +66,7 @@ class MonitoringProfileService:
         profile_id: int,
     ) -> MonitoringProfileModel:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى get_profile؛ المدخلات المهمة: profile_id.
-        تعيد MonitoringProfileModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يسترجع ملف مراقبة واحدًا أو يوضح عدم وجوده.
         """
         profile = self._profile_repository.get_by_id(
             profile_id
@@ -108,11 +84,7 @@ class MonitoringProfileService:
         data: CreateMonitoringProfileDTO,
     ) -> MonitoringProfileModel:
         """
-        ينشئ أو يحفظ نتيجة العملية في الطبقة المالكة للبيانات ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى create_profile؛ المدخلات المهمة: data.
-        تعيد MonitoringProfileModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ ملف مراقبة يمثل مجموعة فحوص قابلة لإعادة الاستخدام.
         """
         if not data.name.strip():
             raise ValueError(
@@ -136,11 +108,7 @@ class MonitoringProfileService:
         data: UpdateMonitoringProfileDTO,
     ) -> MonitoringProfileModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى update_profile؛ المدخلات المهمة: profile_id، data.
-        تعيد MonitoringProfileModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدث وصف ملف المراقبة أو تفعيله دون حذف فحوصه.
         """
         current = self.get_profile(profile_id)
 
@@ -176,11 +144,7 @@ class MonitoringProfileService:
         profile_id: int,
     ) -> None:
         """
-        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى delete_profile؛ المدخلات المهمة: profile_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحذف ملف مراقبة وفق قواعد عدم وجود ارتباطات تمنع الحذف.
         """
         deleted = self._profile_repository.delete(
             profile_id
@@ -201,11 +165,7 @@ class MonitoringProfileService:
         ]
     ]:
         """
-        يقرأ أو يسترجع البيانات مع الحفاظ على semantics الكيان ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى list_profile_commands؛ المدخلات المهمة: profile_id.
-        تعيد list[tuple[MonitorCommandModel, MonitoringProfileCommandModel]] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يعرض الفحوص وترتيبها داخل ملف مراقبة.
         """
         self.get_profile(profile_id)
 
@@ -224,11 +184,7 @@ class MonitoringProfileService:
         custom_timeout_seconds: float | None,
     ) -> MonitoringProfileCommandModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى assign_command؛ المدخلات المهمة: profile_id، command_id، execution_order، enabled، custom_timeout_seconds.
-        تعيد MonitoringProfileCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يضيف فحصًا إلى ملف مراقبة مع ترتيبه وإعدادات بصمته.
         """
         self.get_profile(profile_id)
 
@@ -266,11 +222,7 @@ class MonitoringProfileService:
         update_custom_timeout: bool,
     ) -> MonitoringProfileCommandModel:
         """
-        يحدّث حالة أو إعدادًا بعد تطبيق التحقق الموجود ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى update_command_assignment؛ المدخلات المهمة: profile_id، command_id، execution_order، enabled، custom_timeout_seconds، update_custom_timeout.
-        تعيد MonitoringProfileCommandModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحدث ترتيب فحص أو مهلة أو إعداد بصمته داخل الملف.
         """
         self.get_profile(profile_id)
 
@@ -305,11 +257,7 @@ class MonitoringProfileService:
         command_id: int,
     ) -> None:
         """
-        يحذف أو يزيل الكيان وفق contract الطبقة ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى remove_command؛ المدخلات المهمة: profile_id، command_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يفصل فحصًا من ملف المراقبة دون حذف الفحص من النظام.
         """
         removed = (
             self._profile_repository.remove_command(
@@ -331,11 +279,7 @@ class MonitoringProfileService:
         profile_id: int | None,
     ) -> ServerModel:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / monitoring.
-
-        تُستدعى عندما يصل workflow إلى assign_profile_to_server؛ المدخلات المهمة: server_id، profile_id.
-        تعيد ServerModel أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط ملف مراقبة بسيرفر ليستخدمه المجدول في دوراته.
         """
         if (
             self._server_repository.get_by_id(server_id)

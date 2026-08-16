@@ -1,28 +1,34 @@
 """
-جزء من Claude Runtime لبناء العملية أو تشغيل الجلسة أو قراءة stream أو تسجيل job.
+تصنيف أخطاء تشغيل Claude من لحظة إنشاء العملية حتى قراءة النتيجة.
 
-الموقع في المعمارية: Claude supervisory runtime.
-يُستدعى بواسطة: composition أو Scheduler.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: Claude/Ollama للـreasoning/model؛ policy والحفظ والتنفيذ الحتمي في Python.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+تساعد الأنواع هنا على التمييز بين فشل العملية، ومخرجات غير منظمة، ومحاولة
+استخدام أداة غير مسموحة، حتى تحفظ الخدمة سبب الفشل بدل إخفائه.
 """
 class ClaudeRuntimeError(RuntimeError):
-    """Base error for controlled Claude runtime failures."""
+    """
+    النوع الأساسي لأخطاء دورة تشغيل Claude التي يجب تسجيلها كفشل مضبوط.
+    """
 
 
 class ClaudeStructuredOutputError(ClaudeRuntimeError):
-    """Raised when Claude returns output outside the accepted contract."""
+    """
+    خطأ يصف مخرجًا من Claude لا يمكن تحويله إلى نتيجة منظمة.
+    """
 
 
 class ClaudeToolAccessError(ClaudeRuntimeError):
-    """Raised when a request asks for tools that are not enabled."""
+    """
+    خطأ يوضح أن الجلسة طلبت أدوات تشغيلية دون تفعيل صلاحيتها.
+    """
 
 
 class ClaudeProcessExecutionError(ClaudeRuntimeError):
-    """Raised when the external Claude process cannot execute cleanly."""
+    """
+    خطأ يصف عدم قدرة النظام على إنشاء عملية Claude أو تشغيلها.
+    """
 
 
 class ClaudeProcessOutputError(ClaudeRuntimeError):
-    """Raised when Claude process JSON output is outside its envelope."""
+    """
+    خطأ يصف مخرجًا فارغًا أو غير صالح أو لا يثبت اكتمال جلسة Claude.
+    """

@@ -1,12 +1,8 @@
 """
-Policy أو registry حتمي يقرر السماح أو الرفض أو التصنيف قبل التنفيذ.
+التقييم الحتمي لأهلية تنفيذ المعالجة الذاتية.
 
-الموقع في المعمارية: Core policy.
-يُستدعى بواسطة: capabilities وMCP handlers.
-يعتمد مباشرة على: app.core.contracts.autonomous_remediation.
-الحد المعماري: لا تنفذ SSH أو LLM أو persistence.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يمر القرار عبر مطابقة السياسة والخطر والأدلة ونتيجة sandbox والتاريخ والحدود
+الزمنية، ثم يعيد سببًا قابلًا للمراجعة بدل السماح الضمني بالتغيير.
 """
 from __future__ import annotations
 
@@ -24,15 +20,13 @@ from app.core.contracts.autonomous_remediation import (
 
 
 class AutonomousRemediationPolicyEvaluator:
-    """Pure Phase 7 V1 eligibility evaluator; it never executes or persists."""
+    """
+    مقيّم يطبق بوابات المعالجة الذاتية بالترتيب ويصدر قرارًا مفسرًا.
+    """
 
     def evaluate(self, context: AutonomousEvaluationContext):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى evaluate؛ المدخلات المهمة: context.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يطبق بوابات القرار من تفعيل المعالجة ومطابقة الخطة حتى الأدلة ونتائج التاريخ وحدود المعدل، ثم يحدد تنفيذًا ذاتيًا أو موافقة بشرية أو منعًا.
         """
         reasons: list[str] = []
         messages: list[str] = []
@@ -40,11 +34,7 @@ class AutonomousRemediationPolicyEvaluator:
 
         def deny(code: Code, message: str):
             """
-            ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-            تُستدعى عندما يصل workflow إلى deny؛ المدخلات المهمة: code، message.
-            تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-            قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+            يسجل سبب المنع ورسالة مفهومة ثم يعيد قرارًا يربط الرفض بسياق الخطة والسيرفر.
             """
             reasons.append(code.value)
             messages.append(message)
@@ -143,11 +133,7 @@ class AutonomousRemediationPolicyEvaluator:
     @staticmethod
     def _decision(context, outcome, reasons, messages):
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Core policy.
-
-        تُستدعى عندما يصل workflow إلى _decision؛ المدخلات المهمة: context، outcome، reasons، messages.
-        تعيد نتيجة العملية الحالية أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينشئ قرار سياسة موحدًا يحفظ الرموز والرسائل والبصمات ووقت التقييم للتدقيق.
         """
         from app.core.contracts.autonomous_remediation import AutonomousPolicyDecision
         from uuid import uuid4

@@ -1,12 +1,8 @@
 """
-جزء من Knowledge ingestion/indexing/retrieval لتغذية RAG بمصادر قابلة للتتبع.
+تحميل محتوى مصدر المعرفة من inline أو ملف أو URL.
 
-الموقع في المعمارية: Application capability / knowledge.
-يُستدعى بواسطة: أدوات الإدارة أو Retrieval.
-يعتمد مباشرة على: لا توجد imports داخلية مباشرة ظاهرة.
-الحد المعماري: لا يخلط knowledge retrieval مع reasoning.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+يفرض حدود الحجم والمهلة والأنواع المدعومة، ويعيد المحتوى مع URI قانوني ونوع
+وسيط وتلميح عنوان لتستخدمها مرحلة التحليل.
 """
 from __future__ import annotations
 
@@ -20,12 +16,7 @@ import httpx
 @dataclass(slots=True, frozen=True)
 class LoadedKnowledgeContent:
     """
-    يمثل LoadedKnowledgeContent مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يحمل البايتات المقروءة من المصدر مع URI القانوني ونوع الوسيط وتلميح العنوان.
     """
     content: bytes
     canonical_uri: str
@@ -35,12 +26,7 @@ class LoadedKnowledgeContent:
 
 class KnowledgeSourceLoader:
     """
-    يمثل KnowledgeSourceLoader مسؤولية محددة داخل طبقة Application capability / knowledge.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه أدوات الإدارة أو Retrieval
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يقرأ مصادر المعرفة من أنواعها المدعومة ويفرض حدود الوصول والحجم.
     """
     def __init__(
         self,
@@ -50,11 +36,7 @@ class KnowledgeSourceLoader:
         user_agent: str = "chat-system-knowledge-ingestion/1.0",
     ) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: timeout_seconds، max_bytes، user_agent.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من المهلة والحجم ويحفظ إعدادات تحميل المصادر ووكيل الطلبات.
         """
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be > 0.")
@@ -67,11 +49,7 @@ class KnowledgeSourceLoader:
 
     def load(self, source) -> LoadedKnowledgeContent:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى load؛ المدخلات المهمة: source.
-        تعيد LoadedKnowledgeContent أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يوجه المصدر إلى محمل inline أو الملف أو URL حسب نوعه.
         """
         source_type = str(source.source_type).strip().casefold()
 
@@ -90,11 +68,7 @@ class KnowledgeSourceLoader:
 
     def _load_inline(self, source) -> LoadedKnowledgeContent:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _load_inline؛ المدخلات المهمة: source.
-        تعيد LoadedKnowledgeContent أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل المحتوى المضمن إلى بايتات مع URI اصطناعي ونوع نصي.
         """
         content = str(source.inline_content or "").strip()
 
@@ -112,11 +86,7 @@ class KnowledgeSourceLoader:
 
     def _load_file(self, source) -> LoadedKnowledgeContent:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _load_file؛ المدخلات المهمة: source.
-        تعيد LoadedKnowledgeContent أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحل مسار الملف ويتحقق من وجوده وحجمه ثم يقرأه ويحدد نوعه من الامتداد.
         """
         raw_uri = str(source.source_uri or "").strip()
 
@@ -155,11 +125,7 @@ class KnowledgeSourceLoader:
 
     def _load_url(self, source) -> LoadedKnowledgeContent:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _load_url؛ المدخلات المهمة: source.
-        تعيد LoadedKnowledgeContent أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        ينزل URL عبر HTTP مع إعادة التوجيه والمهلة وحد الحجم ويعيد URI ونوع الاستجابة.
         """
         url = str(source.source_uri or "").strip()
 
@@ -216,11 +182,7 @@ class KnowledgeSourceLoader:
         suffix: str,
     ) -> str | None:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / knowledge.
-
-        تُستدعى عندما يصل workflow إلى _media_type_for_suffix؛ المدخلات المهمة: suffix.
-        تعيد str | None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحوّل امتداد الملف إلى نوع الوسيط الذي يدعمه محلل المعرفة.
         """
         return {
             ".pdf": "application/pdf",

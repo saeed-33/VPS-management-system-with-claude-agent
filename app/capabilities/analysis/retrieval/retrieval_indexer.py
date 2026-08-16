@@ -1,12 +1,8 @@
 """
-جزء من Retrieval/RAG لتطبيع report أو استرجاع context أو الفهرسة.
+فهرسة التحليلات المكتملة في مخزن الاسترجاع.
 
-الموقع في المعمارية: Application capability / retrieval.
-يُستدعى بواسطة: Analysis orchestrator وخدمات الفهرسة.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.embedding_client، app.infrastructure.database.repositories.analysis_repository، app.infrastructure.database.repositories.retrieval_repository.
-الحد المعماري: ينتهي عند context مع provenance؛ reasoning مسؤولية أعلى.
-سير البيانات المختصر: يستقبل contracts أو مدخلات الواجهة، ينفذ الجزء المنوط
-به، ثم يعيد DTO/نتيجة أو أثرًا محفوظًا إلى caller.
+ينشئ embedding والميزات المنظمة وتوقيعات الأخطاء، أو ينسخ مستند استرجاع سابق
+عند إعادة استخدام تحليل، مع تسجيل مسار النسخ أو إعادة التوليد.
 """
 import json
 import logging
@@ -20,20 +16,11 @@ logger = logging.getLogger(__name__)
 
 class RetrievalIndexer:
     """
-    يمثل RetrievalIndexer مسؤولية محددة داخل طبقة Application capability / retrieval.
-
-    مسؤوليته تنسيق أو تمثيل الجزء الظاهر في هذا الملف، ويستخدمه Analysis orchestrator وخدمات الفهرسة
-    ويعتمد على لا يرث contract خارجيًا وعلى dependencies التي يمررها الـcomposition أو يستوردها الملف.
-    لا ينبغي أن يتولى مسؤوليات الطبقات الأخرى مثل SQL/SSH/LLM أو authorization
-    إلا إذا ظهر ذلك صراحةً في implementation الحالي.
+    يدير إنشاء مستندات الاسترجاع للتحليلات المكتملة أو نسخ مستند التحليل المعاد استخدامه.
     """
     def __init__(self, *, analysis_repository: AnalysisRepository, retrieval_repository: RetrievalRepository, embedding_client: EmbeddingClient) -> None:
         """
-        ينشئ الحالة الداخلية ويثبت dependencies اللازمة للعملية ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى __init__؛ المدخلات المهمة: analysis_repository، retrieval_repository، embedding_client.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يربط مستودعي التحليل والاسترجاع وعميل embedding اللازم لبناء المستندات.
         """
         self._analysis_repository = analysis_repository
         self._retrieval_repository = retrieval_repository
@@ -46,11 +33,7 @@ class RetrievalIndexer:
         target_analysis_id: int,
     ) -> str:
         """
-        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى index_reused_analysis؛ المدخلات المهمة: source_analysis_id، target_analysis_id.
-        تعيد str أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يحاول نسخ مستند الاسترجاع من التحليل المصدر، ويعيد فهرسته عند تعذر النسخ.
         """
         target_analysis = self._analysis_repository.get_by_id(
             target_analysis_id
@@ -93,11 +76,7 @@ class RetrievalIndexer:
 
     async def index_analysis(self, analysis_id: int) -> None:
         """
-        ينفذ خطوة من Retrieval أو Knowledge pipeline وينقل provenance ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى index_analysis؛ المدخلات المهمة: analysis_id.
-        تعيد None أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يتحقق من اكتمال التحليل، ينتج embedding وميزات منظمة، ثم يحدّث مستند الاسترجاع.
         """
         analysis = self._analysis_repository.get_by_id(analysis_id)
         if analysis is None:
@@ -166,11 +145,7 @@ class RetrievalIndexer:
         payload: dict,
     ) -> list[str]:
         """
-        ينفذ العملية الخاصة بهذه الطبقة ويعيد ناتجها إلى caller ضمن طبقة Application capability / retrieval.
-
-        تُستدعى عندما يصل workflow إلى _collect_error_signatures؛ المدخلات المهمة: payload.
-        تعيد list[str] أو تحدث الأثر الذي يحدده contract هذه الدالة.
-        قد يرفع exception أو يعيد نتيجة فشل عند عدم تحقق المدخلات أو فشل dependency خارجية.
+        يجمع رسائل الأخطاء ومخرجات stderr الفريدة والمحدودة من التقرير المطبع.
         """
         signatures: set[str] = set()
 
