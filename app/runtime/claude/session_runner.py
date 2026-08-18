@@ -19,6 +19,7 @@ from app.runtime.claude.command import (
 from app.runtime.claude.exceptions import (
     ClaudeProcessExecutionError,
     ClaudeRuntimeError,
+    describe_exception,
 )
 from app.runtime.claude.models import ClaudeRawResult, ClaudeRuntimeRequest
 
@@ -341,7 +342,11 @@ class SubprocessClaudeSessionRunner:
             ) from exc
         except OSError as exc:
             raise ClaudeProcessExecutionError(
-                "Claude runtime process could not start."
+                "Claude runtime process could not start: "
+                + describe_exception(
+                    exc,
+                    fallback="operating-system error without details.",
+                )
             ) from exc
 
     async def _terminate_process(

@@ -300,9 +300,15 @@ class InvestigationRuntimeSnapshotService:
             for slug in selected_specialists
         )
         has_failure = any(item.get("status") in {"failed", "cancelled"} for item in runs)
+        has_findings = any(
+            item.get("status") == "completed"
+            and bool(item.get("findings"))
+            for item in runs
+        )
         snapshot["status"] = (
             "failed" if all_terminal and has_failure
-            else "completed" if all_terminal
+            else "completed" if all_terminal and has_findings
+            else "waiting_for_evidence" if all_terminal
             else "investigating"
         )
 

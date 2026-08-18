@@ -13,6 +13,7 @@ import json
 from app.core.contracts.investigation import (
     EvidenceReference,
     InvestigationBudget,
+    InvestigationFinding,
     SpecialistResult,
     SpecialistTask,
 )
@@ -184,6 +185,8 @@ class SpecialistInvestigationLoop:
         final_execution: (
             SpecialistReasoningExecution | None
         ) = None
+        remediation_action_suggestions: list[dict] = []
+        accumulated_findings: dict[str, InvestigationFinding] = {}
 
         force_synthesis = False
 
@@ -251,6 +254,20 @@ class SpecialistInvestigationLoop:
             )
 
             final_execution = execution
+
+            for finding in execution.result.findings:
+                accumulated_findings.setdefault(
+                    finding.finding_id,
+                    finding,
+                )
+
+            raw_actions = (execution.result.metadata or {}).get(
+                "recommended_remediation_actions", []
+            )
+            if isinstance(raw_actions, (list, tuple)):
+                remediation_action_suggestions.extend(
+                    item for item in raw_actions if isinstance(item, dict)
+                )
 
             force_synthesis = False
 
@@ -613,9 +630,48 @@ class SpecialistInvestigationLoop:
                 )
             )
 
+        final_result = final_execution.result
+        if not final_result.findings and accumulated_findings:
+            historical_evidence_ids = tuple(
+                dict.fromkeys(
+                    final_result.evidence_ids
+                    + tuple(
+                        evidence_id
+                        for finding in accumulated_findings.values()
+                        for evidence_id in finding.evidence_ids
+                    )
+                )
+            )
+            final_result = replace(
+                final_result,
+                findings=tuple(accumulated_findings.values()),
+                evidence_ids=historical_evidence_ids,
+                metadata={
+                    **dict(final_result.metadata or {}),
+                    "findings_preserved_from_previous_round": True,
+                },
+            )
+
+        final_result = self._ensure_evidence_backed_finding(
+            result=final_result,
+            evidence=tuple(evidence),
+        )
+
+        # قد تنتهي الحلقة بتلخيص نهائي لا يعيد اقتراحات الجولة السابقة؛ نحافظ
+        # على الاقتراحات المنظمة كي تصل إلى مرحلة إنشاء الخطة دون فقدها.
+        final_result = replace(
+            final_result,
+            metadata={
+                **dict(final_result.metadata or {}),
+                "recommended_remediation_actions": (
+                    remediation_action_suggestions
+                ),
+            },
+        )
+
         return SpecialistInvestigationLoopResult(
             final_result=(
-                final_execution.result
+                final_result
             ),
             evidence=tuple(evidence),
             rounds_completed=len(traces),
@@ -631,6 +687,52 @@ class SpecialistInvestigationLoop:
             ),
             model=final_execution.model,
             traces=tuple(traces),
+        )
+
+    @staticmethod
+    def _ensure_evidence_backed_finding(
+        *,
+        result: SpecialistResult,
+        evidence: tuple[EvidenceReference, ...],
+    ) -> SpecialistResult:
+        """
+        يحول الخلاصة عالية الثقة إلى نتيجة منظمة عند غياب finding من النموذج.
+
+        لا ينشئ هذا المسار دليلاً جديداً؛ يربط نص الخلاصة بالأدلة التي جمعتها
+        الحلقة فعلياً، ولا يعمل عند وجود أدلة ناقصة أو ثقة منخفضة.
+        """
+        if (
+            result.findings
+            or not evidence
+            or result.confidence < 0.8
+            or result.missing_evidence
+        ):
+            return result
+
+        evidence_ids = tuple(
+            dict.fromkeys(item.evidence_id for item in evidence)
+        )
+        finding = InvestigationFinding(
+            finding_id=f"{result.task_id}:finding:summary",
+            title=(
+                f"{result.specialist_id} evidence-backed conclusion"
+            ),
+            description=result.summary,
+            confidence=result.confidence,
+            evidence_ids=evidence_ids,
+            metadata={
+                "derived_from_specialist_summary": True,
+                "evidence_count": len(evidence_ids),
+            },
+        )
+        return replace(
+            result,
+            findings=(finding,),
+            evidence_ids=evidence_ids,
+            metadata={
+                **dict(result.metadata or {}),
+                "finding_derived_from_summary": True,
+            },
         )
 
     def _render_tool_catalog(

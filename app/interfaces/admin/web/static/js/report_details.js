@@ -1,5 +1,5 @@
 /**
- * صفحة تفاصيل Monitoring Report. تقرأ report وanalysis وretrieval sources من Admin API، ثم تبني العرض؛ لا تنفذ Analysis أو Retrieval بنفسها.
+ * صفحة تفاصيل تقرير المراقبة. تقرأ التقرير والتحليل ومصادر الاسترجاع من Admin API، ثم تبني العرض دون تنفيذ منطق التحليل أو الاسترجاع.
  */
 const reportPageData = document.getElementById(
     "report-page-data"
@@ -8,6 +8,40 @@ const reportPageData = document.getElementById(
 const reportId = Number(
     reportPageData.dataset.reportId
 );
+
+const reportSourceTypeLabels = {
+    monitoring_report: "تقرير مراقبة",
+    historical_analysis: "تحليل تاريخي",
+    knowledge_source: "مصدر معرفة",
+    report: "تقرير",
+    analysis: "تحليل"
+};
+
+const reportClassificationLabels = {
+    availability: "التوافر",
+    performance: "الأداء",
+    configuration: "الإعدادات",
+    security: "الأمان",
+    resource: "الموارد",
+    network: "الشبكة",
+    reliability: "الموثوقية",
+    unknown: "غير معروف",
+    unclassified: "غير مصنف"
+};
+
+const reportSeverityLabels = {
+    info: "معلومة",
+    warning: "تحذير",
+    critical: "حرج"
+};
+
+function reportValueLabel(value, labels, fallback = "غير معروف") {
+    if (value === null || value === undefined || value === "") {
+        return fallback;
+    }
+
+    return labels[value] || fallback;
+}
 /**
  * ينفذ خطوة واجهة باسم loadReportDetails ضمن صفحة Admin Web.
  * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
@@ -84,7 +118,7 @@ async function loadReportAnalysis() {
 
                 <p>
                     قد يكون التحليل قيد التنفيذ،
-                    أو أن مزود LLM غير متاح.
+                    أو أن مزود النموذج اللغوي غير متاح.
                 </p>
             </div>
         `;
@@ -159,7 +193,7 @@ function renderAnalysisSources(sources) {
                         }">
                             ${
                                 source.used_in_prompt
-                                    ? "استُخدم داخل سياق LLM"
+                                    ? "استُخدم داخل سياق النموذج اللغوي"
                                     : "مرجع فقط"
                             }
                         </span>
@@ -171,35 +205,12 @@ function renderAnalysisSources(sources) {
                                 نوع المصدر
                             </span>
                             <strong>
-                                ${escapeHtml(
-                                    source.source_type
-                                )}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span class="form-label">
-                                رقم التقرير
-                            </span>
-                            <strong>
-                                ${
-                                    source.source_report_id
-                                        ? `#${source.source_report_id}`
-                                        : "-"
-                                }
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span class="form-label">
-                                رقم التحليل
-                            </span>
-                            <strong>
-                                ${
-                                    source.source_analysis_id
-                                        ? `#${source.source_analysis_id}`
-                                        : "-"
-                                }
+                                    ${escapeHtml(
+                                        reportValueLabel(
+                                            source.source_type,
+                                            reportSourceTypeLabels
+                                        )
+                                    )}
                             </strong>
                         </div>
 
@@ -230,6 +241,28 @@ function renderAnalysisSources(sources) {
                             </strong>
                         </div>
                     </div>
+
+                    <details class="additional-details">
+                        <summary class="button button-secondary button-sm">
+                            تفاصيل إضافية
+                        </summary>
+                        <div class="additional-details-body">
+                            <div class="admin-kv-grid">
+                                <div class="admin-kv">
+                                    <strong>معرف التقرير المصدر</strong>
+                                    <span class="admin-code">
+                                        ${source.source_report_id || "—"}
+                                    </span>
+                                </div>
+                                <div class="admin-kv">
+                                    <strong>معرف التحليل المصدر</strong>
+                                    <span class="admin-code">
+                                        ${source.source_analysis_id || "—"}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
 
                     ${
                         source.excerpt
@@ -323,7 +356,7 @@ function renderReportAnalysis(analysis) {
         analysis.llm_called
             ? `
                 <span class="badge badge-enabled">
-                    تحليل جديد بواسطة LLM
+                    تحليل جديد بواسطة النموذج اللغوي
                 </span>
             `
             : `
@@ -422,7 +455,7 @@ function renderReportAnalysis(analysis) {
 
             <div>
                 <span class="form-label">
-                    استدعاء LLM
+                    استدعاء النموذج اللغوي
                 </span>
 
                 <strong>
@@ -510,13 +543,18 @@ function renderReportAnalysis(analysis) {
                                             ? "badge-partial_failure"
                                             : "badge-enabled"
                                 }">
-                                    ${escapeHtml(
-                                        issue.severity
+                                    ${reportValueLabel(
+                                        issue.severity,
+                                        reportSeverityLabels
                                     )}
                                 </span>
                                 <span class="badge badge-unknown">
                                     ${escapeHtml(
-                                        issue.classification || "unclassified"
+                                        reportValueLabel(
+                                            issue.classification,
+                                            reportClassificationLabels,
+                                            "غير مصنف"
+                                        )
                                     )}
                                 </span>
                             </header>
@@ -628,7 +666,7 @@ function formatRetrievalStrategy(strategy) {
     };
 
     return strategy
-        ? labels[strategy] || strategy
+        ? labels[strategy] || "غير معروف"
         : "لا يوجد";
 }
 
@@ -807,7 +845,7 @@ function renderCommandExecutions(executions) {
 
                 <div class="execution-meta">
                     <span>
-                        Exit status:
+                        حالة الخروج:
                         ${execution.exit_status ?? "-"}
                     </span>
 
@@ -840,7 +878,7 @@ function renderCommandExecutions(executions) {
 
                 <div class="execution-output-grid">
                     <section>
-                        <h4>stdout</h4>
+                        <h4>المخرجات القياسية</h4>
 
                         <pre>${escapeHtml(
                             execution.stdout ||
@@ -849,7 +887,7 @@ function renderCommandExecutions(executions) {
                     </section>
 
                     <section>
-                        <h4>stderr</h4>
+                        <h4>الأخطاء القياسية</h4>
 
                         <pre>${escapeHtml(
                             execution.stderr ||

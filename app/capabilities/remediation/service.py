@@ -108,7 +108,8 @@ class RemediationService:
                     proposed_actions: list[dict], diagnosis_claim_ids: list[str], evidence_ids: list[str],
                     risk_level: str = RemediationRisk.MEDIUM.value, rollback_plan: str | None = None,
                     plan_id: str | None = None, server_id: int | None = None,
-                    error_classification: str | None = None):
+                    error_classification: str | None = None,
+                    metadata: dict | None = None):
         """
         ينشئ خطة معالجة مرتبطة بالتشخيص والسيرفر والأفعال القابلة للتحقق.
         """
@@ -127,6 +128,7 @@ class RemediationService:
             "production_application_allowed": False,
             "automatic_remediation_allowed": self._automatic_remediation_allowed,
             "registered_actions": registered,
+            **dict(metadata or {}),
         }
         if error_classification is not None:
             metadata["error_classification"] = ErrorClassification(

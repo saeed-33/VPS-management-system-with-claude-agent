@@ -13,7 +13,9 @@ from app.infrastructure.database.models.investigation import (
     InvestigationModel,
     InvestigationSpecialistCandidateModel,
 )
+from app.infrastructure.database.models.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
+from app.core.contracts.investigation import InvestigationStatus
 from app.core.contracts.investigations import PersistInvestigationDTO
 
 
@@ -229,6 +231,80 @@ class InvestigationRepository:
                     ],
                 }
 
+    def promote_next_candidate(self, *, investigation_id: str) -> dict | None:
+        """
+        يضيف المرشح التالي إلى موجة التحقيق ضمن حد المتخصصين المسموح.
+
+        يستخدم هذا المسار عندما تنتهي الموجة الحالية بلا أدلة؛ فلا يعيد حجز
+        متخصص مكتمل، ولا يترك التحقيق عالقاً على المرشحين الأوائل فقط.
+        """
+        with self._session_factory() as session:
+            with session.begin():
+                model = session.scalar(
+                    select(InvestigationModel)
+                    .where(InvestigationModel.investigation_id == investigation_id)
+                    .with_for_update()
+                )
+                if model is None:
+                    raise ValueError(f"Investigation not found: {investigation_id}")
+
+                candidates = list(model.candidates)
+                selected = [item for item in candidates if item.is_selected]
+                if len(selected) >= model.max_specialists:
+                    return None
+
+                next_candidate = next(
+                    (item for item in candidates if not item.is_selected),
+                    None,
+                )
+                if next_candidate is None:
+                    return None
+
+                next_candidate.is_selected = True
+                next_candidate.selected_rank = len(selected) + 1
+                model.status = InvestigationStatus.INVESTIGATING.value
+                session.add(next_candidate)
+                session.add(model)
+                return {
+                    "specialist_slug": next_candidate.specialist_slug,
+                    "selected_rank": next_candidate.selected_rank,
+                }
+
+    def close_without_evidence(self, *, investigation_id: str) -> InvestigationModel:
+        """
+        ينهي تحقيقاً لا يملك أدلة بعد استنفاد المرشحين دون إعادة جدولة لا نهائية.
+        """
+        with self._session_factory() as session:
+            with session.begin():
+                model = session.scalar(
+                    select(InvestigationModel)
+                    .where(InvestigationModel.investigation_id == investigation_id)
+                    .with_for_update()
+                )
+                if model is None:
+                    raise ValueError(f"Investigation not found: {investigation_id}")
+
+                metadata = dict(model.investigation_metadata or {})
+                snapshot = dict(metadata.get("runtime_snapshot") or {})
+                snapshot["status"] = InvestigationStatus.NO_EVIDENCE_FOUND.value
+                snapshot["final_diagnosis_available"] = False
+                runtime_metadata = dict(snapshot.get("metadata") or {})
+                runtime_metadata["completion_reason"] = "no_evidence_found"
+                runtime_metadata["remaining_specialists"] = []
+                snapshot["metadata"] = runtime_metadata
+                metadata["runtime_snapshot"] = snapshot
+                metadata["no_evidence_found_reason"] = (
+                    "All selected specialists completed without findings and "
+                    "no unselected candidates remain within the investigation budget."
+                )
+                model.status = InvestigationStatus.NO_EVIDENCE_FOUND.value
+                model.investigation_metadata = metadata
+                session.add(model)
+                session.flush()
+                session.refresh(model)
+                _ = model.candidates
+                return model
+
     def finalize_specialist(
         self,
         *,
@@ -352,6 +428,47 @@ class InvestigationRepository:
             models = list(
                 session.scalars(statement).all()
             )
+            for model in models:
+                _ = model.candidates
+            return models
+
+    def list_recoverable(
+        self,
+        *,
+        limit: int = 1,
+    ) -> list[InvestigationModel]:
+        """
+        يعرض أقدم التحقيقات التي انقطع تشغيلها بعد التوجيه.
+
+        يمرر فقط التحقيقات التي تحتاج تحقيقًا وسيرفرها مفعل وغير متوقف، حتى
+        لا يعيد العامل تشغيل سجلات تخص سيرفرًا أوقفه المشغل عمدًا.
+        """
+        if limit < 1:
+            raise ValueError("limit must be >= 1.")
+
+        statement = (
+            select(InvestigationModel)
+            .join(
+                ServerModel,
+                ServerModel.id == InvestigationModel.server_id,
+            )
+            .where(
+                InvestigationModel.status.in_(
+                    {"created", "investigating", "waiting_for_evidence"}
+                ),
+                InvestigationModel.should_investigate.is_(True),
+                ServerModel.monitor_enabled.is_(True),
+                ServerModel.status != "offline",
+            )
+            .order_by(
+                InvestigationModel.created_at.asc(),
+                InvestigationModel.id.asc(),
+            )
+            .limit(limit)
+        )
+
+        with self._session_factory() as session:
+            models = list(session.scalars(statement).all())
             for model in models:
                 _ = model.candidates
             return models

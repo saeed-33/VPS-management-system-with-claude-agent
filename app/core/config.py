@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     claude_runtime_enabled: bool = False
     claude_runtime_model: str | None = None
     claude_runtime_timeout_seconds: float = Field(
-        default=300.0,
+        default=600.0,
         gt=0,
     )
     claude_runtime_max_turns: int = Field(
@@ -94,6 +94,12 @@ class Settings(BaseSettings):
     monitor_polling_interval_seconds: float = Field(
         default=5.0,
         gt=0,
+    )
+
+    investigation_recovery_polling_seconds: float = Field(
+        default=15.0,
+        ge=5.0,
+        le=300.0,
     )
 
     default_monitor_interval_seconds: int = Field(

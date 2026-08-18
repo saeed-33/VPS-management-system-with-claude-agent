@@ -36,7 +36,7 @@ class MonitorCommandModel(Base):
     fingerprint_strategy: Mapped[str] = mapped_column(
         String(30),
         nullable=False,
-        default="full_output",
+        default="canonical_lines",
     )
 
     fingerprint_config: Mapped[dict] = mapped_column(

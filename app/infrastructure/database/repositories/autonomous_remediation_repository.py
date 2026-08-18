@@ -63,6 +63,31 @@ class AutonomousRemediationRepository:
         with self._session_factory() as session:
             return session.scalar(select(AutonomousRemediationPolicyModel).where(AutonomousRemediationPolicyModel.policy_id == policy_id))
 
+    def find_duplicate_policy(self, policy: AutonomousRemediationPolicy):
+        """
+        يبحث عن سياسة لها نفس نطاق المشكلة والفعل والهدف ونطاق السيرفرات.
+
+        اختلاف المعرف أو الاسم لا يجعل السياسة مختلفة تشغيلياً؛ وجود أكثر من
+        نسخة مطابقة يسبب تطابقات متعددة ورفضاً احترازياً للتنفيذ الذاتي.
+        """
+        with self._session_factory() as session:
+            candidates = session.scalars(
+                select(AutonomousRemediationPolicyModel).where(
+                    AutonomousRemediationPolicyModel.issue_fingerprint == policy.issue_fingerprint,
+                    AutonomousRemediationPolicyModel.allowed_action_type == policy.allowed_action_type,
+                    AutonomousRemediationPolicyModel.allowed_target_pattern == policy.allowed_target_pattern,
+                )
+            ).all()
+            policy_servers = tuple(policy.allowed_server_ids or ())
+            policy_tags = tuple(policy.allowed_server_tags or ())
+            for candidate in candidates:
+                if (
+                    tuple(candidate.allowed_server_ids or ()) == policy_servers
+                    and tuple(candidate.allowed_server_tags or ()) == policy_tags
+                ):
+                    return candidate
+            return None
+
     def list_policies(self, *, status: str | None = None):
         """
         يعرض قائمة مرتبة من سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها مع إبقاء حدود القراءة واضحة للمرحلة المستدعية.

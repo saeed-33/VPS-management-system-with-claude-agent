@@ -237,7 +237,7 @@ async function loadProfileEditor(profile) {
 
                 <div class="form-group">
                     <label class="form-label">
-                        Timeout مخصص
+                        مهلة مخصصة
                     </label>
 
                     <input
@@ -298,7 +298,7 @@ async function loadProfileEditor(profile) {
                     <tr>
                         <th>الترتيب</th>
                         <th>التعليمة</th>
-                        <th>Timeout</th>
+                        <th>المهلة</th>
                         <th>الحالة</th>
                         <th>الإجراءات</th>
                     </tr>

@@ -94,6 +94,8 @@ class CommandRepository:
         model = MonitorCommandModel(
             name=data.name.strip(),
             command=data.command.strip(),
+            fingerprint_strategy=data.fingerprint_strategy,
+            fingerprint_config=data.fingerprint_config or {},
             description=data.description,
             timeout_seconds=data.timeout_seconds,
             enabled=data.enabled,

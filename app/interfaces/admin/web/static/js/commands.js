@@ -1,5 +1,5 @@
 /**
- * صفحة إدارة monitoring commands. تتعامل مع CRUD للأوامر وإعداد fingerprint strategy عبر Admin API، وتبقي form/modal state محليًا.
+ * صفحة إدارة تعليمات المراقبة. تتعامل مع إنشاء وتعديل وحذف الأوامر وإعداد سياسة البصمة عبر الواجهة البرمجية.
  */
 let currentCommands = [];
 
@@ -7,15 +7,15 @@ const fingerprintStrategyInformation = {
     full_output: {
         label: "المخرجات كاملة",
         description:
-            "يستخدم stdout وstderr كاملين بعد تنظيف المسافات. " +
+            "يستخدم المخرجات القياسية ومخرجات الأخطاء كاملتين بعد تنظيف المسافات. " +
             "أي اختلاف في المخرجات يؤدي غالبًا إلى بصمة جديدة."
     },
 
     status_only: {
         label: "حالة التنفيذ فقط",
         description:
-            "يستخدم نجاح التعليمة وExit status فقط، " +
-            "ويتجاهل stdout وstderr."
+            "يستخدم نجاح التعليمة ورمز الخروج فقط، " +
+            "ويتجاهل المخرجات القياسية ومخرجات الأخطاء."
     },
 
     canonical_lines: {
@@ -29,13 +29,13 @@ const fingerprintStrategyInformation = {
         label: "توقيع الأخطاء",
         description:
             "يستخدم النص بعد إزالة العناصر المتغيرة مثل " +
-            "التواريخ، وفق إعدادات fingerprint_config."
+            "التواريخ، وفق إعدادات ضبط البصمة."
     },
 
     exclude_output: {
         label: "تجاهل المخرجات",
         description:
-            "يتجاهل stdout وstderr، لكنه يحتفظ ببيانات " +
+            "يتجاهل المخرجات القياسية ومخرجات الأخطاء، لكنه يحتفظ ببيانات " +
             "التعليمة وحالة تنفيذها."
     }
 };
@@ -97,7 +97,7 @@ async function loadCommands() {
 
     } catch (error) {
         console.error(
-            "Failed to load commands:",
+            "تعذر تحميل التعليمات:",
             error
         );
 
@@ -142,11 +142,11 @@ async function loadCommands() {
 function renderCommandRow(command) {
     const strategy =
         command.fingerprint_strategy ||
-        "full_output";
+        "canonical_lines";
 
     const strategyData =
         fingerprintStrategyInformation[strategy] ||
-        fingerprintStrategyInformation.full_output;
+        fingerprintStrategyInformation.canonical_lines;
 
     return `
         <tr>
@@ -255,40 +255,52 @@ function renderCommandRow(command) {
 
 
 /**
- * ينفذ خطوة واجهة باسم parseFingerprintConfig ضمن صفحة Admin Web.
- * يقرأ state من DOM أو API ويحدث العرض؛ الفشل يظهر للمستخدم أو يمرر للـcaller.
+ * ينفذ خطوة واجهة باسم fingerprintConfigFromForm ضمن صفحة Admin Web.
+ * يحول خيارات سياسة الذاكرة المرئية إلى إعدادات الطلب دون عرض بنية تقنية.
  */
-function parseFingerprintConfig(
-    rawValue,
-    fieldName
+function fingerprintConfigFromForm(
+    checkboxId
 ) {
-    const normalizedValue =
-        rawValue.trim() || "{}";
+    const checkbox = document.getElementById(
+        checkboxId
+    );
 
-    let parsedValue;
+    return {
+        remove_timestamps: Boolean(
+            checkbox && checkbox.checked
+        )
+    };
+}
 
-    try {
-        parsedValue = JSON.parse(
-            normalizedValue
-        );
 
-    } catch (error) {
-        throw new Error(
-            `${fieldName} يجب أن يحتوي JSON صحيحًا.`
-        );
+function applyFingerprintConfigToForm(
+    checkboxId,
+    config
+) {
+    const checkbox = document.getElementById(
+        checkboxId
+    );
+
+    if (checkbox) {
+        checkbox.checked = config?.remove_timestamps !== false;
     }
+}
 
-    if (
-        parsedValue === null ||
-        Array.isArray(parsedValue) ||
-        typeof parsedValue !== "object"
-    ) {
-        throw new Error(
-            `${fieldName} يجب أن يكون JSON Object.`
-        );
+
+function updateFingerprintOptionState(
+    strategyId,
+    checkboxId
+) {
+    const strategy = document.getElementById(
+        strategyId
+    );
+    const checkbox = document.getElementById(
+        checkboxId
+    );
+
+    if (strategy && checkbox) {
+        checkbox.disabled = strategy.value !== "error_signature";
     }
-
-    return parsedValue;
 }
 
 
@@ -338,15 +350,20 @@ function resetCreateCommandForm() {
 
     document.getElementById(
         "command-fingerprint-strategy"
-    ).value = "full_output";
+    ).value = "canonical_lines";
 
-    document.getElementById(
-        "command-fingerprint-config"
-    ).value = "{}";
+    applyFingerprintConfigToForm(
+        "command-remove-timestamps",
+        {}
+    );
 
     updateStrategyHelp(
         "command-fingerprint-strategy",
         "command-strategy-help"
+    );
+    updateFingerprintOptionState(
+        "command-fingerprint-strategy",
+        "command-remove-timestamps"
     );
 }
 
@@ -397,19 +414,20 @@ function openEditCommandModal(commandId) {
         "edit-command-fingerprint-strategy"
     ).value =
         command.fingerprint_strategy ||
-        "full_output";
+        "canonical_lines";
 
-    document.getElementById(
-        "edit-command-fingerprint-config"
-    ).value = JSON.stringify(
-        command.fingerprint_config || {},
-        null,
-        2
+    applyFingerprintConfigToForm(
+        "edit-command-remove-timestamps",
+        command.fingerprint_config || {}
     );
 
     updateStrategyHelp(
         "edit-command-fingerprint-strategy",
         "edit-command-strategy-help"
+    );
+    updateFingerprintOptionState(
+        "edit-command-fingerprint-strategy",
+        "edit-command-remove-timestamps"
     );
 
     const modal = document.getElementById(
@@ -540,11 +558,8 @@ document
 
             try {
                 const fingerprintConfig =
-                    parseFingerprintConfig(
-                        document.getElementById(
-                            "command-fingerprint-config"
-                        ).value,
-                        "إعدادات سياسة الذاكرة"
+                    fingerprintConfigFromForm(
+                        "command-remove-timestamps"
                     );
 
                 await apiRequest(
@@ -635,11 +650,8 @@ document
 
             try {
                 const fingerprintConfig =
-                    parseFingerprintConfig(
-                        document.getElementById(
-                            "edit-command-fingerprint-config"
-                        ).value,
-                        "إعدادات سياسة الذاكرة"
+                    fingerprintConfigFromForm(
+                        "edit-command-remove-timestamps"
                     );
 
                 await apiRequest(
@@ -718,6 +730,10 @@ document
                 "command-fingerprint-strategy",
                 "command-strategy-help"
             );
+            updateFingerprintOptionState(
+                "command-fingerprint-strategy",
+                "command-remove-timestamps"
+            );
         }
     );
 
@@ -732,6 +748,10 @@ document
             updateStrategyHelp(
                 "edit-command-fingerprint-strategy",
                 "edit-command-strategy-help"
+            );
+            updateFingerprintOptionState(
+                "edit-command-fingerprint-strategy",
+                "edit-command-remove-timestamps"
             );
         }
     );

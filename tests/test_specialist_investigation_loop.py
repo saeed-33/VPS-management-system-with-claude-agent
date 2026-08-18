@@ -401,6 +401,10 @@ def test_loop_collects_evidence_then_reasons_again():
     assert output.rounds_completed == 2
     assert output.actions_executed == 1
     assert len(output.evidence) == 1
+    assert len(output.final_result.findings) == 1
+    assert output.final_result.evidence_ids == (
+        "task-1:r1:a1:network-listeners",
+    )
     assert collector.calls
     assert context_builder.calls == [
         (),

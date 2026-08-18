@@ -6,15 +6,25 @@
 """
 from __future__ import annotations
 
+import asyncio
+from dataclasses import replace
+import logging
 from uuid import uuid4
 
-from app.runtime.claude.exceptions import ClaudeRuntimeError
+from app.runtime.claude.exceptions import (
+    ClaudeRuntimeError,
+    describe_exception,
+)
 from app.runtime.claude.job_service import ClaudeAgentJobService
 from app.runtime.claude.models import (
     ClaudeJobStatus,
+    ClaudeRuntimeResult,
     ClaudeRuntimeRequest,
 )
 from app.runtime.claude.runtime import ClaudeRuntimeAdapter
+
+
+logger = logging.getLogger(__name__)
 
 
 SERVER_SUPERVISOR_ALLOWED_TOOLS = (
@@ -115,9 +125,65 @@ class ClaudeNativeMonitoringRunner:
             job_id=job_id,
         )
 
-        result = await self._runtime_adapter.execute(
-            request
-        )
+        active_request = request
+
+        try:
+            result = await self._runtime_adapter.execute(
+                active_request
+            )
+
+            if self._needs_analysis_recovery(result):
+                logger.warning(
+                    "Resuming Claude monitoring job after missing "
+                    "analysis tool call | job_id=%s",
+                    request.job_id,
+                )
+                active_request = replace(
+                    request,
+                    prompt=(
+                        request.prompt
+                        + "\n\nRECOVERY MODE: The previous attempt "
+                        "already called "
+                        "mcp__vps__run_monitoring. Do not call it again. "
+                        "Resume from the persisted state immediately: read "
+                        "the current report, call "
+                        "mcp__vps__analyze_report with force=false, then "
+                        "verify it with mcp__vps__get_analysis. Continue "
+                        "only through the authorized project MCP tools and "
+                        "do not claim completion until those calls are "
+                        "visible in the session."
+                    ),
+                )
+                result = await self._runtime_adapter.execute(
+                    active_request
+                )
+        except asyncio.CancelledError:
+            # إلغاء مهمة المجدول أثناء إيقاف التطبيق يجب أن يغلق سجل المهمة
+            # قبل إعادة رفع الإلغاء، وإلا ستبقى بحالة running حتى الإقلاع التالي.
+            self._finalize_cancellation(
+                active_request
+            )
+            raise
+        except Exception as exc:
+            # يحول الفشل غير المتوقع في طبقة العامل إلى نتيجة محفوظة قبل
+            # تمريره للمجدول، حتى لا تظل المهمة عالقة بحالة running.
+            failure = ClaudeRuntimeResult(
+                job_id=request.job_id,
+                job_type=request.job_type,
+                status=ClaudeJobStatus.FAILED,
+                error_code="runner_error",
+                error_message=describe_exception(
+                    exc,
+                    fallback=(
+                        "Claude monitoring runner failed without "
+                        "diagnostic output."
+                    ),
+                ),
+            )
+            self._agent_job_service.complete_from_result(
+                failure
+            )
+            raise
 
         self._agent_job_service.complete_from_result(
             result
@@ -141,6 +207,59 @@ class ClaudeNativeMonitoringRunner:
 
         return result
 
+    def _finalize_cancellation(
+        self,
+        request: ClaudeRuntimeRequest,
+    ) -> None:
+        """
+        يحفظ إلغاء دورة المراقبة مع إبقاء ``CancelledError`` قابلًا للانتشار.
+        """
+        result = ClaudeRuntimeResult(
+            job_id=request.job_id,
+            job_type=request.job_type,
+            status=ClaudeJobStatus.CANCELLED,
+            error_code="cancelled",
+            error_message=(
+                "Claude monitoring job was cancelled during "
+                "application shutdown."
+            ),
+        )
+
+        try:
+            self._agent_job_service.complete_from_result(
+                result
+            )
+        except Exception:
+            # لا نخفي إشارة الإلغاء الأصلية إذا تعذر حفظ الحالة أثناء
+            # الإغلاق، لكن نسجل سبب فشل الحفظ للتشخيص.
+            logger.exception(
+                "Could not persist cancelled Claude monitoring job | job_id=%s",
+                request.job_id,
+            )
+
+    @staticmethod
+    def _needs_analysis_recovery(
+        result: ClaudeRuntimeResult,
+    ) -> bool:
+        """
+        يحدد الفشل القابل للاستئناف بعد تنفيذ المراقبة وقبل تحليل التقرير.
+
+        لا يعيد تشغيل الدورة إلا عندما تثبت رسالة decoder أن
+        ``run_monitoring`` نُفذت وأن ``analyze_report`` لم تُنفذ؛ وهذا يمنع
+        تكرار المراقبة أو إنشاء تقرير ثانٍ لنفس الدورة.
+        """
+        if result.status != ClaudeJobStatus.FAILED:
+            return False
+
+        message = result.error_message or ""
+
+        return (
+            "required project MCP tools were not called" in message
+            and "mcp__vps__analyze_report" in message
+            and "observed tool calls:" in message
+            and "mcp__vps__run_monitoring" in message
+        )
+
     @staticmethod
     def _prompt(
         *,
@@ -160,6 +279,7 @@ class ClaudeNativeMonitoringRunner:
             "Do not produce a final answer before completing the mandatory "
             "tool protocol below. "
             "MANDATORY ORDER: "
+            "Do not write a prose answer before completing the tool order. "
             "1) call mcp__vps__get_server_context for the server; "
             "2) call mcp__vps__get_monitoring_profile for the server's "
             "persisted monitoring profile; "
@@ -169,24 +289,21 @@ class ClaudeNativeMonitoringRunner:
             "5) call mcp__vps__analyze_report for the CURRENT persisted "
             "report with force=false; "
             "6) verify that current analysis with mcp__vps__get_analysis; "
+            "The cycle is invalid unless both "
+            "mcp__vps__run_monitoring and "
+            "mcp__vps__analyze_report appear as actual tool calls. "
+            "If a tool result is empty or ambiguous, reread the persisted "
+            "record instead of guessing and continue the order; "
             "7) only then decide from persisted analysis whether deeper "
-            "investigation is required and continue through authorized "
-            "project MCP tools if necessary. "
-            "If start_investigation succeeds with "
-            "should_investigate=true, this cycle is NOT complete: "
-            "you MUST read the returned investigation_id and status, "
-            "then continue until at least one selected Specialist has "
-            "persisted a terminal result and the investigation status and "
-            "Evidence/final diagnosis have been reread. Use the bounded "
-            "Agent(specialist-worker) capability for each selected "
-            "remaining Specialist; when calling the generic Agent interface "
-            "provide both required fields, description and prompt, and put "
-            "all three delegation inputs in the prompt: investigation_id, "
-            "selected specialist_slug, and a concise objective. Do not stop "
-            "after investigation creation or status inspection, and do not "
-            "call run_specialist directly from the supervisor. Stop only "
-            "after persisted Specialist progress is proven or a controlled "
-            "terminal project failure is returned. "
+            "investigation is required. If the persisted routing returns "
+            "should_investigate=true, call "
+            "mcp__vps__start_investigation once to persist routing, then "
+            "reread the returned investigation_id and status. Do not "
+            "delegate Specialists or call Agent(specialist-worker) in this "
+            "scheduled monitoring cycle: the investigation backlog worker "
+            "owns bounded Specialist recovery after routing is persisted. "
+            "This cycle is complete after the current analysis and any "
+            "investigation routing state have been persisted and reread. "
             "If any mandatory tool is unavailable or fails, return a "
             "controlled failure; NEVER invent monitoring values, report IDs, "
             "analysis IDs, diagnoses, evidence, or successful completion. "

@@ -215,6 +215,29 @@ def test_cpu_issue_has_same_candidate_and_selection():
     assert decision.selected_slugs == ("linux-cpu",)
 
 
+def test_cpu_process_issue_adds_domain_specialist_fallback():
+    """
+    يثبت أن مشكلة المعالج المرتبطة بعملية لا تسقط متخصص العمليات بسبب
+    مطابقة linux-cpu لعبارة trigger العامة أولاً.
+    """
+    decision = make_router(*baseline()).route(
+        report=report(),
+        analysis=analysis(
+            health_status="warning",
+            issues=[
+                issue(
+                    "High CPU utilization by Python process",
+                    description="A Python process is consuming excessive CPU.",
+                )
+            ],
+        ),
+    )
+
+    assert decision.candidate_slugs[0] == "linux-cpu"
+    assert "linux-process" in decision.candidate_slugs
+    assert "linux-process" in decision.selected_slugs
+
+
 def test_connection_failure_routes_network_only():
     """
     يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.

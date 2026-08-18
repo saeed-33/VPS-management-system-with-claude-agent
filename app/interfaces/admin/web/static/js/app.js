@@ -1,7 +1,7 @@
 /**
  * مشترك بين صفحات Admin Web. يدير permission visibility، theme/navigation، تنسيق القيم وطلبات API. الحالة الأساسية في DOM وsession/browser state؛ لا يمنح الصلاحية بل يعكس قرار الخادم.
  */
-console.log("Global app.js loaded");
+console.log("تم تحميل واجهة الإدارة المشتركة");
 
 const adminContext =
     window.ADMIN_CONTEXT || {
@@ -105,10 +105,10 @@ function formatDuration(milliseconds) {
     }
 
     if (milliseconds < 1000) {
-        return `${Math.round(milliseconds)} ms`;
+        return `${new Intl.NumberFormat("ar").format(Math.round(milliseconds))} مللي ثانية`;
     }
 
-    return `${(milliseconds / 1000).toFixed(2)} s`;
+    return `${new Intl.NumberFormat("ar", {maximumFractionDigits: 2}).format(milliseconds / 1000)} ثانية`;
 }
 
 /**
@@ -127,14 +127,47 @@ function statusBadge(status) {
         success: "ناجح",
         partial_failure: "فشل جزئي",
         connection_failed: "فشل الاتصال",
-        failed: "فشل"
+        failed: "فشل",
+        pending: "قيد الانتظار",
+        queued: "في قائمة الانتظار",
+        running: "قيد التشغيل",
+        executing: "قيد التنفيذ",
+        completed: "مكتمل",
+        cancelled: "ملغى",
+        canceled: "ملغى",
+        approved: "تمت الموافقة",
+        rejected: "مرفوض",
+        enabled: "مفعّل",
+        disabled: "معطّل",
+        active: "نشط",
+        inactive: "غير نشط",
+        suspended: "موقوف",
+        eligible: "مؤهل للمراجعة",
+        review: "بحاجة إلى مراجعة",
+        rolled_back: "تم التراجع",
+        verified: "تم التحقق",
+        not_started: "لم يبدأ",
+        authorization_required: "يتطلب تفويضًا",
+        created: "منشأ",
+        reserved: "محجوز",
+        consumed: "مستهلك",
+        expired: "منتهي الصلاحية",
+        denied: "مرفوض",
+        blocked: "محجوب",
+        passed: "اجتاز التحقق",
+        stale: "منتهي الصلاحية",
+        auto_execute: "تنفيذ تلقائي",
+        require_human_approval: "يتطلب موافقة بشرية",
+        deny: "مرفوض",
+        valid: "صالح",
+        revoked: "ملغى"
     };
 
     return `
         <span
             class="badge badge-${normalizedStatus}"
         >
-            ${labels[normalizedStatus] ?? normalizedStatus}
+            ${labels[normalizedStatus] ?? "غير معروف"}
         </span>
     `;
 }
@@ -240,20 +273,38 @@ async function apiRequest(
         const detail =
             typeof data.detail === "string"
                 ? data.detail
-                : JSON.stringify(data.detail || data);
+                : readableDetail(data.detail || data);
 
-        const error = new Error(detail || `Request failed (${response.status}).`);
+        const error = new Error(detail || `فشل الطلب (${response.status}).`);
         error.status = response.status;
         error.payload = data;
         if (response.status === 401) {
-            showToast("Your Admin session has expired. Please log in again.", "error");
+            showToast("انتهت جلسة الإدارة. يرجى تسجيل الدخول مرة أخرى.", "error");
         } else if (response.status === 403) {
-            showToast("You do not have permission for this operation.", "error");
+            showToast("لا تملك الصلاحية لتنفيذ هذه العملية.", "error");
         }
         throw error;
     }
 
     return data;
+}
+
+function readableDetail(value) {
+    if (value === null || value === undefined || value === "") {
+        return "تعذر إكمال الطلب.";
+    }
+
+    if (Array.isArray(value)) {
+        return value.map(item => readableDetail(item)).join("، ");
+    }
+
+    if (typeof value === "object") {
+        return Object.entries(value)
+            .map(([key, item]) => `${key}: ${readableDetail(item)}`)
+            .join(" | ");
+    }
+
+    return String(value);
 }
 
 /**
@@ -326,15 +377,21 @@ function initializeNavigation() {
         "/commands": "أوامر المراقبة",
         "/reports": "تقارير المراقبة",
         "/monitoring-profiles": "ملفات المراقبة",
-        "/autonomous-policies": "Autonomous Policies",
-        "/autonomous-candidates": "Policy Candidates",
-        "/autonomous-history": "Autonomous History",
-        "/autonomous-decisions": "Autonomous Decisions",
-        "/autonomous-runtime": "Autonomous Runtime",
-        "/autonomous-reservations": "Reservations",
-        "/autonomous-authorizations": "Authorizations",
-        "/audit": "Audit / Operations",
-        "/system": "System Runtime",
+        "/investigations": "التحقيقات",
+        "/reports": "تقارير المراقبة",
+        "/specialists": "الوكلاء المتخصصون",
+        "/knowledge-sources": "مصادر المعرفة",
+        "/agent-runs": "تشغيلات الوكلاء",
+        "/remediation": "المعالجة تحت الإشراف",
+        "/autonomous-policies": "سياسات المعالجة الذاتية",
+        "/autonomous-candidates": "مرشحو السياسات",
+        "/autonomous-history": "سجل المعالجة الذاتية",
+        "/autonomous-decisions": "قرارات المعالجة الذاتية",
+        "/autonomous-runtime": "تشغيل المعالجة الذاتية",
+        "/autonomous-reservations": "حجوزات التنفيذ",
+        "/autonomous-authorizations": "التفويضات",
+        "/audit": "التدقيق والعمليات",
+        "/system": "النظام والسلامة",
     };
 
     document
@@ -362,6 +419,9 @@ function initializeNavigation() {
     if (titleElement) {
         titleElement.textContent =
             pageTitles[currentPath] ||
+            Object.entries(pageTitles).find(([route]) =>
+                route !== "/" && currentPath.startsWith(route)
+            )?.[1] ||
             "إدارة النظام";
     }
 }

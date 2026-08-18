@@ -8,6 +8,7 @@
 {% block content %}
 <header class="page-header">
     <div>
+        <p class="page-eyebrow">البنية التحتية</p>
         <h1 class="page-heading">
             إدارة السيرفرات
         </h1>
@@ -40,12 +41,12 @@
                     اسم السيرفر
                 </label>
 
-                <input id="server-name" class="form-control" placeholder="Production VPS" required />
+                <input id="server-name" class="form-control" placeholder="مثال: خادم الإنتاج" required />
             </div>
 
             <div class="form-group">
                 <label for="server-host" class="form-label">
-                    IP أو Hostname
+                    عنوان الشبكة أو اسم المضيف
                 </label>
 
                 <input id="server-host" class="form-control" placeholder="192.168.1.100" required />
@@ -53,7 +54,7 @@
 
             <div class="form-group">
                 <label for="server-port" class="form-label">
-                    منفذ SSH
+                    منفذ الاتصال الآمن
                 </label>
 
                 <input id="server-port" class="form-control" type="number" value="22" min="1" max="65535" required />
@@ -61,7 +62,7 @@
 
             <div class="form-group">
                 <label for="server-username" class="form-label">
-                    مستخدم SSH
+                    مستخدم الاتصال
                 </label>
 
                 <input id="server-username" class="form-control" value="monitor" required />
@@ -208,7 +209,7 @@
                     for="edit-server-host"
                     class="form-label"
                 >
-                    IP أو Hostname
+                    عنوان الشبكة أو اسم المضيف
                 </label>
 
                 <input
@@ -223,7 +224,7 @@
                     for="edit-server-port"
                     class="form-label"
                 >
-                    منفذ SSH
+                    منفذ الاتصال الآمن
                 </label>
 
                 <input
@@ -241,7 +242,7 @@
                     for="edit-server-username"
                     class="form-label"
                 >
-                    مستخدم SSH
+                    مستخدم الاتصال
                 </label>
 
                 <input

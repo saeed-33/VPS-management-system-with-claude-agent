@@ -298,6 +298,12 @@ class ClaudeCliJsonDecoder:
                 "Claude operational session cannot be accepted: "
                 "required project MCP tools were not called: "
                 + ", ".join(missing)
+                + "; observed tool calls: "
+                + (
+                    ", ".join(tool_names)
+                    if tool_names
+                    else "none"
+                )
             )
 
         # هذا الغلاف ليس تشخيصًا؛ التقرير والتحليل والتحقيق والأدلة محفوظة في

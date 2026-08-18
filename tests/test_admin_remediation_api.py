@@ -108,7 +108,7 @@ def remediation_api_app():
     engine.dispose()
 
 
-def _login(client: TestClient, service: AdminAuthService, username: str) -> None:
+def _login(client: TestClient, service: AdminAuthService, username: str) -> str:
     """
     ينفذ خطوة مساعدة ضمن هذا الملف ضمن طبقة Test suite.
 
@@ -125,6 +125,9 @@ def _login(client: TestClient, service: AdminAuthService, username: str) -> None
         follow_redirects=False,
     )
     assert response.status_code == 303
+    raw_token = client.cookies.get(service.cookie_name)
+    assert raw_token
+    return service.csrf_token(raw_token)
 
 
 @pytest.mark.parametrize("username", ("viewer", "operator", "admin"))
@@ -180,3 +183,51 @@ def test_remediation_detail_and_missing_record_are_safe_json(remediation_api_app
     missing = client.get("/api/remediation/does-not-exist")
     assert missing.status_code == 404
     assert missing.json() == {"detail": "Remediation plan not found."}
+
+
+def test_sandbox_validation_response_is_finite_json(remediation_api_app):
+    """
+    يثبت أن endpoint التحقق المعزول لا يعيد نموذج SQLAlchemy مباشرة.
+    """
+    app, auth_service = remediation_api_app
+    client = TestClient(app)
+    csrf = _login(client, auth_service, "admin")
+
+    service = app.dependency_overrides[get_remediation_service]()
+
+    service.validate_in_isolated_sandbox = lambda **_: SandboxValidationModel(
+        validation_id="validation-api-repro",
+        plan_id="plan-api-repro",
+        plan_fingerprint="fingerprint-api-repro",
+        server_id=1,
+        server_name="safe-test-server",
+        service="demo.service",
+        action_type="start_service",
+        action_parameters={},
+        expected_state="active",
+        observed_state="active",
+        before_evidence_ids=["before-evidence"],
+        after_evidence_ids=["after-evidence"],
+        verification_status="verified",
+        status="passed",
+        failure_reason=None,
+        validation_metadata={"restored_state": "inactive"},
+    )
+
+    response = client.post(
+        "/api/remediation/plan-api-repro/sandbox-validation",
+        json={
+            "target_server_id": 1,
+            "target_server_name": "safe-test-server",
+            "target_service": "demo.service",
+        },
+        headers={"X-CSRF-Token": csrf},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert isinstance(payload["validation_id"], str)
+    assert payload["validation_id"]
+    assert payload["status"] == "passed"
+    assert payload["observed_state"] == "active"
+    assert json.dumps(payload)

@@ -379,3 +379,60 @@ def test_ollama_invalid_structured_result_fails_closed_after_retry():
 
     assert len(calls) == 2
     asyncio.run(client.close())
+
+
+def test_ollama_normalizes_common_remediation_aliases_before_validation():
+    """
+    يثبت تصحيح مخرج Ollama الذي يستخدم action ويضع مرجع معرفة داخل فرضية.
+    """
+    calls = []
+    output = json.loads(json.dumps(VALID_OUTPUT))
+    output["hypotheses"] = [{
+        "statement": "The service is inactive.",
+        "confidence": 0.9,
+        "supporting_evidence_ids": [],
+        "contradicting_evidence_ids": [],
+        "knowledge_source_ids": ["knowledge-chunk:1"],
+    }]
+    output["recommended_remediation_actions"] = [{
+        "action": "start_service",
+        "target": "ai-vps-remediation-test.service",
+        "description": "The expected service is inactive.",
+        "extra_model_field": "discarded",
+    }]
+
+    async def handler(request):
+        calls.append(json.loads(request.content))
+        return make_response(
+            200,
+            {
+                "done_reason": "stop",
+                "message": {"content": json.dumps(output)},
+            },
+            request,
+        )
+
+    client = OllamaSpecialistReasoningClient(
+        base_url="http://ollama.test",
+        model="test-model",
+        timeout_seconds=10,
+    )
+    client._client = httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+        base_url="http://ollama.test",
+    )
+
+    parsed = asyncio.run(
+        client.reason(
+            system_prompt="system",
+            user_prompt="context",
+        )
+    )
+
+    assert len(calls) == 1
+    assert parsed.hypotheses[0].supporting_evidence_ids == []
+    action = parsed.recommended_remediation_actions[0]
+    assert action.action_type == "start_service"
+    assert action.reason == "The expected service is inactive."
+    assert action.expected_effect == "The named service reaches the expected state."
+    asyncio.run(client.close())

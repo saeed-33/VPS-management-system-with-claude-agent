@@ -1,7 +1,98 @@
-{# قالب Admin Web لصفحة audit. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب سجل التدقيق. يجمع أحداث التشغيل والمصادقة للعرض فقط. #}
 {% extends "base.html" %}
-{% block title %}Audit / Operations{% endblock %}
-{% block content %}<header class="page-header"><div><h1 class="page-heading">Audit / Operations</h1><p class="page-description">Operational policy, autonomous execution, remediation, and Admin security events.</p></div></header><section class="panel"><header class="panel-header"><div class="admin-filter-row"><label class="form-group"><span class="form-label">Plan ID</span><input id="audit-plan" class="form-control" placeholder="optional"></label><label class="form-group"><span class="form-label">Event type</span><input id="audit-event" class="form-control" placeholder="optional"></label><button id="audit-reload" class="button button-secondary button-sm" type="button">Filter</button></div></header><div id="audit-list" class="panel-body"><div class="empty-state"><h3>Loading audit events...</h3></div></div></section>{% endblock %}
-{% block scripts %}<script src="/static/js/autonomous.js"></script><script>
-(() => { const node = document.getElementById("audit-list"); async function load() { try { const query = new URLSearchParams(); const plan = document.getElementById("audit-plan").value.trim(); const eventType = document.getElementById("audit-event").value.trim(); if (plan) query.set("plan_id", plan); if (eventType) query.set("event_type", eventType); query.set("limit", "500"); const [operational, auth] = await Promise.all([apiRequest("/api/autonomous-remediation/audit?" + query.toString()), apiRequest("/api/admin/auth-audit?limit=500")]); const authItems = auth.filter(item => !eventType || item.event_type === eventType).map(item => ({...item, payload: {...(item.metadata || {}), success: item.success, remote_addr: item.remote_addr}, policy_id: ""})); const items = [...operational, ...authItems].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))); if (!items.length) return AutonomousUI.showEmpty(node, "No matching audit events."); node.innerHTML = `<div class="admin-table-wrap"><table class="data-table"><thead><tr><th>Time</th><th>Source</th><th>Event</th><th>Actor</th><th>Policy / Plan</th><th>Payload</th></tr></thead><tbody>${items.map(item => `<tr><td>${AutonomousUI.date(item.created_at)}</td><td>${escapeHtml(item.source)}</td><td>${escapeHtml(item.event_type)}</td><td>${escapeHtml(AutonomousUI.text(item.actor))}</td><td>${escapeHtml(AutonomousUI.text(item.policy_id || item.plan_id))}</td><td><code class="admin-code">${escapeHtml(JSON.stringify(item.payload || {}))}</code></td></tr>`).join("")}</tbody></table></div>`; } catch (error) { AutonomousUI.showError(node, error); } } document.getElementById("audit-reload").addEventListener("click", load); load(); })();
-</script>{% endblock %}
+{% block title %}سجل التدقيق{% endblock %}
+{% block content %}
+<header class="page-header">
+    <div>
+        <p class="page-eyebrow">التتبع والامتثال</p>
+        <h1 class="page-heading">سجل التدقيق</h1>
+        <p class="page-description">مراجعة أحداث التشغيل، المعالجة، المصادقة، والعمليات الإدارية في مكان واحد.</p>
+    </div>
+</header>
+
+<section class="panel audit-panel">
+    <header class="panel-header audit-toolbar">
+        <div>
+            <h2 class="panel-title">تصفية الأحداث</h2>
+            <p class="panel-subtitle">استخدم المعرفات التقنية لتضييق النتائج.</p>
+        </div>
+        <div class="admin-filter-row">
+            <label class="form-group">
+                <span class="form-label">معرف الخطة</span>
+                <input id="audit-plan" class="form-control" placeholder="اختياري" autocomplete="off">
+            </label>
+            <label class="form-group">
+                <span class="form-label">نوع الحدث</span>
+                <input id="audit-event" class="form-control" placeholder="اختياري" autocomplete="off">
+            </label>
+            <button id="audit-reload" class="button button-primary button-sm" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/></svg>
+                تطبيق التصفية
+            </button>
+        </div>
+    </header>
+    <div id="audit-list" class="panel-body">
+        <div class="loading-state"><span class="loading-spinner"></span><span>جارٍ تحميل أحداث التدقيق</span></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/autonomous.js"></script>
+<script>
+(() => {
+    const node = document.getElementById("audit-list");
+    const eventLabels = {
+        login_success: "تسجيل دخول ناجح",
+        login_failed: "فشل تسجيل الدخول",
+        logout: "تسجيل الخروج",
+        remediation_plan_created: "إنشاء خطة معالجة",
+        remediation_approved: "الموافقة على المعالجة",
+        remediation_executed: "تنفيذ المعالجة",
+        remediation_verified: "التحقق من المعالجة",
+        remediation_rolled_back: "التراجع عن المعالجة",
+        autonomous_execution: "تنفيذ معالجة ذاتية",
+        policy_created: "إنشاء سياسة",
+        policy_updated: "تحديث سياسة",
+        policy_suspended: "إيقاف سياسة"
+    };
+
+    function auditEventLabel(value) {
+        return eventLabels[value] || "حدث مسجل";
+    }
+
+    function auditSourceLabel(value) {
+        return value === "admin_auth" ? "المصادقة" : "التشغيل";
+    }
+
+    async function load() {
+        try {
+            const query = new URLSearchParams();
+            const plan = document.getElementById("audit-plan").value.trim();
+            const eventType = document.getElementById("audit-event").value.trim();
+            if (plan) query.set("plan_id", plan);
+            if (eventType) query.set("event_type", eventType);
+            query.set("limit", "500");
+
+            const [operational, auth] = await Promise.all([
+                apiRequest("/api/autonomous-remediation/audit?" + query.toString()),
+                apiRequest("/api/admin/auth-audit?limit=500")
+            ]);
+            const authItems = auth
+                .filter(item => !eventType || item.event_type === eventType)
+                .map(item => ({...item, payload: {...(item.metadata || {}), success: item.success, remote_addr: item.remote_addr}, policy_id: ""}));
+            const items = [...operational, ...authItems].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+
+            if (!items.length) return AutonomousUI.showEmpty(node, "لا توجد أحداث مطابقة للتصفية الحالية.");
+
+            node.innerHTML = `<div class="admin-table-wrap"><table class="data-table audit-table"><thead><tr><th>الوقت</th><th>المصدر</th><th>الحدث</th><th>المنفذ</th><th>الخطة أو السياسة</th><th>البيانات</th></tr></thead><tbody>${items.map(item => `<tr><td>${AutonomousUI.date(item.created_at)}</td><td><span class="audit-source">${auditSourceLabel(item.source)}</span></td><td><span class="table-primary-text">${auditEventLabel(item.event_type)}</span><code class="table-secondary-text">${escapeHtml(item.event_type || "—")}</code></td><td>${escapeHtml(AutonomousUI.text(item.actor, "النظام"))}</td><td>${escapeHtml(AutonomousUI.text(item.policy_id || item.plan_id))}</td><td>${AutonomousUI.additionalDetails([["تفاصيل الحدث", item.payload || {}]])}</td></tr>`).join("")}</tbody></table></div>`;
+        } catch (error) {
+            AutonomousUI.showError(node, error);
+        }
+    }
+
+    document.getElementById("audit-reload").addEventListener("click", load);
+    load();
+})();
+</script>
+{% endblock %}

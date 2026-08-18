@@ -70,9 +70,8 @@ monitor
  -> verify persisted report
  -> analyze
  -> decide whether deeper investigation is required
- -> delegate selected DB-defined Specialist work when required
- -> read persisted investigation/evidence
- -> surface the persisted final diagnosis
+ -> persist investigation routing when required
+ -> stop the scheduled cycle after rereading routing state
  -> create and validate a grounded remediation plan in the explicitly safe
     Claude-native isolated sandbox when appropriate
  -> request explicit human approval only after a current, fingerprint-bound
@@ -84,6 +83,16 @@ monitor
 Use the preloaded operational Skills as the canonical workflow contracts.
 
 ## Specialist delegation
+
+For the scheduled monitoring cycle, Specialist delegation is owned by the
+project investigation backlog worker. After `start_investigation` persists a
+decision, the supervisor must reread the investigation state and stop the
+monitoring cycle. It must not wait for Specialist completion in the same
+Claude session. This keeps monitoring bounded and prevents a slow model or
+remote diagnostic command from consuming the whole monitoring runtime.
+
+The delegation rules below apply when the dedicated interactive investigation
+workflow is explicitly invoked, not to the scheduled monitoring cycle.
 
 Specialists are not static Claude domain roles.
 

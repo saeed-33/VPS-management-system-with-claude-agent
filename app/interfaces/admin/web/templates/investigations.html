@@ -1,55 +1,71 @@
 {# قالب Admin Web لصفحة investigations. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
 {% extends "base.html" %}
-{% block title %}التحقيقات - VPS Agent{% endblock %}
+{% block title %}التحقيقات{% endblock %}
 {% block content %}
-<section class="page-section">
-  <div class="section-header">
+<section class="investigation-page">
+  <header class="page-header investigation-page-header">
     <div>
-      <h1>التحقيقات</h1>
-      <p class="muted-text">عرض التحقيقات المحفوظة ونتائج التنفيذ المتاحة.</p>
+      <p class="page-eyebrow">التحليل والمراقبة</p>
+      <h1 class="page-heading">التحقيقات</h1>
+      <p class="page-description">عرض التحقيقات المحفوظة ونتائج التنفيذ والأدلة المتاحة.</p>
     </div>
-    <button id="reload-investigations" class="button button-secondary" type="button">تحديث</button>
-  </div>
+    <div class="page-actions"><button id="reload-investigations" class="button button-secondary" type="button">تحديث القائمة</button></div>
+  </header>
 
-  <div class="card">
-    <div class="toolbar-row">
-      <label>
-        <span>Server ID</span>
-        <input id="server-filter" class="input" type="number" min="1" placeholder="الكل">
-      </label>
-      <label>
-        <span>الحد</span>
-        <select id="limit-filter" class="input">
+  <section class="summary-grid investigation-summary-grid" aria-label="ملخص التحقيقات">
+    <article class="metric-card primary"><span class="metric-label">إجمالي التحقيقات</span><strong id="investigation-total" class="metric-value">—</strong></article>
+    <article class="metric-card warning"><span class="metric-label">قيد المعالجة</span><strong id="investigation-running" class="metric-value">—</strong></article>
+    <article class="metric-card success"><span class="metric-label">بتشخيص نهائي</span><strong id="investigation-diagnosed" class="metric-value">—</strong></article>
+  </section>
+
+  <section class="panel investigation-filters">
+    <header class="panel-header"><div><h2 class="panel-title">تصفية التحقيقات</h2><p class="panel-subtitle">حدّد السيرفر وعدد النتائج المطلوبة.</p></div></header>
+    <div class="panel-body">
+      <div class="admin-filter-row">
+        <label class="form-group">
+          <span class="form-label">معرف السيرفر</span>
+          <input id="server-filter" class="form-control" type="number" min="1" placeholder="مثال: 4" inputmode="numeric">
+        </label>
+        <label class="form-group">
+          <span class="form-label">عدد النتائج</span>
+          <select id="limit-filter" class="form-control">
           <option value="25">25</option>
           <option value="50">50</option>
           <option value="100" selected>100</option>
           <option value="250">250</option>
-        </select>
-      </label>
+          </select>
+        </label>
+        <div class="form-actions investigation-filter-actions">
+          <button id="apply-investigation-filters" class="button button-primary" type="button">تطبيق المرشح</button>
+          <button id="clear-investigation-filters" class="button button-secondary" type="button">مسح</button>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div id="investigations-state" class="card muted-text">جاري تحميل التحقيقات...</div>
+  <div id="investigations-state" class="panel loading-state" role="status" aria-live="polite">جاري تحميل التحقيقات...</div>
 
-  <div id="investigations-table-card" class="card" hidden>
-    <div class="table-wrapper">
+  <section id="investigations-table-card" class="panel" hidden>
+    <div class="panel-body flush">
+      <div class="table-container">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Investigation</th>
-            <th>Server</th>
-            <th>Report</th>
+            <th>التحقيق</th>
+            <th>السيرفر</th>
+            <th>التقرير</th>
             <th>الحالة</th>
             <th>الاختصاصيون</th>
-            <th>Runtime</th>
-            <th>Final Diagnosis</th>
+            <th>التشغيل</th>
+            <th>التشخيص النهائي</th>
             <th>آخر تحديث</th>
           </tr>
         </thead>
         <tbody id="investigations-body"></tbody>
       </table>
+      </div>
     </div>
-  </div>
+  </section>
 </section>
 
 <script>
@@ -59,15 +75,40 @@
   const body = document.getElementById("investigations-body");
   const serverFilter = document.getElementById("server-filter");
   const limitFilter = document.getElementById("limit-filter");
+  const totalValue = document.getElementById("investigation-total");
+  const runningValue = document.getElementById("investigation-running");
+  const diagnosedValue = document.getElementById("investigation-diagnosed");
 
   const asText = (value, fallback = "—") =>
     value === null || value === undefined || value === "" ? fallback : String(value);
 
+  function statusLabel(label) {
+    return {
+      pending: "قيد الانتظار",
+      queued: "في قائمة الانتظار",
+      running: "قيد التشغيل",
+      investigating: "قيد التحقيق",
+      waiting_for_evidence: "بانتظار الأدلة",
+      triaged: "تم تصنيفها",
+      completed: "مكتمل",
+      no_evidence_found: "لم يتم العثور على أدلة",
+      failed: "فشل",
+      success: "ناجح",
+      cancelled: "ملغى"
+    }[String(label || "").toLowerCase()] || asText(label, "غير معروف");
+  }
+
   function badge(label) {
     const span = document.createElement("span");
-    span.className = "status-badge";
-    span.textContent = label;
+    span.className = "badge badge-info";
+    span.textContent = statusLabel(label);
     return span;
+  }
+
+  function updateSummary(rows) {
+    totalValue.textContent = rows.length.toLocaleString("ar");
+    runningValue.textContent = rows.filter(item => ["pending", "queued", "running", "investigating"].includes(String(item.status || "").toLowerCase())).length.toLocaleString("ar");
+    diagnosedValue.textContent = rows.filter(item => item.final_diagnosis_available).length.toLocaleString("ar");
   }
 
   function td(value) {
@@ -85,6 +126,7 @@
 
   function render(rows) {
     body.replaceChildren();
+    updateSummary(rows);
 
     if (!rows.length) {
       stateBox.hidden = false;
@@ -101,20 +143,43 @@
 
       const investigationLink = document.createElement("a");
       investigationLink.href = "/investigations/" + encodeURIComponent(item.investigation_id);
-      investigationLink.textContent = item.investigation_id;
+      investigationLink.textContent = "فتح التحقيق";
       investigationLink.className = "table-link";
-      tr.appendChild(td(investigationLink));
+      const investigationCell = td(investigationLink);
+      if (item.investigation_id || item.report_id || item.server_id) {
+        const details = document.createElement("details");
+        details.className = "additional-details";
+        details.innerHTML = `<summary class="button button-secondary button-sm">تفاصيل إضافية</summary><div class="additional-details-body"><div class="admin-kv-grid"><div class="admin-kv"><strong>معرف التحقيق</strong><span class="admin-code">${asText(item.investigation_id)}</span></div><div class="admin-kv"><strong>معرف التقرير</strong><span class="admin-code">${asText(item.report_id)}</span></div><div class="admin-kv"><strong>معرف السيرفر</strong><span class="admin-code">${asText(item.server_id)}</span></div></div></div>`;
+        investigationCell.appendChild(details);
+      }
+      tr.appendChild(investigationCell);
 
       tr.appendChild(td(item.server_id));
 
       const reportLink = document.createElement("a");
       reportLink.href = "/reports/" + encodeURIComponent(item.report_id);
-      reportLink.textContent = asText(item.report_id);
+      reportLink.textContent = "عرض التقرير";
       reportLink.className = "table-link";
       tr.appendChild(td(reportLink));
 
       tr.appendChild(td(badge(asText(item.status))));
-      tr.appendChild(td((item.selected_specialists || []).join(", ") || "—"));
+      const specialists = document.createElement("div");
+      specialists.className = "investigation-specialists";
+      const selected = item.selected_specialists || [];
+      if (!selected.length) specialists.textContent = "—";
+      selected.slice(0, 3).forEach(value => {
+        const chip = document.createElement("span");
+        chip.className = "mini-chip";
+        chip.textContent = value;
+        specialists.appendChild(chip);
+      });
+      if (selected.length > 3) {
+        const more = document.createElement("span");
+        more.className = "table-secondary-text";
+        more.textContent = `+${selected.length - 3}`;
+        specialists.appendChild(more);
+      }
+      tr.appendChild(td(specialists));
       tr.appendChild(td(badge(item.runtime_available ? "متاح" : "غير محفوظ")));
       tr.appendChild(td(badge(item.final_diagnosis_available ? "متاح" : "غير متاح")));
       tr.appendChild(td(fmtDate(item.updated_at)));
@@ -144,6 +209,8 @@
   }
 
   document.getElementById("reload-investigations").addEventListener("click", load);
+  document.getElementById("apply-investigation-filters").addEventListener("click", load);
+  document.getElementById("clear-investigation-filters").addEventListener("click", () => { serverFilter.value = ""; limitFilter.value = "100"; load(); });
   limitFilter.addEventListener("change", load);
   serverFilter.addEventListener("keydown", (event) => {
     if (event.key === "Enter") load();

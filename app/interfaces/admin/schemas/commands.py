@@ -28,7 +28,7 @@ class CommandCreateRequest(BaseModel):
     )
     fingerprint_strategy: (
         FingerprintStrategyValue
-    ) = "full_output"
+    ) = "canonical_lines"
 
     fingerprint_config: dict[str, Any] = Field(
         default_factory=dict
@@ -70,6 +70,9 @@ class CommandUpdateRequest(BaseModel):
     )
 
     enabled: bool | None = None
+
+    fingerprint_strategy: FingerprintStrategyValue | None = None
+    fingerprint_config: dict[str, Any] | None = None
 
 
 class CommandResponse(BaseModel):

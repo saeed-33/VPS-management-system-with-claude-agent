@@ -25,6 +25,7 @@ from app.capabilities.investigation.persistence_service import InvestigationPers
 from app.capabilities.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
 from app.capabilities.investigation.specialist_execution_service import SpecialistExecutionService
 from app.capabilities.investigation.specialist_investigation_loop import SpecialistInvestigationLoop
+from app.capabilities.investigation.backlog_worker import InvestigationBacklogWorker
 from app.capabilities.investigation.specialist_registry import SpecialistRegistry
 from app.capabilities.knowledge.chunking_service import KnowledgeChunkingService
 from app.capabilities.knowledge.ingestion_service import KnowledgeIngestionService
@@ -110,6 +111,7 @@ class ApplicationContainer:
 
     monitoring_service: MonitoringService
     scheduler: MonitoringScheduler
+    investigation_backlog_worker: InvestigationBacklogWorker | None
 
     report_analyzer: ReportAnalyzer | None
     analysis_orchestrator: AnalysisOrchestrator | None

@@ -89,6 +89,26 @@ class RemediationRepository:
         with self._session_factory() as session:
             return session.scalar(select(RemediationPlanModel).where(RemediationPlanModel.plan_id == plan_id))
 
+    def get_latest_plan_for_investigation(
+        self,
+        investigation_id: str,
+    ) -> RemediationPlanModel | None:
+        """
+        يعيد أحدث خطة مرتبطة بتحقيق لمنع إنشاء اقتراحات مكررة عند استئناف
+        التحقيق أو إعادة إنهاء المتخصص نفسه.
+        """
+        with self._session_factory() as session:
+            statement = (
+                select(RemediationPlanModel)
+                .where(RemediationPlanModel.investigation_id == investigation_id)
+                .order_by(
+                    RemediationPlanModel.created_at.desc(),
+                    RemediationPlanModel.id.desc(),
+                )
+                .limit(1)
+            )
+            return session.scalar(statement)
+
     def create_no_solution_plan(self, *, plan_id: str, investigation_id: str, title: str,
                                 problem_summary: str, diagnosis_claim_ids: list[str],
                                 evidence_ids: list[str], server_id: int | None = None) -> RemediationPlanModel:

@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from app.core.contracts.investigation import (
@@ -26,6 +27,7 @@ from app.capabilities.investigation.specialist_reasoning_client import (
 from app.core.contracts.specialist_reasoning import (
     SpecialistReasoningOutput,
 )
+from app.core.policies.remediation_tools import SERVICE_NAME_RE
 from app.capabilities.investigation.source_location import extract_source_locations
 
 
@@ -79,6 +81,19 @@ needed, diagnostic_tool_requests must be empty.
 
 recommended_next_specialists may suggest enabled specialist slugs, but this
 response does not create or execute any additional specialist.
+
+When the evidence supports a concrete, named service action, you may include
+it in recommended_remediation_actions. Use only start_service, stop_service,
+restart_service, or reload_service with a single validated service target.
+Never include shell commands, command text, package operations, file edits, or
+an action that is not directly supported by the cited evidence. These are
+reviewable proposals only; they are not execution instructions.
+
+If the Objective or Initial Analysis explicitly says that a named service is
+expected to be active/running, and current systemd-status Evidence proves that
+same service is inactive, include a start_service recommendation. Do not infer
+that an arbitrary inactive service should be started when the expected state
+is not explicit.
 """
 
 
@@ -109,6 +124,9 @@ class SpecialistReasoningAgent:
     """
     يتحقق من استجابة الاختصاصي ويحوّلها إلى نتيجة تشخيصية قابلة للحفظ.
     """
+
+    _REFERENCE_RETRY_LIMIT = 1
+
     def __init__(
         self,
         *,
@@ -150,6 +168,12 @@ class SpecialistReasoningAgent:
                 for item in context.evidence
             )
         )
+        knowledge_source_ids = tuple(
+            dict.fromkeys(
+                item.source_id
+                for item in context.knowledge_sources
+            )
+        )
         user_prompt += (
             "\n\n## Evidence ID Allowlist\n"
             "The only valid values for finding.evidence_ids, "
@@ -167,6 +191,22 @@ class SpecialistReasoningAgent:
                     for value in evidence_ids
                 )
                 if evidence_ids
+                else "(none)"
+            )
+            + "\n\n## Knowledge Source ID Allowlist\n"
+            "The only valid values for finding.knowledge_source_ids are "
+            "the exact opaque Knowledge Source IDs listed below. Copy the "
+            "identifier token only. Never copy a source label, title, "
+            "excerpt, Initial Issues text, or prose into a Knowledge Source "
+            "ID field. If no listed source supports a statement, return an "
+            "empty list.\n"
+            "Allowed Knowledge Source IDs: "
+            + (
+                ", ".join(
+                    f"`{value}`"
+                    for value in knowledge_source_ids
+                )
+                if knowledge_source_ids
                 else "(none)"
             )
         )
@@ -219,11 +259,43 @@ class SpecialistReasoningAgent:
             user_prompt=user_prompt,
         )
 
-        self._validate_references(
-            output=output,
-            context=context,
-            allowed_specialist_slugs=allowed_specialist_slugs,
-        )
+        for attempt in range(
+            self._REFERENCE_RETRY_LIMIT + 1
+        ):
+            try:
+                self._validate_references(
+                    output=output,
+                    context=context,
+                    allowed_specialist_slugs=(
+                        allowed_specialist_slugs
+                    ),
+                )
+                break
+            except ValueError:
+                if attempt >= self._REFERENCE_RETRY_LIMIT:
+                    raise
+
+                # لا نحاول تخمين المعرف من مخرجات الأمر. نعيد الطلب إلى
+                # النموذج مع تذكير صريح بالقائمة المسموحة، ثم نبقي التحقق
+                # الصارم فعالًا على المحاولة الثانية أيضًا.
+                output = await self._client.reason(
+                    system_prompt=SYSTEM_PROMPT,
+                    user_prompt=(
+                        user_prompt
+                        + "\n\n## Provenance Correction Required\n"
+                        "The previous JSON used raw text or an unknown value "
+                        "as an Evidence ID or Knowledge Source ID. Return "
+                        "the same diagnostic result as one JSON object, but "
+                        "use only exact opaque IDs from the Evidence ID "
+                        "Allowlist and Knowledge Source ID Allowlist. "
+                        "If an observation has no matching ID, use an empty "
+                        "list and add the observation to missing_evidence. "
+                        "If no exact Knowledge Source ID is available, use "
+                        "an empty knowledge_source_ids list. Never put "
+                        "command output, process text, labels, or a "
+                        "description in an ID field."
+                    ),
+                )
 
         normalized_specialists, dropped_specialists = (
             self._normalize_specialist_recommendations(
@@ -554,6 +626,31 @@ class SpecialistReasoningAgent:
             )
         )
 
+        remediation_actions = [
+            item.model_dump(mode="json")
+            for item in output.recommended_remediation_actions
+        ]
+        derived_action = (
+            SpecialistReasoningAgent._explicit_inactive_service_action(
+                context=context,
+            )
+        )
+        if derived_action is not None:
+            action_key = (
+                derived_action["action_type"],
+                derived_action["target"],
+            )
+            existing_keys = {
+                (
+                    item.get("action_type"),
+                    item.get("target"),
+                )
+                for item in remediation_actions
+                if isinstance(item, dict)
+            }
+            if action_key not in existing_keys:
+                remediation_actions.append(derived_action)
+
         return SpecialistResult(
             task_id=context.task_id,
             specialist_id=context.specialist_slug,
@@ -578,5 +675,93 @@ class SpecialistReasoningAgent:
                 "dropped_specialist_recommendations": list(
                     dropped_specialist_recommendations
                 ),
+                "recommended_remediation_actions": remediation_actions,
             },
         )
+
+    @staticmethod
+    def _explicit_inactive_service_action(
+        *,
+        context: SpecialistContextSnapshot,
+    ) -> dict | None:
+        """
+        ينشئ اقتراح بدء آمن عند وجود حالة متوقعة صريحة ودليل خدمة مسماة.
+
+        لا يكفي أن تكون الخدمة inactive؛ يجب أن يثبت هدف التحقيق أو التحليل
+        أن الحالة المطلوبة هي active، حتى لا نحول خدمة متوقفة عمداً إلى خطة
+        تشغيل غير مقصودة.
+        """
+        if context.specialist_slug != "systemd-service":
+            return None
+
+        expectation_text_parts = [
+            context.objective,
+            context.initial_analysis_summary or "",
+        ]
+        for issue in context.initial_analysis_issues:
+            if isinstance(issue, dict):
+                expectation_text_parts.extend(
+                    str(issue.get(key) or "")
+                    for key in ("title", "description", "reason")
+                )
+
+        expectation_text = " ".join(expectation_text_parts).casefold()
+        expected_active_markers = (
+            r"\b(?:expected|should|must|required)\b.{0,60}\b(?:active|running)\b",
+            r"\b(?:active|running)\b.{0,60}\b(?:expected|required|must)\b",
+            r"\b(?:restore|start|bring)\b.{0,60}\b(?:service|unit)\b",
+            r"\b(?:service|unit)\b.{0,60}\b(?:start|running|active|required)\b",
+            r"(?:يجب|ينبغي|مطلوب|من المفترض).{0,60}(?:تعمل|نشطة|قيد التشغيل|التشغيل)",
+            r"(?:تشغيل|بدء).{0,40}(?:الخدمة|الوحدة)",
+            r"(?:الخدمة|الوحدة).{0,40}(?:تعمل|نشطة|قيد التشغيل)",
+        )
+        if not any(
+            re.search(marker, expectation_text, flags=re.IGNORECASE | re.DOTALL)
+            for marker in expected_active_markers
+        ):
+            return None
+
+        inactive_markers = (
+            "inactive (dead)",
+            "active: inactive",
+            "inactive",
+        )
+        command_pattern = re.compile(
+            r"\bsystemctl\s+(?:--\S+\s+)*status\s+"
+            r"([A-Za-z0-9][A-Za-z0-9_.@-]{0,127})\b",
+            flags=re.IGNORECASE,
+        )
+
+        for evidence in context.evidence:
+            metadata = dict(evidence.metadata or {})
+            if str(metadata.get("tool_id") or "").casefold() != "systemd-status":
+                continue
+            excerpt = str(evidence.excerpt or "").casefold()
+            if not any(marker in excerpt for marker in inactive_markers):
+                continue
+            command_text = str(metadata.get("command_text") or "")
+            match = command_pattern.search(command_text)
+            if match is None:
+                continue
+            target = match.group(1)
+            if not SERVICE_NAME_RE.fullmatch(target):
+                continue
+            return {
+                "action_type": "start_service",
+                "target": target,
+                "reason": (
+                    "The investigation explicitly requires this service to "
+                    "be active, while systemd-status evidence shows it is "
+                    "inactive."
+                ),
+                "expected_effect": "The named systemd service becomes active.",
+                "risk_level": "low",
+                "requires_approval": True,
+                "rollback_supported": True,
+                "verification_strategy": (
+                    "Verify the service state is active after approval."
+                ),
+                "evidence_requirements": [evidence.evidence_id],
+            }
+
+        return None

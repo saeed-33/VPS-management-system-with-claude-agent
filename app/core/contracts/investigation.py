@@ -13,6 +13,7 @@ class InvestigationStatus(StrEnum):
     CREATED = "created"
     INVESTIGATING = "investigating"
     WAITING_FOR_EVIDENCE = "waiting_for_evidence"
+    NO_EVIDENCE_FOUND = "no_evidence_found"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"

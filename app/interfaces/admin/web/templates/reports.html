@@ -6,8 +6,9 @@
 {% endblock %}
 
 {% block content %}
-<header class="page-header">
+<header class="page-header report-page-header">
     <div>
+        <span class="page-eyebrow">المراقبة والتقارير</span>
         <h1 class="page-heading">
             تقارير المراقبة
         </h1>
@@ -29,7 +30,7 @@
     </div>
 </header>
 
-<section class="panel">
+<section class="panel report-filter-panel">
     <div class="panel-body">
         <div class="reports-filters">
             <div class="form-group">
@@ -115,7 +116,7 @@
     </div>
 </section>
 
-<section class="panel">
+<section class="panel report-list-panel">
     <header class="panel-header">
         <div>
             <h2 class="panel-title">
@@ -295,7 +296,7 @@ async function loadReports() {
                 <tr>
                     <td>
                         <span class="table-primary-text">
-                            #${report.id}
+                            تقرير مراقبة
                         </span>
                     </td>
 
@@ -307,8 +308,7 @@ async function loadReports() {
                         </span>
 
                         <span class="table-secondary-text">
-                            Server ID:
-                            ${report.server_id}
+                            ${escapeHtml(report.server_name)}
                         </span>
                     </td>
 
@@ -343,6 +343,15 @@ async function loadReports() {
                     </td>
 
                     <td>
+                        <details class="additional-details">
+                            <summary class="button button-secondary button-sm">تفاصيل إضافية</summary>
+                            <div class="additional-details-body">
+                                <div class="admin-kv-grid">
+                                    <div class="admin-kv"><strong>معرف التقرير</strong><span class="admin-code">${report.id}</span></div>
+                                    <div class="admin-kv"><strong>معرف السيرفر</strong><span class="admin-code">${report.server_id}</span></div>
+                                </div>
+                            </div>
+                        </details>
                         <a
                             href="/reports/${report.id}"
                             class="button button-secondary button-sm"

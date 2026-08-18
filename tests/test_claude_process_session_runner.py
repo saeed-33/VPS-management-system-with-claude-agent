@@ -304,6 +304,50 @@ raise SystemExit(7)
         )
 
 
+def test_process_runner_reports_spawn_os_error(
+    tmp_path,
+    monkeypatch,
+):
+    """
+    يثبت أن فشل إنشاء العملية يتضمن نوع خطأ نظام التشغيل بدل رسالة فارغة.
+    """
+    project = tmp_path / "project"
+    project.mkdir()
+    script = write_script(
+        tmp_path,
+        'print("unused")\n',
+    )
+
+    async def fail_spawn(*args, **kwargs):
+        raise OSError()
+
+    monkeypatch.setattr(
+        asyncio,
+        "create_subprocess_exec",
+        fail_spawn,
+    )
+
+    runner = SubprocessClaudeSessionRunner(
+        command_builder=ScriptCommandBuilder(script),
+        project_root=project,
+    )
+
+    try:
+        asyncio.run(
+            runner.run(
+                request()
+            )
+        )
+    except ClaudeProcessExecutionError as exc:
+        message = str(exc)
+        assert "could not start" in message
+        assert "OSError" in message
+    else:
+        raise AssertionError(
+            "Expected ClaudeProcessExecutionError."
+        )
+
+
 def test_process_runner_requires_project_root_cwd(
     tmp_path,
 ):
@@ -995,4 +1039,3 @@ def test_decoder_does_not_use_tool_message_as_final_fallback():
         match="no safe final assistant text",
     ):
         decoder.decode(stdout)
-

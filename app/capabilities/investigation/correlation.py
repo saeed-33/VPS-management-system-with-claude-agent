@@ -265,6 +265,16 @@ class CrossSpecialistCorrelator:
             )
         )
         code_locations = self._code_locations_from_claims(claims)
+        remediation_actions = []
+        for run in result.runs:
+            raw_actions = (run.result.metadata or {}).get(
+                "recommended_remediation_actions", []
+            )
+            if not isinstance(raw_actions, (list, tuple)):
+                continue
+            for action in raw_actions:
+                if isinstance(action, dict):
+                    remediation_actions.append(dict(action))
 
         return FinalDiagnosis(
             investigation_id=(
@@ -304,6 +314,7 @@ class CrossSpecialistCorrelator:
                     conflicts
                 ),
                 "code_locations": code_locations,
+                "recommended_remediation_actions": remediation_actions,
             },
         )
 

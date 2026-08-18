@@ -23,6 +23,9 @@ from app.runtime.claude.supervisor import ClaudeSupervisor
 from app.core.config import Settings
 from app.capabilities.monitoring.scheduler import MonitoringScheduler
 from app.capabilities.monitoring.service import MonitoringService
+from app.capabilities.investigation.backlog_worker import (
+    InvestigationBacklogWorker,
+)
 from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
 
@@ -35,6 +38,7 @@ class RuntimeComposition:
     project_mcp_tool_boundary: ProjectMcpToolBoundary
     claude_supervisor: ClaudeSupervisor
     scheduler: MonitoringScheduler
+    investigation_backlog_worker: InvestigationBacklogWorker | None
 
 
 def build_runtime_composition(
@@ -125,11 +129,30 @@ def build_runtime_composition(
         max_concurrent_servers=settings.max_concurrent_servers,
     )
 
+    investigation_backlog_worker = None
+    if analysis.specialist_investigation_loop is not None:
+        investigation_backlog_worker = InvestigationBacklogWorker(
+            investigation_repository=repositories.investigation_repository,
+            investigation_read_service=services.investigation_read_service,
+            analysis_repository=repositories.analysis_repository,
+            specialist_registry=services.specialist_registry,
+            specialist_investigation_loop=(
+                analysis.specialist_investigation_loop
+            ),
+            specialist_execution_service=(
+                services.specialist_execution_service
+            ),
+            polling_interval_seconds=(
+                settings.investigation_recovery_polling_seconds
+            ),
+        )
+
     return RuntimeComposition(
         monitoring_service=monitoring_service,
         project_mcp_tool_boundary=project_mcp_tool_boundary,
         claude_supervisor=claude_supervisor,
         scheduler=scheduler,
+        investigation_backlog_worker=investigation_backlog_worker,
     )
 
 

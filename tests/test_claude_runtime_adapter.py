@@ -205,6 +205,46 @@ def test_runtime_failure_is_returned_as_controlled_result():
     assert result.error_message == "Claude CLI failed."
 
 
+def test_empty_runtime_exception_keeps_diagnostic_context():
+    """
+    يثبت أن الاستثناء الفارغ لا يتحول إلى سجل بلا رسالة تشخيصية.
+    """
+    result = asyncio.run(
+        ClaudeRuntimeAdapter(
+            runner=Runner(
+                error=ClaudeRuntimeError(),
+            )
+        ).execute(
+            request()
+        )
+    )
+
+    assert result.status == ClaudeJobStatus.FAILED
+    assert result.error_code == "runtime_error"
+    assert result.error_message
+    assert "ClaudeRuntimeError" in result.error_message
+
+
+def test_empty_unexpected_exception_keeps_diagnostic_context():
+    """
+    يثبت أن الفشل غير المتوقع الفارغ يبقى قابلًا للتشخيص والتصفية.
+    """
+    result = asyncio.run(
+        ClaudeRuntimeAdapter(
+            runner=Runner(
+                error=ValueError(),
+            )
+        ).execute(
+            request()
+        )
+    )
+
+    assert result.status == ClaudeJobStatus.FAILED
+    assert result.error_code == "unexpected_error"
+    assert result.error_message
+    assert "ValueError" in result.error_message
+
+
 def test_invalid_structured_output_is_rejected():
     """
     يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.

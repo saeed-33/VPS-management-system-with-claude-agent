@@ -222,6 +222,9 @@ def build_container() -> ApplicationContainer:
         ssh_test_service=ssh_test_service,
         monitoring_service=monitoring_service,
         scheduler=scheduler,
+        investigation_backlog_worker=(
+            runtime_composition.investigation_backlog_worker
+        ),
         report_analyzer=report_analyzer,
         analysis_orchestrator=analysis_orchestrator,
         report_pdf_service=report_pdf_service,

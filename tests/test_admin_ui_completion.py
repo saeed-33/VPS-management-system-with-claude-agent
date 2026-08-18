@@ -185,6 +185,8 @@ def test_remediation_ui_has_no_issue_fingerprint_input_or_arbitrary_execution(ui
     assert "arbitrary shell" not in html.lower()
     assert "force_execute" not in html
     assert "skip_approval" not in html
+    assert 'start_service: "بدء الخدمة"' in html
+    assert 'item.target || item.service || "خدمة غير محددة"' in html
 
 
 def test_safe_target_comes_only_from_persisted_designation():

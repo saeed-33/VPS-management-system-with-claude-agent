@@ -191,6 +191,14 @@ Output requirements:
                     exc.response.text[:2000]
                 )
 
+                logger.error(
+                    "Ollama analysis request rejected | model=%s "
+                    "status=%s detail=%s",
+                    self._model,
+                    exc.response.status_code,
+                    response_text,
+                )
+
                 raise RuntimeError(
                     "Ollama returned HTTP "
                     f"{exc.response.status_code}: "

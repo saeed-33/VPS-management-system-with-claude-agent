@@ -121,12 +121,41 @@ class ClaudeAgentObservabilityService:
             "completed",
             0,
         )
+        active = sum(
+            statuses.get(status, 0)
+            for status in (
+                "queued",
+                "running",
+            )
+        )
         failed = sum(
             statuses.get(status, 0)
             for status in (
                 "failed",
                 "timed_out",
                 "cancelled",
+            )
+        )
+        terminal = completed + failed
+
+        error_code_counts = Counter(
+            trace["error_code"]
+            for trace in traces
+            if trace.get("error_code")
+        )
+        diagnostic_gap_count = sum(
+            1
+            for trace in traces
+            if (
+                trace["status"]
+                in {
+                    "failed",
+                    "timed_out",
+                    "cancelled",
+                }
+                and not str(
+                    trace.get("error_message") or ""
+                ).strip()
             )
         )
 
@@ -153,11 +182,22 @@ class ClaudeAgentObservabilityService:
             ),
             "completed_count": completed,
             "failed_count": failed,
+            "active_count": active,
+            "terminal_count": terminal,
             "success_rate": (
                 completed / len(traces)
                 if traces
                 else None
             ),
+            "terminal_success_rate": (
+                completed / terminal
+                if terminal
+                else None
+            ),
+            "error_code_counts": dict(
+                sorted(error_code_counts.items())
+            ),
+            "diagnostic_gap_count": diagnostic_gap_count,
             "average_duration_ms": (
                 sum(duration_values)
                 / len(duration_values)
@@ -172,6 +212,10 @@ class ClaudeAgentObservabilityService:
                 / len(traces)
                 if traces
                 else None
+            ),
+            "total_tool_calls": sum(
+                trace["tool_call_count"]
+                for trace in traces
             ),
             "specialist_delegation_count": sum(
                 trace["specialist_delegation_count"]

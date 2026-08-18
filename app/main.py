@@ -96,6 +96,7 @@ async def lifespan(
         )
 
     scheduler_task = None
+    investigation_backlog_task = None
 
     if (
         container.claude_supervisor.status["state"]
@@ -111,8 +112,15 @@ async def lifespan(
             "the Claude operational runtime is disabled."
         )
 
+    if container.investigation_backlog_worker is not None:
+        investigation_backlog_task = asyncio.create_task(
+            container.investigation_backlog_worker.start(),
+            name="investigation-backlog-worker",
+        )
+
     app.state.scheduler = container.scheduler
     app.state.scheduler_task = scheduler_task
+    app.state.investigation_backlog_task = investigation_backlog_task
     app.state.container = container
 
     logger.info(
@@ -140,6 +148,19 @@ async def lifespan(
             except Exception:
                 logger.exception(
                     "Scheduler shutdown failed."
+                )
+
+        if investigation_backlog_task is not None:
+            container.investigation_backlog_worker.stop()
+            investigation_backlog_task.cancel()
+
+            try:
+                await investigation_backlog_task
+            except asyncio.CancelledError:
+                pass
+            except Exception:
+                logger.exception(
+                    "Investigation backlog worker shutdown failed."
                 )
 
         logger.info(

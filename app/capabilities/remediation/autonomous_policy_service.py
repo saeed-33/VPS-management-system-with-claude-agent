@@ -32,6 +32,11 @@ class AutonomousPolicyService:
         ينشئ سياسة معالجة آلية بعد التحقق من اسمها وأفعالها وحدودها.
         """
         policy = self._validate(values, policy_id=values.get("policy_id") or str(uuid4()), version=1)
+        find_duplicate = getattr(self._repository, "find_duplicate_policy", None)
+        if callable(find_duplicate) and find_duplicate(policy) is not None:
+            raise ValueError(
+                "A policy with the same issue, action, target, and server scope already exists."
+            )
         return self._repository.create_policy(policy)
 
     def get(self, policy_id: str):

@@ -305,3 +305,30 @@ def test_failed_specialist_is_persisted_without_claiming_runtime_available():
     assert snapshot["metadata"]["failed_specialists"] == [
         "systemd-service"
     ]
+
+
+def test_empty_completed_specialist_waits_for_evidence_instead_of_finalizing():
+    """
+    يثبت أن نتيجة المتخصص المكتملة شكلياً بلا finding لا تغلق التحقيق ولا
+    تطلق مرحلة التشخيص أو إنشاء الخطة.
+    """
+    repository = Repository()
+    service = SpecialistExecutionService(
+        repository=repository,
+        snapshot_service=InvestigationRuntimeSnapshotService(repository),
+    )
+    reservation = service.reserve_with_token(
+        investigation_id="inv-1",
+        specialist_slug="linux-cpu",
+    )
+
+    asyncio.run(service.finalize(
+        task=task("linux-cpu"),
+        loop_result=loop_result("linux-cpu"),
+        selected_specialists=("linux-cpu",),
+        ownership_token=reservation["ownership_token"],
+    ))
+
+    snapshot = repository.model.investigation_metadata["runtime_snapshot"]
+    assert snapshot["status"] == "waiting_for_evidence"
+    assert snapshot["final_diagnosis_available"] is False

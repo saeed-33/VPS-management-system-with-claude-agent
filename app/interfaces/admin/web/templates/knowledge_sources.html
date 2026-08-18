@@ -1,39 +1,97 @@
-{# قالب Admin Web لصفحة knowledge sources. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب مصادر المعرفة. يدير سجل المصادر وبيانات نطاق استخدامها. #}
 {% extends "base.html" %}
 {% block title %}مصادر المعرفة{% endblock %}
 {% block content %}
-<header class="page-header"><div><h1 class="page-heading">مصادر المعرفة</h1><p class="page-description">إدارة المصادر التي يستخدمها Knowledge RAG ونطاق استخدامها.</p></div></header>
+<header class="page-header">
+    <div>
+        <p class="page-eyebrow">المعرفة والتحليل</p>
+        <h1 class="page-heading">مصادر المعرفة</h1>
+        <p class="page-description">إدارة المصادر التي يستخدمها نظام استرجاع المعرفة وتحديد نطاق استخدامها.</p>
+    </div>
+</header>
+
 <section class="panel">
-<header class="panel-header"><div><h2 id="ks-form-title" class="panel-title">إضافة مصدر معرفة</h2></div></header>
-<div class="panel-body">
-<form id="ks-form" class="form-grid" data-required-permission="knowledge.write">
-<input id="ks-id" type="hidden">
-<div class="form-group"><label class="form-label">Slug</label><input id="ks-slug" class="form-control" pattern="[A-Za-z][A-Za-z0-9_-]*" required></div>
-<div class="form-group"><label class="form-label">الاسم</label><input id="ks-name" class="form-control" required></div>
-<div class="form-group"><label class="form-label">النوع</label><select id="ks-type" class="form-control"><option value="url">URL</option><option value="inline">Inline</option><option value="file">File</option></select></div>
-<div class="form-group"><label class="form-label">الحالة</label><select id="ks-enabled" class="form-control"><option value="true">مفعل</option><option value="false">معطل</option></select></div>
-<div class="form-group"><label class="form-label">الأولوية</label><input id="ks-priority" type="number" min="0" value="100" class="form-control"></div>
-<div class="form-group full-width"><label class="form-label">الوصف</label><textarea id="ks-description" class="form-control"></textarea></div>
-<div class="form-group full-width"><label class="form-label">Source URI / URL</label><input id="ks-uri" class="form-control"></div>
-<div class="form-group full-width"><label class="form-label">Inline Content</label><textarea id="ks-inline" class="form-control"></textarea></div>
-<div class="form-group"><label class="form-label">Domains</label><input id="ks-domains" class="form-control" placeholder="nginx, http, proxy"></div>
-<div class="form-group"><label class="form-label">Specialist Slugs</label><input id="ks-specialists" class="form-control" placeholder="nginx"></div>
-<div class="form-group"><label class="form-label">Tags</label><input id="ks-tags" class="form-control" placeholder="official, current"></div>
-<div class="form-actions"><button id="ks-cancel" type="button" class="button button-secondary" hidden>إلغاء التعديل</button><button type="submit" class="button button-primary">حفظ</button></div>
-</form></div></section>
-<section class="panel"><header class="panel-header"><div><h2 class="panel-title">المصادر المسجلة</h2></div><button id="ks-reload" type="button" class="button button-secondary button-sm">تحديث</button></header><div id="ks-list" class="panel-body"><div class="empty-state"><span class="loading-spinner"></span></div></div></section>
+    <header class="panel-header">
+        <div>
+            <h2 id="ks-form-title" class="panel-title">إضافة مصدر معرفة</h2>
+            <p class="panel-subtitle">سجّل مصدرًا يمكن ربطه بمجالات أو وكلاء متخصصين محددين.</p>
+        </div>
+    </header>
+    <div class="panel-body">
+        <form id="ks-form" class="form-grid" data-required-permission="knowledge.write">
+            <input id="ks-id" type="hidden">
+            <div class="form-group"><label class="form-label" for="ks-slug">المعرف التقني</label><input id="ks-slug" class="form-control" pattern="[A-Za-z][A-Za-z0-9_-]*" placeholder="مثال: nginx" required></div>
+            <div class="form-group"><label class="form-label" for="ks-name">اسم المصدر</label><input id="ks-name" class="form-control" placeholder="مثال: التوثيق الرسمي" required></div>
+            <div class="form-group"><label class="form-label" for="ks-type">نوع المصدر</label><select id="ks-type" class="form-control"><option value="url">رابط</option><option value="inline">محتوى نصي</option><option value="file">ملف</option></select></div>
+            <div class="form-group"><label class="form-label" for="ks-enabled">الحالة</label><select id="ks-enabled" class="form-control"><option value="true">مفعّل</option><option value="false">معطّل</option></select></div>
+            <div class="form-group"><label class="form-label" for="ks-priority">الأولوية</label><input id="ks-priority" type="number" min="0" value="100" class="form-control"></div>
+            <div class="form-group full-width"><label class="form-label" for="ks-description">الوصف</label><textarea id="ks-description" class="form-control" placeholder="اشرح محتوى المصدر وفائدته."></textarea></div>
+            <div class="form-group full-width"><label class="form-label" for="ks-uri">رابط المصدر</label><input id="ks-uri" class="form-control" dir="ltr" placeholder="https://example.com"></div>
+            <div class="form-group full-width"><label class="form-label" for="ks-inline">المحتوى النصي</label><textarea id="ks-inline" class="form-control" placeholder="أدخل المحتوى عند اختيار مصدر نصي."></textarea></div>
+            <div class="form-group"><label class="form-label" for="ks-domains">المجالات</label><input id="ks-domains" class="form-control" placeholder="الشبكات، الخادم، الوكيل"></div>
+            <div class="form-group"><label class="form-label" for="ks-specialists">معرفات الوكلاء</label><input id="ks-specialists" class="form-control" placeholder="nginx"></div>
+            <div class="form-group"><label class="form-label" for="ks-tags">الوسوم</label><input id="ks-tags" class="form-control" placeholder="رسمي، حديث"></div>
+            <div class="form-actions"><button id="ks-cancel" type="button" class="button button-secondary" hidden>إلغاء التعديل</button><button type="submit" class="button button-primary">حفظ المصدر</button></div>
+        </form>
+    </div>
+</section>
+
+<section class="panel">
+    <header class="panel-header"><div><h2 class="panel-title">المصادر المسجلة</h2><p class="panel-subtitle">المصادر المتاحة للاستخدام في التحليل.</p></div><button id="ks-reload" type="button" class="button button-secondary button-sm">تحديث القائمة</button></header>
+    <div id="ks-list" class="panel-body"><div class="loading-state"><span class="loading-spinner"></span><span>جارٍ تحميل المصادر</span></div></div>
+</section>
 {% endblock %}
+
 {% block scripts %}
 <script>
 let sources = [];
-const csv = v => v.split(",").map(x => x.trim()).filter(Boolean);
-const esc = v => { const d = document.createElement("div"); d.textContent = v ?? ""; return d.innerHTML; };
-async function loadSources() { const box=document.getElementById("ks-list"); try { sources=await apiRequest("/api/knowledge-sources"); if(!sources.length){box.innerHTML='<div class="empty-state"><h3>لا توجد مصادر معرفة</h3></div>';return;} box.innerHTML=sources.map(x=>`<article class="panel" style="margin-bottom:1rem"><header class="panel-header"><div><h3 class="panel-title">${esc(x.name)}</h3><p class="panel-subtitle">${esc(x.slug)} · ${esc(x.source_type)} · أولوية ${x.priority} · ${x.enabled?"مفعل":"معطل"}</p></div><div class="form-actions"><button class="button button-secondary button-sm" onclick="editSource(${x.id})">تعديل</button><button class="button button-secondary button-sm" onclick="toggleSource(${x.id},${!x.enabled})">${x.enabled?"تعطيل":"تفعيل"}</button><button class="button button-secondary button-sm" onclick="deleteSource(${x.id})">حذف</button></div></header><div class="panel-body"><p>${esc(x.description||"بدون وصف")}</p><p><strong>URI:</strong> ${esc(x.source_uri||"—")}</p><p><strong>Domains:</strong> ${esc((x.domains||[]).join(", ")||"—")}</p><p><strong>Specialists:</strong> ${esc((x.specialist_slugs||[]).join(", ")||"—")}</p><p><strong>Tags:</strong> ${esc((x.tags||[]).join(", ")||"—")}</p></div></article>`).join(""); } catch(e){box.innerHTML="";showToast(e.message,"error");}}
-function editSource(id){const x=sources.find(v=>v.id===id);if(!x)return;document.getElementById("ks-form-title").textContent="تعديل مصدر المعرفة";document.getElementById("ks-id").value=x.id;const slug=document.getElementById("ks-slug");slug.value=x.slug;slug.disabled=true;document.getElementById("ks-name").value=x.name;document.getElementById("ks-description").value=x.description||"";document.getElementById("ks-type").value=x.source_type;document.getElementById("ks-uri").value=x.source_uri||"";document.getElementById("ks-inline").value=x.inline_content||"";document.getElementById("ks-enabled").value=String(x.enabled);document.getElementById("ks-domains").value=(x.domains||[]).join(", ");document.getElementById("ks-specialists").value=(x.specialist_slugs||[]).join(", ");document.getElementById("ks-tags").value=(x.tags||[]).join(", ");document.getElementById("ks-priority").value=x.priority;document.getElementById("ks-cancel").hidden=false;window.scrollTo({top:0,behavior:"smooth"});}
-function resetForm(){document.getElementById("ks-form").reset();document.getElementById("ks-id").value="";const slug=document.getElementById("ks-slug");slug.disabled=false;document.getElementById("ks-priority").value="100";document.getElementById("ks-enabled").value="true";document.getElementById("ks-form-title").textContent="إضافة مصدر معرفة";document.getElementById("ks-cancel").hidden=true;}
-document.getElementById("ks-form").addEventListener("submit",async event=>{event.preventDefault();const id=document.getElementById("ks-id").value;const common={name:document.getElementById("ks-name").value.trim(),description:document.getElementById("ks-description").value.trim()||null,source_type:document.getElementById("ks-type").value,source_uri:document.getElementById("ks-uri").value.trim()||null,inline_content:document.getElementById("ks-inline").value.trim()||null,enabled:document.getElementById("ks-enabled").value==="true",domains:csv(document.getElementById("ks-domains").value),specialist_slugs:csv(document.getElementById("ks-specialists").value),tags:csv(document.getElementById("ks-tags").value),priority:Number(document.getElementById("ks-priority").value),metadata:{}};try{if(id){await apiRequest(`/api/knowledge-sources/${id}`,{method:"PATCH",body:JSON.stringify(common)});}else{await apiRequest("/api/knowledge-sources",{method:"POST",body:JSON.stringify({slug:document.getElementById("ks-slug").value.trim(),...common})});}resetForm();await loadSources();showToast("تم حفظ مصدر المعرفة.","success");}catch(e){showToast(e.message,"error");}});
-async function toggleSource(id,enabled){try{await apiRequest(`/api/knowledge-sources/${id}/enabled`,{method:"PUT",body:JSON.stringify({enabled})});await loadSources();}catch(e){showToast(e.message,"error");}}
-async function deleteSource(id){const x=sources.find(v=>v.id===id);if(!x||!confirm(`حذف مصدر المعرفة "${x.name}"؟`))return;try{await apiRequest(`/api/knowledge-sources/${id}`,{method:"DELETE"});resetForm();await loadSources();}catch(e){showToast(e.message,"error");}}
-document.getElementById("ks-cancel").addEventListener("click",resetForm);document.getElementById("ks-reload").addEventListener("click",loadSources);loadSources();
+const csv = value => value.split(",").map(item => item.trim()).filter(Boolean);
+const esc = value => { const node = document.createElement("div"); node.textContent = value ?? ""; return node.innerHTML; };
+const sourceTypeLabel = value => ({url: "رابط", inline: "محتوى نصي", file: "ملف"}[value] || "مصدر");
+
+async function loadSources() {
+    const box = document.getElementById("ks-list");
+    try {
+        sources = await apiRequest("/api/knowledge-sources");
+        if (!sources.length) { box.innerHTML = '<div class="empty-state"><h3>لا توجد مصادر معرفة</h3><p>أضف أول مصدر باستخدام النموذج أعلاه.</p></div>'; return; }
+        box.innerHTML = sources.map(source => `<article class="knowledge-source-card"><header class="panel-header"><div><h3 class="panel-title">${esc(source.name)}</h3><p class="panel-subtitle">${esc(source.slug)} · ${sourceTypeLabel(source.source_type)} · أولوية ${source.priority}</p></div><span class="badge ${source.enabled ? "badge-success" : "badge-unknown"}">${source.enabled ? "مفعّل" : "معطّل"}</span></header><div class="knowledge-source-body"><p class="knowledge-source-description">${esc(source.description || "بدون وصف")}</p><div class="admin-kv-grid"><div class="admin-kv"><strong>الرابط</strong><span dir="ltr">${esc(source.source_uri || "—")}</span></div><div class="admin-kv"><strong>المجالات</strong><span>${esc((source.domains || []).join(", ") || "—")}</span></div><div class="admin-kv"><strong>الوكلاء المتخصصون</strong><span>${esc((source.specialist_slugs || []).join(", ") || "—")}</span></div><div class="admin-kv"><strong>الوسوم</strong><span>${esc((source.tags || []).join(", ") || "—")}</span></div></div><div class="table-actions knowledge-source-actions"><button class="button button-secondary button-sm" onclick="editSource(${source.id})">تعديل</button><button class="button button-secondary button-sm" onclick="toggleSource(${source.id}, ${!source.enabled})">${source.enabled ? "تعطيل" : "تفعيل"}</button><button class="button button-danger button-sm" onclick="deleteSource(${source.id})">حذف</button></div></div></article>`).join("");
+    } catch (error) { box.innerHTML = `<div class="empty-state"><h3>تعذر تحميل المصادر</h3><p>${esc(error.message)}</p></div>`; showToast(error.message, "error"); }
+}
+
+function editSource(id) {
+    const source = sources.find(item => item.id === id); if (!source) return;
+    document.getElementById("ks-form-title").textContent = "تعديل مصدر المعرفة";
+    document.getElementById("ks-id").value = source.id;
+    const slug = document.getElementById("ks-slug"); slug.value = source.slug; slug.disabled = true;
+    document.getElementById("ks-name").value = source.name;
+    document.getElementById("ks-description").value = source.description || "";
+    document.getElementById("ks-type").value = source.source_type;
+    document.getElementById("ks-uri").value = source.source_uri || "";
+    document.getElementById("ks-inline").value = source.inline_content || "";
+    document.getElementById("ks-enabled").value = String(source.enabled);
+    document.getElementById("ks-domains").value = (source.domains || []).join(", ");
+    document.getElementById("ks-specialists").value = (source.specialist_slugs || []).join(", ");
+    document.getElementById("ks-tags").value = (source.tags || []).join(", ");
+    document.getElementById("ks-priority").value = source.priority;
+    document.getElementById("ks-cancel").hidden = false;
+    window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function resetForm() {
+    document.getElementById("ks-form").reset(); document.getElementById("ks-id").value = "";
+    const slug = document.getElementById("ks-slug"); slug.disabled = false;
+    document.getElementById("ks-priority").value = "100"; document.getElementById("ks-enabled").value = "true";
+    document.getElementById("ks-form-title").textContent = "إضافة مصدر معرفة"; document.getElementById("ks-cancel").hidden = true;
+}
+
+document.getElementById("ks-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    const id = document.getElementById("ks-id").value;
+    const common = {name: document.getElementById("ks-name").value.trim(), description: document.getElementById("ks-description").value.trim() || null, source_type: document.getElementById("ks-type").value, source_uri: document.getElementById("ks-uri").value.trim() || null, inline_content: document.getElementById("ks-inline").value.trim() || null, enabled: document.getElementById("ks-enabled").value === "true", domains: csv(document.getElementById("ks-domains").value), specialist_slugs: csv(document.getElementById("ks-specialists").value), tags: csv(document.getElementById("ks-tags").value), priority: Number(document.getElementById("ks-priority").value), metadata: {}};
+    try { if (id) await apiRequest(`/api/knowledge-sources/${id}`, {method: "PATCH", body: JSON.stringify(common)}); else await apiRequest("/api/knowledge-sources", {method: "POST", body: JSON.stringify({slug: document.getElementById("ks-slug").value.trim(), ...common})}); resetForm(); await loadSources(); showToast("تم حفظ مصدر المعرفة.", "success"); } catch (error) { showToast(error.message, "error"); }
+});
+async function toggleSource(id, enabled) { try { await apiRequest(`/api/knowledge-sources/${id}/enabled`, {method: "PUT", body: JSON.stringify({enabled})}); await loadSources(); showToast(enabled ? "تم تفعيل المصدر." : "تم تعطيل المصدر.", "success"); } catch (error) { showToast(error.message, "error"); } }
+async function deleteSource(id) { const source = sources.find(item => item.id === id); if (!source || !confirm(`حذف مصدر المعرفة "${source.name}"؟`)) return; try { await apiRequest(`/api/knowledge-sources/${id}`, {method: "DELETE"}); resetForm(); await loadSources(); showToast("تم حذف مصدر المعرفة.", "success"); } catch (error) { showToast(error.message, "error"); } }
+document.getElementById("ks-cancel").addEventListener("click", resetForm); document.getElementById("ks-reload").addEventListener("click", loadSources); loadSources();
 </script>
 {% endblock %}

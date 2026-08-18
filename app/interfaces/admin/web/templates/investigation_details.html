@@ -1,64 +1,66 @@
 {# قالب Admin Web لصفحة investigation details. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
 {% extends "base.html" %}
-{% block title %}تفاصيل التحقيق - VPS Agent{% endblock %}
+{% block title %}تفاصيل التحقيق{% endblock %}
 {% block content %}
-<section class="page-section">
-  <div class="section-header">
+<section class="investigation-page">
+  <header class="page-header">
     <div>
       <a class="table-link" href="/investigations">← التحقيقات</a>
-      <h1>تفاصيل التحقيق</h1>
-      <p class="muted-text">{{ investigation_id }}</p>
+      <h1 class="page-heading">تفاصيل التحقيق</h1>
+      <p class="page-description">مراجعة الحالة والتوجيه والتشخيص المحفوظ لهذا التحقيق.</p>
     </div>
     <button id="reload-investigation" class="button button-secondary" type="button">تحديث</button>
-  </div>
+  </header>
 
-  <div id="investigation-state" class="card muted-text">جاري تحميل التحقيق...</div>
+  <div id="investigation-state" class="panel loading-state">جاري تحميل التحقيق...</div>
 
   <div id="investigation-content" hidden>
     <div id="investigation-summary" class="summary-grid"></div>
 
-    <div class="card">
-      <h2>قرار التوجيه</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">قرار التوجيه</h2>
       <div id="routing-summary" class="detail-grid"></div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>الاختصاصيون المرشحون</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">الاختصاصيون المرشحون</h2>
       <div id="candidate-list" class="stack-list"></div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>Runtime Investigation</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">تشغيل التحقيق</h2>
       <div id="runtime-content"></div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>Final Diagnosis</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">التشخيص النهائي</h2>
       <div id="diagnosis-content"></div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>Correlated Claims</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">الاستنتاجات المرتبطة</h2>
       <div id="claims-content" class="stack-list"></div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>Conflicts</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">التعارضات</h2>
       <div id="conflicts-content" class="stack-list"></div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>Specialist Runs</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">تشغيلات الاختصاصيين</h2>
       <div id="specialists-content" class="stack-list"></div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>Evidence</h2>
+    <section class="panel investigation-section">
+      <h2 class="panel-title">الأدلة</h2>
       <div id="evidence-content" class="stack-list"></div>
-    </div>
+    </section>
   </div>
 </section>
 
+{% endblock %}
+{% block scripts %}
 <script>
 (() => {
   const investigationId = {{ investigation_id | tojson }};
@@ -67,6 +69,23 @@
 
   const asText = (value, fallback = "—") =>
     value === null || value === undefined || value === "" ? fallback : String(value);
+
+  const statusLabels = {
+    created: "منشأ",
+    investigating: "قيد التحقيق",
+    waiting_for_evidence: "بانتظار الأدلة",
+    no_evidence_found: "لم يتم العثور على أدلة",
+    completed: "مكتمل",
+    failed: "فشل",
+    cancelled: "ملغى",
+    no_evidence_collected: "لم تُجمع أدلة"
+  };
+
+  function displayValue(value, fallback = "—") {
+    if (typeof value === "boolean") return value ? "نعم" : "لا";
+    if (typeof value === "string" && statusLabels[value]) return statusLabels[value];
+    return asText(value, fallback);
+  }
 
   function valueRow(label, value) {
     const wrapper = document.createElement("div");
@@ -77,13 +96,13 @@
     labelNode.textContent = label;
 
     const valueNode = document.createElement("strong");
-    valueNode.textContent = asText(value);
+    valueNode.textContent = displayValue(value);
 
     wrapper.append(labelNode, valueNode);
     return wrapper;
   }
 
-  function card(title, lines) {
+  function card(title, lines, technicalLines = []) {
     const item = document.createElement("div");
     item.className = "sub-card";
 
@@ -100,10 +119,17 @@
       name.textContent = label;
 
       const val = document.createElement("span");
-      val.textContent = asText(value);
+      val.textContent = displayValue(value);
 
       row.append(name, val);
       item.appendChild(row);
+    }
+
+    if (technicalLines.length) {
+      const details = document.createElement("details");
+      details.className = "additional-details";
+      details.innerHTML = `<summary class="button button-secondary button-sm">تفاصيل إضافية</summary><div class="additional-details-body"><div class="admin-kv-grid">${technicalLines.map(([label, value]) => `<div class="admin-kv"><strong>${label}</strong><span class="admin-code">${displayValue(value)}</span></div>`).join("")}</div></div>`;
+      item.appendChild(details);
     }
 
     return item;
@@ -111,23 +137,26 @@
 
   function renderSummary(item) {
     document.getElementById("investigation-summary").replaceChildren(
-      valueRow("Status", item.status),
-      valueRow("Server", item.server_id),
-      valueRow("Report", item.report_id),
-      valueRow("Analysis", item.analysis_id),
-      valueRow("Runtime", item.runtime_available ? "متاح" : "غير محفوظ"),
-      valueRow("Final Diagnosis", item.final_diagnosis_available ? "متاح" : "غير متاح")
+      valueRow("الحالة", item.status),
+      valueRow("التشغيل", item.runtime_available ? "متاح" : "غير محفوظ"),
+      valueRow("التشخيص النهائي", item.final_diagnosis_available ? "متاح" : "غير متاح"),
+      card("المعرفات التقنية", [], [
+        ["معرف التحقيق", item.investigation_id || investigationId],
+        ["معرف السيرفر", item.server_id],
+        ["معرف التقرير", item.report_id],
+        ["معرف التحليل", item.analysis_id]
+      ])
     );
 
     document.getElementById("routing-summary").replaceChildren(
-      valueRow("Should investigate", item.should_investigate),
-      valueRow("Detected domains", (item.detected_domains || []).join(", ") || "—"),
-      valueRow("Reasons", (item.routing_reasons || []).join(", ") || "—"),
+      valueRow("يحتاج إلى تحقيق", item.should_investigate),
+      valueRow("المجالات المكتشفة", (item.detected_domains || []).join(", ") || "—"),
+      valueRow("الأسباب", (item.routing_reasons || []).join(", ") || "—"),
       valueRow(
-        "Budget",
-        item.max_specialists + " specialists / "
-        + item.max_rounds + " rounds / "
-        + item.max_actions + " actions"
+        "الحدود التشغيلية",
+        item.max_specialists + " اختصاصيين / "
+        + item.max_rounds + " جولات / "
+        + item.max_actions + " إجراءات"
       )
     );
 
@@ -137,10 +166,10 @@
     for (const candidate of item.candidates || []) {
       candidates.appendChild(
         card(candidate.specialist_name, [
-          ["Slug", candidate.specialist_slug],
-          ["Score", candidate.score],
-          ["Selected", candidate.is_selected],
-          ["Domains", (candidate.matched_domains || []).join(", ")]
+          ["المعرف التقني", candidate.specialist_slug],
+          ["النتيجة", candidate.score],
+          ["تم الاختيار", candidate.is_selected],
+          ["المجالات", (candidate.matched_domains || []).join(", ")]
         ])
       );
     }
@@ -154,7 +183,7 @@
     const runtimeNode = document.getElementById("runtime-content");
 
     if (!runtime) {
-      runtimeNode.textContent = "لا توجد Runtime Snapshot محفوظة لهذا التحقيق.";
+      runtimeNode.textContent = "لا توجد لقطة تشغيل محفوظة لهذا التحقيق.";
       document.getElementById("diagnosis-content").textContent = "غير متاح.";
       document.getElementById("claims-content").textContent = "غير متاح.";
       document.getElementById("conflicts-content").textContent = "غير متاح.";
@@ -164,12 +193,12 @@
     }
 
     runtimeNode.replaceChildren(
-      valueRow("Status", runtime.status),
-      valueRow("Orchestrator", runtime.orchestrator),
-      valueRow("Execution mode", runtime.execution_mode),
-      valueRow("Waves", runtime.waves_completed),
-      valueRow("Actions", runtime.actions_used),
-      valueRow("Evidence count", runtime.evidence_count)
+      valueRow("الحالة", runtime.status),
+      valueRow("المنسق", runtime.orchestrator),
+      valueRow("نمط التنفيذ", runtime.execution_mode),
+      valueRow("الجولات", runtime.waves_completed),
+      valueRow("الإجراءات", runtime.actions_used),
+      valueRow("عدد الأدلة", runtime.evidence_count)
     );
 
     const diagnosisNode = document.getElementById("diagnosis-content");
@@ -177,77 +206,80 @@
 
     if (runtime.final_diagnosis) {
       const d = runtime.final_diagnosis;
-      diagnosisNode.appendChild(card("Deterministic Diagnosis", [
-        ["Summary", d.summary],
-        ["Confirmed", d.confirmed_count],
-        ["Probable", d.probable_count],
-        ["Unknown", d.unknown_count],
-        ["Conflicts", d.conflict_count]
+      diagnosisNode.appendChild(card("تشخيص حتمي", [
+        ["الملخص", d.summary],
+        ["المؤكدة", d.confirmed_count],
+        ["المرجحة", d.probable_count],
+        ["غير المعروفة", d.unknown_count],
+        ["التعارضات", d.conflict_count]
       ]));
     } else {
-      diagnosisNode.textContent = "لا يوجد Final Diagnosis محفوظ.";
+      diagnosisNode.textContent = "لا يوجد تشخيص نهائي محفوظ.";
     }
 
     if (runtime.narrative) {
       const n = runtime.narrative;
-      diagnosisNode.appendChild(card("Narrative", [
-        ["Summary", n.summary],
-        ["Provider", n.provider_name],
-        ["Model", n.model_name],
-        ["Fallback", n.used_fallback],
-        ["Operator notes", (n.operator_notes || []).join(" | ")]
+      diagnosisNode.appendChild(card("السرد التحليلي", [
+        ["الملخص", n.summary],
+        ["المزوّد", n.provider_name],
+        ["النموذج", n.model_name],
+        ["استخدام البديل", n.used_fallback],
+        ["ملاحظات المشغّل", (n.operator_notes || []).join(" | ")]
       ]));
     }
 
     renderList("claims-content", runtime.correlated_claims || [], (item) => card(
-      item.title || item.claim_id,
+      item.title || "استنتاج مرتبط",
       [
-        ["Claim ID", item.claim_id],
-        ["Certainty", item.certainty],
-        ["Confidence", item.confidence],
-        ["Specialists", (item.specialist_slugs || []).join(", ")],
-        ["Evidence", (item.evidence_ids || []).join(", ")],
-        ["Code locations", (item.metadata && item.metadata.code_locations || []).map(
+        ["درجة اليقين", item.certainty],
+        ["الثقة", item.confidence],
+        ["الاختصاصيون", (item.specialist_slugs || []).join(", ")],
+        ["الوصف", item.description]
+      ], [
+        ["معرف الاستنتاج", item.claim_id],
+        ["معرفات الأدلة", (item.evidence_ids || []).join(", ")],
+        ["مواضع الشيفرة", (item.metadata && item.metadata.code_locations || []).map(
           (location) => location.file_path + ":" + location.line_number
             + (location.column_number ? ":" + location.column_number : "")
-        ).join(", ") || "—"],
-        ["Description", item.description]
+        ).join(", ") || "—"]
       ]
-    ), "لا توجد Claims محفوظة.");
+    ), "لا توجد استنتاجات محفوظة.");
 
     renderList("conflicts-content", runtime.conflicts || [], (item) => card(
-      item.title || item.conflict_id,
+      item.title || "تعارض محفوظ",
       [
-        ["Conflict ID", item.conflict_id],
-        ["States", (item.diagnostic_states || []).join(" ↔ ")],
-        ["Specialists", (item.specialist_slugs || []).join(", ")],
-        ["Evidence", (item.evidence_ids || []).join(", ")],
-        ["Description", item.description]
+        ["الحالات", (item.diagnostic_states || []).join(" ↔ ")],
+        ["الاختصاصيون", (item.specialist_slugs || []).join(", ")],
+        ["الوصف", item.description]
+      ], [
+        ["معرف التعارض", item.conflict_id],
+        ["معرفات الأدلة", (item.evidence_ids || []).join(", ")]
       ]
     ), "لا توجد تعارضات.");
 
     renderList("specialists-content", runtime.specialist_runs || [], (item) => card(
       item.specialist_slug,
       [
-        ["Status", item.status],
-        ["Confidence", item.confidence],
-        ["Rounds", item.rounds_completed],
-        ["Actions", item.actions_executed],
-        ["Stop reason", item.stop_reason],
-        ["Summary", item.summary],
-        ["Evidence", (item.evidence_ids || []).join(", ")]
+        ["الحالة", item.status],
+        ["الثقة", item.confidence],
+        ["الجولات", item.rounds_completed],
+        ["الإجراءات", item.actions_executed],
+        ["سبب التوقف", item.stop_reason],
+        ["الملخص", item.summary],
+        ["الأدلة", (item.evidence_ids || []).join(", ")]
       ]
-    ), "لا توجد Specialist runs محفوظة.");
+    ), "لا توجد تشغيلات اختصاصيين محفوظة.");
 
     renderList("evidence-content", runtime.evidence || [], (item) => card(
-      item.title || item.evidence_id,
+      item.title || "دليل محفوظ",
       [
-        ["Evidence ID", item.evidence_id],
-        ["Kind", item.kind],
-        ["Source", item.source_id],
-        ["Excerpt", item.excerpt]
+        ["النوع", item.kind],
+        ["المقتطف", item.excerpt]
+      ], [
+        ["معرف الدليل", item.evidence_id],
+        ["معرف المصدر", item.source_id]
       ]
-    ), "لا توجد Evidence محفوظة.");
+    ), "لا توجد أدلة محفوظة.");
   }
 
   function renderList(id, items, builder, emptyText) {

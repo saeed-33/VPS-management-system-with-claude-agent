@@ -58,3 +58,20 @@ def test_native_sandbox_runtime_accepts_complete_attestation_in_wsl(tmp_path, mo
     monkeypatch.setenv("PHASE6_NATIVE_SANDBOX_ATTESTATION_FILE", str(path))
     monkeypatch.setenv("WSL_DISTRO_NAME", "Ubuntu")
     assert NativeSandboxRuntime().check().available is True
+
+
+def test_native_sandbox_runtime_accepts_application_configured_attestation(tmp_path, monkeypatch):
+    """
+    يثبت أن إعدادات التطبيق تكفي لتحديد ملف الشهادة حتى عندما لا يكون المتغير مصدّرًا.
+    """
+    path = tmp_path / "configured-attestation.json"
+    path.write_text(json.dumps({
+        "sandboxed": True,
+        "project_path_accessible": True,
+        "sensitive_path_inaccessible": True,
+        "unsandboxed_escape_unavailable": True,
+    }), encoding="utf-8")
+    monkeypatch.delenv("PHASE6_NATIVE_SANDBOX_ATTESTATION_FILE", raising=False)
+    monkeypatch.setenv("WSL_DISTRO_NAME", "Ubuntu")
+
+    assert NativeSandboxRuntime(attestation_file=path).check().available is True

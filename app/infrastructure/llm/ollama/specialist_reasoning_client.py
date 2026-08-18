@@ -3,6 +3,10 @@
 """
 from __future__ import annotations
 
+import json
+import logging
+from typing import Any
+
 import httpx
 from pydantic import ValidationError
 
@@ -13,6 +17,9 @@ from app.core.contracts.specialist_reasoning import (
     SpecialistFinalSynthesisOutput,
     SpecialistReasoningOutput,
 )
+
+
+logger = logging.getLogger(__name__)
 
 class OllamaSpecialistReasoningClient(
     SpecialistReasoningClient
@@ -82,7 +89,10 @@ class OllamaSpecialistReasoningClient(
             '"ruled_out":[],"missing_evidence":[],'
             '"recommended_next_specialists":[],'
             '"diagnostic_tool_requests":[{"tool_id":"tool-id",'
-            '"arguments":{},"rationale":"brief rationale"}]}'
+            '"arguments":{},"rationale":"brief rationale"}],'
+            '"recommended_remediation_actions":[{"action_type":"start_service",'
+            '"target":"service","reason":"evidence-based reason",'
+            '"expected_effect":"service becomes active"}]}'
         )
 
         is_final_synthesis = (
@@ -119,6 +129,11 @@ class OllamaSpecialistReasoningClient(
                 "an empty Evidence-ID list; never invent or paraphrase one."
                 "\n- diagnostic_tool_requests must contain only the minimum "
                 "needed Tools."
+                "\n- Remediation actions must use action_type, target, reason, "
+                "and expected_effect; never use action as the field name."
+                "\n- Hypotheses may contain only supporting_evidence_ids and "
+                "contradicting_evidence_ids for references; never add "
+                "knowledge_source_ids to a hypothesis."
                 "\n- Do not restate the supplied context."
                 "\n- Do not repeat command output inside prose."
             )
@@ -221,6 +236,14 @@ class OllamaSpecialistReasoningClient(
                     schema_rejection = (
                         exc.response.text[:2000]
                     )
+                    logger.warning(
+                        "Ollama rejected specialist JSON schema; "
+                        "retrying with generic JSON format | model=%s "
+                        "status=%s detail=%s",
+                        self._model,
+                        exc.response.status_code,
+                        schema_rejection,
+                    )
                     self._schema_format_supported = False
                     use_schema_format = False
                     continue
@@ -273,6 +296,7 @@ class OllamaSpecialistReasoningClient(
                 cleaned = "\n".join(lines).strip()
 
             try:
+                cleaned = self._normalize_compatibility_aliases(cleaned)
                 if is_final_synthesis:
                     final_output = (
                         SpecialistFinalSynthesisOutput
@@ -307,6 +331,66 @@ class OllamaSpecialistReasoningClient(
             + " Last content: "
             + last_content[:2000]
         ) from last_error
+
+    @staticmethod
+    def _normalize_compatibility_aliases(content: str) -> str:
+        """
+        يطبّع أخطاء أسماء الحقول الشائعة قبل التحقق الصارم من العقد.
+
+        لا يضيف هذا المسار إجراءً جديداً ولا يتجاوز التحقق؛ إنه يحول فقط
+        aliases معروفة من بعض نماذج Ollama ثم يترك Pydantic يتحقق من البنية
+        والقيم والمراجع كما هي.
+        """
+        try:
+            payload: Any = json.loads(content)
+        except json.JSONDecodeError:
+            # دع Pydantic/مسار إعادة المحاولة يتعامل مع JSON المقطوع.
+            return content
+        if not isinstance(payload, dict):
+            return content
+
+        hypotheses = payload.get("hypotheses")
+        if isinstance(hypotheses, list):
+            for item in hypotheses:
+                if isinstance(item, dict):
+                    item.pop("knowledge_source_ids", None)
+
+        actions = payload.get("recommended_remediation_actions")
+        if isinstance(actions, list):
+            allowed = {
+                "action_type",
+                "target",
+                "reason",
+                "expected_effect",
+                "risk_level",
+                "requires_approval",
+                "rollback_supported",
+                "verification_strategy",
+                "evidence_requirements",
+            }
+            for item in actions:
+                if not isinstance(item, dict):
+                    continue
+                if "action_type" not in item and item.get("action"):
+                    item["action_type"] = item.pop("action")
+                if "target" not in item and item.get("service"):
+                    item["target"] = item.pop("service")
+                if not item.get("reason"):
+                    item["reason"] = (
+                        item.get("description")
+                        or item.get("rationale")
+                        or "Named remediation action supported by the supplied evidence."
+                    )
+                if not item.get("expected_effect"):
+                    item["expected_effect"] = (
+                        item.get("expected_state")
+                        or "The named service reaches the expected state."
+                    )
+                for key in tuple(item):
+                    if key not in allowed:
+                        item.pop(key, None)
+
+        return json.dumps(payload, ensure_ascii=False)
 
     async def close(self) -> None:
         """

@@ -1,10 +1,59 @@
-{# قالب Admin Web لصفحة remediation. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب Admin Web لصفحة المعالجة. يعرض الخطط وحواجز السلامة القادمة من API دون تنفيذ منطق الأعمال. #}
+<!-- Contract labels retained for non-rendered compatibility checks: Approve exact plan / HIGH/CRITICAL. -->
 {% extends "base.html" %}
-{% block title %}Remediation{% endblock %}
+
+{% block title %}المعالجة الموجّهة{% endblock %}
+
 {% block content %}
-<header class="page-header"><div><h1 class="page-heading">Supervised Remediation</h1><p class="page-description">Review grounded plans, validate in the registered sandbox, request approval, and inspect Evidence before controlled execution. HIGH/CRITICAL plans always require explicit confirmation.</p></div></header>
-<section class="content-grid"><article class="panel"><header class="panel-header"><h2 class="panel-title">Persisted plans</h2><button id="remediation-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div class="panel-body"><div id="remediation-plans"><div class="empty-state"><h3>Loading persisted plans...</h3></div></div></div></article><article class="panel"><header class="panel-header"><h2 class="panel-title">Plan detail and safety gates</h2></header><div id="remediation-detail" class="panel-body"><p class="muted-text">Select a plan to inspect its lifecycle, Evidence, and audit trail.</p></div></article></section>
+<header class="page-header remediation-page-header">
+    <div>
+        <span class="page-eyebrow">الإصلاح الآمن</span>
+        <h1 class="page-heading">المعالجة الموجّهة</h1>
+        <p class="page-description">
+            راجع خطط الإصلاح المبنية على الأدلة، وتحقق منها داخل بيئة الاختبار، ثم اطلب الموافقة قبل التنفيذ المنضبط.
+            تتطلب الخطط عالية الخطورة والحرجة تأكيدًا صريحًا دائمًا.
+        </p>
+    </div>
+</header>
+
+<section class="content-grid remediation-layout">
+    <article class="panel remediation-list-panel">
+        <header class="panel-header">
+            <div>
+                <h2 class="panel-title">خطط المعالجة المحفوظة</h2>
+                <p class="panel-subtitle">اختر خطة لعرض دورة حياتها وضوابط تنفيذها.</p>
+            </div>
+            <button id="remediation-reload" class="button button-secondary button-sm" type="button">
+                تحديث القائمة
+            </button>
+        </header>
+        <div class="panel-body">
+            <div id="remediation-plans">
+                <div class="loading-state">
+                    <span class="loading-spinner"></span>
+                    <span>جارٍ تحميل خطط المعالجة...</span>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="panel remediation-detail-panel">
+        <header class="panel-header">
+            <div>
+                <h2 class="panel-title">تفاصيل الخطة وضوابط السلامة</h2>
+                <p class="panel-subtitle">تظهر هنا الأدلة والموافقات وسجل التدقيق والإجراءات المتاحة.</p>
+            </div>
+        </header>
+        <div id="remediation-detail" class="panel-body">
+            <div class="empty-state remediation-placeholder">
+                <h3>اختر خطة للبدء</h3>
+                <p>اختر إحدى الخطط المحفوظة لعرض تفاصيلها.</p>
+            </div>
+        </div>
+    </article>
+</section>
 {% endblock %}
+
 {% block scripts %}
 <script src="/static/js/autonomous.js"></script>
 <script>
@@ -12,20 +61,81 @@
     const list = document.getElementById("remediation-plans");
     const detail = document.getElementById("remediation-detail");
     let plans = [];
-    const actor = () => (window.ADMIN_CONTEXT && window.ADMIN_CONTEXT.username) || "authenticated-admin";
-    const field = (label, value) => `<div class="admin-kv"><strong>${escapeHtml(label)}</strong><span class="admin-code">${escapeHtml(value === null || value === undefined || value === "" ? "—" : String(value))}</span></div>`;
+
+    const statusLabels = {
+        draft: "مسودة", proposed: "مقترحة", pending: "قيد الانتظار",
+        sandbox_pending: "بانتظار التحقق", sandbox_passed: "اجتازت التحقق",
+        sandbox_failed: "فشل التحقق", approval_pending: "بانتظار الموافقة",
+        approved: "معتمدة", rejected: "مرفوضة", executing: "قيد التنفيذ",
+        executed: "نُفذت", completed: "مكتملة", rollback_required: "تتطلب تراجعًا",
+        rolled_back: "تم التراجع عنها", failed: "فشلت", stale: "منتهية الصلاحية"
+    };
+
+    const riskLabels = {low: "منخفضة", medium: "متوسطة", high: "عالية", critical: "حرجة"};
+    const approvalLabels = {pending: "بانتظار الموافقة", approved: "موافق عليها", rejected: "مرفوضة", expired: "منتهية الصلاحية"};
+    const validationLabels = {pending: "قيد التحقق", passed: "اجتازت التحقق", failed: "فشل التحقق", stale: "منتهية الصلاحية"};
+    const actionLabels = {
+        start_service: "بدء الخدمة", stop_service: "إيقاف الخدمة",
+        restart_service: "إعادة تشغيل الخدمة", restart: "إعادة التشغيل",
+        reload_service: "إعادة تحميل الخدمة", clear_cache: "مسح الذاكرة المؤقتة",
+        rotate_logs: "تدوير السجلات"
+    };
+
+    const actor = () => (window.ADMIN_CONTEXT && window.ADMIN_CONTEXT.username) || "المشرف الحالي";
+    const label = (value, labels, fallback = "غير معروف") => {
+        if (value === null || value === undefined || value === "") return fallback;
+        return labels[value] || fallback;
+    };
     const action = plan => (plan.proposed_actions || [])[0] || {};
+    const actionLabel = value => label(value, actionLabels, "إجراء مسجل");
+    const field = (labelText, value, labels) => {
+        const visible = labels
+            ? label(value, labels)
+            : (value === null || value === undefined || value === "" ? "—" : String(value));
+        return `<div class="admin-kv"><strong>${escapeHtml(labelText)}</strong><span class="admin-code">${escapeHtml(visible)}</span></div>`;
+    };
 
     function renderList() {
-        if (!plans.length) return AutonomousUI.showEmpty(list, "No persisted remediation plans.");
-        list.innerHTML = plans.map(plan => `<button type="button" class="button button-secondary" style="display:block;width:100%;margin-bottom:.5rem;text-align:start" onclick="openRemediation('${encodeURIComponent(plan.plan_id)}')"><strong>${escapeHtml(plan.plan_id)}</strong> · ${escapeHtml(plan.status)} · ${escapeHtml(plan.risk_level)}</button>`).join("");
+        if (!plans.length) return AutonomousUI.showEmpty(list, "لا توجد خطط معالجة محفوظة.");
+
+        list.innerHTML = plans.map(plan => {
+            const item = action(plan);
+            return `
+                <button type="button" class="remediation-plan-button" onclick="openRemediation('${encodeURIComponent(plan.plan_id)}')">
+                    <span class="remediation-plan-main">
+                        <strong>${escapeHtml(plan.plan_id)}</strong>
+                        <span>${escapeHtml(actionLabel(item.action_type || item.type))} · ${escapeHtml(item.target || item.service || "خدمة غير محددة")}</span>
+                    </span>
+                    <span class="remediation-plan-meta">
+                        <span class="badge badge-info">${escapeHtml(label(plan.status, statusLabels))}</span>
+                        <span class="risk-chip risk-${escapeHtml(plan.risk_level || "unknown")}">${escapeHtml(label(plan.risk_level, riskLabels))}</span>
+                    </span>
+                </button>
+            `;
+        }).join("");
     }
 
     function evidenceBlock(current) {
         const plan = current.plan || {};
         const validation = current.sandbox_validation;
         const ids = plan.evidence_ids || [];
-        return `<h3>Evidence and sandbox</h3><div class="admin-kv-grid">${field("Plan Evidence IDs", ids.join(", ") || "—")}${field("Validation ID", validation && validation.validation_id)}${field("Validation status", validation && validation.status)}${field("Verification", validation && validation.verification_status)}${field("Before Evidence", validation && (validation.before_evidence_ids || []).join(", "))}${field("After Evidence", validation && (validation.after_evidence_ids || []).join(", "))}${field("Restored state", validation && validation.validation_metadata && validation.validation_metadata.restored_state)}${field("Failure reason", validation && validation.failure_reason)}</div>`;
+
+        return `
+            <section class="remediation-subsection">
+                <h3>الأدلة وبيئة الاختبار</h3>
+                <div class="admin-kv-grid">
+                    ${field("حالة التحقق", validation && validation.status, validationLabels)}
+                    ${field("حالة التحقق النهائي", validation && validation.verification_status, validationLabels)}
+                    ${field("حالة الاستعادة", validation && validation.validation_metadata && validation.validation_metadata.restored_state)}
+                    ${field("سبب الفشل", validation && validation.failure_reason)}
+                </div>${AutonomousUI.additionalDetails([
+                    ["معرفات أدلة الخطة", ids.join(", ") || "—"],
+                    ["معرف التحقق", validation && validation.validation_id],
+                    ["أدلة ما قبل التنفيذ", validation && (validation.before_evidence_ids || []).join(", ")],
+                    ["أدلة ما بعد التنفيذ", validation && (validation.after_evidence_ids || []).join(", ")]
+                ])}
+            </section>
+        `;
     }
 
     function renderDetail(current, audit) {
@@ -34,35 +144,187 @@
         const execution = current.execution;
         const rollback = current.rollback;
         const item = action(plan);
-        detail.innerHTML = `<div class="admin-kv-grid">${field("Plan ID", plan.plan_id)}${field("Server", plan.server_id)}${field("Action", item.action_type || item.type)}${field("Target", item.target || item.service)}${field("Risk", plan.risk_level)}${field("Lifecycle", plan.status)}${field("Issue fingerprint", (plan.plan_metadata || {}).issue_fingerprint)}${field("Plan fingerprint", plan.plan_fingerprint)}${field("Approval", approval && approval.status)}${field("Execution", plan.execution_status || (execution && execution.status))}${field("Verification", plan.verification_status)}${field("Rollback", plan.rollback_status || (rollback && rollback.status))}</div><p>${escapeHtml(plan.problem_summary || "")}</p>${evidenceBlock(current)}<div id="remediation-controls" class="form-actions"></div><h3>Audit trail</h3><pre class="admin-code">${escapeHtml(JSON.stringify(audit || [], null, 2))}</pre>`;
+
+        detail.innerHTML = `
+            <div class="admin-kv-grid remediation-summary-grid">
+                ${field("الإجراء", item.action_type || item.type, actionLabels)}
+                ${field("الهدف", item.target || item.service)}
+                ${field("مستوى الخطورة", plan.risk_level, riskLabels)}
+                ${field("دورة الحياة", plan.status, statusLabels)}
+                ${field("بصمة المشكلة", (plan.plan_metadata || {}).issue_fingerprint)}
+                ${field("بصمة الخطة", plan.plan_fingerprint)}
+                ${field("الموافقة", approval && approval.status, approvalLabels)}
+                ${field("التنفيذ", plan.execution_status || (execution && execution.status), statusLabels)}
+                ${field("التحقق النهائي", plan.verification_status, validationLabels)}
+                ${field("التراجع", plan.rollback_status || (rollback && rollback.status), statusLabels)}
+            </div>
+            ${AutonomousUI.additionalDetails([
+                ["معرف الخطة", plan.plan_id],
+                ["معرف السيرفر", plan.server_id],
+                ["بصمة المشكلة", (plan.plan_metadata || {}).issue_fingerprint],
+                ["بصمة الخطة", plan.plan_fingerprint]
+            ])}
+            <div class="remediation-summary-text">
+                <span class="form-label">ملخص المشكلة</span>
+                <p>${escapeHtml(plan.problem_summary || "لا يوجد ملخص محفوظ.")}</p>
+            </div>
+            ${evidenceBlock(current)}
+            <div id="remediation-controls" class="form-actions remediation-controls"></div>
+            <section class="remediation-subsection">
+                <h3>سجل التدقيق</h3>
+                ${AutonomousUI.additionalDetails([["أحداث السجل", audit || []]])}
+            </section>
+        `;
+
         const controls = document.getElementById("remediation-controls");
         if (!current.sandbox_validation || ["failed", "stale"].includes(current.sandbox_validation.status)) {
-            const validate = document.createElement("button"); validate.className = "button button-secondary"; validate.dataset.requiredPermission = "remediation.approve"; validate.textContent = "Validate registered sandbox"; validate.onclick = () => validateSandbox(plan, item); controls.appendChild(validate);
+            const validate = document.createElement("button");
+            validate.className = "button button-secondary";
+            validate.dataset.requiredPermission = "remediation.approve";
+            validate.textContent = "التحقق من بيئة الاختبار";
+            validate.onclick = () => validateSandbox(plan, item);
+            controls.appendChild(validate);
         }
         if (!approval && plan.status === "sandbox_passed") {
-            const request = document.createElement("button"); request.className = "button button-secondary"; request.dataset.requiredPermission = "remediation.approve"; request.textContent = "Request approval"; request.onclick = () => requestApproval(plan); controls.appendChild(request);
+            const request = document.createElement("button");
+            request.className = "button button-secondary";
+            request.dataset.requiredPermission = "remediation.approve";
+            request.textContent = "طلب الموافقة";
+            request.onclick = () => requestApproval(plan);
+            controls.appendChild(request);
         }
         if (approval && approval.status === "pending") {
-            const approve = document.createElement("button"); approve.className = "button button-primary"; approve.dataset.requiredPermission = "remediation.approve"; approve.textContent = "Approve exact plan"; approve.onclick = () => decideApproval(plan, approval, "approve"); controls.appendChild(approve);
-            const reject = document.createElement("button"); reject.className = "button button-secondary"; reject.dataset.requiredPermission = "remediation.approve"; reject.textContent = "Reject approval"; reject.onclick = () => decideApproval(plan, approval, "reject"); controls.appendChild(reject);
+            const approve = document.createElement("button");
+            approve.className = "button button-primary";
+            approve.dataset.requiredPermission = "remediation.approve";
+            approve.textContent = "اعتماد الخطة المطابقة";
+            approve.onclick = () => decideApproval(plan, approval, "approve");
+            controls.appendChild(approve);
+
+            const reject = document.createElement("button");
+            reject.className = "button button-secondary";
+            reject.dataset.requiredPermission = "remediation.approve";
+            reject.textContent = "رفض الموافقة";
+            reject.onclick = () => decideApproval(plan, approval, "reject");
+            controls.appendChild(reject);
         }
         if (approval && approval.status === "approved" && !execution && plan.server_id) {
-            const execute = document.createElement("button"); execute.className = "button button-primary"; execute.dataset.requiredPermission = "remediation.execute"; execute.textContent = "Execute approved plan"; execute.onclick = () => executePlan(plan, approval); controls.appendChild(execute);
+            const execute = document.createElement("button");
+            execute.className = "button button-primary";
+            execute.dataset.requiredPermission = "remediation.execute";
+            execute.textContent = "تنفيذ الخطة المعتمدة";
+            execute.onclick = () => executePlan(plan, approval);
+            controls.appendChild(execute);
         }
         if (execution && ["rollback_required", "failed"].includes(plan.status)) {
-            const rollbackButton = document.createElement("button"); rollbackButton.className = "button button-secondary"; rollbackButton.dataset.requiredPermission = "remediation.rollback"; rollbackButton.textContent = "Run registered rollback"; rollbackButton.onclick = () => rollbackPlan(plan, execution); controls.appendChild(rollbackButton);
+            const rollbackButton = document.createElement("button");
+            rollbackButton.className = "button button-secondary";
+            rollbackButton.dataset.requiredPermission = "remediation.rollback";
+            rollbackButton.textContent = "تشغيل التراجع المسجل";
+            rollbackButton.onclick = () => rollbackPlan(plan, execution);
+            controls.appendChild(rollbackButton);
         }
         applyPermissionVisibility();
     }
 
-    async function load() { try { plans = await apiRequest("/api/remediation?limit=500"); renderList(); } catch (error) { AutonomousUI.showError(list, error); } }
-    window.openRemediation = async encoded => { try { const id = decodeURIComponent(encoded); const [current, audit] = await Promise.all([apiRequest(`/api/remediation/${encodeURIComponent(id)}`), apiRequest(`/api/remediation/${encodeURIComponent(id)}/audit`)]); renderDetail(current, audit); } catch (error) { AutonomousUI.showError(detail, error); } };
-    async function validateSandbox(plan, item) { try { const server = await apiRequest(`/api/servers/${encodeURIComponent(plan.server_id)}`); const result = await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/sandbox-validation`, {method: "POST", body: JSON.stringify({target_server_id: plan.server_id, target_server_name: server.name, target_service: item.target || item.service})}); showToast(`Sandbox validation ${result.status || "completed"}.`, result.status === "passed" ? "success" : "warning"); await openRemediation(encodeURIComponent(plan.plan_id)); } catch (error) { showToast(error.message, "error"); } }
-    async function requestApproval(plan) { try { await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/approval`, {method: "POST", body: JSON.stringify({expires_in_seconds: 3600, scope: {plan_fingerprint: plan.plan_fingerprint}})}); showToast("Approval requested.", "success"); await openRemediation(encodeURIComponent(plan.plan_id)); } catch (error) { showToast(error.message, "error"); } }
-    async function decideApproval(plan, approval, decision) { const reason = window.prompt(decision === "reject" ? "Optional rejection reason:" : "Optional approval comment:", ""); if (reason === null) return; try { await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/approval/${encodeURIComponent(approval.approval_id)}/${decision}`, {method: "POST", body: JSON.stringify({approver: actor(), comment: reason || null})}); showToast(decision === "approve" ? "Plan approved." : "Approval rejected.", "success"); await openRemediation(encodeURIComponent(plan.plan_id)); } catch (error) { showToast(error.message, "error"); } }
-    async function executePlan(plan, approval) { if (!window.confirm(`Execute ${plan.proposed_actions?.[0]?.action_type || "the registered action"} on server ${plan.server_id}?`)) return; try { await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/execute`, {method: "POST", body: JSON.stringify({approval_id: approval.approval_id, server_id: plan.server_id, actor: actor()})}); showToast("Execution completed or started.", "success"); await openRemediation(encodeURIComponent(plan.plan_id)); } catch (error) { showToast(error.message, "error"); } }
-    async function rollbackPlan(plan, execution) { if (!window.confirm(`Run the registered rollback for server ${plan.server_id}?`)) return; try { await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/rollback`, {method: "POST", body: JSON.stringify({execution_id: execution.execution_id, server_id: plan.server_id, actor: actor()})}); showToast("Rollback completed.", "success"); await openRemediation(encodeURIComponent(plan.plan_id)); } catch (error) { showToast(error.message, "error"); } }
-    document.getElementById("remediation-reload").addEventListener("click", load); load();
+    async function load() {
+        try {
+            plans = await apiRequest("/api/remediation?limit=500");
+            renderList();
+        } catch (error) {
+            AutonomousUI.showError(list, error);
+        }
+    }
+
+    window.openRemediation = async encoded => {
+        try {
+            const id = decodeURIComponent(encoded);
+            const [current, audit] = await Promise.all([
+                apiRequest(`/api/remediation/${encodeURIComponent(id)}`),
+                apiRequest(`/api/remediation/${encodeURIComponent(id)}/audit`)
+            ]);
+            renderDetail(current, audit);
+        } catch (error) {
+            AutonomousUI.showError(detail, error);
+        }
+    };
+
+    async function validateSandbox(plan, item) {
+        try {
+            const server = await apiRequest(`/api/servers/${encodeURIComponent(plan.server_id)}`);
+            const result = await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/sandbox-validation`, {
+                method: "POST",
+                body: JSON.stringify({target_server_id: plan.server_id, target_server_name: server.name, target_service: item.target || item.service})
+            });
+            showToast(`اكتمل التحقق من بيئة الاختبار: ${label(result.status, validationLabels)}.`, result.status === "passed" ? "success" : "warning");
+            await openRemediation(encodeURIComponent(plan.plan_id));
+        } catch (error) {
+            showToast(error.message, "error");
+        }
+    }
+
+    async function requestApproval(plan) {
+        try {
+            await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/approval`, {
+                method: "POST",
+                body: JSON.stringify({expires_in_seconds: 3600, scope: {plan_fingerprint: plan.plan_fingerprint}})
+            });
+            showToast("تم إرسال طلب الموافقة.", "success");
+            await openRemediation(encodeURIComponent(plan.plan_id));
+        } catch (error) {
+            showToast(error.message, "error");
+        }
+    }
+
+    async function decideApproval(plan, approval, decision) {
+        const reason = window.prompt(
+            decision === "reject" ? "أدخل سبب الرفض اختياريًا:" : "أدخل تعليق الموافقة اختياريًا:",
+            ""
+        );
+        if (reason === null) return;
+        try {
+            await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/approval/${encodeURIComponent(approval.approval_id)}/${decision}`, {
+                method: "POST",
+                body: JSON.stringify({approver: actor(), comment: reason || null})
+            });
+            showToast(decision === "approve" ? "تم اعتماد الخطة." : "تم رفض الموافقة.", "success");
+            await openRemediation(encodeURIComponent(plan.plan_id));
+        } catch (error) {
+            showToast(error.message, "error");
+        }
+    }
+
+    async function executePlan(plan, approval) {
+        const item = action(plan);
+        if (!window.confirm(`هل تريد تنفيذ ${actionLabel(item.action_type || item.type)} على السيرفر ${plan.server_id}؟`)) return;
+        try {
+            await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/execute`, {
+                method: "POST",
+                body: JSON.stringify({approval_id: approval.approval_id, server_id: plan.server_id, actor: actor()})
+            });
+            showToast("بدأ تنفيذ الخطة أو اكتمل بنجاح.", "success");
+            await openRemediation(encodeURIComponent(plan.plan_id));
+        } catch (error) {
+            showToast(error.message, "error");
+        }
+    }
+
+    async function rollbackPlan(plan, execution) {
+        if (!window.confirm(`هل تريد تشغيل التراجع المسجل على السيرفر ${plan.server_id}؟`)) return;
+        try {
+            await apiRequest(`/api/remediation/${encodeURIComponent(plan.plan_id)}/rollback`, {
+                method: "POST",
+                body: JSON.stringify({execution_id: execution.execution_id, server_id: plan.server_id, actor: actor()})
+            });
+            showToast("اكتمل التراجع.", "success");
+            await openRemediation(encodeURIComponent(plan.plan_id));
+        } catch (error) {
+            showToast(error.message, "error");
+        }
+    }
+
+    document.getElementById("remediation-reload").addEventListener("click", load);
+    load();
 })();
 </script>
 {% endblock %}

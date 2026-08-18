@@ -1,9 +1,35 @@
-{# قالب Admin Web لصفحة autonomous runtime. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب صفحة تشغيل المعالجة الذاتية. #}
 {% extends "base.html" %}
-{% block title %}Autonomous Runtime{% endblock %}
-{% block content %}<header class="page-header"><div><h1 class="page-heading">Autonomous Runtime</h1><p class="page-description">Per-policy runtime state, suspension state, and circuit-breaker status. Resume starts a new operator-approved epoch.</p></div></header><section class="panel"><header class="panel-header"><h2 class="panel-title">Policy runtime</h2><button id="runtime-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div id="runtime-list" class="panel-body"><div class="empty-state"><h3>Loading runtime...</h3></div></div></section>{% endblock %}
-{% block scripts %}<script src="/static/js/autonomous.js"></script><script>
-(() => { const node = document.getElementById("runtime-list"); function render(items) { if (!items.length) return AutonomousUI.showEmpty(node, "No autonomous policies configured."); node.innerHTML = items.map(({policy, runtime}) => `<article class="panel" style="margin-bottom:1rem"><header class="panel-header"><div><h3 class="panel-title">${escapeHtml(policy.name)}</h3><p class="panel-subtitle">${escapeHtml(policy.policy_id)} · ${escapeHtml(policy.status)}</p></div><div>${AutonomousUI.badge(policy.status)} <button type="button" class="button button-secondary button-sm" data-required-permission="autonomous.policy.resume" onclick="resumeRuntime('${encodeURIComponent(policy.policy_id)}')">Resume policy</button></div></header><div class="panel-body"><div class="admin-kv-grid">${[["Consecutive failures",runtime && runtime.consecutive_failures], ["Runtime epoch",runtime && (runtime.runtime_epoch || runtime.epoch)], ["Last execution",AutonomousUI.date(runtime && runtime.last_execution_at)], ["Last failure",AutonomousUI.date(runtime && runtime.last_failure_at)], ["Suspended at",AutonomousUI.date(runtime && runtime.suspended_at)], ["Suspension reason",runtime && runtime.suspension_reason], ["Circuit breaker",policy.status === "suspended" ? "tripped/suspended" : "not suspended"], ["Updated",AutonomousUI.date(runtime && runtime.updated_at)]].map(([k,v])=>`<div class="admin-kv"><strong>${escapeHtml(k)}</strong><span>${escapeHtml(AutonomousUI.text(v,"0"))}</span></div>`).join("")}</div></div></article>`).join(""); applyPermissionVisibility(); }
-window.resumeRuntime = async encoded => { const id = decodeURIComponent(encoded); try { const confirmed = await AutonomousUI.confirmAction(`Resume ${id}? This starts a new runtime epoch and clears the suspension marker.`, () => apiRequest(`/api/autonomous-remediation/policies/${encodeURIComponent(id)}/resume`, {method: "POST", body: JSON.stringify({})})); if (confirmed) { showToast("Policy resumed.", "success"); await load(); } } catch (error) { showToast(error.message, "error"); } };
-async function load() { try { const policies = await apiRequest("/api/autonomous-remediation/policies"); const items = await Promise.all(policies.map(async policy => ({policy, runtime: await apiRequest(`/api/autonomous-remediation/policies/${encodeURIComponent(policy.policy_id)}/runtime`)}))); render(items); } catch (error) { AutonomousUI.showError(node, error); } } document.getElementById("runtime-reload").addEventListener("click", load); load(); })();
-</script>{% endblock %}
+{% block title %}تشغيل المعالجة الذاتية{% endblock %}
+{% block content %}
+<header class="page-header autonomous-page-header"><div><span class="page-eyebrow">المعالجة الذاتية</span><h1 class="page-heading">تشغيل المعالجة الذاتية</h1><p class="page-description">حالة التشغيل لكل سياسة، وحالة الإيقاف، وقاطع الدائرة. يؤدي الاستئناف إلى بدء دورة تشغيل جديدة بموافقة المشغّل.</p></div></header>
+<section class="panel autonomous-panel"><header class="panel-header"><div><h2 class="panel-title">حالة تشغيل السياسات</h2><p class="panel-subtitle">راجع حالات التعثر والإيقاف قبل استئناف أي سياسة.</p></div><button id="runtime-reload" class="button button-secondary button-sm" type="button">تحديث الحالات</button></header><div id="runtime-list" class="panel-body"><div class="loading-state"><span class="loading-spinner"></span><span>جارٍ تحميل حالات التشغيل...</span></div></div></section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/autonomous.js"></script>
+<script>
+(() => {
+    const node = document.getElementById("runtime-list");
+    function render(items) {
+        if (!items.length) return AutonomousUI.showEmpty(node, "لا توجد سياسات معالجة ذاتية.");
+        node.innerHTML = items.map(({policy, runtime}) => `
+            <article class="autonomous-record-card">
+                <header class="autonomous-record-header"><div><h3 class="panel-title">${escapeHtml(policy.name)}</h3><p class="panel-subtitle">${escapeHtml(policy.policy_id)} · ${AutonomousUI.badge(policy.status)}</p></div><button type="button" class="button button-secondary button-sm" data-required-permission="autonomous.policy.resume" onclick="resumeRuntime('${encodeURIComponent(policy.policy_id)}')">استئناف السياسة</button></header>
+                <div class="autonomous-record-body"><div class="admin-kv-grid">${[["مرات الفشل المتتالية", runtime && runtime.consecutive_failures], ["دورة التشغيل", runtime && (runtime.runtime_epoch || runtime.epoch)], ["آخر تنفيذ", AutonomousUI.date(runtime && runtime.last_execution_at)], ["آخر فشل", AutonomousUI.date(runtime && runtime.last_failure_at)], ["تاريخ الإيقاف", AutonomousUI.date(runtime && runtime.suspended_at)], ["سبب الإيقاف", runtime && runtime.suspension_reason], ["قاطع الدائرة", policy.status === "suspended" ? "مفعّل بسبب التعثر" : "غير موقوف"], ["آخر تحديث", AutonomousUI.date(runtime && runtime.updated_at)]].map(([key, value]) => `<div class="admin-kv"><strong>${key}</strong><span>${escapeHtml(AutonomousUI.text(value, "0"))}</span></div>`).join("")}</div></div>
+            </article>
+        `).join("");
+        applyPermissionVisibility();
+    }
+    window.resumeRuntime = async encoded => {
+        const id = decodeURIComponent(encoded);
+        try {
+            const confirmed = await AutonomousUI.confirmAction(`هل تريد استئناف السياسة ${id}؟ سيؤدي ذلك إلى بدء دورة تشغيل جديدة وإزالة علامة الإيقاف.`, () => apiRequest(`/api/autonomous-remediation/policies/${encodeURIComponent(id)}/resume`, {method: "POST", body: JSON.stringify({})}));
+            if (confirmed) { showToast("تم استئناف السياسة.", "success"); await load(); }
+        } catch (error) { showToast(error.message, "error"); }
+    };
+    async function load() { try { const policies = await apiRequest("/api/autonomous-remediation/policies"); const items = await Promise.all(policies.map(async policy => ({policy, runtime: await apiRequest(`/api/autonomous-remediation/policies/${encodeURIComponent(policy.policy_id)}/runtime`)}))); render(items); } catch (error) { AutonomousUI.showError(node, error); } }
+    document.getElementById("runtime-reload").addEventListener("click", load);
+    load();
+})();
+</script>
+{% endblock %}

@@ -9,6 +9,7 @@
 نتيجة CLI/evaluation أو assertion إلى caller.
 """
 import asyncio
+from dataclasses import replace
 
 import pytest
 
@@ -62,6 +63,31 @@ class Client:
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
         return self.output
+
+
+class SequenceClient(Client):
+    """
+    يعيد مخرجات متتابعة لاختبار إعادة محاولة إصلاح provenance.
+    """
+    def __init__(self, outputs):
+        """
+        يجهز قائمة الردود وعدد الاستدعاءات.
+        """
+        super().__init__(outputs[0])
+        self.outputs = list(outputs)
+        self.calls = 0
+
+    async def reason(self, *, system_prompt, user_prompt):
+        """
+        يعيد الرد التالي مع حفظ آخر prompt.
+        """
+        self.system_prompt = system_prompt
+        self.user_prompt = user_prompt
+        output = self.outputs[
+            min(self.calls, len(self.outputs) - 1)
+        ]
+        self.calls += 1
+        return output
 
 
 def context():
@@ -296,6 +322,10 @@ def test_prompt_lists_exact_evidence_id_allowlist_without_raw_observation():
     )
 
     assert "Allowed Evidence IDs: `evidence-A`" in client.user_prompt
+    assert (
+        "Allowed Knowledge Source IDs: `knowledge-chunk:12`"
+        in client.user_prompt
+    )
     assert "Never copy an Evidence title" in client.user_prompt
     assert "Active: inactive (dead)" not in client.user_prompt.split(
         "## Evidence ID Allowlist",
@@ -321,6 +351,63 @@ def test_raw_log_text_in_evidence_id_field_fails_closed():
                 context=context()
             )
         )
+
+
+def test_invalid_evidence_reference_is_retried_with_provenance_correction():
+    """
+    يثبت أن خطأ المرجع يعيد الطلب مرة واحدة دون تخمين معرف الدليل.
+    """
+    invalid = valid_output()
+    invalid.findings[0].evidence_ids = [
+        "PID 4363 monitor python3 99.4 0.6",
+    ]
+
+    recovered = valid_output()
+    recovered.findings[0].evidence_ids = [
+        "evidence-A",
+    ]
+
+    client = SequenceClient([invalid, recovered])
+
+    execution = asyncio.run(
+        SpecialistReasoningAgent(client=client).reason(
+            context=context()
+        )
+    )
+
+    assert client.calls == 2
+    assert "Provenance Correction Required" in client.user_prompt
+    assert execution.result.findings[0].evidence_ids == (
+        "evidence-A",
+    )
+
+
+def test_invalid_knowledge_reference_is_retried_with_provenance_correction():
+    """
+    يثبت أن معرف مصدر المعرفة غير الصالح يعاد تصحيحه دون تخمين.
+    """
+    invalid = valid_output()
+    invalid.findings[0].knowledge_source_ids = [
+        "knowledge_source_id:N/A (Based on Initial Issues)",
+    ]
+
+    recovered = valid_output()
+    recovered.findings[0].knowledge_source_ids = [
+        "knowledge-chunk:12",
+    ]
+
+    client = SequenceClient([invalid, recovered])
+
+    execution = asyncio.run(
+        SpecialistReasoningAgent(client=client).reason(
+            context=context()
+        )
+    )
+
+    assert client.calls == 2
+    assert execution.result.findings[0].knowledge_source_ids == (
+        "knowledge-chunk:12",
+    )
 
 
 def test_evidence_from_another_context_fails_closed():
@@ -365,3 +452,89 @@ def test_duplicate_evidence_ids_follow_existing_aggregate_deduplication():
         "evidence-A",
     )
     assert execution.result.evidence_ids == ("evidence-A",)
+
+
+def test_explicit_active_expectation_creates_supervised_start_action():
+    """
+    يثبت إنشاء اقتراح بدء خدمة عند وجود توقع active ودليل systemd inactive.
+    """
+    output = valid_output()
+    output.findings[0].knowledge_source_ids = []
+    systemd_context = replace(
+        context(),
+        specialist_slug="systemd-service",
+        specialist_name="Systemd Service Specialist",
+        objective=(
+            "The ai-vps-remediation-test.service is expected to be active. "
+            "Start the service if systemd reports it inactive."
+        ),
+        domains=("systemd", "service"),
+        knowledge_sources=(),
+        evidence=(
+            EvidenceReference(
+                evidence_id="systemd-evidence",
+                kind=EvidenceKind.COMMAND_RESULT,
+                title="Systemd status",
+                excerpt="Active: inactive (dead)",
+                metadata={
+                    "tool_id": "systemd-status",
+                    "command_text": (
+                        "systemctl --no-pager --full status "
+                        "ai-vps-remediation-test.service"
+                    ),
+                },
+            ),
+        ),
+    )
+
+    execution = asyncio.run(
+        SpecialistReasoningAgent(client=Client(output)).reason(
+            context=systemd_context,
+        )
+    )
+
+    actions = execution.result.metadata["recommended_remediation_actions"]
+    assert len(actions) == 1
+    assert actions[0]["action_type"] == "start_service"
+    assert actions[0]["target"] == "ai-vps-remediation-test.service"
+    assert actions[0]["requires_approval"] is True
+    assert actions[0]["evidence_requirements"] == ["systemd-evidence"]
+
+
+def test_inactive_service_without_expected_active_state_creates_no_action():
+    """
+    يثبت عدم تشغيل خدمة متوقفة عمداً عند غياب الحالة المتوقعة الصريحة.
+    """
+    output = valid_output()
+    output.findings[0].knowledge_source_ids = []
+    systemd_context = replace(
+        context(),
+        specialist_slug="systemd-service",
+        specialist_name="Systemd Service Specialist",
+        objective="Investigate the current service state; it may be inactive by design.",
+        domains=("systemd", "service"),
+        knowledge_sources=(),
+        evidence=(
+            EvidenceReference(
+                evidence_id="systemd-evidence",
+                kind=EvidenceKind.COMMAND_RESULT,
+                title="Systemd status",
+                excerpt="Active: inactive (dead)",
+                metadata={
+                    "tool_id": "systemd-status",
+                    "command_text": (
+                        "systemctl --no-pager --full status "
+                        "ai-vps-remediation-test.service"
+                    ),
+                },
+            ),
+        ),
+    )
+
+    execution = asyncio.run(
+        SpecialistReasoningAgent(client=Client(output)).reason(
+            context=systemd_context,
+        )
+    )
+
+    assert execution.result.metadata["recommended_remediation_actions"] == []

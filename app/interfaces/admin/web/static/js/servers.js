@@ -1,7 +1,7 @@
 /**
  * صفحة إدارة Servers. تحمل servers وmonitoring profiles عبر Admin API، تدير forms/modals، وتعرض اختبار SSH وتبديل monitoring. لا تنفذ SSH في المتصفح؛ الخادم هو صاحب القرار.
  */
-console.log("Servers page script loaded");
+console.log("تم تحميل واجهة السيرفرات");
 
 /**
  * ينفذ خطوة واجهة باسم safetyDesignationLabel ضمن صفحة Admin Web.
@@ -9,10 +9,10 @@ console.log("Servers page script loaded");
  */
 function safetyDesignationLabel(value) {
     const labels = {
-        safe_remediation_lab: "Safe remediation lab",
-        non_production: "Non-production",
-        production: "Production",
-        unclassified: "Unclassified"
+        safe_remediation_lab: "مختبر معالجة آمن",
+        non_production: "غير إنتاجي",
+        production: "إنتاجي",
+        unclassified: "غير مصنف"
     };
     return labels[value] || labels.unclassified;
 }
@@ -225,7 +225,7 @@ function safetyDesignationLabel(value) {
         data-required-permission="monitoring.control"
         onclick="testServer(${server.id})"
     >
-        اختبار SSH
+        اختبار الاتصال
     </button>
 
     <button
@@ -347,7 +347,7 @@ function safetyDesignationLabel(value) {
     async function testServer(serverId) {
         try {
             showToast(
-                "جارٍ اختبار اتصال SSH...",
+                "جارٍ اختبار الاتصال بالسيرفر...",
                 "info"
             );
 
@@ -363,7 +363,7 @@ function safetyDesignationLabel(value) {
             }
 
             showToast(
-                `نجح الاتصال بالسيرفر: ${result.hostname || "Unknown"
+                `نجح الاتصال بالسيرفر: ${result.hostname || "غير معروف"
                 }`,
                 "success"
             );
@@ -478,25 +478,25 @@ async function initializeServersPage() {
 
     try {
         console.log(
-            "Initializing servers page..."
+            "جارٍ تهيئة واجهة السيرفرات..."
         );
 
         await loadAvailableMonitoringProfiles();
 
         console.log(
-            "Monitoring profiles loaded:",
+            "تم تحميل ملفات المراقبة:",
             availableMonitoringProfiles
         );
 
         await loadServers();
 
         console.log(
-            "Servers loaded successfully."
+            "تم تحميل السيرفرات بنجاح."
         );
 
     } catch (error) {
         console.error(
-            "Servers page initialization failed:",
+            "تعذر تهيئة واجهة السيرفرات:",
             error
         );
 

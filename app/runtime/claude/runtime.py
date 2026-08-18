@@ -13,6 +13,7 @@ from app.runtime.claude.exceptions import (
     ClaudeRuntimeError,
     ClaudeStructuredOutputError,
     ClaudeToolAccessError,
+    describe_exception,
 )
 from app.runtime.claude.models import (
     ClaudeJobStatus,
@@ -117,14 +118,25 @@ class ClaudeRuntimeAdapter:
             return self._failure(
                 request,
                 error_code="runtime_error",
-                error_message=str(exc),
+                error_message=describe_exception(
+                    exc,
+                    fallback=(
+                        "Claude runtime failed without diagnostic output."
+                    ),
+                ),
             )
 
         except Exception as exc:
             return self._failure(
                 request,
                 error_code="unexpected_error",
-                error_message=str(exc),
+                error_message=describe_exception(
+                    exc,
+                    fallback=(
+                        "Unexpected Claude runtime failure without "
+                        "diagnostic output."
+                    ),
+                ),
             )
 
         try:

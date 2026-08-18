@@ -12,7 +12,8 @@ class CreateCommandDTO:
     """
     name: str
     command: str
-    fingerprint_strategy: str = "full_output"
+    # الافتراضي يقلل الضوضاء في الأوامر متعددة الأسطر.
+    fingerprint_strategy: str = "canonical_lines"
     fingerprint_config: dict = field(
         default_factory=dict
     )

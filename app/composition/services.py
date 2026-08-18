@@ -35,6 +35,8 @@ from app.capabilities.investigation.read_service import InvestigationReadService
 from app.capabilities.knowledge.source_service import KnowledgeSourceService
 from app.capabilities.monitoring.profile_service import MonitoringProfileService
 from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.sandbox_runtime import NativeSandboxRuntime
+from app.capabilities.remediation.plan_proposal_service import RemediationPlanProposalService
 from app.capabilities.remediation.issue_fingerprint_service import IssueFingerprintService
 from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
 from app.capabilities.remediation.autonomous_history_service import AutonomousHistoryService
@@ -126,12 +128,6 @@ def build_core_services(
     investigation_runtime_snapshot_service = InvestigationRuntimeSnapshotService(
         repository=repositories.investigation_repository,
     )
-    specialist_execution_service = SpecialistExecutionService(
-        repository=repositories.investigation_repository,
-        snapshot_service=investigation_runtime_snapshot_service,
-        correlator=CrossSpecialistCorrelator(),
-        synthesizer=FinalDiagnosisSynthesizer(),
-    )
     knowledge_source_service = KnowledgeSourceService(
         repository=repositories.knowledge_source_repository,
     )
@@ -172,7 +168,7 @@ def build_core_services(
     )
     remediation_service = RemediationService(
         repository=repositories.remediation_repository,
-        automatic_remediation_allowed=False,
+        automatic_remediation_allowed=settings.automatic_remediation_allowed,
         write_runner=SSHNamedWriteRunner(
             server_repository=repositories.server_repository,
             private_key_path=str(settings.default_ssh_private_key_path),
@@ -195,7 +191,22 @@ def build_core_services(
             command_timeout_seconds=settings.command_timeout_seconds,
         ),
         server_repository=repositories.server_repository,
+        sandbox_runtime=NativeSandboxRuntime(
+            attestation_file=settings.phase6_native_sandbox_attestation_file,
+            require_wsl2=settings.phase6_require_wsl2,
+        ),
         issue_fingerprint_service=issue_fingerprint_service,
+    )
+    remediation_plan_proposal_service = RemediationPlanProposalService(
+        repository=repositories.remediation_repository,
+        remediation_service=remediation_service,
+    )
+    specialist_execution_service = SpecialistExecutionService(
+        repository=repositories.investigation_repository,
+        snapshot_service=investigation_runtime_snapshot_service,
+        correlator=CrossSpecialistCorrelator(),
+        synthesizer=FinalDiagnosisSynthesizer(),
+        remediation_plan_proposal_service=remediation_plan_proposal_service,
     )
     autonomous_policy_service = AutonomousPolicyService(
         repository=repositories.autonomous_remediation_repository,

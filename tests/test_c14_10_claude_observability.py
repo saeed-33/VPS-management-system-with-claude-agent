@@ -89,6 +89,8 @@ def make_job(
     tools=None,
     mcp_status="connected",
     duration_ms=1200,
+    error_code=None,
+    error_message=None,
 ):
     """
     يبني أو يجهز البيانات اللازمة للمسار ضمن طبقة Test suite.
@@ -151,8 +153,8 @@ def make_job(
                 "mcp__vps__run_monitoring",
             ],
         },
-        error_code=None,
-        error_message=None,
+        error_code=error_code,
+        error_message=error_message,
     )
 
 
@@ -211,6 +213,8 @@ def test_summary_exposes_failures_tools_and_mcp_health():
         ],
         mcp_status="failed",
         duration_ms=800,
+        error_code="runtime_error",
+        error_message="Claude process failed.",
     )
 
     service = ClaudeAgentObservabilityService(
@@ -225,8 +229,40 @@ def test_summary_exposes_failures_tools_and_mcp_health():
     assert summary["completed_count"] == 1
     assert summary["failed_count"] == 1
     assert summary["success_rate"] == 0.5
+    assert summary["terminal_success_rate"] == 0.5
+    assert summary["active_count"] == 0
+    assert summary["terminal_count"] == 2
+    assert summary["error_code_counts"] == {
+        "runtime_error": 1,
+    }
+    assert summary["diagnostic_gap_count"] == 0
     assert summary["mcp_disconnected_job_count"] == 1
     assert summary["specialist_delegation_count"] == 1
+
+
+def test_summary_separates_active_jobs_and_missing_diagnostics():
+    """
+    يثبت أن الملخص يميز المهام النشطة عن الفشل النهائي ويكشف فجوات التشخيص.
+    """
+    running = make_job(
+        job_id="job-running",
+        status="running",
+    )
+    failed_without_message = make_job(
+        job_id="job-empty-error",
+        status="failed",
+    )
+
+    summary = ClaudeAgentObservabilityService(
+        FakeRepository(
+            [running, failed_without_message]
+        )
+    ).summarize_recent()
+
+    assert summary["active_count"] == 1
+    assert summary["terminal_count"] == 1
+    assert summary["diagnostic_gap_count"] == 1
+    assert summary["terminal_success_rate"] == 0.0
 
 
 def test_completed_job_missing_required_tools_is_visible():

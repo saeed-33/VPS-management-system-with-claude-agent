@@ -8,6 +8,7 @@
 {% block content %}
 <header class="page-header">
     <div>
+        <p class="page-eyebrow">البنية التحتية</p>
         <h1 class="page-heading">
             الوكلاء المتخصصون
         </h1>
@@ -31,7 +32,7 @@
             </h2>
 
             <p class="panel-subtitle">
-                الـSlug معرف ثابت بعد الإنشاء.
+                المعرف التقني ثابت بعد الإنشاء ويُستخدم داخل النظام.
             </p>
         </div>
     </header>
@@ -52,7 +53,7 @@
                     for="specialist-slug"
                     class="form-label"
                 >
-                    Slug
+                    المعرف التقني
                 </label>
                 <input
                     id="specialist-slug"
@@ -73,7 +74,7 @@
                 <input
                     id="specialist-name"
                     class="form-control"
-                    placeholder="Linux CPU Investigator"
+                    placeholder="مثال: محلل أداء المعالج"
                     required
                 >
             </div>
@@ -188,12 +189,12 @@
                     for="specialist-trigger-hints"
                     class="form-label"
                 >
-                    Trigger Hints
+                    مؤشرات التشغيل
                 </label>
                 <input
                     id="specialist-trigger-hints"
                     class="form-control"
-                    placeholder="high cpu, load average"
+                    placeholder="استهلاك معالج مرتفع، متوسط الحمل"
                 >
             </div>
 
@@ -212,9 +213,9 @@
             </div>
 
             <div class="form-group full-width">
-                <label class="form-label">Diagnostic Tools المسموحة</label>
+                <label class="form-label">أدوات التشخيص المسموحة</label>
                 <p class="panel-subtitle">
-                    اختر من الأدوات Read-Only المسجلة فعليًا في Registry.
+                    اختر من الأدوات المسموح بها والمسجلة فعليًا في دليل الأدوات.
                 </p>
                 <div id="specialist-tools-selector">
                     <div class="empty-state">
@@ -293,6 +294,15 @@ function escapeText(value) {
     return div.innerHTML;
 }
 
+function riskLabel(value) {
+    return {
+        low: "منخفضة",
+        medium: "متوسطة",
+        high: "مرتفعة",
+        critical: "حرجة"
+    }[String(value || "").toLowerCase()] || "غير محددة";
+}
+
 function selectedDiagnosticToolIds() {
     return Array.from(
         document.querySelectorAll(
@@ -318,21 +328,21 @@ function renderDiagnosticTools() {
     if (!diagnosticTools.length) {
         container.innerHTML = `
             <div class="empty-state">
-                <p>لا توجد Diagnostic Tools مسجلة.</p>
+                <p>لا توجد أدوات تشخيص مسجلة.</p>
             </div>
         `;
         return;
     }
 
     container.innerHTML = diagnosticTools.map(tool => `
-        <label style="display:flex;gap:.75rem;align-items:flex-start;border:1px solid var(--border-color,#dfe3e8);border-radius:.75rem;padding:.8rem;margin:.5rem 0;cursor:pointer">
-            <input type="checkbox" name="specialist-tool" value="${escapeText(tool.tool_id)}" style="margin-top:.25rem">
+        <label class="diagnostic-tool-option">
+            <input type="checkbox" name="specialist-tool" value="${escapeText(tool.tool_id)}">
             <span>
                 <strong>${escapeText(tool.name)}</strong>
-                <span class="table-secondary-text" style="display:block">
-                    ${escapeText(tool.tool_id)} · ${escapeText(tool.risk)} · ${tool.timeout_seconds}s
+                <span class="table-secondary-text">
+                    ${escapeText(tool.tool_id)} · خطورة ${riskLabel(tool.risk)} · ${tool.timeout_seconds} ثانية
                 </span>
-                <span style="display:block;margin-top:.3rem">${escapeText(tool.description)}</span>
+                <span class="diagnostic-tool-description">${escapeText(tool.description)}</span>
                 <small>${escapeText((tool.domains || []).join(", "))}</small>
             </span>
         </label>
@@ -351,7 +361,7 @@ async function loadDiagnosticTools() {
             "specialist-tools-selector"
         ).innerHTML = `
             <div class="empty-state">
-                <p>تعذر تحميل Diagnostic Tool Registry.</p>
+                <p>تعذر تحميل دليل أدوات التشخيص.</p>
             </div>
         `;
         showToast(error.message, "error");
@@ -398,7 +408,7 @@ function renderSpecialists() {
     }
 
     container.innerHTML = specialists.map(item => `
-        <article class="panel" style="margin-bottom: 1rem;">
+        <article class="panel specialist-card">
             <header class="panel-header">
                 <div>
                     <h3 class="panel-title">

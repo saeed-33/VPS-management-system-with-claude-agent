@@ -1,15 +1,121 @@
-{# قالب Admin Web لصفحة agent runs. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب تشغيلات الوكلاء. يعرض جلسات التشغيل المحفوظة للقراءة والمراجعة. #}
 {% extends "base.html" %}
-{% block title %}Agent Runs{% endblock %}
+{% block title %}تشغيلات الوكلاء{% endblock %}
 {% block content %}
-<header class="page-header"><div><h1 class="page-heading">Agent Runs</h1><p class="page-description">Persisted Claude sessions, MCP calls, specialist delegation, and outcomes.</p></div></header>
-<section class="panel"><div class="panel-body flush"><div class="table-container"><table class="data-table"><thead><tr><th>Job</th><th>Session</th><th>Status</th><th>Model</th><th>Turns</th><th>Tools</th><th>Duration</th><th>Error</th></tr></thead><tbody id="agent-runs-table"><tr><td colspan="8" class="loading-row">Loading</td></tr></tbody></table></div></div></section>
+<section class="agent-runs-page">
+    <header class="page-header agent-runs-page-header">
+        <div>
+            <p class="page-eyebrow">المراقبة الداخلية</p>
+            <h1 class="page-heading">تشغيلات الوكلاء</h1>
+            <p class="page-description">راجع جلسات التشغيل، استدعاءات الأدوات، المزوّد، والنتائج المحفوظة في مكان واحد.</p>
+        </div>
+        <div class="page-actions"><button id="reload-agent-runs" class="button button-secondary" type="button">تحديث القائمة</button></div>
+    </header>
+
+    <section class="summary-grid agent-runs-summary" aria-label="ملخص تشغيلات الوكلاء">
+        <article class="metric-card primary"><span class="metric-label">إجمالي الجلسات</span><strong id="agent-total" class="metric-value">—</strong></article>
+        <article class="metric-card warning"><span class="metric-label">قيد التشغيل</span><strong id="agent-running" class="metric-value">—</strong></article>
+        <article class="metric-card danger"><span class="metric-label">جلسات فاشلة</span><strong id="agent-failed" class="metric-value">—</strong></article>
+        <article class="metric-card success"><span class="metric-label">نسبة النجاح النهائية</span><strong id="agent-success-rate" class="metric-value">—</strong></article>
+        <article class="metric-card primary"><span class="metric-label">استدعاءات الأدوات</span><strong id="agent-tools" class="metric-value">—</strong></article>
+        <article class="metric-card danger"><span class="metric-label">أخطاء بلا تشخيص</span><strong id="agent-diagnostic-gaps" class="metric-value">—</strong></article>
+    </section>
+
+    <section class="panel agent-runs-filter-panel">
+        <header class="panel-header"><div><h2 class="panel-title">تصفية الجلسات</h2><p class="panel-subtitle">ابحث بالمهمة أو المزوّد، أو اعرض حالة محددة.</p></div></header>
+        <div class="panel-body"><div class="admin-filter-row">
+            <label class="form-group"><span class="form-label">بحث</span><input id="agent-run-search" class="form-control" type="search" placeholder="نوع المهمة أو المزوّد"></label>
+            <label class="form-group"><span class="form-label">الحالة</span><select id="agent-run-status" class="form-control"><option value="">كل الحالات</option><option value="running">قيد التشغيل</option><option value="completed">مكتمل</option><option value="failed">فشل</option><option value="cancelled">ملغى</option></select></label>
+            <div class="form-actions agent-runs-filter-actions"><button id="clear-agent-run-filters" class="button button-secondary" type="button">مسح المرشح</button></div>
+        </div></div>
+    </section>
+
+    <section class="panel agent-runs-list-panel">
+        <header class="panel-header"><div><h2 class="panel-title">سجل الجلسات</h2><p id="agent-runs-summary" class="panel-subtitle">آخر 100 جلسة تشغيل محفوظة.</p></div></header>
+        <div class="panel-body flush"><div class="table-container"><table class="data-table agent-runs-table"><thead><tr><th>المهمة</th><th>الحالة</th><th>المزوّد</th><th>الجولات</th><th>الأدوات</th><th>المدة</th><th>الخطأ</th></tr></thead><tbody id="agent-runs-table"><tr><td colspan="7" class="loading-row"><div class="loading-state"><span class="loading-spinner"></span><span>جارٍ تحميل الجلسات...</span></div></td></tr></tbody></table></div></div>
+    </section>
+</section>
 {% endblock %}
-{% block scripts %}<script>
-async function loadAgentRuns() {
-    const payload = await apiRequest("/api/agent-observability/jobs?limit=100");
-    const rows = payload.items.map(job => `<tr><td>${escapeHtml(job.job_id)}</td><td>${escapeHtml(job.session_id || "-")}</td><td>${statusBadge(job.status)}</td><td>${escapeHtml(job.provider || "-")}</td><td>${job.turn_count}</td><td>${job.tool_call_count}</td><td>${job.duration_ms ?? "-"}</td><td>${escapeHtml(job.error_message || "-")}</td></tr>`);
-    document.getElementById("agent-runs-table").innerHTML = rows.join("") || '<tr><td colspan="8">No Claude sessions recorded.</td></tr>';
+
+{% block scripts %}
+<script>
+let agentRuns = [];
+let agentSummary = null;
+
+function agentNumber(value) {
+    return value === null || value === undefined ? "—" : Number(value).toLocaleString("ar");
 }
-loadAgentRuns().catch(error => showToast(error.message, "error"));
-</script>{% endblock %}
+
+function renderAgentRunSummary(items, summary = null) {
+    const fallbackFailed = items.filter(item => ["failed", "timed_out", "cancelled"].includes(item.status)).length;
+    const fallbackActive = items.filter(item => ["queued", "running"].includes(item.status)).length;
+    const fallbackTools = items.reduce((sum, item) => sum + Number(item.tool_call_count || 0), 0);
+    const terminalRate = summary && summary.terminal_success_rate !== null && summary.terminal_success_rate !== undefined
+        ? `${(Number(summary.terminal_success_rate) * 100).toFixed(1)}%`
+        : "—";
+
+    document.getElementById("agent-total").textContent = agentNumber(summary?.sample_size ?? items.length);
+    document.getElementById("agent-running").textContent = agentNumber(summary?.active_count ?? fallbackActive);
+    document.getElementById("agent-failed").textContent = agentNumber(summary?.failed_count ?? fallbackFailed);
+    document.getElementById("agent-success-rate").textContent = summary ? terminalRate : "—";
+    document.getElementById("agent-tools").textContent = agentNumber(summary?.total_tool_calls ?? fallbackTools);
+    document.getElementById("agent-diagnostic-gaps").textContent = agentNumber(summary?.diagnostic_gap_count ?? 0);
+}
+
+function renderAgentRunRows() {
+    const table = document.getElementById("agent-runs-table");
+    const query = document.getElementById("agent-run-search").value.trim().toLowerCase();
+    const status = document.getElementById("agent-run-status").value;
+    const filtered = agentRuns.filter(job => {
+        const haystack = [job.job_id, job.session_id, job.job_type, job.provider].filter(Boolean).join(" ").toLowerCase();
+        return (!query || haystack.includes(query)) && (!status || job.status === status);
+    });
+
+    const diagnosticText = agentSummary
+        ? ` · أخطاء بلا تشخيص: ${agentNumber(agentSummary.diagnostic_gap_count)}`
+        : "";
+    document.getElementById("agent-runs-summary").textContent = `عرض ${agentNumber(filtered.length)} من ${agentNumber(agentRuns.length)} جلسة${diagnosticText}`;
+    if (!filtered.length) {
+        table.innerHTML = '<tr><td colspan="7"><div class="empty-state"><h3>لا توجد جلسات مطابقة</h3><p>جرّب تغيير المرشح أو تحديث القائمة.</p></div></td></tr>';
+        return;
+    }
+
+    table.innerHTML = filtered.map(job => `
+        <tr>
+            <td><span class="table-primary-text">${escapeHtml(job.job_type || "مهمة تشغيل")}</span>${(job.job_id || job.session_id) ? `<details class="additional-details"><summary class="button button-secondary button-sm">تفاصيل إضافية</summary><div class="additional-details-body"><div class="admin-kv-grid"><div class="admin-kv"><strong>معرف المهمة</strong><span class="admin-code">${escapeHtml(job.job_id || "—")}</span></div><div class="admin-kv"><strong>معرف الجلسة</strong><span class="admin-code">${escapeHtml(job.session_id || "—")}</span></div></div></div></details>` : ""}</td>
+            <td>${statusBadge(job.status)}</td>
+            <td>${escapeHtml(job.provider || "—")}</td>
+            <td>${agentNumber(job.turn_count)}</td>
+            <td>${agentNumber(job.tool_call_count)}</td>
+            <td>${formatDuration(job.duration_ms)}</td>
+            <td><code class="admin-code agent-error">${escapeHtml(job.error_message || "—")}</code></td>
+        </tr>
+    `).join("");
+}
+
+async function loadAgentRuns() {
+    const table = document.getElementById("agent-runs-table");
+    table.innerHTML = '<tr><td colspan="7" class="loading-row"><div class="loading-state"><span class="loading-spinner"></span><span>جارٍ تحميل الجلسات...</span></div></td></tr>';
+    try {
+        const payload = await apiRequest("/api/agent-observability/jobs?limit=100");
+        agentRuns = payload.items || [];
+        try {
+            agentSummary = await apiRequest("/api/agent-observability/summary?limit=100");
+        } catch (summaryError) {
+            agentSummary = null;
+        }
+        renderAgentRunSummary(agentRuns, agentSummary);
+        renderAgentRunRows();
+    } catch (error) {
+        table.innerHTML = `<tr><td colspan="7"><div class="empty-state"><h3>تعذر تحميل الجلسات</h3><p>${escapeHtml(error.message)}</p><button type="button" class="button button-secondary" onclick="loadAgentRuns()">إعادة المحاولة</button></div></td></tr>`;
+        showToast(error.message, "error");
+    }
+}
+
+document.getElementById("reload-agent-runs").addEventListener("click", loadAgentRuns);
+document.getElementById("agent-run-search").addEventListener("input", renderAgentRunRows);
+document.getElementById("agent-run-status").addEventListener("change", renderAgentRunRows);
+document.getElementById("clear-agent-run-filters").addEventListener("click", () => { document.getElementById("agent-run-search").value = ""; document.getElementById("agent-run-status").value = ""; renderAgentRunRows(); });
+loadAgentRuns();
+</script>
+{% endblock %}

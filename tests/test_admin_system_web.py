@@ -27,5 +27,5 @@ def test_system_runtime_page_is_available():
     response = TestClient(app).get("/system")
 
     assert response.status_code == 200
-    assert "System Runtime" in response.text
+    assert "النظام والسلامة" in response.text
     assert "/api/system/runtime" in response.text

@@ -8,12 +8,13 @@
 {% block content %}
 <header class="page-header">
     <div>
+        <p class="page-eyebrow">البنية التحتية</p>
         <h1 class="page-heading">
             تعليمات المراقبة
         </h1>
 
         <p class="page-description">
-            إدارة تعليمات Linux المستخدمة داخل ملفات المراقبة،
+            إدارة تعليمات النظام المستخدمة داخل ملفات المراقبة،
             وتحديد سياسة إدخال نتائج كل تعليمة في ذاكرة التحليل.
         </p>
     </div>
@@ -62,7 +63,7 @@
                     class="form-control"
                     type="text"
                     maxlength="150"
-                    placeholder="Memory usage"
+                    placeholder="مثال: استخدام الذاكرة"
                     required
                 />
             </div>
@@ -128,7 +129,7 @@
                         حالة التنفيذ فقط
                     </option>
 
-                    <option value="canonical_lines">
+                    <option value="canonical_lines" selected>
                         ترتيب وإزالة تكرار الأسطر
                     </option>
 
@@ -145,7 +146,7 @@
                     id="command-strategy-help"
                     class="form-help"
                 >
-                    تُستخدم المخرجات كاملة عند إنشاء بصمة التقرير.
+                    يفضل استخدام الأسطر المرتبة لمعظم التعليمات متعددة الأسطر.
                 </small>
             </div>
 
@@ -179,32 +180,26 @@
                     id="command-description"
                     class="form-control"
                     rows="3"
-                    placeholder="جمع معلومات استخدام الذاكرة وSwap"
+                    placeholder="جمع معلومات استخدام الذاكرة التبادلية"
                 ></textarea>
             </div>
 
             <div class="form-group full-width">
                 <label
-                    for="command-fingerprint-config"
                     class="form-label"
                 >
                     إعدادات سياسة الذاكرة
                 </label>
 
-                <textarea
-                    id="command-fingerprint-config"
-                    class="form-control command-config-textarea"
-                    dir="ltr"
-                    rows="4"
-                    spellcheck="false"
-                    placeholder='{}'
-                >{}</textarea>
-
-                <small class="form-help">
-                    يجب أن تكون القيمة JSON صحيحة. غالبًا تُترك
-                    فارغة بالشكل
-                    <code dir="ltr">{}</code>.
-                </small>
+                <div class="fingerprint-options">
+                    <label class="form-check-row">
+                        <input id="command-remove-timestamps" type="checkbox" checked>
+                        إزالة التواريخ المتغيرة من توقيع الأخطاء
+                    </label>
+                    <small class="form-help">
+                        يستخدم هذا الخيار فقط مع سياسة «توقيع الأخطاء».
+                    </small>
+                </div>
             </div>
 
             <div class="form-actions full-width">
@@ -250,7 +245,7 @@
                 <thead>
                 <tr>
                     <th>التعليمة</th>
-                    <th>أمر Linux</th>
+                    <th>الأمر التنفيذي</th>
                     <th>المهلة</th>
                     <th>سياسة الذاكرة</th>
                     <th>الحالة</th>
@@ -443,26 +438,20 @@
 
             <div class="form-group full-width">
                 <label
-                    for="edit-command-fingerprint-config"
                     class="form-label"
                 >
                     إعدادات سياسة الذاكرة
                 </label>
 
-                <textarea
-                    id="edit-command-fingerprint-config"
-                    class="form-control command-config-textarea"
-                    dir="ltr"
-                    rows="5"
-                    spellcheck="false"
-                ></textarea>
-
-                <small class="form-help">
-                    مثال لاستراتيجية توقيع الأخطاء:
-                    <code dir="ltr">
-                        {"remove_timestamps": true}
-                    </code>
-                </small>
+                <div class="fingerprint-options">
+                    <label class="form-check-row">
+                        <input id="edit-command-remove-timestamps" type="checkbox" checked>
+                        إزالة التواريخ المتغيرة من توقيع الأخطاء
+                    </label>
+                    <small class="form-help">
+                        يستخدم هذا الخيار فقط مع سياسة «توقيع الأخطاء».
+                    </small>
+                </div>
             </div>
 
             <div class="form-actions full-width">

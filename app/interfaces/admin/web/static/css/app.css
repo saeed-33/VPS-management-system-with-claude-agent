@@ -1254,6 +1254,426 @@ textarea.form-control {
     background: var(--warning);
     border-color: var(--warning);
 }
+
+/* تحسينات مشتركة للغة العربية وإتاحة الاستخدام في جميع الواجهات. */
+html {
+    direction: rtl;
+}
+
+body {
+    direction: rtl;
+    text-align: right;
+}
+
+::selection {
+    color: #ffffff;
+    background: var(--primary);
+}
+
+:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.42);
+    outline-offset: 3px;
+}
+
+.skip-link {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 300;
+    padding: 10px 14px;
+    color: #ffffff;
+    background: var(--primary);
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-160%);
+    transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+    color: #ffffff;
+    transform: translateY(0);
+}
+
+.navigation-label {
+    letter-spacing: 0;
+}
+
+.brand-text small {
+    letter-spacing: 0;
+}
+
+.data-table th {
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.toast-container {
+    right: 24px;
+    left: auto;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.85;
+}
+
+.panel,
+.metric-card,
+.modal-card,
+.profile-button {
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.panel:hover,
+.metric-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* مكوّنات الخطوة الثانية: الدخول، النظام، وسجل التدقيق. */
+.page-eyebrow,
+.auth-eyebrow {
+    margin: 0 0 6px;
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.loading-state {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+    color: var(--text-muted);
+    font-size: 0.86rem;
+}
+
+.empty-state.compact {
+    min-height: 150px;
+}
+
+.panel-status-icon {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    color: var(--success);
+    background: var(--success-soft);
+    border-radius: 12px;
+}
+
+.panel-status-icon.info {
+    color: var(--info);
+    background: var(--info-soft);
+}
+
+.panel-status-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.dashboard-status-list {
+    display: grid;
+    gap: 12px;
+}
+
+.dashboard-status-list .agent-status {
+    margin: 0;
+}
+
+.badge-readonly {
+    color: var(--success);
+    background: var(--success-soft);
+}
+
+.badge-execute {
+    color: var(--warning);
+    background: var(--warning-soft);
+}
+
+.auth-page {
+    background:
+        radial-gradient(circle at 15% 10%, rgba(37, 99, 235, 0.12), transparent 30%),
+        var(--background);
+}
+
+.auth-page .sidebar,
+.auth-page .topbar {
+    display: none;
+}
+
+.auth-page .main-wrapper {
+    margin-right: 0;
+}
+
+.auth-page .main-content {
+    display: grid;
+    min-height: 100vh;
+    max-width: 1100px;
+    padding: 32px;
+    place-items: center;
+}
+
+.auth-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+    gap: 26px;
+    align-items: stretch;
+    width: min(900px, 100%);
+}
+
+.auth-intro,
+.auth-card {
+    padding: 34px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-intro {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 460px;
+    color: #ffffff;
+    background:
+        linear-gradient(145deg, rgba(37, 99, 235, 0.95), rgba(15, 23, 42, 0.98));
+    border-color: rgba(96, 165, 250, 0.35);
+}
+
+.auth-mark {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 17px;
+}
+
+.auth-mark svg {
+    width: 30px;
+    height: 30px;
+}
+
+.auth-intro .auth-eyebrow {
+    color: #bfdbfe;
+}
+
+.auth-intro h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.auth-description {
+    max-width: 28rem;
+    margin: 12px 0 0;
+    color: #dbeafe;
+    line-height: 1.9;
+}
+
+.auth-card {
+    align-self: center;
+    background: var(--surface);
+}
+
+.auth-card .section-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.auth-card .muted-text,
+.auth-note {
+    color: var(--text-muted);
+}
+
+.auth-form {
+    display: grid;
+    gap: 18px;
+    margin-top: 26px;
+}
+
+.auth-submit {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.auth-submit svg {
+    width: 18px;
+    height: 18px;
+}
+
+.auth-note {
+    margin: 22px 0 0;
+    font-size: 0.76rem;
+    line-height: 1.7;
+}
+
+.auth-card .analysis-error-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 20px;
+}
+
+.audit-toolbar {
+    align-items: flex-end;
+}
+
+.audit-toolbar .admin-filter-row {
+    flex: 1;
+    justify-content: flex-start;
+}
+
+.audit-toolbar .form-group {
+    min-width: 155px;
+}
+
+.audit-toolbar .button {
+    white-space: nowrap;
+}
+
+.audit-source {
+    display: inline-flex;
+    padding: 4px 8px;
+    color: var(--info);
+    font-size: 0.76rem;
+    font-weight: 700;
+    background: var(--info-soft);
+    border-radius: 8px;
+}
+
+.audit-table .table-secondary-text {
+    direction: ltr;
+    text-align: right;
+}
+
+.audit-payload {
+    display: block;
+    max-width: 280px;
+    max-height: 76px;
+    overflow: auto;
+    direction: rtl;
+    text-align: right;
+}
+
+.additional-details {
+    margin-top: 10px;
+}
+
+.additional-details > summary {
+    display: inline-flex;
+    width: fit-content;
+    cursor: pointer;
+    list-style: none;
+}
+
+.additional-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.additional-details-body {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.structured-data-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.structured-data-item {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.4fr);
+    gap: 10px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid var(--border);
+}
+
+.structured-data-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.structured-list {
+    display: grid;
+    gap: 6px;
+}
+
+.structured-list-item {
+    padding: 8px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.fingerprint-options {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.form-check-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+@media (max-width: 760px) {
+    .auth-page .main-content {
+        padding: 18px;
+    }
+
+    .auth-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-intro {
+        min-height: auto;
+        gap: 38px;
+    }
+
+    .auth-intro,
+    .auth-card {
+        padding: 26px;
+    }
+
+    .audit-toolbar,
+    .audit-toolbar .admin-filter-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .audit-toolbar .form-group,
+    .audit-toolbar .button {
+        width: 100%;
+    }
+}
 .profiles-layout {
     display: grid;
     grid-template-columns:
@@ -1584,6 +2004,351 @@ body.modal-open {
     min-height: 36px;
     padding: 6px 9px;
     font-size: 12px;
+}
+
+/* تحسينات الخطوة الخامسة: التقارير والمعالجة الآمنة */
+.report-page-header,
+.remediation-page-header {
+    align-items: flex-start;
+}
+
+.report-filter-panel,
+.report-list-panel,
+.report-detail-panel,
+.remediation-list-panel,
+.remediation-detail-panel {
+    overflow: hidden;
+}
+
+.report-summary-grid {
+    margin-bottom: 22px;
+}
+
+.remediation-layout {
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.65fr);
+    align-items: start;
+}
+
+.remediation-list-panel .panel-body {
+    max-height: 720px;
+    overflow-y: auto;
+}
+
+.remediation-plan-button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 14px;
+    margin-bottom: 9px;
+    color: var(--text-primary);
+    text-align: start;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.remediation-plan-button:hover {
+    background: var(--surface);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.remediation-plan-main,
+.remediation-plan-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.remediation-plan-main {
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.remediation-plan-main strong {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+}
+
+.remediation-plan-main span {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.remediation-plan-meta {
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.risk-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 23px;
+    padding: 3px 8px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.risk-high,
+.risk-critical {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: color-mix(in srgb, var(--danger) 26%, var(--border));
+}
+
+.risk-medium {
+    color: var(--warning);
+    background: var(--warning-soft);
+    border-color: color-mix(in srgb, var(--warning) 26%, var(--border));
+}
+
+.remediation-summary-grid {
+    margin-bottom: 18px;
+}
+
+.remediation-summary-text,
+.remediation-subsection {
+    padding-top: 18px;
+    margin-top: 18px;
+    border-top: 1px solid var(--border);
+}
+
+.remediation-summary-text p {
+    margin: 7px 0 0;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+.remediation-subsection h3 {
+    margin: 0 0 14px;
+    font-size: 15px;
+}
+
+.remediation-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    padding-top: 18px;
+    margin-top: 18px;
+    border-top: 1px solid var(--border);
+}
+
+.remediation-audit {
+    max-height: 360px;
+    margin: 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.remediation-placeholder {
+    padding: 40px 18px;
+}
+
+@media (max-width: 900px) {
+    .remediation-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .remediation-list-panel .panel-body {
+        max-height: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .remediation-plan-button {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .remediation-plan-meta {
+        justify-content: flex-start;
+    }
+}
+
+/* تحسينات الخطوة السادسة: واجهات المعالجة الذاتية */
+.autonomous-page-header {
+    align-items: flex-start;
+}
+
+.autonomous-panel {
+    overflow: hidden;
+}
+
+.autonomous-record-card {
+    margin-bottom: 14px;
+    overflow: hidden;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.autonomous-record-card:last-child {
+    margin-bottom: 0;
+}
+
+.autonomous-record-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.autonomous-record-header h3,
+.autonomous-record-header .panel-title {
+    margin: 0 0 5px;
+}
+
+.autonomous-record-header .form-actions {
+    justify-content: flex-end;
+}
+
+.autonomous-record-body {
+    padding: 18px;
+}
+
+.autonomous-record-body > p {
+    margin-top: 0;
+    color: var(--text-secondary);
+}
+
+.autonomous-record-body h4 {
+    margin: 18px 0 8px;
+    font-size: 13px;
+}
+
+.autonomous-code-block {
+    max-height: 360px;
+    margin: 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.autonomous-data-table {
+    min-width: 980px;
+}
+
+.autonomous-data-table td,
+.autonomous-data-table th {
+    vertical-align: top;
+}
+
+.autonomous-data-table code,
+.autonomous-record-card code {
+    overflow-wrap: anywhere;
+}
+
+details.autonomous-record-card > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+details.autonomous-record-card > summary::-webkit-details-marker {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    .autonomous-record-header {
+        flex-direction: column;
+    }
+
+    .autonomous-record-header .form-actions {
+        justify-content: flex-start;
+    }
+}
+
+/* تحسين نهائي للتحقيقات وتشغيلات الوكلاء */
+.investigation-page-header,
+.agent-runs-page-header {
+    align-items: flex-start;
+}
+
+.investigation-summary-grid,
+.agent-runs-summary {
+    margin-bottom: 20px;
+}
+
+.investigation-filter-actions,
+.agent-runs-filter-actions {
+    align-items: end;
+    padding-bottom: 1px;
+}
+
+.investigation-specialists {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.mini-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 2px 7px;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--primary-soft);
+    border-radius: 999px;
+}
+
+.investigation-page .data-table th,
+.investigation-page .data-table td {
+    vertical-align: top;
+}
+
+.agent-runs-list-panel,
+.agent-runs-filter-panel {
+    overflow: hidden;
+}
+
+.agent-runs-table {
+    min-width: 920px;
+}
+
+.agent-runs-table td {
+    vertical-align: top;
+}
+
+.agent-runs-table .table-secondary-text {
+    display: block;
+    margin-top: 4px;
+}
+
+.agent-runs-table .agent-error {
+    display: block;
+    max-width: 280px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+@media (max-width: 760px) {
+    .investigation-filter-actions,
+    .agent-runs-filter-actions {
+        width: 100%;
+    }
+
+    .investigation-filter-actions .button,
+    .agent-runs-filter-actions .button {
+        flex: 1;
+    }
 }
 .reports-filters {
     display: grid;
@@ -2077,5 +2842,238 @@ code {
 
     body {
         line-height: 1.6;
+    }
+}
+
+/* تحسينات واجهات المعرفة والتحقيقات. */
+.investigation-page {
+    min-width: 0;
+}
+
+.investigation-filters .admin-filter-row {
+    align-items: end;
+}
+
+.investigation-filters .form-group {
+    min-width: 190px;
+}
+
+.investigation-page #investigation-content {
+    display: grid;
+    gap: 18px;
+}
+
+.investigation-page #investigation-content[hidden] {
+    display: none;
+}
+
+.summary-grid,
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.detail-item strong,
+.detail-line span:last-child {
+    overflow-wrap: anywhere;
+}
+
+.investigation-section {
+    padding: 20px;
+}
+
+.investigation-section > .panel-title {
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.stack-list {
+    display: grid;
+    gap: 12px;
+}
+
+.sub-card {
+    display: grid;
+    gap: 9px;
+    padding: 14px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.detail-line {
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.knowledge-source-card {
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.knowledge-source-card + .knowledge-source-card {
+    margin-top: 14px;
+}
+
+.knowledge-source-card .panel-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.knowledge-source-body {
+    padding: 20px 22px;
+}
+
+.knowledge-source-description {
+    margin: 0 0 16px;
+    color: var(--text-secondary);
+}
+
+.knowledge-source-actions {
+    justify-content: flex-start;
+    margin-top: 16px;
+}
+
+.agent-runs-table td {
+    vertical-align: top;
+}
+
+.agent-error {
+    display: block;
+    max-width: 260px;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 700px) {
+    .investigation-filters .admin-filter-row,
+    .investigation-filters .form-group {
+        width: 100%;
+    }
+
+    .detail-line {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .knowledge-source-body {
+        padding: 16px;
+    }
+}
+
+/* تحسينات واجهات إدارة البنية التحتية. */
+.server-monitoring-cell {
+    display: grid;
+    gap: 8px;
+    min-width: 150px;
+}
+
+.compact-profile-select {
+    min-height: 36px;
+    padding: 6px 9px;
+    font-size: 0.8rem;
+}
+
+.profiles-layout {
+    min-width: 0;
+}
+
+.profile-list-item .badge {
+    flex: 0 0 auto;
+}
+
+.compact-control {
+    min-height: 36px;
+    padding: 6px 9px;
+    font-size: 0.82rem;
+}
+
+.diagnostic-tool-option {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px;
+    margin: 8px 0;
+    cursor: pointer;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.diagnostic-tool-option:hover {
+    background: var(--primary-soft);
+    border-color: rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
+}
+
+.diagnostic-tool-option input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    accent-color: var(--primary);
+}
+
+.diagnostic-tool-option > span {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.diagnostic-tool-option .table-secondary-text,
+.diagnostic-tool-option small,
+.diagnostic-tool-description {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.diagnostic-tool-description {
+    color: var(--text-secondary);
+}
+
+.specialist-card {
+    margin-bottom: 16px;
+}
+
+.specialist-card .panel-header {
+    align-items: flex-start;
+}
+
+.specialist-card .form-actions {
+    flex: 0 0 auto;
+    width: auto;
+    padding-top: 0;
+}
+
+@media (max-width: 700px) {
+    .specialist-card .panel-header {
+        flex-direction: column;
+    }
+
+    .specialist-card .form-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 }

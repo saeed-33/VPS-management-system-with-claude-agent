@@ -1,30 +1,60 @@
-{# قالب Admin Web لصفحة login. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب تسجيل الدخول. يعرض نموذج المصادقة فقط ولا ينفذ منطق التحقق. #}
 {% extends "base.html" %}
-{% block title %}Admin Login{% endblock %}
+{% block title %}تسجيل الدخول{% endblock %}
+{% block body_class %}auth-page{% endblock %}
 {% block content %}
-<section class="page-section" style="max-width: 34rem; margin: 4rem auto;">
-    <div class="card">
+<section class="auth-shell" aria-labelledby="login-title">
+    <div class="auth-intro">
+        <span class="auth-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v3A2.5 2.5 0 0 1 17.5 11h-11A2.5 2.5 0 0 1 4 8.5v-3Zm0 10A2.5 2.5 0 0 1 6.5 13h11a2.5 2.5 0 0 1 2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5v-3Z"/>
+                <path d="M7.5 7h.01M7.5 17h.01M11 7h6M11 17h6"/>
+            </svg>
+        </span>
+        <div>
+            <p class="auth-eyebrow">منصة إدارة البنية التحتية</p>
+            <h1 id="login-title">مرحبًا بك</h1>
+            <p class="auth-description">سجّل الدخول للوصول إلى أدوات المراقبة والتحقيق والتشغيل الآمن.</p>
+        </div>
+    </div>
+
+    <div class="auth-card">
         <div class="section-header">
             <div>
-                <h1>Admin Login</h1>
-                <p class="muted-text">Authenticate as a local Admin operator.</p>
+                <h2>تسجيل الدخول إلى لوحة الإدارة</h2>
+                <p class="muted-text">استخدم بيانات حساب المسؤول المحلي.</p>
             </div>
         </div>
-        {% if error %}<p class="analysis-error-card">{{ error }}</p>{% endif %}
-        <form method="post" action="/login" class="form-grid">
+
+        {% if error %}
+        <div class="analysis-error-card" role="alert">
+            <strong>تعذر تسجيل الدخول</strong>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="post" action="/login" class="auth-form">
             <input type="hidden" name="next" value="{{ next_path }}">
+
             <div class="form-group">
-                <label class="form-label" for="username">Username</label>
-                <input class="form-control" id="username" name="username" autocomplete="username" required>
+                <label class="form-label" for="username">اسم المستخدم</label>
+                <input class="form-control" id="username" name="username" autocomplete="username" placeholder="أدخل اسم المستخدم" required autofocus>
             </div>
+
             <div class="form-group">
-                <label class="form-label" for="password">Password</label>
-                <input class="form-control" id="password" name="password" type="password" autocomplete="current-password" required>
+                <label class="form-label" for="password">كلمة المرور</label>
+                <input class="form-control" id="password" name="password" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" required>
             </div>
-            <div class="form-actions">
-                <button class="button button-primary" type="submit">Login</button>
-            </div>
+
+            <button class="button button-primary auth-submit" type="submit">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15 12H3M11 8l4 4-4 4M21 4v16"/>
+                </svg>
+                دخول آمن
+            </button>
         </form>
+
+        <p class="auth-note">تتم حماية الجلسة وطلبات الإدارة بواسطة آليات أمان النظام.</p>
     </div>
 </section>
 {% endblock %}

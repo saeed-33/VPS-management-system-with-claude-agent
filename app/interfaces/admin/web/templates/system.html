@@ -1,49 +1,34 @@
-{# قالب Admin Web لصفحة system. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب حالة النظام. يعرض بيانات التشغيل والأمان القادمة من الواجهة البرمجية. #}
 {% extends "base.html" %}
 
-{% block title %}
-System Runtime
-{% endblock %}
+{% block title %}حالة النظام{% endblock %}
 
 {% block content %}
 <header class="page-header">
     <div>
-        <h1 class="page-heading">
-            System Runtime
-        </h1>
-
-        <p class="page-description">
-            Runtime status and project tools exposed to the
-            supervisory runtime.
-        </p>
+        <p class="page-eyebrow">المراقبة الداخلية</p>
+        <h1 class="page-heading">حالة النظام</h1>
+        <p class="page-description">نظرة موحّدة على حالة التشغيل، أدوات النظام، وحدود الأمان الفعّالة.</p>
     </div>
 </header>
 
-<section class="content-grid">
-    <article class="panel">
+<section class="content-grid system-overview-grid">
+    <article class="panel system-status-panel">
         <header class="panel-header">
             <div>
-                <h2 class="panel-title">
-                    Supervisor
-                </h2>
-
-                <p class="panel-subtitle">
-                    Active runtime state.
-                </p>
+                <h2 class="panel-title">المشرف التشغيلي</h2>
+                <p class="panel-subtitle">الحالة الحالية لمحرك التشغيل.</p>
             </div>
+            <span class="panel-status-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M3 12h3M18 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/><circle cx="12" cy="12" r="4"/></svg>
+            </span>
         </header>
-
         <div class="panel-body">
             <div class="agent-status">
                 <span class="status-indicator"></span>
-
                 <div>
-                    <strong id="runtime-name">
-                        -
-                    </strong>
-                    <small id="runtime-state">
-                        Loading
-                    </small>
+                    <strong id="runtime-name">جارٍ التحميل</strong>
+                    <small id="runtime-state">جارٍ قراءة الحالة</small>
                 </div>
             </div>
         </div>
@@ -52,68 +37,46 @@ System Runtime
     <article class="panel">
         <header class="panel-header">
             <div>
-                <h2 class="panel-title">
-                    Tool Groups
-                </h2>
-
-                <p class="panel-subtitle">
-                    Tools available through the project boundary.
-                </p>
+                <h2 class="panel-title">أدوات النظام</h2>
+                <p class="panel-subtitle">الأدوات المتاحة ضمن حدود المشروع.</p>
             </div>
+            <span class="panel-status-icon info" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5M8 17h3"/></svg>
+            </span>
         </header>
-
         <div class="panel-body">
-            <strong
-                id="tool-count"
-                class="metric-value"
-            >
-                -
-            </strong>
-            <div class="metric-footer">
-                Registered tools
-            </div>
+            <strong id="tool-count" class="metric-value">-</strong>
+            <div class="metric-footer">أداة مسجلة في النظام</div>
         </div>
     </article>
 </section>
+
 <section class="content-grid">
-    <article class="panel"><header class="panel-header"><h2 class="panel-title">Safety state</h2></header><div class="panel-body" id="safety-state">Loading</div></article>
-    <article class="panel"><header class="panel-header"><h2 class="panel-title">Admin session security</h2></header><div class="panel-body" id="admin-security-state">Loading</div></article>
+    <article class="panel">
+        <header class="panel-header"><h2 class="panel-title">حالة السلامة</h2></header>
+        <div class="panel-body" id="safety-state"><div class="loading-state"><span class="loading-spinner"></span><span>جارٍ التحميل</span></div></div>
+    </article>
+    <article class="panel">
+        <header class="panel-header"><h2 class="panel-title">أمان جلسة الإدارة</h2></header>
+        <div class="panel-body" id="admin-security-state"><div class="loading-state"><span class="loading-spinner"></span><span>جارٍ التحميل</span></div></div>
+    </article>
 </section>
 
 <section class="panel">
     <header class="panel-header">
         <div>
-            <h2 class="panel-title">
-                Project Tool Catalog
-            </h2>
-
-            <p class="panel-subtitle">
-                Grouped capabilities exposed by the system.
-            </p>
+            <h2 class="panel-title">دليل أدوات المشروع</h2>
+            <p class="panel-subtitle">القدرات المجمعة التي يعرضها النظام للمشغّل.</p>
         </div>
     </header>
-
     <div class="panel-body flush">
         <div class="table-container">
             <table class="data-table">
                 <thead>
-                <tr>
-                    <th>Group</th>
-                    <th>Tool</th>
-                    <th>Mode</th>
-                    <th>Description</th>
-                </tr>
+                <tr><th>المجموعة</th><th>الأداة</th><th>النمط</th><th>الوصف</th></tr>
                 </thead>
-
                 <tbody id="runtime-tools-table">
-                <tr>
-                    <td
-                        colspan="4"
-                        class="loading-row"
-                    >
-                        <span class="loading-spinner"></span>
-                    </td>
-                </tr>
+                <tr><td colspan="4" class="loading-row"><span class="loading-spinner"></span></td></tr>
                 </tbody>
             </table>
         </div>
@@ -123,82 +86,45 @@ System Runtime
 
 {% block scripts %}
 <script>
-async function loadRuntimeOverview() {
-    const payload =
-        await apiRequest("/api/system/runtime");
-
-    document.getElementById(
-        "runtime-name"
-    ).textContent =
-        payload.supervisor.runtime;
-
-    document.getElementById(
-        "runtime-state"
-    ).textContent =
-        payload.supervisor.state;
-
-    document.getElementById(
-        "tool-count"
-    ).textContent =
-        payload.tool_count;
-
-    const rows = [];
-
-    for (const group of payload.tool_groups) {
-        for (const tool of group.tools) {
-            rows.push(`
-                <tr>
-                    <td>
-                        ${escapeHtml(group.name)}
-                    </td>
-                    <td>
-                        <span class="table-primary-text">
-                            ${escapeHtml(tool.tool_id)}
-                        </span>
-                    </td>
-                    <td>
-                        ${
-                            tool.read_only
-                                ? statusBadge("success")
-                                : statusBadge("degraded")
-                        }
-                    </td>
-                    <td>
-                        ${escapeHtml(tool.description)}
-                    </td>
-                </tr>
-            `);
-        }
-    }
-
-    document.getElementById(
-        "runtime-tools-table"
-    ).innerHTML =
-        rows.join("");
-
-    const safety = payload.safety || {};
-    document.getElementById("safety-state").innerHTML = `
-        <div class="admin-kv-grid">
-            <div class="admin-kv"><strong>Automatic remediation</strong><span>${safety.automatic_remediation_allowed ? "enabled" : "disabled (fail-closed)"}</span></div>
-            <div class="admin-kv"><strong>V1 actions</strong><span>${escapeHtml((safety.v1_allowed_actions || []).join(", "))}</span></div>
-            <div class="admin-kv"><strong>Max risk</strong><span>${escapeHtml(safety.autonomous_max_risk || "—")}</span></div>
-            <div class="admin-kv"><strong>Phase 6 sandbox</strong><span>${safety.phase6_sandbox_required ? "required" : "not required"} · ${safety.phase6_attestation_configured ? "configured" : "not configured"}</span></div>
-        </div>`;
-    const security = payload.admin_security || {};
-    document.getElementById("admin-security-state").innerHTML = `
-        <div class="admin-kv-grid">
-            <div class="admin-kv"><strong>Cookie</strong><span>${escapeHtml(security.session_cookie_name || "—")}</span></div>
-            <div class="admin-kv"><strong>TTL</strong><span>${escapeHtml(String(security.session_ttl_seconds || "—"))} seconds</span></div>
-            <div class="admin-kv"><strong>Secure flag</strong><span>${security.secure_cookie ? "enabled" : "disabled for local HTTP"}</span></div>
-            <div class="admin-kv"><strong>CSRF</strong><span>${escapeHtml(security.csrf || "enabled")}</span></div>
-        </div>`;
+function systemValue(value, fallback = "—") {
+    return value === null || value === undefined || value === "" ? fallback : value;
 }
 
-loadRuntimeOverview().catch(error => {
-    showToast(
-        error.message,
-        "error"
-    );
-});
+function systemBoolean(value, positive, negative) {
+    return value ? positive : negative;
+}
+
+async function loadRuntimeOverview() {
+    const payload = await apiRequest("/api/system/runtime");
+    document.getElementById("runtime-name").textContent = systemValue(payload.supervisor?.runtime);
+    document.getElementById("runtime-state").textContent = systemValue(payload.supervisor?.state, "غير معروف");
+    document.getElementById("tool-count").textContent = new Intl.NumberFormat("ar").format(payload.tool_count || 0);
+
+    const rows = [];
+    for (const group of payload.tool_groups || []) {
+        for (const tool of group.tools || []) {
+            rows.push(`<tr><td>${escapeHtml(group.name)}</td><td><span class="table-primary-text">${escapeHtml(tool.tool_id)}</span></td><td><span class="badge ${tool.read_only ? "badge-readonly" : "badge-execute"}">${tool.read_only ? "قراءة فقط" : "تنفيذ"}</span></td><td>${escapeHtml(tool.description)}</td></tr>`);
+        }
+    }
+    document.getElementById("runtime-tools-table").innerHTML = rows.length ? rows.join("") : `<tr><td colspan="4"><div class="empty-state compact"><h3>لا توجد أدوات مسجلة</h3></div></td></tr>`;
+
+    const safety = payload.safety || {};
+    document.getElementById("safety-state").innerHTML = `<div class="admin-kv-grid">
+        <div class="admin-kv"><strong>المعالجة الآلية</strong><span>${systemBoolean(safety.automatic_remediation_allowed, "مسموحة", "موقوفة — الوضع الآمن")}</span></div>
+        <div class="admin-kv"><strong>الإجراءات المسموحة</strong><span>${escapeHtml((safety.v1_allowed_actions || []).join(", ") || "—")}</span></div>
+        <div class="admin-kv"><strong>أعلى مستوى خطورة</strong><span>${escapeHtml(systemValue(safety.autonomous_max_risk))}</span></div>
+        <div class="admin-kv"><strong>متطلبات بيئة الاختبار</strong><span>${systemBoolean(safety.phase6_sandbox_required, "مطلوبة", "غير مطلوبة")} · ${systemBoolean(safety.phase6_attestation_configured, "مهيّأة", "غير مهيّأة")}</span></div>
+    </div>`;
+
+    const security = payload.admin_security || {};
+    document.getElementById("admin-security-state").innerHTML = `<div class="admin-kv-grid">
+        <div class="admin-kv"><strong>ملف ارتباط الجلسة</strong><span>${escapeHtml(systemValue(security.session_cookie_name))}</span></div>
+        <div class="admin-kv"><strong>مدة الجلسة</strong><span>${escapeHtml(String(security.session_ttl_seconds || "—"))} ثانية</span></div>
+        <div class="admin-kv"><strong>الاتصال الآمن</strong><span>${security.secure_cookie ? "مفعّل" : "معطّل للاتصال المحلي"}</span></div>
+        <div class="admin-kv"><strong>حماية الطلبات</strong><span>${escapeHtml(systemValue(security.csrf, "مفعّلة"))}</span></div>
+    </div>`;
+}
+
+loadRuntimeOverview().catch(error => showToast(error.message, "error"));
 </script>
 {% endblock %}

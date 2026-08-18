@@ -1,8 +1,35 @@
-{# قالب Admin Web لصفحة autonomous history. يعرض projections القادمة من routes ولا ينفذ business logic أو authorization. #}
+{# قالب صفحة سجل المعالجة الذاتية. #}
 {% extends "base.html" %}
-{% block title %}Autonomous History{% endblock %}
-{% block content %}<header class="page-header"><div><h1 class="page-heading">Autonomous History</h1><p class="page-description">Supervised operational history used by the Phase 7 evaluator.</p></div></header><section class="panel"><header class="panel-header"><h2 class="panel-title">History snapshots</h2><button id="history-reload" class="button button-secondary button-sm" type="button">Refresh</button></header><div id="history-list" class="panel-body"><div class="empty-state"><h3>Loading history...</h3></div></div></section>{% endblock %}
-{% block scripts %}<script src="/static/js/autonomous.js"></script><script>
-(() => { const node = document.getElementById("history-list"); function render(items) { if (!items.length) return AutonomousUI.showEmpty(node, "No autonomous history recorded."); node.innerHTML = items.map(item => `<article class="panel" style="margin-bottom:1rem"><header class="panel-header"><div><h3 class="panel-title"><code>${escapeHtml(item.issue_fingerprint)}</code></h3><p class="panel-subtitle">${escapeHtml(item.action_type)} → ${escapeHtml(item.target)}</p></div><span>${AutonomousUI.percent(item.success_rate)} verified success</span></header><div class="panel-body"><div class="admin-kv-grid">${[["Supervised executions",item.supervised_execution_count],["Successful executions",item.successful_execution_count],["Verified successes",item.verified_success_count],["Failed executions",item.failed_execution_count],["Verification failures",item.verification_failure_count],["Rollback failures",item.rollback_failure_count],["Failure rate",AutonomousUI.percent(item.failure_rate)],["Rollback failure rate",AutonomousUI.percent(item.rollback_failure_rate)]].map(([k,v])=>`<div class="admin-kv"><strong>${escapeHtml(k)}</strong><span>${escapeHtml(AutonomousUI.text(v,"0"))}</span></div>`).join("")}</div></div></article>`).join(""); }
-async function load() { try { const candidates = await apiRequest("/api/autonomous-remediation/candidates"); const snapshots = await Promise.all(candidates.map(item => apiRequest(`/api/autonomous-remediation/history?issue_fingerprint=${encodeURIComponent(item.issue_fingerprint)}&action_type=${encodeURIComponent(item.action_type)}&target=${encodeURIComponent(item.target)}`))); render(snapshots); } catch (error) { AutonomousUI.showError(node, error); } } document.getElementById("history-reload").addEventListener("click", load); load(); })();
-</script>{% endblock %}
+{% block title %}سجل المعالجة الذاتية{% endblock %}
+{% block content %}
+<header class="page-header autonomous-page-header"><div><span class="page-eyebrow">المعالجة الذاتية</span><h1 class="page-heading">سجل المعالجة الذاتية</h1><p class="page-description">لقطات تاريخية للتشغيل تحت الإشراف يستخدمها مقيّم السياسات.</p></div></header>
+<section class="panel autonomous-panel"><header class="panel-header"><div><h2 class="panel-title">اللقطات التاريخية</h2><p class="panel-subtitle">مؤشرات النجاح والفشل والتحقق والتراجع لكل مرشح.</p></div><button id="history-reload" class="button button-secondary button-sm" type="button">تحديث السجل</button></header><div id="history-list" class="panel-body"><div class="loading-state"><span class="loading-spinner"></span><span>جارٍ تحميل السجل...</span></div></div></section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/autonomous.js"></script>
+<script>
+(() => {
+    const node = document.getElementById("history-list");
+    function render(items) {
+        if (!items.length) return AutonomousUI.showEmpty(node, "لا يوجد سجل معالجة ذاتية.");
+        node.innerHTML = items.map(item => `
+            <article class="autonomous-record-card">
+                <header class="autonomous-record-header"><div><h3 class="panel-title"><code>${escapeHtml(item.issue_fingerprint)}</code></h3><p class="panel-subtitle">${escapeHtml(AutonomousUI.label(item.action_type, "إجراء مسجل"))} ← ${escapeHtml(item.target)}</p></div><span class="badge badge-info">${AutonomousUI.percent(item.success_rate)} نجاح موثق</span></header>
+                <div class="autonomous-record-body"><div class="admin-kv-grid">
+                    ${[["التنفيذ تحت الإشراف", item.supervised_execution_count], ["التنفيذ الناجح", item.successful_execution_count], ["النجاحات الموثقة", item.verified_success_count], ["التنفيذ الفاشل", item.failed_execution_count], ["فشل التحقق", item.verification_failure_count], ["فشل التراجع", item.rollback_failure_count], ["معدل الفشل", AutonomousUI.percent(item.failure_rate)], ["معدل فشل التراجع", AutonomousUI.percent(item.rollback_failure_rate)]].map(([key, value]) => `<div class="admin-kv"><strong>${escapeHtml(key)}</strong><span>${escapeHtml(AutonomousUI.text(value, "0"))}</span></div>`).join("")}
+                </div></div>
+            </article>
+        `).join("");
+    }
+    async function load() {
+        try {
+            const candidates = await apiRequest("/api/autonomous-remediation/candidates");
+            const snapshots = await Promise.all(candidates.map(item => apiRequest(`/api/autonomous-remediation/history?issue_fingerprint=${encodeURIComponent(item.issue_fingerprint)}&action_type=${encodeURIComponent(item.action_type)}&target=${encodeURIComponent(item.target)}`)));
+            render(snapshots);
+        } catch (error) { AutonomousUI.showError(node, error); }
+    }
+    document.getElementById("history-reload").addEventListener("click", load);
+    load();
+})();
+</script>
+{% endblock %}

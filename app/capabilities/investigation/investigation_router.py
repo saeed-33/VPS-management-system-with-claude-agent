@@ -299,7 +299,19 @@ class InvestigationRouter:
         trigger_candidates = tuple(
             x for x in scored if x.matched_trigger_hints
         )
-        pool = trigger_candidates if trigger_candidates else scored
+        if trigger_candidates:
+            # لا نهمل اختصاصيي المجال الذين يغطون نفس المشكلة بتخصص أدق
+            # لمجرد أن اختصاصياً آخر طابق عبارة trigger عامة. هذا مهم مثلاً
+            # لمشكلة "high CPU process" التي تحتاج مراجعة CPU وprocess معاً.
+            domain_fallbacks = tuple(
+                x
+                for x in scored
+                if not x.matched_trigger_hints
+                and x.matched_issue_indexes
+            )
+            pool = trigger_candidates + domain_fallbacks
+        else:
+            pool = scored
 
         ordered = tuple(sorted(
             pool,

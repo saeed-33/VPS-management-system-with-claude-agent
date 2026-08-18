@@ -197,7 +197,7 @@ def validate_remediation_in_sandbox(
     """
     try:
         result = service.validate_in_isolated_sandbox(plan_id=plan_id, **payload.model_dump())
-        return serialize_value(result)
+        return _serialize_sandbox_validation(result)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

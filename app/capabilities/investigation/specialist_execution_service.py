@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import logging
 from dataclasses import replace
 from uuid import uuid4
 
@@ -48,6 +49,9 @@ class SpecialistExecutionInProgress(RuntimeError):
     pass
 
 
+logger = logging.getLogger(__name__)
+
+
 class SpecialistExecutionService:
     """
     ينسق حجز تنفيذ الاختصاصي وإنهائه أو تسجيل فشله.
@@ -60,6 +64,7 @@ class SpecialistExecutionService:
         snapshot_service: InvestigationRuntimeSnapshotService,
         correlator: CrossSpecialistCorrelator | None = None,
         synthesizer: FinalDiagnosisSynthesizer | None = None,
+        remediation_plan_proposal_service=None,
     ) -> None:
         """
         يهيئ SpecialistExecutionService ويربط الاعتماديات اللازمة لدورة التحقيق.
@@ -68,6 +73,7 @@ class SpecialistExecutionService:
         self._snapshot_service = snapshot_service
         self._correlator = correlator or CrossSpecialistCorrelator()
         self._synthesizer = synthesizer or FinalDiagnosisSynthesizer()
+        self._remediation_plan_proposal_service = remediation_plan_proposal_service
 
     def reserve_with_token(self, *, investigation_id: str, specialist_slug: str) -> dict:
         """
@@ -129,6 +135,27 @@ class SpecialistExecutionService:
             )
             detail = dict(model.investigation_metadata or {})
             snapshot = dict(detail.get("runtime_snapshot") or {})
+
+            if self._remediation_plan_proposal_service is not None:
+                try:
+                    plans = self._remediation_plan_proposal_service.create_from_diagnosis(
+                        diagnosis=diagnosis,
+                        server_id=model.server_id,
+                    )
+                    logger.info(
+                        "Remediation plan proposal stage completed | "
+                        "investigation_id=%s | plans=%s",
+                        task.investigation_id,
+                        len(plans),
+                    )
+                except Exception:
+                    # لا نسقط التشخيص المكتمل بسبب عطل في مرحلة الاقتراح؛
+                    # يبقى على المشغل إعادة المحاولة من دون فقد الأدلة.
+                    logger.exception(
+                        "Remediation plan proposal stage failed | "
+                        "investigation_id=%s",
+                        task.investigation_id,
+                    )
 
         return {
             "status": "persisted",
