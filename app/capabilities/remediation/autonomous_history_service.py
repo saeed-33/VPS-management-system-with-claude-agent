@@ -6,7 +6,7 @@
 """
 from __future__ import annotations
 
-from app.core.contracts.autonomous_remediation import AutonomousHistorySnapshot
+from app.core.contracts.autonomous_remediation.autonomous_history_snapshot import AutonomousHistorySnapshot
 
 
 class AutonomousHistoryService:
@@ -24,4 +24,3 @@ class AutonomousHistoryService:
         يجمع أحدث القرارات والحجوزات والتفويضات والتدقيق في لقطة تاريخية.
         """
         return self._repository.history(issue_fingerprint=issue_fingerprint, action_type=action_type, target=target)
-

@@ -15,7 +15,7 @@ deterministic test into live infrastructure acceptance.
 | FR-008 | Produce a grounded final diagnosis. | final diagnosis synthesizer | diagnosis grounding tests | IMPLEMENTED |
 | FR-009 | Create immutable, fingerprinted remediation plans. | `RemediationService` | Phase 5/remediation tests | IMPLEMENTED |
 | FR-010 | Validate a plan in the registered native sandbox before approval/execution. | Phase 6 sandbox runtime | sandbox tests; live status is unresolved | PARTIAL |
-| FR-011 | Request, approve, or reject a persisted remediation plan. | remediation API/Admin UI | `tests/test_phase5_admin_api.py`, UI tests | IMPLEMENTED |
+| FR-011 | Request, approve, or reject a persisted remediation plan. | remediation API/Admin UI | `tests/acceptance/readiness/test_supervised_remediation_admin_interface.py`, UI tests | IMPLEMENTED |
 | FR-012 | Execute only registered approved actions and verify or rollback. | remediation execution/verification/rollback | Phase 5 tests and recorded acceptance report | IMPLEMENTED |
 | FR-013 | Discover autonomous candidates from persisted history. | candidate/history services | autonomous policy/history tests | IMPLEMENTED |
 | FR-014 | Create, update, enable, suspend, resume, and disable autonomous policies through Admin. | Admin policy API/UI | autonomous policy/RBAC/UI tests | IMPLEMENTED |
@@ -24,7 +24,7 @@ deterministic test into live infrastructure acceptance.
 | FR-017 | Issue and consume single-use authorization, reserve idempotently, execute outside transaction, and finalize with ownership. | autonomous execution/repository | authorization, concurrency/recovery tests | IMPLEMENTED |
 | FR-018 | Suspend after configured failure threshold and require explicit operator resume. | circuit-breaker runtime | circuit-breaker tests | IMPLEMENTED |
 | FR-019 | Expose safe autonomous reservations, authorizations, decisions, history, runtime, and audit projections. | Admin API/UI | Admin UI completion tests; route inventory | IMPLEMENTED |
-| FR-020 | Authenticate Admin users with session cookies, RBAC, CSRF, expiry, and audit. | `AdminAuthService`, middleware | `tests/test_admin_auth_rbac.py` | IMPLEMENTED |
+| FR-020 | Authenticate Admin users with session cookies, RBAC, CSRF, expiry, and audit. | `AdminAuthService`, middleware | `tests/integration/admin/test_authentication_authorization.py` | IMPLEMENTED |
 | FR-021 | Provide a bounded 25-tool MCP catalog to Claude. | MCP catalog/boundary | MCP catalog/boundary tests | IMPLEMENTED |
 | FR-022 | Identify application-code failure locations without unsafe automatic code modification. | diagnosis/grounded narrative | no dedicated code-localization implementation found | PARTIAL |
 | FR-023 | Send dangerous/sensitive proposals through social communication channels. | notification integration | no Telegram/social adapter in current source | DEFERRED |

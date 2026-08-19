@@ -12,7 +12,7 @@ from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app.interfaces.admin.auth import safe_redirect_path
+from app.interfaces.admin.auth.middleware import safe_redirect_path
 
 
 router = APIRouter(include_in_schema=False)

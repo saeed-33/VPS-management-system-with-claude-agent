@@ -10,17 +10,12 @@ from app.interfaces.admin.dependencies import (
     get_claude_supervisor,
     get_project_tool_boundary,
 )
-from app.runtime.claude.supervisor import (
-    ClaudeSupervisor,
-)
+from app.runtime.claude.supervisor.supervisor import ClaudeSupervisor
 from app.interfaces.mcp.registry import (
     ProjectMcpToolBoundary,
 )
 from app.core.config import settings
-from app.core.contracts.autonomous_remediation import (
-    V1_AUTONOMOUS_ACTIONS,
-    V1_AUTONOMOUS_RISK_CEILING,
-)
+from app.core.contracts.autonomous_remediation.helpers import V1_AUTONOMOUS_ACTIONS, V1_AUTONOMOUS_RISK_CEILING
 
 
 router = APIRouter(

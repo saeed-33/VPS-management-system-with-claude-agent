@@ -9,12 +9,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.core.contracts.remediation import (
-    ApprovalStatus,
-    PolicyDecision,
-    PolicyResult,
-    RemediationPlanStatus,
-)
+from app.core.contracts.remediation.approval_status import ApprovalStatus
+from app.core.contracts.remediation.policy_decision import PolicyDecision
+from app.core.contracts.remediation.policy_result import PolicyResult
+from app.core.contracts.remediation.remediation_plan_status import RemediationPlanStatus
 
 
 @dataclass(frozen=True, slots=True)

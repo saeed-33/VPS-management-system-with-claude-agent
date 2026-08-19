@@ -1,20 +1,14 @@
 """
 إدارة هوية السيرفر وإعدادات الاتصال وتفعيل المراقبة الخاصة به.
 """
-from app.infrastructure.database.models.server import (
-    ServerModel,
-)
+from app.infrastructure.database.models.server.server import ServerModel
 from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
-from app.core.contracts.servers import (
-    CreateServerDTO,
-    UpdateServerDTO,
-)
-from app.core.exceptions import (
-    DuplicateServerError,
-    ServerNotFoundError,
-)
+from app.core.contracts.servers.create_server_dto import CreateServerDTO
+from app.core.contracts.servers.update_server_dto import UpdateServerDTO
+from app.core.exceptions.duplicate_server_error import DuplicateServerError
+from app.core.exceptions.server_not_found_error import ServerNotFoundError
 
 
 class ServerService:

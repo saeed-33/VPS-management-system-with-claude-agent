@@ -7,7 +7,7 @@ marked `TARGET_DEFINED_BUT_NOT_MEASURED`.
 | ID | Quality | Measurable statement and threshold | Method/evidence | Observed result | Status |
 |---|---|---|---|---|---|
 | NFR-SEC-001 | Access control | 100% of protected Admin Web/API routes require an authenticated session. | Auth middleware tests and route inventory | Pass | IMPLEMENTED |
-| NFR-SEC-002 | CSRF | 100% of cookie-authenticated POST/PUT/PATCH/DELETE requests require a valid CSRF token. | `tests/test_admin_auth_rbac.py` | Pass | IMPLEMENTED |
+| NFR-SEC-002 | CSRF | 100% of cookie-authenticated POST/PUT/PATCH/DELETE requests require a valid CSRF token. | `tests/integration/admin/test_authentication_authorization.py` | Pass | IMPLEMENTED |
 | NFR-SEC-003 | Capability boundary | 0 unrestricted raw SSH, raw SQL, arbitrary shell, or unrestricted filesystem MCP capabilities. | MCP catalog/boundary and Claude least-privilege tests | Pass; catalog 25 | IMPLEMENTED |
 | NFR-SEC-004 | Autonomous safety | Fresh configuration default `automatic_remediation_allowed` is false in 100% of loads. | `Settings` default and negative security tests | Pass | IMPLEMENTED |
 | NFR-SEC-005 | Binding | 100% of autonomous executions require matching issue/plan/action/target/server/sandbox/Evidence bindings. | policy, authorization, idempotency, and negative tests | Pass in deterministic tests | IMPLEMENTED |

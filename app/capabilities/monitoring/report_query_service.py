@@ -4,14 +4,10 @@
 from app.infrastructure.database.repositories.report_repository import (
     ReportRepository,
 )
-from app.core.contracts.reports import (
-    CommandExecutionDTO,
-    ReportDetailsDTO,
-    ReportListItemDTO,
-)
-from app.core.exceptions import (
-    ReportNotFoundError,
-)
+from app.core.contracts.reports.command_execution_dto import CommandExecutionDTO
+from app.core.contracts.reports.report_details_dto import ReportDetailsDTO
+from app.core.contracts.reports.report_list_item_dto import ReportListItemDTO
+from app.core.exceptions.report_not_found_error import ReportNotFoundError
 
 
 class ReportQueryService:

@@ -101,7 +101,7 @@ $env:LLM_PROVIDER="ollama"
 $env:CLAUDE_RUNTIME_ENABLED="true"
 $env:AI_VPS_REAL_RUNTIME_SERVER_ID="<server_id>"
 $env:AI_VPS_RUN_REAL_RUNTIME_TESTS="1"
-uv run --no-sync python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
+uv run --no-sync python -m pytest tests/acceptance/external_runtime/test_real_claude_ollama_mcp_cycle.py -v -s
 ```
 
 The test persists a real AgentJob/session outcome and verifies report, analysis,

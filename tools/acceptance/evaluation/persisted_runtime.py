@@ -16,9 +16,7 @@ from tools.acceptance.evaluation.contracts import (
     EvaluationMetric,
     EvaluationObservation,
 )
-from app.core.contracts.investigation_read_models import (
-    InvestigationDetailReadModel,
-)
+from app.core.contracts.investigation_read_models.investigation_detail_read_model import InvestigationDetailReadModel
 
 
 @dataclass(slots=True, frozen=True)

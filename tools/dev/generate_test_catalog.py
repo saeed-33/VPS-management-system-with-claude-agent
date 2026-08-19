@@ -105,7 +105,7 @@ def main() -> int:
     ]
 
     test_files = sorted(
-        TESTS.glob(
+        TESTS.rglob(
             "test_*.py"
         )
     )

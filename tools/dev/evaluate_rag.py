@@ -27,13 +27,9 @@ if project_root_value not in sys.path:
 
 from sqlalchemy import select, text
 
-from app.capabilities.analysis.retrieval.structured_compatibility import (
-    StructuredCompatibilityChecker,
-)
+from app.capabilities.analysis.retrieval.structured_compatibility.checker import StructuredCompatibilityChecker
 from app.core.config import settings
-from app.infrastructure.database.models.report_analysis import (
-    ReportAnalysisModel,
-)
+from app.infrastructure.database.models.report_analysis.analysis import ReportAnalysisModel
 from app.infrastructure.database.models.report_analysis_source import (
     ReportAnalysisSourceModel,
 )

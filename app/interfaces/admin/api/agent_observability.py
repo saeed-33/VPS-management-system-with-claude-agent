@@ -16,9 +16,7 @@ from fastapi import (
 from app.interfaces.admin.dependencies import (
     get_claude_agent_observability_service,
 )
-from app.runtime.claude.observability import (
-    ClaudeAgentObservabilityService,
-)
+from app.runtime.claude.observability.observability import ClaudeAgentObservabilityService
 
 
 router = APIRouter(

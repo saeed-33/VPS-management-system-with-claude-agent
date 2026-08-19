@@ -9,9 +9,7 @@ import json
 import re
 from typing import Any
 
-from app.core.contracts.reports import (
-    ReportDetailsDTO,
-)
+from app.core.contracts.reports.report_details_dto import ReportDetailsDTO
 from app.core.policies.fingerprint_strategy import (
     FingerprintStrategy,
 )

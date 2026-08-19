@@ -3,14 +3,10 @@
 """
 from datetime import UTC, datetime
 
-from app.infrastructure.ssh.command_executor import (
-    CommandExecutionResult,
-)
-from app.core.contracts.reports import (
-    CommandExecutionData,
-    MonitoringReportData,
-    MonitoringReportStatus,
-)
+from app.infrastructure.ssh.command_executor.result import CommandExecutionResult
+from app.core.contracts.reports.command_execution_data import CommandExecutionData
+from app.core.contracts.reports.monitoring_report_data import MonitoringReportData
+from app.core.contracts.reports.monitoring_report_status import MonitoringReportStatus
 
 
 class ReportService:

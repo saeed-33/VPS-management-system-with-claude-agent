@@ -8,7 +8,7 @@ import json
 import logging
 
 from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
-from app.infrastructure.database.repositories.analysis_repository import AnalysisRepository
+from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
 from app.infrastructure.database.repositories.retrieval_repository import RetrievalRepository
 
 logger = logging.getLogger(__name__)
@@ -160,4 +160,3 @@ class RetrievalIndexer:
                     signatures.add(str(value)[:500])
 
         return sorted(signatures)
-

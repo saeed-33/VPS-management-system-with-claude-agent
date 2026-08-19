@@ -10,7 +10,7 @@ import json
 import os
 from pathlib import Path
 
-from app.core.contracts.sandbox_validation import SandboxRuntimeCheck
+from app.core.contracts.sandbox_validation.sandbox_runtime_check import SandboxRuntimeCheck
 
 
 class NativeSandboxRuntime:

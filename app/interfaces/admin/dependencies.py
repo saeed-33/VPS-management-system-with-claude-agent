@@ -6,15 +6,11 @@
 """
 from fastapi import Request
 
-from app.runtime.claude.observability import (
-    ClaudeAgentObservabilityService,
-)
+from app.runtime.claude.observability.observability import ClaudeAgentObservabilityService
 from app.capabilities.investigation.read_service import (
     InvestigationReadService,
 )
-from app.runtime.claude.supervisor import (
-    ClaudeSupervisor,
-)
+from app.runtime.claude.supervisor.supervisor import ClaudeSupervisor
 from app.interfaces.mcp.registry import (
     ProjectMcpToolBoundary,
 )
@@ -25,9 +21,7 @@ from app.capabilities.investigation.specialist_service import (
     SpecialistDefinitionService,
 )
 from app.composition import container
-from app.interfaces.admin.services.ssh_test_service import (
-    SSHTestService,
-)
+from app.interfaces.admin.services.ssh_test_service.service import SSHTestService
 from app.interfaces.admin.services.report_pdf_service import (
     ReportPdfService,
 )
@@ -40,18 +34,14 @@ from app.capabilities.monitoring.server_service import ServerService
 from app.capabilities.monitoring.profile_service import (
     MonitoringProfileService,
 )
-from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.service.service import RemediationService
 from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
 from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
-from app.capabilities.remediation.autonomous_execution_service import AutonomousExecutionService
-from app.infrastructure.database.repositories.analysis_repository import (
-    AnalysisRepository,
-)
-from app.interfaces.admin.auth import (
-    AdminAuthService,
-    AdminPrincipal,
-    get_admin_principal,
-)
+from app.capabilities.remediation.autonomous_execution_service.service import AutonomousExecutionService
+from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
+from app.interfaces.admin.auth.service import AdminAuthService
+from app.interfaces.admin.auth.principal import AdminPrincipal
+from app.interfaces.admin.auth.middleware import get_admin_principal
 
 
 def get_monitoring_profile_service(

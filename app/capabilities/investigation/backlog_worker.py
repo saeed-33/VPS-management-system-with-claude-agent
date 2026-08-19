@@ -10,11 +10,9 @@ import asyncio
 import logging
 from typing import Any
 
-from app.core.contracts.investigation import (
-    InvestigationBudget,
-    SpecialistTask,
-    SpecialistTaskStatus,
-)
+from app.core.contracts.investigation.investigation_budget import InvestigationBudget
+from app.core.contracts.investigation.specialist_task import SpecialistTask
+from app.core.contracts.investigation.specialist_task_status import SpecialistTaskStatus
 
 
 logger = logging.getLogger(__name__)

@@ -15,20 +15,16 @@ from app.capabilities.analysis.retrieval.report_fingerprint import (
 from app.capabilities.analysis.retrieval.report_normalizer import (
     ReportNormalizer,
 )
-from app.interfaces.mcp.schemas import (
-    ProjectToolCall,
-    ProjectToolDefinition,
-    ProjectToolResult,
-)
+from app.interfaces.mcp.schemas.call import ProjectToolCall
+from app.interfaces.mcp.schemas.definition import ProjectToolDefinition
+from app.interfaces.mcp.schemas.result import ProjectToolResult
 from app.interfaces.mcp.catalog import group_definitions
-from app.interfaces.mcp.handlers import (
-    AnalysisToolsMixin,
-    BoundaryCommonMixin,
-    BoundaryDefinitionsMixin,
-    InvestigationToolsMixin,
-    MonitoringToolsMixin,
-    RemediationToolsMixin,
-)
+from app.interfaces.mcp.handlers.analysis import AnalysisToolsMixin
+from app.interfaces.mcp.handlers.common import BoundaryCommonMixin
+from app.interfaces.mcp.handlers.definitions.definitions import BoundaryDefinitionsMixin
+from app.interfaces.mcp.handlers.investigation.investigation import InvestigationToolsMixin
+from app.interfaces.mcp.handlers.monitoring import MonitoringToolsMixin
+from app.interfaces.mcp.handlers.remediation import RemediationToolsMixin
 
 
 ToolHandler = Callable[

@@ -1,0 +1,187 @@
+"""
+نماذج دورة المعالجة من الخطة والاختبار والموافقة حتى التنفيذ والتحقق والتراجع.
+
+تضم أيضًا سجلات قرار المعالجة الذاتية وحجوزها وحالتها وأحداث تدقيقها، حتى يكون
+كل تغيير على السيرفر قابلًا للمراجعة وربطه بالتشخيص والخطة.
+"""
+from __future__ import annotations
+
+from datetime import datetime
+
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    JSON,
+    String,
+)
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.infrastructure.database.base import Base
+from app.core.utils.datetime import utc_now
+
+
+class RemediationPlanModel(Base):
+    """
+    خطة تغيير تربط التشخيص بالأفعال والخطر وحالة الموافقة والتنفيذ.
+    """
+    __tablename__ = "remediation_plans"
+    __table_args__ = (
+        Index(
+            "ix_remediation_plans_investigation_created",
+            "investigation_id",
+            "created_at",
+        ),
+        Index(
+            "ix_remediation_plans_status",
+            "status",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
+    plan_id: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    investigation_id: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        index=True,
+    )
+    server_id: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+        index=True,
+    )
+    title: Mapped[str] = mapped_column(
+        String(300),
+        nullable=False,
+    )
+    problem_summary: Mapped[str] = mapped_column(
+        String(4000),
+        nullable=False,
+    )
+    proposed_actions: Mapped[list] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    diagnosis_claim_ids: Mapped[list] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    evidence_ids: Mapped[list] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    risk_level: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+    )
+    plan_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=1,
+    )
+    plan_fingerprint: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
+    )
+    rollback_plan: Mapped[str | None] = mapped_column(
+        String(4000),
+        nullable=True,
+    )
+    status: Mapped[str] = mapped_column(
+        String(40),
+        nullable=False,
+    )
+    sandbox_result_id: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
+    )
+    approval_requested_at: Mapped[datetime | None] = (
+        mapped_column(
+            DateTime(timezone=True),
+            nullable=True,
+        )
+    )
+    approved_by: Mapped[str | None] = mapped_column(
+        String(120),
+        nullable=True,
+    )
+    approved_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    denial_reason: Mapped[str | None] = mapped_column(
+        String(2000),
+        nullable=True,
+    )
+    approval_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    approval_fingerprint: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+    approval_comment: Mapped[str | None] = mapped_column(
+        String(2000),
+        nullable=True,
+    )
+    approval_scope: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+    approval_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    execution_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    verification_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    rollback_status: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+    runtime_session_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+    agent_job_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+    plan_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+    )
+

@@ -18,20 +18,14 @@ from fastapi import (
 from app.interfaces.admin.dependencies import (
     get_specialist_definition_service,
 )
-from app.interfaces.admin.schemas.specialists import (
-    SpecialistCreateRequest,
-    SpecialistEnabledRequest,
-    SpecialistResponse,
-    SpecialistUpdateRequest,
-)
-from app.core.contracts.specialists import (
-    CreateSpecialistDefinitionDTO,
-    UpdateSpecialistDefinitionDTO,
-)
-from app.core.exceptions import (
-    DuplicateSpecialistDefinitionError,
-    SpecialistDefinitionNotFoundError,
-)
+from app.interfaces.admin.schemas.specialists.specialist_create_request import SpecialistCreateRequest
+from app.interfaces.admin.schemas.specialists.specialist_enabled_request import SpecialistEnabledRequest
+from app.interfaces.admin.schemas.specialists.specialist_response import SpecialistResponse
+from app.interfaces.admin.schemas.specialists.specialist_update_request import SpecialistUpdateRequest
+from app.core.contracts.specialists.create_specialist_definition_dto import CreateSpecialistDefinitionDTO
+from app.core.contracts.specialists.update_specialist_definition_dto import UpdateSpecialistDefinitionDTO
+from app.core.exceptions.duplicate_specialist_definition_error import DuplicateSpecialistDefinitionError
+from app.core.exceptions.specialist_definition_not_found_error import SpecialistDefinitionNotFoundError
 from app.capabilities.investigation.specialist_service import (
     SpecialistDefinitionService,
 )

@@ -27,6 +27,15 @@ readiness dimensions:          8 / 8 PASS
 The one warning is the existing Starlette/httpx deprecation warning. Real
 runtime tests are opt-in and require external infrastructure.
 
+## Test layout
+
+Test files are grouped by responsibility rather than delivery phase:
+
+- `tests/unit/` — isolated domain, policy, capability, infrastructure, and runtime behavior.
+- `tests/integration/` — database, Admin, MCP, evaluation, and composed application boundaries.
+- `tests/architecture/` — dependency direction and architectural boundary rules.
+- `tests/acceptance/` — readiness gates and opt-in external-runtime acceptance.
+
 ## Test layers
 
 ### Unit and contract tests
@@ -42,7 +51,7 @@ Admin/API wiring, runtime jobs, and observability.
 ### Architecture tests
 
 ```powershell
-uv run --no-sync python -m pytest tests/test_architecture_dependencies.py -v
+uv run --no-sync python -m pytest tests/architecture/test_dependency_boundaries.py -v
 ```
 
 These verify dependency direction and absence of the removed application
@@ -86,7 +95,7 @@ $env:LLM_PROVIDER="ollama"
 $env:CLAUDE_RUNTIME_ENABLED="true"
 $env:AI_VPS_REAL_RUNTIME_SERVER_ID="<server_id>"
 $env:AI_VPS_RUN_REAL_RUNTIME_TESTS="1"
-uv run --no-sync python -m pytest tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -v -s
+uv run --no-sync python -m pytest tests/acceptance/external_runtime/test_real_claude_ollama_mcp_cycle.py -v -s
 ```
 
 This requires native Claude CLI, Ollama and the configured model, PostgreSQL,

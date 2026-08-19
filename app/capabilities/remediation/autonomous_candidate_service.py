@@ -6,7 +6,7 @@
 """
 from __future__ import annotations
 
-from app.core.contracts.autonomous_remediation import AutonomousPolicyCandidate
+from app.core.contracts.autonomous_remediation.autonomous_policy_candidate import AutonomousPolicyCandidate
 
 
 class AutonomousCandidateService:

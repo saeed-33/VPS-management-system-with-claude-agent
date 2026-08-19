@@ -20,24 +20,18 @@ from app.interfaces.admin.dependencies import (
     get_report_pdf_service,
     get_report_query_service,
 )
-from app.interfaces.admin.schemas.reports import (
-    PaginatedReportsResponse,
-    ReportAnalysisResponse,
-    ReportAnalysisSourcesResponse,
-    ReportDetailsResponse,
-)
+from app.interfaces.admin.schemas.reports.paginated_reports_response import PaginatedReportsResponse
+from app.interfaces.admin.schemas.reports.report_analysis_response import ReportAnalysisResponse
+from app.interfaces.admin.schemas.reports.report_analysis_sources_response import ReportAnalysisSourcesResponse
+from app.interfaces.admin.schemas.reports.report_details_response import ReportDetailsResponse
 from app.interfaces.admin.services.report_pdf_service import (
     ReportPdfService,
 )
-from app.infrastructure.database.repositories.analysis_repository import (
-    AnalysisRepository,
-)
+from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
 from app.infrastructure.database.repositories.analysis_source_repository import (
     AnalysisSourceRepository,
 )
-from app.core.exceptions import (
-    ReportNotFoundError,
-)
+from app.core.exceptions.report_not_found_error import ReportNotFoundError
 from app.capabilities.monitoring.report_query_service import (
     ReportQueryService,
 )

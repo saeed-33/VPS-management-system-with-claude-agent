@@ -8,12 +8,8 @@ from __future__ import annotations
 
 from hashlib import sha256
 
-from app.capabilities.knowledge.chunker import (
-    StructureAwareKnowledgeChunker,
-)
-from app.capabilities.knowledge.ingestion_contracts import (
-    KnowledgeDocumentStatus,
-)
+from app.capabilities.knowledge.chunker.chunker import StructureAwareKnowledgeChunker
+from app.capabilities.knowledge.ingestion_contracts.status import KnowledgeDocumentStatus
 from app.infrastructure.database.repositories.knowledge_document_repository import (
     KnowledgeDocumentRepository,
 )

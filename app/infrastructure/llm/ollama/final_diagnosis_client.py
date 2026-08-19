@@ -5,10 +5,8 @@ from __future__ import annotations
 
 import httpx
 
-from app.core.contracts.final_diagnosis import (
-    FinalDiagnosisNarrativeClient,
-    FinalDiagnosisNarrativeOutput,
-)
+from app.core.contracts.final_diagnosis.final_diagnosis_narrative_client import FinalDiagnosisNarrativeClient
+from app.core.contracts.final_diagnosis.final_diagnosis_narrative_output import FinalDiagnosisNarrativeOutput
 
 class OllamaFinalDiagnosisNarrativeClient(
     FinalDiagnosisNarrativeClient

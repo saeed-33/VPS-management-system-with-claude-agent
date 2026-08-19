@@ -42,30 +42,30 @@ Focused critical-domain regression:
 
 ```bash
 uv run --no-sync python -m pytest -q \
-  tests/test_error_classification.py \
-  tests/test_error_classification_policy.py \
-  tests/test_source_location.py \
-  tests/test_investigation_runtime_snapshot_service.py \
-  tests/test_investigations_api.py \
-  tests/test_admin_auth_rbac.py \
-  tests/test_admin_remediation_api.py \
-  tests/test_admin_system_api.py \
-  tests/test_admin_system_web.py \
-  tests/test_phase7_acceptance_environment.py \
-  tests/test_phase7_acceptance_history.py \
-  tests/test_phase7_circuit_breaker.py \
-  tests/test_phase7_concurrency_recovery.py \
-  tests/test_phase7_negative_security.py \
-  tests/test_project_mcp_tool_boundary.py \
-  tests/test_claude_least_privilege.py \
-  tests/test_seed_specialists.py
+  tests/unit/core/policies/test_error_classification.py \
+  tests/unit/core/policies/test_error_classification_policy.py \
+  tests/unit/core/test_source_location.py \
+  tests/unit/capabilities/investigation/test_runtime_snapshot_service.py \
+  tests/integration/admin/test_investigations_api.py \
+  tests/integration/admin/test_authentication_authorization.py \
+  tests/integration/admin/test_remediation_api.py \
+  tests/integration/admin/test_system_api.py \
+  tests/integration/admin/test_system_web.py \
+  tests/acceptance/readiness/test_autonomous_acceptance_environment.py \
+  tests/acceptance/readiness/test_autonomous_acceptance_history.py \
+  tests/acceptance/readiness/test_autonomous_circuit_breaker.py \
+  tests/acceptance/readiness/test_autonomous_concurrency_recovery.py \
+  tests/acceptance/readiness/test_autonomous_negative_security.py \
+  tests/integration/mcp/test_tool_boundary.py \
+  tests/unit/runtime/claude/test_least_privilege.py \
+  tests/integration/database/test_specialist_seeding.py
 ```
 
 Deployment-security configuration regression:
 
 ```bash
 uv run --no-sync python -m pytest -q \
-  tests/test_deployment_security_config.py
+  tests/unit/core/test_deployment_security_config.py
 ```
 
 Schema, seed, compilation, documentation, and repository checks:

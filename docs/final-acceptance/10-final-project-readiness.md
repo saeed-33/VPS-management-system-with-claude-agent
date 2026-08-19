@@ -52,7 +52,7 @@ policy, or remediation target was executed.
 - Focused Admin/supporting tests:
 
   ```bash
-  uv run --no-sync python -m pytest tests/test_admin_auth_rbac.py tests/test_admin_remediation_api.py tests/test_admin_ui_completion.py tests/test_admin_system_web.py tests/test_admin_system_api.py tests/test_phase5_admin_api.py tests/test_phase5_supervised_remediation.py tests/test_phase6_sandbox_validation.py tests/test_route_inventory.py tests/test_project_mcp_tool_boundary.py tests/test_claude_least_privilege.py -q
+  uv run --no-sync python -m pytest tests/integration/admin/test_authentication_authorization.py tests/integration/admin/test_remediation_api.py tests/integration/admin/test_admin_ui_completion.py tests/integration/admin/test_system_web.py tests/integration/admin/test_system_api.py tests/acceptance/readiness/test_supervised_remediation_admin_interface.py tests/unit/capabilities/remediation/test_supervised_remediation.py tests/unit/capabilities/remediation/test_sandbox_validation.py tests/integration/admin/test_route_inventory.py tests/integration/mcp/test_tool_boundary.py tests/unit/runtime/claude/test_least_privilege.py -q
   ```
 
 - Compile check:

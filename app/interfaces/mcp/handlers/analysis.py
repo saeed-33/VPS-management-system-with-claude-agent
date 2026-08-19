@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.interfaces.mcp.schemas import ProjectToolResult
+from app.interfaces.mcp.schemas.result import ProjectToolResult
 from app.interfaces.mcp.serializers import (
     serialize_analysis,
     serialize_incident_context,

@@ -14,7 +14,7 @@ Warning: one existing Starlette/httpx deprecation warning.
 Exact command:
 
 ```bash
-uv run --no-sync python -m pytest -q -o addopts="" --ignore=tests/real_runtime
+uv run --no-sync python -m pytest -q -o addopts="" --ignore=tests/acceptance/external_runtime
 ```
 
 Result: **620 passed, 0 failed, 0 skipped, 1 warning**. The equivalent full

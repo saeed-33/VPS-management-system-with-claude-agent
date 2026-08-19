@@ -24,12 +24,8 @@ from app.capabilities.analysis.prompts import (
 from app.capabilities.analysis.report_serializer import (
     ReportSerializer,
 )
-from app.infrastructure.database.repositories.analysis_repository import (
-    AnalysisRepository,
-)
-from app.core.contracts.analysis import (
-    ReportAnalysisResult,
-)
+from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
+from app.core.contracts.analysis.report_analysis_result import ReportAnalysisResult
 from app.capabilities.monitoring.report_query_service import (
     ReportQueryService,
 )

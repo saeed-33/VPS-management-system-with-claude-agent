@@ -6,14 +6,10 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app.capabilities.knowledge.ingestion_contracts import (
-    KnowledgeDocumentStatus,
-    ParsedKnowledgeDocument,
-)
-from app.infrastructure.database.models.knowledge_document import (
-    KnowledgeChunkModel,
-    KnowledgeDocumentModel,
-)
+from app.capabilities.knowledge.ingestion_contracts.status import KnowledgeDocumentStatus
+from app.capabilities.knowledge.ingestion_contracts.parsed_document import ParsedKnowledgeDocument
+from app.infrastructure.database.models.knowledge_document.chunk import KnowledgeChunkModel
+from app.infrastructure.database.models.knowledge_document.document import KnowledgeDocumentModel
 from app.infrastructure.database.session import SessionLocal
 from app.core.utils.datetime import utc_now
 

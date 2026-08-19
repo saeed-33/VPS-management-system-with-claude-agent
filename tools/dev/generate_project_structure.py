@@ -128,7 +128,10 @@ SPECIAL = {
     "app/interfaces/mcp/server.py": (
         "Project-scoped MCP protocol server exposing project tools to Claude Code."
     ),
-    "app/core/contracts/investigation.py": (
+    "docs/architecture/code-structure-rules.md": (
+        "Rules and audit baseline for one-class-per-file contract organization."
+    ),
+    "app/core/contracts/investigation/__init__.py": (
         "Provider- and infrastructure-independent investigation contracts."
     ),
     "app/core/policies/diagnostic_policy.py": (
@@ -543,24 +546,32 @@ def main() -> int:
     """
     files = []
 
-    for path in ROOT.rglob("*"):
-        if not path.is_file():
-            continue
-        if should_skip(path):
-            continue
+    # os.walk lets us prune excluded directories before descending into them.
+    # This is important on Windows where .venv/lib64 may be a symlink.
+    for current_root, directories, filenames in os.walk(ROOT, topdown=True):
+        directories[:] = [
+            name
+            for name in directories
+            if name not in EXCLUDED_DIRS
+            and not name.startswith(EXCLUDED_PREFIXES)
+        ]
+        for filename in filenames:
+            path = Path(current_root) / filename
+            if should_skip(path):
+                continue
 
-        rel = path.relative_to(ROOT).as_posix()
+            rel = path.relative_to(ROOT).as_posix()
 
-        # Do not document generated backup/package artifacts.
-        if rel == OUTPUT.relative_to(ROOT).as_posix():
-            continue
+            # Do not document generated backup/package artifacts.
+            if rel == OUTPUT.relative_to(ROOT).as_posix():
+                continue
 
-        files.append(
-            (
-                rel,
-                describe(path),
+            files.append(
+                (
+                    rel,
+                    describe(path),
+                )
             )
-        )
 
     files.sort()
 

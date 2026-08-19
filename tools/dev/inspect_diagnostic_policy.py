@@ -20,15 +20,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.core.contracts.investigation import InvestigationBudget
-from app.core.policies.diagnostic_policy import (
-    DiagnosticPolicyEngine,
-    DiagnosticPolicyRequest,
-)
-from app.core.policies.diagnostic_tools import (
-    DiagnosticToolCall,
-    build_default_diagnostic_tool_registry,
-)
+from app.core.contracts.investigation.investigation_budget import InvestigationBudget
+from app.core.policies.diagnostic_policy.diagnostic_policy_engine import DiagnosticPolicyEngine
+from app.core.policies.diagnostic_policy.diagnostic_policy_request import DiagnosticPolicyRequest
+from app.core.policies.diagnostic_tools.diagnostic_tool_call import DiagnosticToolCall
+from app.core.policies.diagnostic_tools.factories import build_default_diagnostic_tool_registry
 from app.composition import container
 
 

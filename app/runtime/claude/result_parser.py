@@ -9,13 +9,9 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from app.runtime.claude.exceptions import (
-    ClaudeStructuredOutputError,
-)
-from app.runtime.claude.models import (
-    ClaudeJobStatus,
-    ClaudeStructuredOutput,
-)
+from app.runtime.claude.exceptions.structured_output_error import ClaudeStructuredOutputError
+from app.runtime.claude.models.job_status import ClaudeJobStatus
+from app.runtime.claude.models.structured_output import ClaudeStructuredOutput
 
 
 def _strip_code_fence(

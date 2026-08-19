@@ -8,18 +8,14 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from app.runtime.claude.models import (
-    ClaudeJobStatus,
-    ClaudeRuntimeRequest,
-    ClaudeRuntimeResult,
-)
+from app.runtime.claude.models.job_status import ClaudeJobStatus
+from app.runtime.claude.models.runtime_request import ClaudeRuntimeRequest
+from app.runtime.claude.models.runtime_result import ClaudeRuntimeResult
 from app.infrastructure.database.repositories.agent_job_repository import (
     AgentJobRepository,
 )
-from app.core.contracts.agent_jobs import (
-    CreateAgentJobDTO,
-    UpdateAgentJobDTO,
-)
+from app.core.contracts.agent_jobs.create_agent_job_dto import CreateAgentJobDTO
+from app.core.contracts.agent_jobs.update_agent_job_dto import UpdateAgentJobDTO
 
 
 class ClaudeAgentJobService:

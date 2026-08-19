@@ -3,8 +3,9 @@
 """
 from __future__ import annotations
 
-from app.core.contracts.remediation import RemediationAction, RemediationRisk
-from app.core.policies.remediation_tools import NamedWriteToolRegistry
+from app.core.contracts.remediation.remediation_action import RemediationAction
+from app.core.contracts.remediation.remediation_risk import RemediationRisk
+from app.core.policies.remediation_tools.named_write_tool_registry import NamedWriteToolRegistry
 
 
 class RemediationRiskClassifier:

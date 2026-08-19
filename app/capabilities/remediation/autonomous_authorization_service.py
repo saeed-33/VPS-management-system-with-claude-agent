@@ -10,10 +10,8 @@ from datetime import timedelta
 from dataclasses import replace
 from uuid import uuid4
 
-from app.core.contracts.autonomous_remediation import (
-    AutonomousAuthorization,
-    AutonomousAuthorizationStatus,
-)
+from app.core.contracts.autonomous_remediation.autonomous_authorization import AutonomousAuthorization
+from app.core.contracts.autonomous_remediation.autonomous_authorization_status import AutonomousAuthorizationStatus
 from app.core.utils.datetime import utc_now
 
 

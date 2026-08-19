@@ -9,32 +9,30 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.composition.repositories import RepositoryBundle
-from app.core.policies.diagnostic_policy import DiagnosticPolicyEngine
-from app.core.policies.diagnostic_tools import (
-    DiagnosticToolRegistry,
-    build_default_diagnostic_tool_registry,
-)
-from app.capabilities.investigation.evidence_collection import EvidenceCollectionService
-from app.capabilities.investigation.investigation_router import InvestigationRouter
+from app.core.policies.diagnostic_policy.diagnostic_policy_engine import DiagnosticPolicyEngine
+from app.core.policies.diagnostic_tools.diagnostic_tool_registry import DiagnosticToolRegistry
+from app.core.policies.diagnostic_tools.factories import build_default_diagnostic_tool_registry
+from app.capabilities.investigation.evidence_collection.evidence_collection_service import EvidenceCollectionService
+from app.capabilities.investigation.investigation_router.investigation_router import InvestigationRouter
 from app.capabilities.investigation.persistence_service import InvestigationPersistenceService
-from app.capabilities.investigation.runtime_snapshot_service import InvestigationRuntimeSnapshotService
-from app.capabilities.investigation.specialist_execution_service import SpecialistExecutionService
-from app.capabilities.investigation.correlation import CrossSpecialistCorrelator
-from app.capabilities.investigation.final_diagnosis_synthesizer import FinalDiagnosisSynthesizer
-from app.capabilities.investigation.specialist_registry import SpecialistRegistry
-from app.capabilities.knowledge.chunker import StructureAwareKnowledgeChunker
+from app.capabilities.investigation.runtime_snapshot_service.service import InvestigationRuntimeSnapshotService
+from app.capabilities.investigation.specialist_execution_service.specialist_execution_service import SpecialistExecutionService
+from app.capabilities.investigation.correlation.cross_specialist_correlator import CrossSpecialistCorrelator
+from app.capabilities.investigation.final_diagnosis_synthesizer.service import FinalDiagnosisSynthesizer
+from app.capabilities.investigation.specialist_registry.specialist_registry import SpecialistRegistry
+from app.capabilities.knowledge.chunker.chunker import StructureAwareKnowledgeChunker
 from app.capabilities.knowledge.chunking_service import KnowledgeChunkingService
 from app.capabilities.knowledge.ingestion_service import KnowledgeIngestionService
-from app.capabilities.knowledge.parsers import KnowledgeContentParser
-from app.capabilities.knowledge.source_loader import KnowledgeSourceLoader
-from app.capabilities.knowledge.source_registry import KnowledgeSourceRegistry
+from app.capabilities.knowledge.parsers.content_parser import KnowledgeContentParser
+from app.capabilities.knowledge.source_loader.loader import KnowledgeSourceLoader
+from app.capabilities.knowledge.source_registry.registry import KnowledgeSourceRegistry
 from app.runtime.claude.job_service import ClaudeAgentJobService
 from app.core.config import Settings
 from app.capabilities.monitoring.command_service import CommandService
 from app.capabilities.investigation.read_service import InvestigationReadService
 from app.capabilities.knowledge.source_service import KnowledgeSourceService
 from app.capabilities.monitoring.profile_service import MonitoringProfileService
-from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.service.service import RemediationService
 from app.capabilities.remediation.sandbox_runtime import NativeSandboxRuntime
 from app.capabilities.remediation.plan_proposal_service import RemediationPlanProposalService
 from app.capabilities.remediation.issue_fingerprint_service import IssueFingerprintService
@@ -42,12 +40,10 @@ from app.capabilities.remediation.autonomous_policy_service import AutonomousPol
 from app.capabilities.remediation.autonomous_history_service import AutonomousHistoryService
 from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
 from app.capabilities.remediation.autonomous_authorization_service import AutonomousAuthorizationService
-from app.capabilities.remediation.autonomous_execution_service import AutonomousExecutionService
-from app.capabilities.remediation.execution import (
-    SSHServiceStateEvidenceCollector,
-    SSHNamedWriteRunner,
-    SSHServiceVerifier,
-)
+from app.capabilities.remediation.autonomous_execution_service.service import AutonomousExecutionService
+from app.capabilities.remediation.execution.ssh_service_state_evidence_collector import SSHServiceStateEvidenceCollector
+from app.capabilities.remediation.execution.ssh_named_write_runner import SSHNamedWriteRunner
+from app.capabilities.remediation.execution.ssh_service_verifier import SSHServiceVerifier
 from app.capabilities.monitoring.report_query_service import ReportQueryService
 from app.capabilities.monitoring.server_service import ServerService
 from app.capabilities.investigation.specialist_service import SpecialistDefinitionService

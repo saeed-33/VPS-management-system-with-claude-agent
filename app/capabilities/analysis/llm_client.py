@@ -6,9 +6,7 @@
 """
 from abc import ABC, abstractmethod
 
-from app.core.contracts.analysis import (
-    ReportAnalysisResult,
-)
+from app.core.contracts.analysis.report_analysis_result import ReportAnalysisResult
 
 
 class LLMAnalysisClient(ABC):

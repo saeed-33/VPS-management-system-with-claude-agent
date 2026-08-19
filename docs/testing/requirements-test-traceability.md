@@ -4,12 +4,12 @@
 |---|---|
 | Monitoring/report/analysis | `test_*monitoring*`, `test_*report*`, `test_*analysis*`, `test_hybrid_retriever.py` |
 | Investigation/Specialists/Evidence | `test_investigation_*`, `test_specialist_*`, `test_evidence_collection.py` |
-| Supervised remediation | `test_phase5_*`, `test_phase6_*`, `test_phase5_admin_api.py` |
-| Autonomous policy | `test_autonomous_remediation_policy.py`, `test_phase7_negative_security.py`, `test_phase7_circuit_breaker.py` |
-| Authorization/replay/recovery | `test_autonomous_remediation_authorization.py`, `test_autonomous_execution_idempotency.py`, `test_phase7_concurrency_recovery.py` |
-| Claude/MCP boundary | `test_project_mcp_*`, `test_claude_*`, `test_c14_9_*`, `test_c14_11a3_ollama_only_contract.py` |
-| Admin/RBAC/UI | `test_admin_auth_rbac.py`, `test_admin_ui_completion.py`, `test_admin_system_*` |
-| Schema/routes/static | `test_route_inventory.py`, `test_project_tool_catalog.py`, `test_c14_11a4_3d_*`, bootstrap verify |
+| Supervised remediation | `tests/unit/capabilities/remediation/`, `tests/acceptance/readiness/test_supervised_remediation_*` |
+| Autonomous policy | `tests/unit/core/policies/test_autonomous_remediation_policy.py`, `tests/acceptance/readiness/test_autonomous_negative_security.py`, `tests/acceptance/readiness/test_autonomous_circuit_breaker.py` |
+| Authorization/replay/recovery | `tests/unit/capabilities/remediation/test_autonomous_authorization.py`, `tests/unit/capabilities/remediation/test_autonomous_execution_idempotency.py`, `tests/acceptance/readiness/test_autonomous_concurrency_recovery.py` |
+| Claude/MCP boundary | `tests/integration/mcp/`, `tests/unit/runtime/claude/`, `tests/architecture/runtime/` |
+| Admin/RBAC/UI | `tests/integration/admin/` |
+| Schema/routes/static | `tests/integration/admin/test_route_inventory.py`, `tests/integration/mcp/test_tool_catalog.py`, `tests/architecture/infrastructure/`, bootstrap verify |
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**

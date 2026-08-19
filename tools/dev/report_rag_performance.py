@@ -24,9 +24,7 @@ if project_root_value not in sys.path:
 
 from sqlalchemy import select
 
-from app.infrastructure.database.models.report_analysis import (
-    ReportAnalysisModel,
-)
+from app.infrastructure.database.models.report_analysis.analysis import ReportAnalysisModel
 from app.infrastructure.database.session import SessionLocal
 
 

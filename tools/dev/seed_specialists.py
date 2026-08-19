@@ -22,10 +22,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from app.infrastructure.database.repositories.specialist_definition_repository import (
     SpecialistDefinitionRepository,
 )
-from app.core.contracts.specialists import (
-    CreateSpecialistDefinitionDTO,
-    UpdateSpecialistDefinitionDTO,
-)
+from app.core.contracts.specialists.create_specialist_definition_dto import CreateSpecialistDefinitionDTO
+from app.core.contracts.specialists.update_specialist_definition_dto import UpdateSpecialistDefinitionDTO
 
 
 SPECIALISTS = [

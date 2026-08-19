@@ -11,7 +11,6 @@ from pydantic_settings import (
 )
 from sqlalchemy import URL
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENV_FILE = PROJECT_ROOT / ".env"
 
@@ -38,7 +37,6 @@ class Settings(BaseSettings):
         default=50_000,
         ge=1_000,
     )
-
 
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "qwen3:8b"

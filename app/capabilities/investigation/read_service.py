@@ -6,15 +6,11 @@
 """
 from __future__ import annotations
 
-from app.infrastructure.database.repositories.investigation_repository import (
-    InvestigationRepository,
-)
-from app.core.contracts.investigation_read_models import (
-    InvestigationCandidateReadModel,
-    InvestigationDetailReadModel,
-    InvestigationRuntimeReadModel,
-    InvestigationSummaryReadModel,
-)
+from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
+from app.core.contracts.investigation_read_models.investigation_candidate_read_model import InvestigationCandidateReadModel
+from app.core.contracts.investigation_read_models.investigation_detail_read_model import InvestigationDetailReadModel
+from app.core.contracts.investigation_read_models.investigation_runtime_read_model import InvestigationRuntimeReadModel
+from app.core.contracts.investigation_read_models.investigation_summary_read_model import InvestigationSummaryReadModel
 
 
 class InvestigationReadService:

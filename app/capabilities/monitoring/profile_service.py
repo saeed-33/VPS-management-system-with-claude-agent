@@ -10,29 +10,19 @@ from app.infrastructure.database.models.monitoring_profile import (
 from app.infrastructure.database.models.profile_command import (
     MonitoringProfileCommandModel,
 )
-from app.infrastructure.database.models.server import (
-    ServerModel,
-)
-from app.infrastructure.database.repositories.command_repository import (
-    CommandRepository,
-)
-from app.infrastructure.database.repositories.profile_repository import (
-    MonitoringProfileRepository,
-)
+from app.infrastructure.database.models.server.server import ServerModel
+from app.infrastructure.database.repositories.command_repository.repository import CommandRepository
+from app.infrastructure.database.repositories.profile_repository.repository import MonitoringProfileRepository
 from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
-from app.core.contracts.profiles import (
-    CreateMonitoringProfileDTO,
-    UpdateMonitoringProfileDTO,
-)
-from app.core.exceptions import (
-    CommandNotFoundError,
-    DuplicateMonitoringProfileError,
-    MonitoringProfileNotFoundError,
-    ProfileCommandNotFoundError,
-    ServerNotFoundError,
-)
+from app.core.contracts.profiles.create_monitoring_profile_dto import CreateMonitoringProfileDTO
+from app.core.contracts.profiles.update_monitoring_profile_dto import UpdateMonitoringProfileDTO
+from app.core.exceptions.command_not_found_error import CommandNotFoundError
+from app.core.exceptions.duplicate_monitoring_profile_error import DuplicateMonitoringProfileError
+from app.core.exceptions.monitoring_profile_not_found_error import MonitoringProfileNotFoundError
+from app.core.exceptions.profile_command_not_found_error import ProfileCommandNotFoundError
+from app.core.exceptions.server_not_found_error import ServerNotFoundError
 
 
 class MonitoringProfileService:

@@ -12,10 +12,8 @@ from app.infrastructure.database.models.agent_job import (
     AgentJobModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.core.contracts.agent_jobs import (
-    CreateAgentJobDTO,
-    UpdateAgentJobDTO,
-)
+from app.core.contracts.agent_jobs.create_agent_job_dto import CreateAgentJobDTO
+from app.core.contracts.agent_jobs.update_agent_job_dto import UpdateAgentJobDTO
 
 
 _MAX_ERROR_MESSAGE_LENGTH = 2000

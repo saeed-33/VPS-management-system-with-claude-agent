@@ -18,16 +18,12 @@ from fastapi import (
 from app.interfaces.admin.dependencies import (
     get_knowledge_source_service,
 )
-from app.interfaces.admin.schemas.knowledge_sources import (
-    KnowledgeSourceCreateRequest,
-    KnowledgeSourceEnabledRequest,
-    KnowledgeSourceResponse,
-    KnowledgeSourceUpdateRequest,
-)
-from app.core.contracts.knowledge_sources import (
-    CreateKnowledgeSourceDTO,
-    UpdateKnowledgeSourceDTO,
-)
+from app.interfaces.admin.schemas.knowledge_sources.knowledge_source_create_request import KnowledgeSourceCreateRequest
+from app.interfaces.admin.schemas.knowledge_sources.knowledge_source_enabled_request import KnowledgeSourceEnabledRequest
+from app.interfaces.admin.schemas.knowledge_sources.knowledge_source_response import KnowledgeSourceResponse
+from app.interfaces.admin.schemas.knowledge_sources.knowledge_source_update_request import KnowledgeSourceUpdateRequest
+from app.core.contracts.knowledge_sources.create_knowledge_source_dto import CreateKnowledgeSourceDTO
+from app.core.contracts.knowledge_sources.update_knowledge_source_dto import UpdateKnowledgeSourceDTO
 from app.capabilities.knowledge.source_service import (
     KnowledgeSourceService,
 )

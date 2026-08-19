@@ -25,9 +25,7 @@ if str(PROJECT_ROOT) not in sys.path:
     )
 
 
-from tools.acceptance.evaluation import (
-    ProductionReadinessGate,
-)
+from tools.acceptance.evaluation.readiness_gate import ProductionReadinessGate
 from tools.acceptance.evaluation.safety_runtime import (
     evaluate_safety_runtime,
 )

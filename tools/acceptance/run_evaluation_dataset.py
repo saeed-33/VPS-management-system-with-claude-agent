@@ -24,11 +24,8 @@ if str(PROJECT_ROOT) not in sys.path:
     )
 
 
-from tools.acceptance.evaluation import (
-    DeterministicEvaluationRunner,
-    default_evaluation_cases,
-    expected_behavior_executor,
-)
+from tools.acceptance.evaluation.runner import DeterministicEvaluationRunner, expected_behavior_executor
+from tools.acceptance.evaluation.cases import default_evaluation_cases
 
 def main() -> int:
     """

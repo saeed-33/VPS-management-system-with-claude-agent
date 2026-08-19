@@ -9,14 +9,11 @@ from __future__ import annotations
 import fnmatch
 from datetime import timedelta
 
-from app.core.contracts.autonomous_remediation import (
-    AutonomousDecisionOutcome,
-    AutonomousDecisionReasonCode as Code,
-    AutonomousEvaluationContext,
-    AutonomousPolicyStatus,
-    V1_AUTONOMOUS_ACTIONS,
-    V1_AUTONOMOUS_RISK_CEILING,
-)
+from app.core.contracts.autonomous_remediation.autonomous_decision_outcome import AutonomousDecisionOutcome
+from app.core.contracts.autonomous_remediation.autonomous_decision_reason_code import AutonomousDecisionReasonCode as Code
+from app.core.contracts.autonomous_remediation.autonomous_evaluation_context import AutonomousEvaluationContext
+from app.core.contracts.autonomous_remediation.autonomous_policy_status import AutonomousPolicyStatus
+from app.core.contracts.autonomous_remediation.helpers import V1_AUTONOMOUS_ACTIONS, V1_AUTONOMOUS_RISK_CEILING
 
 
 class AutonomousRemediationPolicyEvaluator:
@@ -135,7 +132,7 @@ class AutonomousRemediationPolicyEvaluator:
         """
         ينشئ قرار سياسة موحدًا يحفظ الرموز والرسائل والبصمات ووقت التقييم للتدقيق.
         """
-        from app.core.contracts.autonomous_remediation import AutonomousPolicyDecision
+        from app.core.contracts.autonomous_remediation.autonomous_policy_decision import AutonomousPolicyDecision
         from uuid import uuid4
         return AutonomousPolicyDecision(
             decision_id=str(uuid4()), outcome=outcome,

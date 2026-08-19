@@ -13,10 +13,8 @@ from app.infrastructure.database.models.knowledge_source import (
     KnowledgeSourceModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from app.core.contracts.knowledge_sources import (
-    CreateKnowledgeSourceDTO,
-    UpdateKnowledgeSourceDTO,
-)
+from app.core.contracts.knowledge_sources.create_knowledge_source_dto import CreateKnowledgeSourceDTO
+from app.core.contracts.knowledge_sources.update_knowledge_source_dto import UpdateKnowledgeSourceDTO
 from app.core.utils.datetime import utc_now
 
 

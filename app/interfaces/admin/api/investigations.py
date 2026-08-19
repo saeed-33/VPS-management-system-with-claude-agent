@@ -9,10 +9,8 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.interfaces.admin.dependencies import get_investigation_read_service
-from app.interfaces.admin.schemas.investigations import (
-    InvestigationDetailResponse,
-    InvestigationSummaryResponse,
-)
+from app.interfaces.admin.schemas.investigations.investigation_detail_response import InvestigationDetailResponse
+from app.interfaces.admin.schemas.investigations.investigation_summary_response import InvestigationSummaryResponse
 from app.capabilities.investigation.read_service import (
     InvestigationReadService,
 )

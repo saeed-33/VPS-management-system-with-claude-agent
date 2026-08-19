@@ -37,9 +37,7 @@ from tools.acceptance.evaluation.safety_runtime import (
     evaluate_safety_runtime,
 )
 from app.composition import container
-from app.runtime.claude.observability import (
-    ClaudeAgentObservabilityService,
-)
+from app.runtime.claude.observability.observability import ClaudeAgentObservabilityService
 
 
 async def run(args) -> int:

@@ -28,10 +28,8 @@ if str(PROJECT_ROOT) not in sys.path:
         str(PROJECT_ROOT),
     )
 
-from app.core.contracts.investigation import (
-    InvestigationBudget,
-    SpecialistTask,
-)
+from app.core.contracts.investigation.investigation_budget import InvestigationBudget
+from app.core.contracts.investigation.specialist_task import SpecialistTask
 from app.composition import container
 
 

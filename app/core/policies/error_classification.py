@@ -6,11 +6,9 @@
 """
 from __future__ import annotations
 
-from app.core.contracts.analysis import (
-    AnalysisIssue,
-    ErrorClassification,
-    ReportAnalysisResult,
-)
+from app.core.contracts.analysis.analysis_issue import AnalysisIssue
+from app.core.contracts.analysis.error_classification import ErrorClassification
+from app.core.contracts.analysis.report_analysis_result import ReportAnalysisResult
 
 
 _SENSITIVE_MARKERS = (

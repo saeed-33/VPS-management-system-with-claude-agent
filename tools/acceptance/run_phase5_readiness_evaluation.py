@@ -48,11 +48,11 @@ def main() -> int:
         result = subprocess.run(
             [
                 sys.executable, "-m", "pytest", "-q",
-                "tests/test_phase5_supervised_remediation.py",
-                "tests/test_phase5_admin_api.py",
-                "tests/test_phase5_readiness.py",
-                "tests/test_project_mcp_remediation_tools.py",
-                "tests/real_runtime/test_phase5_real_supervised_remediation_acceptance.py",
+                "tests/unit/capabilities/remediation/test_supervised_remediation.py",
+                "tests/acceptance/readiness/test_supervised_remediation_admin_interface.py",
+                "tests/acceptance/readiness/test_supervised_remediation_readiness.py",
+                "tests/integration/mcp/test_remediation_tools.py",
+                "tests/acceptance/external_runtime/test_real_supervised_remediation.py",
             ],
             cwd=ROOT,
             check=False,

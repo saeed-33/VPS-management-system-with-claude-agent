@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.interfaces.mcp.schemas import ProjectToolDefinition
+    from app.interfaces.mcp.schemas.definition import ProjectToolDefinition
 
 
 @dataclass(slots=True, frozen=True)

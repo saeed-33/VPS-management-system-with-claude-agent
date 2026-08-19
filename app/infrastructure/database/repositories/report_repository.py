@@ -7,16 +7,14 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-from app.core.contracts.reports import MonitoringReportData
+from app.core.contracts.reports.monitoring_report_data import MonitoringReportData
 from app.infrastructure.database.models.command_execution import (
     CommandExecutionModel,
 )
 from app.infrastructure.database.models.monitoring_report import (
     MonitoringReportModel,
 )
-from app.infrastructure.database.models.server import (
-    ServerModel,
-)
+from app.infrastructure.database.models.server.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
 
 

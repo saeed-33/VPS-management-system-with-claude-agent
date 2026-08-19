@@ -9,20 +9,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from app.composition.analysis import (
-    AnalysisInvestigationComposition,
-    RetrievalComposition,
-)
+from app.composition.analysis.analysis_investigation_composition import AnalysisInvestigationComposition
+from app.composition.analysis.retrieval_composition import RetrievalComposition
 from app.composition.repositories import RepositoryBundle
 from app.composition.services import CoreServiceBundle
 from app.runtime.claude.native_monitoring import ClaudeNativeMonitoringRunner
 from app.runtime.claude.ollama_runtime import OllamaClaudeCommandBuilder
-from app.runtime.claude.runtime import ClaudeRuntimeAdapter
-from app.runtime.claude.session_runner import SubprocessClaudeSessionRunner
-from app.runtime.claude.supervisor import ClaudeSupervisor
+from app.runtime.claude.runtime.adapter import ClaudeRuntimeAdapter
+from app.runtime.claude.session_runner.session_runner import SubprocessClaudeSessionRunner
+from app.runtime.claude.supervisor.supervisor import ClaudeSupervisor
 from app.core.config import Settings
-from app.capabilities.monitoring.scheduler import MonitoringScheduler
-from app.capabilities.monitoring.service import MonitoringService
+from app.capabilities.monitoring.scheduler.monitoring_scheduler import MonitoringScheduler
+from app.capabilities.monitoring.service.monitoring_service import MonitoringService
 from app.capabilities.investigation.backlog_worker import (
     InvestigationBacklogWorker,
 )

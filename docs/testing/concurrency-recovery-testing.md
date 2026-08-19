@@ -7,9 +7,10 @@ breaker recovery. The acceptance property is that an immutable idempotency
 binding cannot physically execute more than once and a stale worker cannot
 overwrite the current reservation state.
 
-Relevant tests include `test_phase7_concurrency_recovery.py`,
-`test_autonomous_execution_idempotency.py`, `test_phase7_circuit_breaker.py`,
-and `test_claude_agent_job_persistence.py`.
+Relevant tests include `tests/acceptance/readiness/test_autonomous_concurrency_recovery.py`,
+`tests/unit/capabilities/remediation/test_autonomous_execution_idempotency.py`,
+`tests/acceptance/readiness/test_autonomous_circuit_breaker.py`,
+and `tests/unit/runtime/claude/test_agent_job_persistence.py`.
 
 <!-- PROJECT-DOC-METADATA:BEGIN -->
 Document classification: **CURRENT_CANONICAL**

@@ -8,13 +8,11 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from app.core.contracts.investigation import InvestigationBudget
-from app.capabilities.investigation.investigation_router import InvestigationRoutingDecision
-from app.infrastructure.database.repositories.investigation_repository import InvestigationRepository
-from app.core.contracts.investigations import (
-    PersistInvestigationCandidateDTO,
-    PersistInvestigationDTO,
-)
+from app.core.contracts.investigation.investigation_budget import InvestigationBudget
+from app.capabilities.investigation.investigation_router.investigation_routing_decision import InvestigationRoutingDecision
+from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
+from app.core.contracts.investigations.persist_investigation_candidate_dto import PersistInvestigationCandidateDTO
+from app.core.contracts.investigations.persist_investigation_dto import PersistInvestigationDTO
 
 
 class InvestigationPersistenceService:

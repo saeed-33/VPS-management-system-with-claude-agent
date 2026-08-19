@@ -23,13 +23,9 @@ if str(PROJECT_ROOT) not in sys.path:
 from app.capabilities.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.capabilities.knowledge.retrieval import (
-    KnowledgeHybridRetriever,
-)
+from app.capabilities.knowledge.retrieval.retriever import KnowledgeHybridRetriever
 from app.core.config import settings
-from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
-    KnowledgeRetrievalRepository,
-)
+from app.infrastructure.database.repositories.knowledge_retrieval_repository.repository import KnowledgeRetrievalRepository
 
 
 async def run(args) -> int:

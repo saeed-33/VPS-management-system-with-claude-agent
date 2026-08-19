@@ -23,9 +23,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from app.capabilities.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.capabilities.knowledge.indexer import (
-    KnowledgeIndexer,
-)
+from app.capabilities.knowledge.indexer.indexer import KnowledgeIndexer
 from app.composition import container
 from app.core.config import settings
 

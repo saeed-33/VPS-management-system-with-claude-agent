@@ -10,9 +10,7 @@ import httpx
 from app.capabilities.analysis.llm_client import (
     LLMAnalysisClient,
 )
-from app.core.contracts.analysis import (
-    ReportAnalysisResult,
-)
+from app.core.contracts.analysis.report_analysis_result import ReportAnalysisResult
 
 logger = logging.getLogger(__name__)
 

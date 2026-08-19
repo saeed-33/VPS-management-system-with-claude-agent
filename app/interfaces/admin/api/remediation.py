@@ -13,15 +13,13 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
-from app.capabilities.remediation.service import RemediationService
+from app.capabilities.remediation.service.service import RemediationService
 from app.interfaces.admin.dependencies import get_remediation_service
-from app.interfaces.admin.schemas.remediation import (
-    ApprovalDecisionRequest,
-    ApprovalRequest,
-    ExecuteRemediationRequest,
-    RollbackRemediationRequest,
-    SandboxValidationRequest,
-)
+from app.interfaces.admin.schemas.remediation.approval_decision_request import ApprovalDecisionRequest
+from app.interfaces.admin.schemas.remediation.approval_request import ApprovalRequest
+from app.interfaces.admin.schemas.remediation.execute_remediation_request import ExecuteRemediationRequest
+from app.interfaces.admin.schemas.remediation.rollback_remediation_request import RollbackRemediationRequest
+from app.interfaces.admin.schemas.remediation.sandbox_validation_request import SandboxValidationRequest
 from app.interfaces.mcp.serializers import serialize_value
 
 

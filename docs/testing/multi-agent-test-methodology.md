@@ -94,7 +94,7 @@ Example:
 
 ```powershell
 uv run python tools/acceptance/smoke_ollama_claude_runtime.py --server-id <server_id>
-uv run python -m pytest tests/real_runtime -q
+uv run python -m pytest tests/acceptance/external_runtime -q
 ```
 
 Required invariants:
@@ -117,7 +117,7 @@ There are two distinct acceptance questions.
 ### A. Natural recommendation acceptance
 
 ```powershell
-uv run python -m pytest tests/test_c14_10_claude_observability.py -q
+uv run python -m pytest tests/unit/runtime/claude/test_observability.py -q
 ```
 
 This tests whether the real model naturally recommends another Specialist.
@@ -127,7 +127,7 @@ Failure to recommend does not necessarily prove orchestration failure; it can be
 ### B. Controlled recommendation acceptance
 
 ```powershell
-uv run python -m pytest tests/test_specialist_investigation_loop.py -q
+uv run python -m pytest tests/unit/capabilities/investigation/test_specialist_investigation_loop.py -q
 ```
 
 Only the recommendation value is controlled. Primary/secondary Specialist executions and Phase 4.17 Registry/budget validation remain real.

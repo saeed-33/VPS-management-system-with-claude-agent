@@ -20,32 +20,22 @@ from tools.acceptance.evaluation.contracts import (
     EvaluationMetric,
     EvaluationObservation,
 )
-from app.core.contracts.investigation import (
-    InvestigationBudget,
-)
-from app.core.policies.diagnostic_policy import (
-    DiagnosticPolicyDecision,
-    DiagnosticPolicyEngine,
-    DiagnosticPolicyReason,
-    DiagnosticPolicyRequest,
-)
-from app.core.policies.diagnostic_tools import (
-    DiagnosticParameterKind,
-    DiagnosticToolCall,
-    DiagnosticToolDefinition,
-    DiagnosticToolParameter,
-    DiagnosticToolRegistry,
-)
-from app.capabilities.investigation.investigation_router import (
-    InvestigationRouter,
-)
+from app.core.contracts.investigation.investigation_budget import InvestigationBudget
+from app.core.policies.diagnostic_policy.diagnostic_policy_decision import DiagnosticPolicyDecision
+from app.core.policies.diagnostic_policy.diagnostic_policy_engine import DiagnosticPolicyEngine
+from app.core.policies.diagnostic_policy.diagnostic_policy_reason import DiagnosticPolicyReason
+from app.core.policies.diagnostic_policy.diagnostic_policy_request import DiagnosticPolicyRequest
+from app.core.policies.diagnostic_tools.diagnostic_parameter_kind import DiagnosticParameterKind
+from app.core.policies.diagnostic_tools.diagnostic_tool_call import DiagnosticToolCall
+from app.core.policies.diagnostic_tools.diagnostic_tool_definition import DiagnosticToolDefinition
+from app.core.policies.diagnostic_tools.diagnostic_tool_parameter import DiagnosticToolParameter
+from app.core.policies.diagnostic_tools.diagnostic_tool_registry import DiagnosticToolRegistry
+from app.capabilities.investigation.investigation_router.investigation_router import InvestigationRouter
 from app.capabilities.investigation.specialist_reasoning_client import (
     OllamaSpecialistReasoningClient,
 )
-from app.capabilities.investigation.specialist_registry import (
-    SpecialistRegistrySnapshot,
-    SpecialistRuntimeDefinition,
-)
+from app.capabilities.investigation.specialist_registry.specialist_registry_snapshot import SpecialistRegistrySnapshot
+from app.capabilities.investigation.specialist_registry.specialist_runtime_definition import SpecialistRuntimeDefinition
 
 
 class _StaticRegistry:

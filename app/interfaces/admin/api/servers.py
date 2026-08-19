@@ -16,23 +16,15 @@ from app.interfaces.admin.dependencies import (
     get_server_service,
     get_ssh_test_service,
 )
-from app.interfaces.admin.schemas.servers import (
-    ServerCreateRequest,
-    ServerResponse,
-    ServerUpdateRequest,
-    SSHTestResponse,
-)
-from app.interfaces.admin.services.ssh_test_service import (
-    SSHTestService,
-)
-from app.core.contracts.servers import (
-    CreateServerDTO,
-    UpdateServerDTO,
-)
-from app.core.exceptions import (
-    DuplicateServerError,
-    ServerNotFoundError,
-)
+from app.interfaces.admin.schemas.servers.server_create_request import ServerCreateRequest
+from app.interfaces.admin.schemas.servers.server_response import ServerResponse
+from app.interfaces.admin.schemas.servers.server_update_request import ServerUpdateRequest
+from app.interfaces.admin.schemas.servers.s_s_h_test_response import SSHTestResponse
+from app.interfaces.admin.services.ssh_test_service.service import SSHTestService
+from app.core.contracts.servers.create_server_dto import CreateServerDTO
+from app.core.contracts.servers.update_server_dto import UpdateServerDTO
+from app.core.exceptions.duplicate_server_error import DuplicateServerError
+from app.core.exceptions.server_not_found_error import ServerNotFoundError
 from app.capabilities.monitoring.server_service import (
     ServerService,
 )

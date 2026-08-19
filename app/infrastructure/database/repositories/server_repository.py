@@ -6,14 +6,10 @@ from dataclasses import asdict
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app.infrastructure.database.models.server import (
-    ServerModel,
-)
+from app.infrastructure.database.models.server.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
-from app.core.contracts.servers import (
-    CreateServerDTO,
-    UpdateServerDTO,
-)
+from app.core.contracts.servers.create_server_dto import CreateServerDTO
+from app.core.contracts.servers.update_server_dto import UpdateServerDTO
 from app.core.utils.datetime import utc_now
 
 

@@ -16,10 +16,8 @@ from app.interfaces.admin.dependencies import (
     get_autonomous_execution_service,
     get_remediation_service,
 )
-from app.interfaces.admin.schemas.autonomous_remediation import (
-    AutonomousPolicyRequest,
-    AutonomousPolicyUpdateRequest,
-)
+from app.interfaces.admin.schemas.autonomous_remediation.autonomous_policy_request import AutonomousPolicyRequest
+from app.interfaces.admin.schemas.autonomous_remediation.autonomous_policy_update_request import AutonomousPolicyUpdateRequest
 from app.interfaces.mcp.serializers import serialize_value
 
 

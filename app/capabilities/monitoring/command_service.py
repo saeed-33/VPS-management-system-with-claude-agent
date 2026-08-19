@@ -7,21 +7,15 @@ from app.infrastructure.database.models.monitor_command import (
 from app.infrastructure.database.models.profile_command import (
     MonitoringProfileCommandModel,
 )
-from app.infrastructure.database.repositories.command_repository import (
-    CommandRepository,
-)
+from app.infrastructure.database.repositories.command_repository.repository import CommandRepository
 from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
-from app.core.contracts.commands import (
-    CreateCommandDTO,
-    UpdateCommandDTO,
-)
-from app.core.exceptions import (
-    CommandNotFoundError,
-    DuplicateCommandError,
-    ServerNotFoundError,
-)
+from app.core.contracts.commands.create_command_dto import CreateCommandDTO
+from app.core.contracts.commands.update_command_dto import UpdateCommandDTO
+from app.core.exceptions.command_not_found_error import CommandNotFoundError
+from app.core.exceptions.duplicate_command_error import DuplicateCommandError
+from app.core.exceptions.server_not_found_error import ServerNotFoundError
 
 
 class CommandService:

@@ -6,7 +6,8 @@ import argparse
 import getpass
 import sys
 
-from app.interfaces.admin.auth import AdminAuthService, AdminRole
+from app.interfaces.admin.auth.service import AdminAuthService
+from app.interfaces.admin.auth.role import AdminRole
 
 
 def main(argv: list[str] | None = None) -> int:

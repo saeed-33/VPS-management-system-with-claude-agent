@@ -11,18 +11,12 @@ from dataclasses import dataclass
 from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
-from app.infrastructure.database.repositories.command_repository import (
-    CommandRepository,
-)
-from app.infrastructure.database.repositories.profile_repository import (
-    MonitoringProfileRepository,
-)
+from app.infrastructure.database.repositories.command_repository.repository import CommandRepository
+from app.infrastructure.database.repositories.profile_repository.repository import MonitoringProfileRepository
 from app.infrastructure.database.repositories.report_repository import (
     ReportRepository,
 )
-from app.infrastructure.database.repositories.analysis_repository import (
-    AnalysisRepository,
-)
+from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
 from app.infrastructure.database.repositories.retrieval_repository import (
     RetrievalRepository,
 )
@@ -32,9 +26,7 @@ from app.infrastructure.database.repositories.analysis_source_repository import 
 from app.infrastructure.database.repositories.specialist_definition_repository import (
     SpecialistDefinitionRepository,
 )
-from app.infrastructure.database.repositories.investigation_repository import (
-    InvestigationRepository,
-)
+from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
 from app.infrastructure.database.repositories.knowledge_source_repository import (
     KnowledgeSourceRepository,
 )
@@ -44,12 +36,8 @@ from app.infrastructure.database.repositories.knowledge_document_repository impo
 from app.infrastructure.database.repositories.agent_job_repository import (
     AgentJobRepository,
 )
-from app.infrastructure.database.repositories.remediation_repository import (
-    RemediationRepository,
-)
-from app.infrastructure.database.repositories.autonomous_remediation_repository import (
-    AutonomousRemediationRepository,
-)
+from app.infrastructure.database.repositories.remediation_repository.repository import RemediationRepository
+from app.infrastructure.database.repositories.autonomous_remediation_repository.repository import AutonomousRemediationRepository
 
 
 @dataclass(slots=True, frozen=True)

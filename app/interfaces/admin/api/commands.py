@@ -15,24 +15,18 @@ from fastapi import (
 from app.interfaces.admin.dependencies import (
     get_command_service,
 )
-from app.interfaces.admin.schemas.commands import (
-    AssignCommandRequest,
-    CommandCreateRequest,
-    CommandResponse,
-    CommandUpdateRequest,
-    ServerCommandAssignmentResponse,
-    UpdateCommandAssignmentRequest,
-)
-from app.core.contracts.commands import (
-    CreateCommandDTO,
-    UpdateCommandDTO,
-)
-from app.core.exceptions import (
-    CommandAlreadyAssignedError,
-    CommandNotFoundError,
-    DuplicateCommandError,
-    ServerNotFoundError,
-)
+from app.interfaces.admin.schemas.commands.assign_command_request import AssignCommandRequest
+from app.interfaces.admin.schemas.commands.command_create_request import CommandCreateRequest
+from app.interfaces.admin.schemas.commands.command_response import CommandResponse
+from app.interfaces.admin.schemas.commands.command_update_request import CommandUpdateRequest
+from app.interfaces.admin.schemas.commands.server_command_assignment_response import ServerCommandAssignmentResponse
+from app.interfaces.admin.schemas.commands.update_command_assignment_request import UpdateCommandAssignmentRequest
+from app.core.contracts.commands.create_command_dto import CreateCommandDTO
+from app.core.contracts.commands.update_command_dto import UpdateCommandDTO
+from app.core.exceptions.command_already_assigned_error import CommandAlreadyAssignedError
+from app.core.exceptions.command_not_found_error import CommandNotFoundError
+from app.core.exceptions.duplicate_command_error import DuplicateCommandError
+from app.core.exceptions.server_not_found_error import ServerNotFoundError
 from app.capabilities.monitoring.command_service import (
     CommandService,
 )
@@ -174,4 +168,3 @@ def delete_command(
     return Response(
         status_code=status.HTTP_204_NO_CONTENT
     )
-

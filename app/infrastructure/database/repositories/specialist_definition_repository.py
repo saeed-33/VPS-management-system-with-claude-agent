@@ -11,7 +11,8 @@ from sqlalchemy.orm import sessionmaker
 
 from app.infrastructure.database.models.specialist_definition import SpecialistDefinitionModel
 from app.infrastructure.database.session import SessionLocal
-from app.core.contracts.specialists import CreateSpecialistDefinitionDTO, UpdateSpecialistDefinitionDTO
+from app.core.contracts.specialists.create_specialist_definition_dto import CreateSpecialistDefinitionDTO
+from app.core.contracts.specialists.update_specialist_definition_dto import UpdateSpecialistDefinitionDTO
 from app.core.utils.datetime import utc_now
 
 _LIST_FIELDS = {"domains", "trigger_hints", "knowledge_topics", "allowed_tool_ids"}

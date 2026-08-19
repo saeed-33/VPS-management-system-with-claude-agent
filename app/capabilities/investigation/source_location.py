@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 
-from app.core.contracts.source_location import SourceLocation
+from app.core.contracts.source_location.source_location import SourceLocation
 
 
 _SOURCE_EXTENSIONS = (

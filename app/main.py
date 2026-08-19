@@ -11,22 +11,22 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.interfaces.admin.api import (
-    agent_observability_router,
-    investigations_router,
-    commands_router,
-    profiles_router,
-    reports_router,
-    servers_router,
-    specialists_router,
-    knowledge_sources_router,
-    diagnostic_tools_router,
-    system_router,
-    remediation_router,
-    autonomous_remediation_router,
-)
-from app.interfaces.admin.auth import AdminAuthMiddleware, AdminAuthService
-from app.interfaces.admin.web import auth_router, router as web_router
+from app.interfaces.admin.api.agent_observability import router
+from app.interfaces.admin.api.investigations import router
+from app.interfaces.admin.api.commands import router
+from app.interfaces.admin.api.profiles.router import router
+from app.interfaces.admin.api.reports import router
+from app.interfaces.admin.api.servers import router
+from app.interfaces.admin.api.specialists import router
+from app.interfaces.admin.api.knowledge_sources import router
+from app.interfaces.admin.api.diagnostic_tools import router
+from app.interfaces.admin.api.system import router
+from app.interfaces.admin.api.remediation import router
+from app.interfaces.admin.api.autonomous_remediation import router
+from app.interfaces.admin.auth.middleware import AdminAuthMiddleware
+from app.interfaces.admin.auth.service import AdminAuthService
+from app.interfaces.admin.web.auth_routes import router
+from app.interfaces.admin.web.routes import router as web_router
 from app.composition import container
 from app.core.config import settings
 from app.infrastructure.database.engine import (

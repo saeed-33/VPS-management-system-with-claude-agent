@@ -10,8 +10,9 @@ from __future__ import annotations
 import logging
 from uuid import uuid4
 
-from app.core.contracts.remediation import RemediationAction
-from app.core.policies.remediation_tools import NamedWriteToolRegistry, build_default_write_tool_registry
+from app.core.contracts.remediation.remediation_action import RemediationAction
+from app.core.policies.remediation_tools.named_write_tool_registry import NamedWriteToolRegistry
+from app.core.policies.remediation_tools.factories import build_default_write_tool_registry
 
 
 logger = logging.getLogger(__name__)

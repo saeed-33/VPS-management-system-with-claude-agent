@@ -45,7 +45,7 @@ Claude/Ollama supervisory attempts.
 Focused regression:
 
 ```bash
-uv run --no-sync python -m pytest tests/test_seed_specialists.py tests/test_investigation_persistence_service.py tests/test_investigation_router.py tests/test_specialist_registry.py tests/test_specialist_execution_persistence.py tests/test_specialist_investigation_loop.py tests/test_cross_specialist_correlation.py tests/test_cross_specialist_conflicts.py tests/test_final_diagnosis_synthesizer.py tests/test_project_mcp_investigation_tools.py tests/test_project_mcp_specialist_tools.py tests/test_project_mcp_tool_boundary.py tests/test_claude_bounded_agents.py tests/test_claude_least_privilege.py -q
+uv run --no-sync python -m pytest tests/integration/database/test_specialist_seeding.py tests/unit/capabilities/investigation/test_persistence_service.py tests/unit/capabilities/investigation/test_router.py tests/unit/capabilities/investigation/test_specialist_registry.py tests/unit/capabilities/investigation/test_specialist_execution_persistence.py tests/unit/capabilities/investigation/test_specialist_investigation_loop.py tests/unit/capabilities/investigation/test_cross_specialist_correlation.py tests/unit/capabilities/investigation/test_cross_specialist_conflicts.py tests/unit/capabilities/investigation/test_final_diagnosis_synthesizer.py tests/integration/mcp/test_investigation_tools.py tests/integration/mcp/test_specialist_tools.py tests/integration/mcp/test_tool_boundary.py tests/unit/runtime/claude/test_bounded_agents.py tests/unit/runtime/claude/test_least_privilege.py -q
 ```
 
 Full non-real regression:
@@ -76,7 +76,7 @@ SSH_KNOWN_HOSTS_PATH=/mnt/c/Users/SAEED/.ssh/known_hosts \
 LLM_ENABLED=true LLM_PROVIDER=ollama CLAUDE_RUNTIME_ENABLED=true \
 AI_VPS_REAL_RUNTIME_SERVER_ID=4 \
 uv run --no-sync python -m pytest \
-  tests/real_runtime/test_c14_11_claude_ollama_mcp_acceptance.py -q -r s
+  tests/acceptance/external_runtime/test_real_claude_ollama_mcp_cycle.py -q -r s
 ```
 
 The canonical MCP `start_investigation` path was run against the safe lab

@@ -9,11 +9,9 @@ from __future__ import annotations
 import re
 from uuid import uuid4
 
-from app.core.contracts.autonomous_remediation import (
-    AutonomousPolicyStatus,
-    AutonomousRemediationPolicy,
-    V1_AUTONOMOUS_ACTIONS,
-)
+from app.core.contracts.autonomous_remediation.autonomous_policy_status import AutonomousPolicyStatus
+from app.core.contracts.autonomous_remediation.autonomous_remediation_policy import AutonomousRemediationPolicy
+from app.core.contracts.autonomous_remediation.helpers import V1_AUTONOMOUS_ACTIONS
 
 
 class AutonomousPolicyService:

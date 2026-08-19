@@ -8,9 +8,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.core.policies.diagnostic_tools import (
-    build_default_diagnostic_tool_registry,
-)
+from app.core.policies.diagnostic_tools.factories import build_default_diagnostic_tool_registry
 
 
 router = APIRouter(tags=["diagnostic-tools"])

@@ -45,7 +45,7 @@ The acceptance procedure was the opt-in real-runtime test:
 
 ```bash
 export AI_VPS_RUN_REAL_RUNTIME_TESTS=1
-uv run --no-sync python -m pytest tests/real_runtime/test_phase7_real_autonomous_acceptance.py -q -r s
+uv run --no-sync python -m pytest tests/acceptance/external_runtime/test_real_autonomous_remediation.py -q -r s
 ```
 
 The operator first ran the preflight and the acceptance attempt, inspected the

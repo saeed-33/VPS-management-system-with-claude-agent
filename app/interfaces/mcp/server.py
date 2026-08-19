@@ -12,11 +12,9 @@ import sys
 from dataclasses import asdict
 from typing import Any, TextIO
 
-from app.interfaces.mcp.schemas import (
-    ProjectToolCall,
-    ProjectToolDefinition,
-    ProjectToolResult,
-)
+from app.interfaces.mcp.schemas.call import ProjectToolCall
+from app.interfaces.mcp.schemas.definition import ProjectToolDefinition
+from app.interfaces.mcp.schemas.result import ProjectToolResult
 
 
 class ProjectMcpProtocolServer:

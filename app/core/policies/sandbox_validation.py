@@ -3,8 +3,8 @@
 """
 from __future__ import annotations
 
-from app.core.contracts.sandbox_validation import SandboxTarget
-from app.core.policies.remediation_tools import SERVICE_NAME_RE
+from app.core.contracts.sandbox_validation.sandbox_target import SandboxTarget
+from app.core.policies.remediation_tools.constants import SERVICE_NAME_RE
 
 
 SAFE_MARKERS = ("safe-remediation-test", "non-production")

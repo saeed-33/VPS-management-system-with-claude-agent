@@ -20,10 +20,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.composition import container
-from app.core.contracts.knowledge_sources import (
-    CreateKnowledgeSourceDTO,
-    UpdateKnowledgeSourceDTO,
-)
+from app.core.contracts.knowledge_sources.create_knowledge_source_dto import CreateKnowledgeSourceDTO
+from app.core.contracts.knowledge_sources.update_knowledge_source_dto import UpdateKnowledgeSourceDTO
 
 
 @dataclass(frozen=True, slots=True)

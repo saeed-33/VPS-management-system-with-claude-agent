@@ -24,24 +24,16 @@ if str(PROJECT_ROOT) not in sys.path:
 from app.capabilities.analysis.retrieval.embedding_factory import (
     create_embedding_client,
 )
-from app.core.contracts.investigation import SpecialistTask
-from app.capabilities.knowledge.retrieval import (
-    KnowledgeHybridRetriever,
-)
-from app.capabilities.investigation.specialist_context import (
-    SpecialistContextBuilder,
-)
-from app.capabilities.investigation.specialist_reasoning_agent import (
-    SpecialistReasoningAgent,
-)
+from app.core.contracts.investigation.specialist_task import SpecialistTask
+from app.capabilities.knowledge.retrieval.retriever import KnowledgeHybridRetriever
+from app.capabilities.investigation.specialist_context.specialist_context_builder import SpecialistContextBuilder
+from app.capabilities.investigation.specialist_reasoning_agent.specialist_reasoning_agent import SpecialistReasoningAgent
 from app.capabilities.investigation.specialist_reasoning_client import (
     create_specialist_reasoning_client,
 )
 from app.composition import container
 from app.core.config import settings
-from app.infrastructure.database.repositories.knowledge_retrieval_repository import (
-    KnowledgeRetrievalRepository,
-)
+from app.infrastructure.database.repositories.knowledge_retrieval_repository.repository import KnowledgeRetrievalRepository
 
 
 async def run(args) -> int:

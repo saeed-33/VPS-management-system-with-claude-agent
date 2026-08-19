@@ -8,12 +8,8 @@ from __future__ import annotations
 
 from hashlib import sha256
 
-from app.capabilities.knowledge.parsers import (
-    KnowledgeContentParser,
-)
-from app.capabilities.knowledge.source_loader import (
-    KnowledgeSourceLoader,
-)
+from app.capabilities.knowledge.parsers.content_parser import KnowledgeContentParser
+from app.capabilities.knowledge.source_loader.loader import KnowledgeSourceLoader
 from app.infrastructure.database.repositories.knowledge_document_repository import (
     KnowledgeDocumentRepository,
 )

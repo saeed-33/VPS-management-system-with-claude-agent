@@ -1,7 +1,7 @@
 # Admin UI and RBAC Testing
 
-`tests/test_admin_auth_rbac.py` verifies authentication, session, RBAC, CSRF,
-and API/Web response differences. `tests/test_admin_ui_completion.py` verifies
+`tests/integration/admin/test_authentication_authorization.py` verifies authentication, session, RBAC, CSRF,
+and API/Web response differences. `tests/integration/admin/test_admin_ui_completion.py` verifies
 all current Admin pages, navigation, compatibility redirect, safe target
 labels, reservation token omission, remediation safety controls, and role
 markers. System and Phase 5 Admin tests cover runtime safety payloads and

@@ -5,18 +5,14 @@
 جاهزة للاستخدام من واجهة التطبيق.
 """
 from app.composition.runtime import build_runtime_composition
-from app.composition.analysis import (
-    build_analysis_investigation_composition,
-    build_retrieval_composition,
-)
+from app.composition.analysis.analysis import build_analysis_investigation_composition
+from app.composition.analysis.retrieval import build_retrieval_composition
 from app.composition.container import ApplicationContainer
 from app.composition.services import build_core_services
 from app.composition.repositories import build_repositories
 import logging
 
-from app.interfaces.admin.services.ssh_test_service import (
-    SSHTestService,
-)
+from app.interfaces.admin.services.ssh_test_service.service import SSHTestService
 from app.core.config import PROJECT_ROOT, settings
 
 logger = logging.getLogger(__name__)
