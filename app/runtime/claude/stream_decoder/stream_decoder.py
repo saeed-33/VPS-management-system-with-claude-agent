@@ -11,12 +11,12 @@ import json
 from app.runtime.claude.exceptions.process_output_error import ClaudeProcessOutputError
 from app.runtime.claude.models.raw_result import ClaudeRawResult
 
-from .operations_1 import _ClaudeCliJsonDecoderMixin1
-from .operations_2 import _ClaudeCliJsonDecoderMixin2
-from .operations_3 import _ClaudeCliJsonDecoderMixin3
+from .content_extractor import _ContentExtractorMixin
+from .envelope_decoder import _EnvelopeDecoderMixin
+from .result_metadata import _ResultMetadataMixin
 
 
-class ClaudeCliJsonDecoder(_ClaudeCliJsonDecoderMixin1, _ClaudeCliJsonDecoderMixin2, _ClaudeCliJsonDecoderMixin3):
+class ClaudeCliJsonDecoder(_EnvelopeDecoderMixin, _ContentExtractorMixin, _ResultMetadataMixin):
     """
     محلل يتحقق من بنية مخرجات Claude ويستخرج منها دليل تنفيذ دورة VPS التشغيلية.
     """

@@ -31,7 +31,7 @@ from app.infrastructure.database.models.remediation.verification import Remediat
 from app.infrastructure.database.session import SessionLocal
 
 
-class _AutonomousRemediationRepositoryMixin1:
+class _PolicyOperationsMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def create_policy(self, policy: AutonomousRemediationPolicy):

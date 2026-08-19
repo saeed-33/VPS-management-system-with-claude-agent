@@ -27,7 +27,7 @@ _MAX_ERROR_TEXT = 2000
 from app.runtime.claude.stream_decoder.stream_decoder import ClaudeCliJsonDecoder
 
 
-class _SubprocessClaudeSessionRunnerMixin2:
+class _ProcessTerminationMixin:
     """ينظم مجموعة من عمليات المكون."""
 
     async def _spawn(

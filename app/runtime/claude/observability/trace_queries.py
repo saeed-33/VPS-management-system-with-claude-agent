@@ -15,7 +15,7 @@ from app.infrastructure.database.repositories.agent_job_repository import (
 )
 
 
-class _ClaudeAgentObservabilityServiceMixin1:
+class _TraceQueriesMixin:
     """ينظم مجموعة من عمليات المكون."""
 
     def get_trace(
@@ -228,4 +228,3 @@ class _ClaudeAgentObservabilityServiceMixin1:
                 in tool_counts.most_common(15)
             ],
         }
-

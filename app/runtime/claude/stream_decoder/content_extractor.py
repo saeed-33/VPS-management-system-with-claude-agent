@@ -12,7 +12,7 @@ from app.runtime.claude.exceptions.process_output_error import ClaudeProcessOutp
 from app.runtime.claude.models.raw_result import ClaudeRawResult
 
 
-class _ClaudeCliJsonDecoderMixin2:
+class _ContentExtractorMixin:
     """ينظم مجموعة من عمليات المكون."""
 
     def _operational_vps_content(

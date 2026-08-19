@@ -16,7 +16,7 @@ from app.core.policies.error_classification import classify_issue, classify_resu
 from app.core.utils.datetime import utc_now
 
 
-class _AnalysisRepositoryMixin1:
+class _AnalysisQueriesMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def get_by_id(

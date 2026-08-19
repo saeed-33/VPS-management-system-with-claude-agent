@@ -19,11 +19,11 @@ from app.core.contracts.commands.update_command_dto import UpdateCommandDTO
 from app.core.exceptions.command_already_assigned_error import CommandAlreadyAssignedError
 from app.core.utils.datetime import utc_now
 
-from .operations_1 import _CommandRepositoryMixin1
-from .operations_2 import _CommandRepositoryMixin2
+from .command_queries import _CommandQueriesMixin
+from .server_assignments import _ServerAssignmentsMixin
 
 
-class CommandRepository(_CommandRepositoryMixin1, _CommandRepositoryMixin2):
+class CommandRepository(_CommandQueriesMixin, _ServerAssignmentsMixin):
     """
     مسؤول عن تعريف فحوص المراقبة وربطها بالسيرفرات وقراءتها بترتيب التنفيذ.
     """

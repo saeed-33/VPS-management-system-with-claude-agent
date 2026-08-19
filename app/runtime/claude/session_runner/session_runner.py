@@ -26,11 +26,11 @@ _MAX_ERROR_TEXT = 2000
 
 from app.runtime.claude.stream_decoder.stream_decoder import ClaudeCliJsonDecoder
 
-from .operations_1 import _SubprocessClaudeSessionRunnerMixin1
-from .operations_2 import _SubprocessClaudeSessionRunnerMixin2
+from .process_termination import _ProcessTerminationMixin
+from .session_lifecycle import _SessionLifecycleMixin
 
 
-class SubprocessClaudeSessionRunner(_SubprocessClaudeSessionRunnerMixin1, _SubprocessClaudeSessionRunnerMixin2):
+class SubprocessClaudeSessionRunner(_SessionLifecycleMixin, _ProcessTerminationMixin):
     """
     مشغل يتعامل مباشرة مع عملية Claude وتدفق مخرجاتها وإيقافها وتنظيفها.
     """

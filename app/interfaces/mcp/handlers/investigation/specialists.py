@@ -19,7 +19,7 @@ from app.interfaces.mcp.serializers import (
 )
 
 
-class _InvestigationToolsOperations2:
+class _InvestigationSpecialistOperations:
     """ينظم مجموعة من عمليات التحقيق في MCP."""
 
     async def _get_evidence(

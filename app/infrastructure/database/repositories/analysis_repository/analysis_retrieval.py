@@ -16,7 +16,7 @@ from app.core.policies.error_classification import classify_issue, classify_resu
 from app.core.utils.datetime import utc_now
 
 
-class _AnalysisRepositoryMixin2:
+class _AnalysisRetrievalMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def list_pending_or_running(

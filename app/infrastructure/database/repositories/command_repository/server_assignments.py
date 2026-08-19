@@ -20,7 +20,7 @@ from app.core.exceptions.command_already_assigned_error import CommandAlreadyAss
 from app.core.utils.datetime import utc_now
 
 
-class _CommandRepositoryMixin2:
+class _ServerAssignmentsMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def list_enabled_for_server(

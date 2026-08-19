@@ -12,7 +12,7 @@ from app.runtime.claude.exceptions.process_output_error import ClaudeProcessOutp
 from app.runtime.claude.models.raw_result import ClaudeRawResult
 
 
-class _ClaudeCliJsonDecoderMixin3:
+class _ResultMetadataMixin:
     """ينظم مجموعة من عمليات المكون."""
 
     @staticmethod

@@ -17,7 +17,7 @@ from app.core.contracts.investigation.investigation_status import InvestigationS
 from app.core.contracts.investigations.persist_investigation_dto import PersistInvestigationDTO
 
 
-class _InvestigationRepositoryMixin2:
+class _SpecialistExecutionMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def close_without_evidence(self, *, investigation_id: str) -> InvestigationModel:

@@ -31,7 +31,7 @@ from app.infrastructure.database.models.remediation.verification import Remediat
 from app.infrastructure.database.session import SessionLocal
 
 
-class _AutonomousRemediationRepositoryMixin2:
+class _DecisionHistoryMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def record_autonomous_failure(

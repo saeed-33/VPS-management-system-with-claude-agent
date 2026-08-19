@@ -30,12 +30,12 @@ from app.infrastructure.database.models.remediation.sandbox_validation import Sa
 from app.infrastructure.database.models.server.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
 
-from .operations_1 import _RemediationRepositoryMixin1
-from .operations_2 import _RemediationRepositoryMixin2
-from .operations_3 import _RemediationRepositoryMixin3
+from .execution_operations import _ExecutionOperationsMixin
+from .plan_operations import _PlanOperationsMixin
+from .sandbox_operations import _SandboxOperationsMixin
 
 
-class RemediationRepository(_RemediationRepositoryMixin1, _RemediationRepositoryMixin2, _RemediationRepositoryMixin3):
+class RemediationRepository(_PlanOperationsMixin, _SandboxOperationsMixin, _ExecutionOperationsMixin):
     """
     مسؤول عن كل سجل ينتج من خطة المعالجة حتى التحقق أو التراجع والتدقيق.
     """

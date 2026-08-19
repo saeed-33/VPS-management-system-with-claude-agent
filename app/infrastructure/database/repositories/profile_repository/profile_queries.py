@@ -23,7 +23,7 @@ from app.core.contracts.profiles.update_monitoring_profile_dto import UpdateMoni
 from app.core.utils.datetime import utc_now
 
 
-class _MonitoringProfileRepositoryMixin1:
+class _ProfileQueriesMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def get_by_id(

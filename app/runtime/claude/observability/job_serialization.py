@@ -15,7 +15,7 @@ from app.infrastructure.database.repositories.agent_job_repository import (
 )
 
 
-class _ClaudeAgentObservabilityServiceMixin2:
+class _JobSerializationMixin:
     """ينظم مجموعة من عمليات المكون."""
 
     def _serialize_job(
@@ -256,4 +256,3 @@ class _ClaudeAgentObservabilityServiceMixin2:
             )
 
         return result
-

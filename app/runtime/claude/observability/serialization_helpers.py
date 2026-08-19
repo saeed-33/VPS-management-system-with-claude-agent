@@ -15,7 +15,7 @@ from app.infrastructure.database.repositories.agent_job_repository import (
 )
 
 
-class _ClaudeAgentObservabilityServiceMixin3:
+class _ObservabilitySerializationHelpersMixin:
     """ينظم مجموعة من عمليات المكون."""
 
     @staticmethod
@@ -62,4 +62,3 @@ class _ClaudeAgentObservabilityServiceMixin3:
             return None
 
         return value.isoformat()
-

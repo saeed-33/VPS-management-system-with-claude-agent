@@ -31,7 +31,7 @@ from app.infrastructure.database.models.remediation.verification import Remediat
 from app.infrastructure.database.session import SessionLocal
 
 
-class _AutonomousRemediationRepositoryMixin4:
+class _RuntimeStateMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def finalize_reservation(self, reservation_id: str, *, owner_token: str, status: str, execution_id: str | None = None):

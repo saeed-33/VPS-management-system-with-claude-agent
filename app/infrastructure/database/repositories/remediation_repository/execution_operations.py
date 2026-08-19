@@ -31,7 +31,7 @@ from app.infrastructure.database.models.server.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
 
 
-class _RemediationRepositoryMixin3:
+class _ExecutionOperationsMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def sandbox_evidence_belongs(self, *, validation) -> bool:

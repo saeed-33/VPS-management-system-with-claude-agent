@@ -12,7 +12,7 @@ from app.runtime.claude.exceptions.process_output_error import ClaudeProcessOutp
 from app.runtime.claude.models.raw_result import ClaudeRawResult
 
 
-class _ClaudeCliJsonDecoderMixin1:
+class _EnvelopeDecoderMixin:
     """ينظم مجموعة من عمليات المكون."""
 
     def decode(

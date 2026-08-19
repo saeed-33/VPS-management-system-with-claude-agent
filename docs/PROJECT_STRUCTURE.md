@@ -7510,32 +7510,32 @@ Evaluation / Production Readiness Gate
 - `app/infrastructure/database/models/server/status.py` — نموذج هوية السيرفر وإعدادات الاتصال وحالة آخر مراقبة.
 - `app/infrastructure/database/models/specialist_definition.py` — نموذج تعريف المتخصص ومجالاته وأدواته وحدود تحقيقه.
 - `app/infrastructure/database/repositories/agent_job_repository.py` — سجل مهام Claude والعامل التشغيلي وحالاتها ونتائجها.
-- `app/infrastructure/database/repositories/analysis_repository/operations_1.py` — تحليل تقارير المراقبة ومحاولاته ونتائج إعادة الاستخدام والأداء.
-- `app/infrastructure/database/repositories/analysis_repository/operations_2.py` — تحليل تقارير المراقبة ومحاولاته ونتائج إعادة الاستخدام والأداء.
+- `app/infrastructure/database/repositories/analysis_repository/analysis_queries.py` — تحليل تقارير المراقبة ومحاولاته ونتائج إعادة الاستخدام والأداء.
+- `app/infrastructure/database/repositories/analysis_repository/analysis_retrieval.py` — تحليل تقارير المراقبة ومحاولاته ونتائج إعادة الاستخدام والأداء.
 - `app/infrastructure/database/repositories/analysis_repository/repository.py` — تحليل تقارير المراقبة ومحاولاته ونتائج إعادة الاستخدام والأداء.
 - `app/infrastructure/database/repositories/analysis_source_repository.py` — المصادر التي استند إليها تحليل تقرير معين.
-- `app/infrastructure/database/repositories/autonomous_remediation_repository/operations_1.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
-- `app/infrastructure/database/repositories/autonomous_remediation_repository/operations_2.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
-- `app/infrastructure/database/repositories/autonomous_remediation_repository/operations_3.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
-- `app/infrastructure/database/repositories/autonomous_remediation_repository/operations_4.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
+- `app/infrastructure/database/repositories/autonomous_remediation_repository/decision_history.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
+- `app/infrastructure/database/repositories/autonomous_remediation_repository/policy_operations.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
 - `app/infrastructure/database/repositories/autonomous_remediation_repository/repository.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
-- `app/infrastructure/database/repositories/command_repository/operations_1.py` — تعريف فحوص المراقبة وربطها بالسيرفرات وترتيب تنفيذها.
-- `app/infrastructure/database/repositories/command_repository/operations_2.py` — تعريف فحوص المراقبة وربطها بالسيرفرات وترتيب تنفيذها.
+- `app/infrastructure/database/repositories/autonomous_remediation_repository/reservation_operations.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
+- `app/infrastructure/database/repositories/autonomous_remediation_repository/runtime_state.py` — سياسات المعالجة الذاتية وقراراتها وتفويضاتها وحجوزها وتاريخ نجاحها وفشلها.
+- `app/infrastructure/database/repositories/command_repository/command_queries.py` — تعريف فحوص المراقبة وربطها بالسيرفرات وترتيب تنفيذها.
 - `app/infrastructure/database/repositories/command_repository/repository.py` — تعريف فحوص المراقبة وربطها بالسيرفرات وترتيب تنفيذها.
-- `app/infrastructure/database/repositories/investigation_repository/operations_1.py` — حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم.
-- `app/infrastructure/database/repositories/investigation_repository/operations_2.py` — حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم.
+- `app/infrastructure/database/repositories/command_repository/server_assignments.py` — تعريف فحوص المراقبة وربطها بالسيرفرات وترتيب تنفيذها.
+- `app/infrastructure/database/repositories/investigation_repository/lifecycle_operations.py` — حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم.
 - `app/infrastructure/database/repositories/investigation_repository/repository.py` — حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم.
+- `app/infrastructure/database/repositories/investigation_repository/specialist_execution.py` — حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم.
 - `app/infrastructure/database/repositories/knowledge_document_repository.py` — وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها.
 - `app/infrastructure/database/repositories/knowledge_retrieval_repository/repository.py` — البحث الدلالي والنصي في مقاطع المعرفة المؤهلة لسياق التحقيق.
 - `app/infrastructure/database/repositories/knowledge_retrieval_repository/search_row.py` — البحث الدلالي والنصي في مقاطع المعرفة المؤهلة لسياق التحقيق.
 - `app/infrastructure/database/repositories/knowledge_source_repository.py` — مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل.
-- `app/infrastructure/database/repositories/profile_repository/operations_1.py` — ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
-- `app/infrastructure/database/repositories/profile_repository/operations_2.py` — ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
+- `app/infrastructure/database/repositories/profile_repository/profile_assignments.py` — ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
+- `app/infrastructure/database/repositories/profile_repository/profile_queries.py` — ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
 - `app/infrastructure/database/repositories/profile_repository/repository.py` — ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
-- `app/infrastructure/database/repositories/remediation_repository/operations_1.py` — خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
-- `app/infrastructure/database/repositories/remediation_repository/operations_2.py` — خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
-- `app/infrastructure/database/repositories/remediation_repository/operations_3.py` — خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
+- `app/infrastructure/database/repositories/remediation_repository/execution_operations.py` — خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
+- `app/infrastructure/database/repositories/remediation_repository/plan_operations.py` — خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
 - `app/infrastructure/database/repositories/remediation_repository/repository.py` — خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
+- `app/infrastructure/database/repositories/remediation_repository/sandbox_operations.py` — خطط المعالجة ونتائج sandbox والموافقات والتنفيذ والأدلة والتحقق والتراجع.
 - `app/infrastructure/database/repositories/report_repository.py` — تقارير المراقبة ونتائج الفحوص وملخصات عرضها.
 - `app/infrastructure/database/repositories/retrieval_repository.py` — فهرس التقارير المستخدم للبحث النصي والتشابه وإعادة استخدام سياق سابق.
 - `app/infrastructure/database/repositories/server_repository.py` — سجلات السيرفرات وحالة المراقبة وإعدادات الاتصال والجدولة.
@@ -7556,10 +7556,10 @@ Evaluation / Production Readiness Gate
 - `app/interfaces/mcp/handlers/definitions/read.py` — مجموعات تعريفات أدوات MCP.
 - `app/interfaces/mcp/handlers/definitions/remediation.py` — مجموعات تعريفات أدوات MCP.
 - `app/interfaces/mcp/handlers/investigation/investigation.py` — معالجات أدوات التحقيق في MCP.
-- `app/interfaces/mcp/handlers/investigation/operations_1.py` — معالجات أدوات التحقيق في MCP.
-- `app/interfaces/mcp/handlers/investigation/operations_2.py` — معالجات أدوات التحقيق في MCP.
-- `app/interfaces/mcp/handlers/investigation/operations_3.py` — معالجات أدوات التحقيق في MCP.
-- `app/interfaces/mcp/handlers/investigation/operations_4.py` — معالجات أدوات التحقيق في MCP.
+- `app/interfaces/mcp/handlers/investigation/investigation_lookup.py` — معالجات أدوات التحقيق في MCP.
+- `app/interfaces/mcp/handlers/investigation/lifecycle.py` — معالجات أدوات التحقيق في MCP.
+- `app/interfaces/mcp/handlers/investigation/specialist_execution.py` — معالجات أدوات التحقيق في MCP.
+- `app/interfaces/mcp/handlers/investigation/specialists.py` — معالجات أدوات التحقيق في MCP.
 - `app/interfaces/mcp/handlers/monitoring.py` — معالجات أدوات المراقبة في MCP.
 - `app/interfaces/mcp/handlers/remediation.py` — معالجات أدوات المعالجة في MCP.
 - `app/interfaces/mcp/registry.py` — Project tool execution boundary used by Claude through MCP; validates calls, invokes deterministic services, and returns structured results.
@@ -7589,20 +7589,20 @@ Evaluation / Production Readiness Gate
 - `app/runtime/claude/models/runtime_result.py` — نماذج البيانات التي تصف طلب جلسة Claude ونتيجتها وحالتها.
 - `app/runtime/claude/models/structured_output.py` — نماذج البيانات التي تصف طلب جلسة Claude ونتيجتها وحالتها.
 - `app/runtime/claude/native_monitoring.py` — تشغيل دورة المراقبة الفعلية لسيرفر عبر جلسة Claude.
+- `app/runtime/claude/observability/job_serialization.py` — قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
 - `app/runtime/claude/observability/observability.py` — قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
-- `app/runtime/claude/observability/operations_1.py` — قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
-- `app/runtime/claude/observability/operations_2.py` — قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
-- `app/runtime/claude/observability/operations_3.py` — قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
+- `app/runtime/claude/observability/serialization_helpers.py` — قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
+- `app/runtime/claude/observability/trace_queries.py` — قراءة آثار مهام Claude وعرض نشاطها التشغيلي.
 - `app/runtime/claude/ollama_runtime.py` — بناء أمر Claude الذي يستخدم Ollama كمزود للنموذج.
 - `app/runtime/claude/result_parser.py` — تحويل النص النهائي من Claude إلى نتيجة تشغيل منظمة.
 - `app/runtime/claude/runtime/adapter.py` — محول تشغيل جلسة Claude إلى نتيجة موحدة.
 - `app/runtime/claude/runtime/runner.py` — عقد تشغيل جلسة Claude.
-- `app/runtime/claude/session_runner/operations_1.py` — إدارة عملية Claude على مستوى نظام التشغيل.
-- `app/runtime/claude/session_runner/operations_2.py` — إدارة عملية Claude على مستوى نظام التشغيل.
+- `app/runtime/claude/session_runner/process_termination.py` — إدارة عملية Claude على مستوى نظام التشغيل.
+- `app/runtime/claude/session_runner/session_lifecycle.py` — إدارة عملية Claude على مستوى نظام التشغيل.
 - `app/runtime/claude/session_runner/session_runner.py` — إدارة عملية Claude على مستوى نظام التشغيل.
-- `app/runtime/claude/stream_decoder/operations_1.py` — قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
-- `app/runtime/claude/stream_decoder/operations_2.py` — قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
-- `app/runtime/claude/stream_decoder/operations_3.py` — قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
+- `app/runtime/claude/stream_decoder/content_extractor.py` — قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
+- `app/runtime/claude/stream_decoder/envelope_decoder.py` — قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
+- `app/runtime/claude/stream_decoder/result_metadata.py` — قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
 - `app/runtime/claude/stream_decoder/stream_decoder.py` — قراءة مخرجات Claude بصيغة JSON المفردة أو stream-json.
 - `app/runtime/claude/supervisor/runner.py` — عقد عامل المراقبة.
 - `app/runtime/claude/supervisor/supervisor.py` — منسق تشغيل مراقبة Claude.

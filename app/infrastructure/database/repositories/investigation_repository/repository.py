@@ -16,11 +16,11 @@ from app.infrastructure.database.session import SessionLocal
 from app.core.contracts.investigation.investigation_status import InvestigationStatus
 from app.core.contracts.investigations.persist_investigation_dto import PersistInvestigationDTO
 
-from .operations_1 import _InvestigationRepositoryMixin1
-from .operations_2 import _InvestigationRepositoryMixin2
+from .lifecycle_operations import _InvestigationLifecycleMixin
+from .specialist_execution import _SpecialistExecutionMixin
 
 
-class InvestigationRepository(_InvestigationRepositoryMixin1, _InvestigationRepositoryMixin2):
+class InvestigationRepository(_InvestigationLifecycleMixin, _SpecialistExecutionMixin):
     """
     مسؤول عن حفظ حالة التحقيق ومنع تكرار تشغيل المتخصص وتثبيت نتائجه.
     """

@@ -18,13 +18,13 @@ from app.interfaces.mcp.serializers import (
     serialize_value,
 )
 
-from .operations_1 import _InvestigationToolsOperations1
-from .operations_2 import _InvestigationToolsOperations2
-from .operations_3 import _InvestigationToolsOperations3
-from .operations_4 import _InvestigationToolsOperations4
+from .investigation_lookup import _InvestigationLookupHelpers
+from .lifecycle import _InvestigationLifecycleOperations
+from .specialist_execution import _SpecialistExecutionOperations
+from .specialists import _InvestigationSpecialistOperations
 
 
-class InvestigationToolsMixin(_InvestigationToolsOperations1, _InvestigationToolsOperations2, _InvestigationToolsOperations3, _InvestigationToolsOperations4):
+class InvestigationToolsMixin(_InvestigationLifecycleOperations, _InvestigationSpecialistOperations, _SpecialistExecutionOperations, _InvestigationLookupHelpers):
     """
     يوفر معالجات دورة التحقيق والاختصاصيين والأدلة.
     """

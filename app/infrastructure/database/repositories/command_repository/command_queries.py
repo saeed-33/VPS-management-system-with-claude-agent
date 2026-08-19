@@ -20,7 +20,7 @@ from app.core.exceptions.command_already_assigned_error import CommandAlreadyAss
 from app.core.utils.datetime import utc_now
 
 
-class _CommandRepositoryMixin1:
+class _CommandQueriesMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def get_by_id(

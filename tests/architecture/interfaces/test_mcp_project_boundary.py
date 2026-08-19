@@ -104,7 +104,7 @@ def test_c14_8_bounded_modules_own_tool_implementations():
         "app.interfaces.mcp.handlers.analysis"
         ),
         "_run_specialist": (
-        "app.interfaces.mcp.handlers.investigation.operations_3"
+        "app.interfaces.mcp.handlers.investigation.specialist_execution"
         ),
         "_create_remediation_plan": (
         "app.interfaces.mcp.handlers.remediation"

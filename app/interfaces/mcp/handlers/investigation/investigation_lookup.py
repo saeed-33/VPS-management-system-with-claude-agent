@@ -19,7 +19,7 @@ from app.interfaces.mcp.serializers import (
 )
 
 
-class _InvestigationToolsOperations4:
+class _InvestigationLookupHelpers:
     """ينظم مجموعة من عمليات التحقيق في MCP."""
 
     def _specialist_progress(self, detail):

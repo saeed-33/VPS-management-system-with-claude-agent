@@ -31,7 +31,7 @@ from app.infrastructure.database.models.server.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
 
 
-class _RemediationRepositoryMixin2:
+class _SandboxOperationsMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     @staticmethod

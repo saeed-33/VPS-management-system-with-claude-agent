@@ -31,7 +31,7 @@ from app.infrastructure.database.models.remediation.verification import Remediat
 from app.infrastructure.database.session import SessionLocal
 
 
-class _AutonomousRemediationRepositoryMixin3:
+class _ReservationOperationsMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def reserve(self, *, idempotency_key: str, owner_token: str, policy_id: str, plan_id: str, plan_fingerprint: str, action_type: str, target: str, server_id: int, now: datetime, lease_seconds: int = 900):

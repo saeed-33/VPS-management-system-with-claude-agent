@@ -31,7 +31,7 @@ from app.infrastructure.database.models.server.server import ServerModel
 from app.infrastructure.database.session import SessionLocal
 
 
-class _RemediationRepositoryMixin1:
+class _PlanOperationsMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def create_plan(self, data: CreateRemediationPlanDTO) -> RemediationPlanModel:

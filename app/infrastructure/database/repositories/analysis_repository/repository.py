@@ -15,11 +15,11 @@ from app.core.contracts.analysis.report_analysis_result import ReportAnalysisRes
 from app.core.policies.error_classification import classify_issue, classify_result
 from app.core.utils.datetime import utc_now
 
-from .operations_1 import _AnalysisRepositoryMixin1
-from .operations_2 import _AnalysisRepositoryMixin2
+from .analysis_queries import _AnalysisQueriesMixin
+from .analysis_retrieval import _AnalysisRetrievalMixin
 
 
-class AnalysisRepository(_AnalysisRepositoryMixin1, _AnalysisRepositoryMixin2):
+class AnalysisRepository(_AnalysisQueriesMixin, _AnalysisRetrievalMixin):
     """
     مسؤول عن حالة تحليل التقرير ومحاولاته ونتائج التحليل القابلة لإعادة الاستخدام.
     """

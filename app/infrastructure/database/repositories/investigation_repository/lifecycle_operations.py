@@ -17,7 +17,7 @@ from app.core.contracts.investigation.investigation_status import InvestigationS
 from app.core.contracts.investigations.persist_investigation_dto import PersistInvestigationDTO
 
 
-class _InvestigationRepositoryMixin1:
+class _InvestigationLifecycleMixin:
     """ينظم مجموعة من عمليات المستودع."""
 
     def create(self, data: PersistInvestigationDTO) -> InvestigationModel:

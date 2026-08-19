@@ -22,11 +22,11 @@ from app.core.contracts.profiles.monitoring_profile_command_config import Monito
 from app.core.contracts.profiles.update_monitoring_profile_dto import UpdateMonitoringProfileDTO
 from app.core.utils.datetime import utc_now
 
-from .operations_1 import _MonitoringProfileRepositoryMixin1
-from .operations_2 import _MonitoringProfileRepositoryMixin2
+from .profile_assignments import _ProfileAssignmentsMixin
+from .profile_queries import _ProfileQueriesMixin
 
 
-class MonitoringProfileRepository(_MonitoringProfileRepositoryMixin1, _MonitoringProfileRepositoryMixin2):
+class MonitoringProfileRepository(_ProfileQueriesMixin, _ProfileAssignmentsMixin):
     """
     مسؤول عن ملفات المراقبة وعلاقاتها بالفحوص والسيرفرات.
     """

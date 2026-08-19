@@ -30,13 +30,13 @@ from app.infrastructure.database.models.remediation.rollback import RemediationR
 from app.infrastructure.database.models.remediation.verification import RemediationVerificationModel
 from app.infrastructure.database.session import SessionLocal
 
-from .operations_1 import _AutonomousRemediationRepositoryMixin1
-from .operations_2 import _AutonomousRemediationRepositoryMixin2
-from .operations_3 import _AutonomousRemediationRepositoryMixin3
-from .operations_4 import _AutonomousRemediationRepositoryMixin4
+from .decision_history import _DecisionHistoryMixin
+from .policy_operations import _PolicyOperationsMixin
+from .reservation_operations import _ReservationOperationsMixin
+from .runtime_state import _RuntimeStateMixin
 
 
-class AutonomousRemediationRepository(_AutonomousRemediationRepositoryMixin1, _AutonomousRemediationRepositoryMixin2, _AutonomousRemediationRepositoryMixin3, _AutonomousRemediationRepositoryMixin4):
+class AutonomousRemediationRepository(_PolicyOperationsMixin, _DecisionHistoryMixin, _ReservationOperationsMixin, _RuntimeStateMixin):
     """
     مسؤول عن السجل الدائم لسياسات المعالجة الذاتية وقراراتها وحجوزها وتاريخها.
     """
