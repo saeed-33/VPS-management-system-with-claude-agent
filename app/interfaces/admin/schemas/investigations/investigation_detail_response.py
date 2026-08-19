@@ -11,6 +11,9 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .investigation_candidate_response import InvestigationCandidateResponse
+from .investigation_runtime_response import InvestigationRuntimeResponse
+
 
 class InvestigationDetailResponse(BaseModel):
     """
@@ -41,4 +44,3 @@ class InvestigationDetailResponse(BaseModel):
     metadata: dict[str, Any]
     created_at: datetime
     updated_at: datetime
-

@@ -16,7 +16,7 @@ from pathlib import Path
 from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 EXPECTED_TOOL_IDS = {'get_server_context', 'start_investigation', 'get_top_similar_reports', 'get_analysis', 'propose_remediation', 'get_sandbox_result', 'run_monitoring', 'search_similar_incidents', 'create_remediation_plan', 'get_report', 'analyze_report', 'find_exact_report_match', 'get_latest_report', 'search_knowledge', 'get_investigation_status', 'apply_approved_remediation', 'request_user_approval', 'get_monitoring_profile', 'get_evidence', 'get_investigation', 'get_available_specialists', 'test_remediation_in_sandbox', 'run_specialist', 'get_specialist_definition', 'attempt_autonomous_remediation'}
 
 
@@ -104,7 +104,7 @@ def test_c14_8_bounded_modules_own_tool_implementations():
         "app.interfaces.mcp.handlers.analysis"
         ),
         "_run_specialist": (
-        "app.interfaces.mcp.handlers.investigation"
+        "app.interfaces.mcp.handlers.investigation.operations_3"
         ),
         "_create_remediation_plan": (
         "app.interfaces.mcp.handlers.remediation"
@@ -113,7 +113,7 @@ def test_c14_8_bounded_modules_own_tool_implementations():
         "app.interfaces.mcp.handlers.common"
         ),
         "_build_definitions": (
-        "app.interfaces.mcp.handlers.definitions"
+        "app.interfaces.mcp.handlers.definitions.definitions"
         ),
     }
 

@@ -12,7 +12,7 @@ import ast
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[4]
 
 
 def test_hybrid_does_not_use_rrf_as_vector_similarity():
@@ -24,7 +24,7 @@ def test_hybrid_does_not_use_rrf_as_vector_similarity():
     """
     source = (
         ROOT
-        / "app/capabilities/analysis/retrieval/hybrid_retriever.py"
+        / "app/capabilities/analysis/retrieval/hybrid_retriever/retriever.py"
     ).read_text(encoding="utf-8")
 
     assert "vector_score=candidate.vector_score" in source
@@ -40,7 +40,7 @@ def test_orchestrator_persists_vector_similarity_not_rrf():
     """
     source = (
         ROOT
-        / "app/capabilities/analysis/analysis_orchestrator.py"
+        / "app/capabilities/analysis/analysis_orchestrator/generated_analysis_persister.py"
     ).read_text(encoding="utf-8")
 
     assert "retrieved_contexts[0].vector_score" in source

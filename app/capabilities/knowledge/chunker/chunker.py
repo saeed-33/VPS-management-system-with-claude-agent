@@ -1,5 +1,6 @@
 """تقطيع محتوى المعرفة مع مراعاة البنية والعناوين."""
 from __future__ import annotations
+import re
 from app.capabilities.knowledge.ingestion_contracts.chunk_draft import KnowledgeChunkDraft
 from .block import _Block
 from .config import KnowledgeChunkerConfig
@@ -16,7 +17,6 @@ class StructureAwareKnowledgeChunker:
         يحفظ إعدادات التقطيع المقدمة أو ينشئ الإعدادات الافتراضية.
         """
         self._config = config or KnowledgeChunkerConfig()
-
     def chunk_document(
         self,
         *,

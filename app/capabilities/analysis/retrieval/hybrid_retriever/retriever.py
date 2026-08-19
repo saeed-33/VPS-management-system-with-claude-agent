@@ -14,6 +14,8 @@ from app.capabilities.analysis.retrieval.performance_profiler import record_timi
 
 from .fusion_candidate import _FusionCandidate
 
+logger = logging.getLogger(__name__)
+
 class HybridRetriever:
     """
     يدمج مصادر الاسترجاع ويتحقق من التوافق ثم يعيد أفضل التحليلات المكتملة كسياق.

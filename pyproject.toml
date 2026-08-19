@@ -23,6 +23,3 @@ dependencies = [
     "sqlmodel>=0.0.39",
     "uvicorn[standard]>=0.52.1",
 ]
-
-[tool.pytest.ini_options]
-addopts = "--import-mode=importlib"

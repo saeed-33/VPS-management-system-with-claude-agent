@@ -38,7 +38,7 @@ def _restore_operational_runtime_env() -> None:
     """
     from dotenv import dotenv_values
 
-    env_path = Path(__file__).resolve().parents[2] / ".env"
+    env_path = Path(__file__).resolve().parents[3] / ".env"
     values = dotenv_values(env_path)
 
     required = (

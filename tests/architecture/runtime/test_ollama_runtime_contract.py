@@ -11,7 +11,7 @@
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_c14_11a3_removes_legacy_runtime_surfaces():
@@ -62,9 +62,8 @@ def test_c14_11a3_no_openai_implementation_surfaces_remain():
     """
     paths = (
         ROOT / "app/capabilities/analysis/client_factory.py",
-        ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer.py",
+        ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer/client_factory.py",
         ROOT / "app/capabilities/investigation/specialist_reasoning_client.py",
-        ROOT / "app/capabilities/investigation/__init__.py",
     )
 
     joined = "\n".join(
@@ -87,7 +86,7 @@ def test_c14_11a3_ollama_implementations_remain():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     final_diag = (
-        ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer.py"
+        ROOT / "app/capabilities/investigation/final_diagnosis_synthesizer/client_factory.py"
     ).read_text(encoding="utf-8")
     specialist = (
         ROOT / "app/capabilities/investigation/specialist_reasoning_client.py"

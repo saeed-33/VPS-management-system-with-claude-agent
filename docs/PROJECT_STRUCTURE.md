@@ -7573,6 +7573,7 @@ Evaluation / Production Readiness Gate
 
 ### Claude Runtime
 
+- `app/runtime/claude/__init__.py` — واجهة تشغيل Claude الأصلية المستخدمة من طبقة التركيب والاختبارات.
 - `app/runtime/claude/command/builder.py` — عقد بناء أمر عملية Claude.
 - `app/runtime/claude/command/process_command.py` — تعريف أمر عملية Claude.
 - `app/runtime/claude/exceptions/process_execution_error.py` — استثناءات تشغيل Claude.

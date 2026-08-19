@@ -1,6 +1,10 @@
 """منفذ أو عقد من مكونات تنفيذ المعالجة."""
 from __future__ import annotations
 
+from .service_state_observation import ServiceStateObservation
+from .ssh_named_command_runner import _SSHNamedCommandRunner
+
+
 class SSHServiceStateEvidenceCollector(_SSHNamedCommandRunner):
     """
     يجمع حالة خدمة وأدلتها عبر SSH من السيرفر المستهدف.

@@ -210,10 +210,10 @@ class SpecialistReasoningResultBuilder:
             return None
 
         expectation_text_parts = [
-            context.objective,
-            context.initial_analysis_summary or "",
+            str(getattr(context, "objective", "") or ""),
+            str(getattr(context, "initial_analysis_summary", "") or ""),
         ]
-        for issue in context.initial_analysis_issues:
+        for issue in getattr(context, "initial_analysis_issues", ()):
             if isinstance(issue, dict):
                 expectation_text_parts.extend(
                     str(issue.get(key) or "")

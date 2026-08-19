@@ -55,7 +55,7 @@ class SpecialistContextBuilder:
             or SpecialistContextBudget()
         )
         self._selector = SpecialistContextSelector(self._budget)
-        self._renderer.renderer = SpecialistContextRenderer()
+        self._renderer = SpecialistContextRenderer()
 
     async def build(
         self,

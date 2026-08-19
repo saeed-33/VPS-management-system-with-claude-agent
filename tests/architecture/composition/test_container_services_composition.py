@@ -12,7 +12,7 @@ from pathlib import Path
 import ast
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_application_container_is_outside_builder():
@@ -108,7 +108,7 @@ def test_analysis_and_runtime_are_outside_builder():
         ROOT / "app/composition/builder.py"
     ).read_text(encoding="utf-8")
     analysis = (
-        ROOT / "app/composition/analysis.py"
+        ROOT / "app/composition/analysis/analysis.py"
     ).read_text(encoding="utf-8")
     runtime = (
         ROOT / "app/composition/runtime.py"
@@ -121,4 +121,3 @@ def test_analysis_and_runtime_are_outside_builder():
     assert "AnalysisOrchestrator(" in analysis
     assert "SpecialistInvestigationLoop(" in analysis
     assert "ClaudeNativeMonitoringRunner(" in runtime
-

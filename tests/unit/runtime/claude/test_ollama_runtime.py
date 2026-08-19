@@ -78,7 +78,7 @@ def test_runtime_composition_uses_direct_claude_settings():
     تُستدعى عندما يصل المسار إلى test_runtime_composition_uses_direct_claude_settings؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[4]
     text = (
         root
         / "app"

@@ -23,7 +23,7 @@ from app.runtime.claude.supervisor.supervisor import ClaudeSupervisor
 from app.capabilities.monitoring.service.monitoring_service import MonitoringService
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 LEGACY_PATHS = (
@@ -152,7 +152,7 @@ def test_c14_9_composition_has_no_python_orchestration_fallback():
         encoding="utf-8"
     )
     analysis_text = (
-        ROOT / "app" / "composition" / "analysis.py"
+        ROOT / "app" / "composition" / "analysis" / "analysis.py"
     ).read_text(
         encoding="utf-8"
     )

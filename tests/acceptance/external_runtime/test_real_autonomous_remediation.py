@@ -41,7 +41,7 @@ def _load_operational_runtime_env(env_path: Path | None = None) -> None:
     """Load operational settings, preserving explicit process environment values."""
     from dotenv import dotenv_values
 
-    resolved_env_path = env_path or Path(__file__).resolve().parents[2] / ".env"
+    resolved_env_path = env_path or Path(__file__).resolve().parents[3] / ".env"
     values = dotenv_values(resolved_env_path)
     required = (
         "POSTGRES_HOST",

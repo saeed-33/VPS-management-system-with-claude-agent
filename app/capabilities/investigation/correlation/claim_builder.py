@@ -22,8 +22,6 @@ from .diagnosis_conflict import DiagnosisConflict
 
 from .final_diagnosis import FinalDiagnosis
 
-from .claim_builder import CrossSpecialistClaimBuilder
-
 class CrossSpecialistClaimBuilder:
     """يبني الادعاءات والتعارضات من نتائج الاختصاصيين."""
 

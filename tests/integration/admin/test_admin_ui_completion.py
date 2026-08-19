@@ -28,7 +28,7 @@ from app.interfaces.admin.auth.middleware import AdminAuthMiddleware
 from app.interfaces.admin.auth.service import AdminAuthService
 from app.interfaces.admin.api.servers import _safety_designation
 from app.interfaces.admin.api.autonomous_remediation import _reservation_view
-from app.interfaces.admin.web.auth_routes import router
+from app.interfaces.admin.web.auth_routes import router as auth_router
 from app.interfaces.admin.web.routes import router as web_router
 
 

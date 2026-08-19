@@ -12,7 +12,7 @@ from pathlib import Path
 import ast
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_database_models_live_only_in_infrastructure():

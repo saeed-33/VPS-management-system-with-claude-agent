@@ -74,6 +74,7 @@ def test_app_keeps_init_files_only_at_main_package_boundaries() -> None:
         Path("app/infrastructure/__init__.py"),
         Path("app/interfaces/__init__.py"),
         Path("app/runtime/__init__.py"),
+        Path("app/runtime/claude/__init__.py"),
     }
 
     actual = set(Path("app").rglob("__init__.py"))

@@ -179,7 +179,7 @@ def _restore_operational_database_env(
     from dotenv import dotenv_values
 
     project_root = (
-        Path(__file__).resolve().parents[2]
+        Path(__file__).resolve().parents[3]
     )
     resolved_env_path = env_path or (project_root / ".env")
 

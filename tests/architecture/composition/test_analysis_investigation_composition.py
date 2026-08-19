@@ -11,7 +11,7 @@
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_analysis_and_investigation_composition_is_outside_builder():
@@ -25,7 +25,7 @@ def test_analysis_and_investigation_composition_is_outside_builder():
         ROOT / "app/composition/builder.py"
     ).read_text(encoding="utf-8")
     analysis = (
-        ROOT / "app/composition/analysis.py"
+        ROOT / "app/composition/analysis/analysis.py"
     ).read_text(encoding="utf-8")
 
     assert "build_retrieval_composition(" in builder

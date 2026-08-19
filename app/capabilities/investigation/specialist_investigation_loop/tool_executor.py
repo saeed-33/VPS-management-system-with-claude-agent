@@ -38,10 +38,7 @@ from .specialist_loop_round_trace import SpecialistLoopRoundTrace
 from .specialist_loop_stop_reason import SpecialistLoopStopReason
 
 from .specialist_loop_tool_decision import SpecialistLoopToolDecision
-
-from .finalizer import SpecialistLoopFinalizer
-from .round_executor import SpecialistLoopRoundExecutor
-from .tool_executor import SpecialistLoopToolExecutor
+from .tool_execution_result import SpecialistLoopToolExecutionResult
 
 class SpecialistLoopToolExecutor:
     """ينفذ طلبات الأدوات بعد تطبيق السياسة ومنع التكرار."""

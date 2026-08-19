@@ -11,9 +11,6 @@ from typing import Any
 
 
 @dataclass(slots=True, frozen=True)
-
-
-@dataclass(slots=True, frozen=True)
 class ProjectToolDefinition:
     """
     يمثل تعريف أداة MCP ووسائطها ووصف نتيجة استخدامها.
@@ -36,4 +33,3 @@ class ProjectToolDefinition:
             raise ValueError(
                 "description must not be empty."
             )
-

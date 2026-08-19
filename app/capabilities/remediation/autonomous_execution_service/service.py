@@ -240,10 +240,26 @@ class AutonomousExecutionService:
             "execution_id": reservation.execution_id,
         }
 
-    def _record_runtime(self, **kwargs):
+    def _record_runtime(
+        self,
+        policy,
+        decision,
+        success: bool,
+        execution_id: str | None,
+        *,
+        failure_key: str | None = None,
+    ):
         """يحافظ على واجهة تسجيل حالة التشغيل السابقة."""
-        return self._runtime_recorder.record(self, **kwargs)
+        return self._runtime_recorder.record(
+            self,
+            policy,
+            decision,
+            success,
+            execution_id,
+            failure_key=failure_key,
+        )
 
+    @staticmethod
     def _single_action(plan):
         """
         ينفذ فعلًا آليًا واحدًا مع حدود السياسة والتحقق المطلوبة.

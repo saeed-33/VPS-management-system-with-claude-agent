@@ -11,7 +11,7 @@
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[4]
 
 
 def read_doc(
@@ -46,7 +46,7 @@ def test_project_structure_documents_runtime_files():
         "CLAUDE.md",
         ".mcp.json",
         ".claude/settings.json",
-        "app/runtime/claude/supervisor.py",
+        "app/runtime/claude/supervisor/supervisor.py",
             "app/interfaces/mcp/registry.py",
         "app/interfaces/mcp/catalog.py",
             "app/interfaces/admin/api/system.py",

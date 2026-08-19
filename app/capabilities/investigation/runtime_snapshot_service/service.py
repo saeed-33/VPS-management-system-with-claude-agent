@@ -98,7 +98,7 @@ class InvestigationRuntimeSnapshotService:
                     **dict(current.get("metadata") or {}),
                     **dict(snapshot.get("metadata") or {}),
                 }
-            metadata["runtime_snapshot"] = self._serializer._json_safe(snapshot)
+            metadata["runtime_snapshot"] = self._serializer.json_safe(snapshot)
             metadata["runtime_snapshot_version"] = self.SNAPSHOT_VERSION
             metadata["runtime_investigation_id"] = runtime_id
             return metadata
@@ -251,7 +251,7 @@ class InvestigationRuntimeSnapshotService:
                 narrative
             )
 
-        return self._serializer._json_safe(snapshot)
+        return self._serializer.json_safe(snapshot)
 
     def merge_specialist_result(
         self,
@@ -284,3 +284,11 @@ class InvestigationRuntimeSnapshotService:
             final_diagnosis=final_diagnosis,
             narrative=narrative,
         )
+
+    def _serialize_claim(self, claim) -> dict:
+        """يحافظ على واجهة القراءة القديمة أثناء تفويض التسلسل للمكوّن المختص."""
+        return self._serializer._serialize_claim(claim)
+
+    def _serialize_final_diagnosis(self, final_diagnosis) -> dict:
+        """يحافظ على واجهة القراءة القديمة أثناء تفويض التسلسل للمكوّن المختص."""
+        return self._serializer._serialize_final_diagnosis(final_diagnosis)

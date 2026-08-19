@@ -34,7 +34,7 @@ from app.interfaces.admin.api.remediation import router as remediation_router
 from app.interfaces.admin.auth.middleware import AdminAuthMiddleware
 from app.interfaces.admin.auth.service import AdminAuthService
 from app.interfaces.admin.dependencies import get_remediation_service
-from app.interfaces.admin.web.auth_routes import router
+from app.interfaces.admin.web.auth_routes import router as auth_router
 
 
 @pytest.fixture()

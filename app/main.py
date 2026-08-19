@@ -11,21 +11,21 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.interfaces.admin.api.agent_observability import router
-from app.interfaces.admin.api.investigations import router
-from app.interfaces.admin.api.commands import router
-from app.interfaces.admin.api.profiles.router import router
-from app.interfaces.admin.api.reports import router
-from app.interfaces.admin.api.servers import router
-from app.interfaces.admin.api.specialists import router
-from app.interfaces.admin.api.knowledge_sources import router
-from app.interfaces.admin.api.diagnostic_tools import router
-from app.interfaces.admin.api.system import router
-from app.interfaces.admin.api.remediation import router
-from app.interfaces.admin.api.autonomous_remediation import router
+from app.interfaces.admin.api.agent_observability import router as agent_observability_router
+from app.interfaces.admin.api.investigations import router as investigations_router
+from app.interfaces.admin.api.commands import router as commands_router
+from app.interfaces.admin.api.profiles.router import router as profiles_router
+from app.interfaces.admin.api.reports import router as reports_router
+from app.interfaces.admin.api.servers import router as servers_router
+from app.interfaces.admin.api.specialists import router as specialists_router
+from app.interfaces.admin.api.knowledge_sources import router as knowledge_sources_router
+from app.interfaces.admin.api.diagnostic_tools import router as diagnostic_tools_router
+from app.interfaces.admin.api.system import router as system_router
+from app.interfaces.admin.api.remediation import router as remediation_router
+from app.interfaces.admin.api.autonomous_remediation import router as autonomous_remediation_router
 from app.interfaces.admin.auth.middleware import AdminAuthMiddleware
 from app.interfaces.admin.auth.service import AdminAuthService
-from app.interfaces.admin.web.auth_routes import router
+from app.interfaces.admin.web.auth_routes import router as auth_router
 from app.interfaces.admin.web.routes import router as web_router
 from app.composition import container
 from app.core.config import settings

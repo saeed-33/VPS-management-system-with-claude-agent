@@ -11,9 +11,6 @@ from typing import Any
 
 
 @dataclass(slots=True, frozen=True)
-
-
-@dataclass(slots=True, frozen=True)
 class ProjectToolCall:
     """
     يمثل طلب استدعاء أداة باسمها ووسائطها.
@@ -31,4 +28,3 @@ class ProjectToolCall:
             raise ValueError(
                 "tool_id must not be empty."
             )
-

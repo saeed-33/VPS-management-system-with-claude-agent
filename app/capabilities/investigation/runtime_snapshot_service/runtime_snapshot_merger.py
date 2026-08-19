@@ -123,7 +123,7 @@ class InvestigationRuntimeSnapshotMerger:
         # لا نرفع حالة الاكتمال إلا بعد تثبيت تشغيل متخصص واحد على الأقل.
         snapshot["runtime_available"] = bool(completed)
         snapshot["final_diagnosis_available"] = isinstance(snapshot.get("final_diagnosis"), dict)
-        merged["runtime_snapshot"] = self._serializer._json_safe(snapshot)
+        merged["runtime_snapshot"] = self._serializer.json_safe(snapshot)
         merged["runtime_snapshot_version"] = self._snapshot_version
         merged["runtime_investigation_id"] = model.investigation_id
         return snapshot["status"], merged
@@ -147,7 +147,7 @@ class InvestigationRuntimeSnapshotMerger:
         snapshot["runtime_available"] = True
         snapshot["final_diagnosis_available"] = True
         snapshot["status"] = "completed"
-        merged["runtime_snapshot"] = self._serializer._json_safe(snapshot)
+        merged["runtime_snapshot"] = self._serializer.json_safe(snapshot)
         merged["runtime_snapshot_version"] = self._snapshot_version
         return "completed", merged
 

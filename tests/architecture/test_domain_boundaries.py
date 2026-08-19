@@ -11,7 +11,7 @@
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 def test_removed_domain_package_has_no_boundary_to_audit():
     """
     يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.

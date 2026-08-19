@@ -10,7 +10,7 @@
 """
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_ollama_provider_implementations_live_in_infrastructure():

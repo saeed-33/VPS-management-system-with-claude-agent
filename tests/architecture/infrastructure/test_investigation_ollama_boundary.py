@@ -12,7 +12,7 @@ from pathlib import Path
 import ast
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_investigation_ollama_adapters_live_in_infrastructure():
@@ -24,7 +24,7 @@ def test_investigation_ollama_adapters_live_in_infrastructure():
     """
     specialist = (
         ROOT
-        / "app/infrastructure/llm/ollama/specialist_reasoning_client.py"
+        / "app/infrastructure/llm/ollama/specialist_reasoning_client/client.py"
     ).read_text(encoding="utf-8")
     final = (
         ROOT
@@ -50,14 +50,14 @@ def test_investigation_capability_keeps_contracts_not_ollama_implementations():
     ).read_text(encoding="utf-8")
     final = (
         ROOT
-        / "app/capabilities/investigation/final_diagnosis_synthesizer.py"
+        / "app/capabilities/investigation/final_diagnosis_synthesizer/client_factory.py"
     ).read_text(encoding="utf-8")
 
     specialist_contract = (
-        ROOT / "app/core/contracts/specialist_reasoning.py"
+        ROOT / "app/core/contracts/specialist_reasoning/specialist_reasoning_client.py"
     ).read_text(encoding="utf-8")
     final_contract = (
-        ROOT / "app/core/contracts/final_diagnosis.py"
+        ROOT / "app/core/contracts/final_diagnosis/final_diagnosis_narrative_client.py"
     ).read_text(encoding="utf-8")
 
     assert "class SpecialistReasoningClient" in specialist_contract
@@ -91,7 +91,7 @@ def test_capability_contracts_resolve_provider_adapters_lazily():
     ).read_text(encoding="utf-8")
     final = (
         ROOT
-        / "app/capabilities/investigation/final_diagnosis_synthesizer.py"
+        / "app/capabilities/investigation/final_diagnosis_synthesizer/client_factory.py"
     ).read_text(encoding="utf-8")
 
     assert any(

@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[4]
 HOOK = ROOT / "tools" / "claude_hooks" / "runtime_hooks.py"
 
 

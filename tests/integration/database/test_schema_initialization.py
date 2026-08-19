@@ -11,7 +11,7 @@
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 SMOKE = ROOT / "tools" / "acceptance" / "smoke_ollama_claude_runtime.py"
 
 

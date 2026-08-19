@@ -11,9 +11,6 @@ from typing import Any
 
 
 @dataclass(slots=True, frozen=True)
-
-
-@dataclass(slots=True, frozen=True)
 class ProjectToolResult:
     """
     يمثل نتيجة الأداة مع النجاح أو الخطأ والحمولة القابلة للتسلسل.
@@ -46,4 +43,3 @@ class ProjectToolResult:
                     "successful tool result cannot "
                     "have error_message."
                 )
-
