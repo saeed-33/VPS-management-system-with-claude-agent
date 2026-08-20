@@ -35,10 +35,8 @@ from app.capabilities.analysis.retrieval.performance_profiler import (
     snapshot,
     start_profile,
 )
-from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
-from app.infrastructure.database.repositories.analysis_source_repository import (
-    AnalysisSourceRepository,
-)
+from app.core.ports.analysis.analysis_repository import AnalysisRepositoryPort
+from app.core.ports.analysis.source_repository import AnalysisSourceRepositoryPort
 from app.capabilities.monitoring.report_query_service import (
     ReportQueryService,
 )
@@ -52,8 +50,8 @@ class ExactAnalysisReuseHandler:
     def __init__(
         self,
         *,
-        analysis_repository: AnalysisRepository,
-        analysis_source_repository: AnalysisSourceRepository | None,
+        analysis_repository: AnalysisRepositoryPort,
+        analysis_source_repository: AnalysisSourceRepositoryPort | None,
         retrieval_indexer: RetrievalIndexer | None,
         reuse_policy: AnalysisReusePolicy,
         exact_reuse_enabled: bool,

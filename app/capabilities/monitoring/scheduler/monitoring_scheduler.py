@@ -5,9 +5,9 @@ import asyncio
 import logging
 from datetime import UTC, datetime
 
-from .monitoring_runner_protocol import MonitoringRunnerProtocol
-from .server_repository_protocol import SchedulerServerRepositoryProtocol
-from .schedulable_server_record import SchedulableServerRecord
+from app.core.ports.monitoring.monitoring_runner import MonitoringRunnerPort
+from app.core.ports.monitoring.scheduler_server_repository import SchedulerServerRepositoryPort
+from app.core.ports.monitoring.schedulable_server_record import SchedulableServerRecord
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +20,9 @@ class MonitoringScheduler:
         self,
         *,
         server_repository: (
-            SchedulerServerRepositoryProtocol
+            SchedulerServerRepositoryPort
         ),
-        monitoring_service: MonitoringRunnerProtocol,
+        monitoring_service: MonitoringRunnerPort,
         polling_interval_seconds: float = 5.0,
         max_concurrent_servers: int = 5,
     ) -> None:

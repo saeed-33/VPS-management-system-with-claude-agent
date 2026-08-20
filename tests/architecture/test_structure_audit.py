@@ -71,6 +71,7 @@ def test_app_keeps_init_files_only_at_main_package_boundaries() -> None:
         Path("app/capabilities/__init__.py"),
         Path("app/composition/__init__.py"),
         Path("app/core/__init__.py"),
+        Path("app/core/ports/__init__.py"),
         Path("app/infrastructure/__init__.py"),
         Path("app/interfaces/__init__.py"),
         Path("app/runtime/__init__.py"),
@@ -82,8 +83,49 @@ def test_app_keeps_init_files_only_at_main_package_boundaries() -> None:
     assert actual == expected
 
 
+def test_package_exports_are_explicit_at_public_boundaries() -> None:
+    marker_packages = {
+        Path("app/__init__.py"),
+        Path("app/capabilities/__init__.py"),
+        Path("app/core/__init__.py"),
+        Path("app/core/ports/__init__.py"),
+        Path("app/infrastructure/__init__.py"),
+        Path("app/interfaces/__init__.py"),
+        Path("app/runtime/__init__.py"),
+    }
+    for path in marker_packages:
+        assert "__all__: list[str] = []" in path.read_text(encoding="utf-8")
+
+    composition = Path("app/composition/__init__.py").read_text(encoding="utf-8")
+    runtime = Path("app/runtime/claude/__init__.py").read_text(encoding="utf-8")
+    assert '"build_container"' in composition
+    assert '"container"' in composition
+    assert '__all__ = ["ClaudeNativeMonitoringRunner"]' in runtime
+
+
 def test_core_contracts_meet_the_current_structure_gate() -> None:
     assert audit(Path("app/core/contracts"), max_lines=350) == []
+
+
+def test_capabilities_do_not_keep_ambiguous_generic_module_names() -> None:
+    """تمنع أسماء الوحدات العامة التي تخفي مسؤولية الملف."""
+    forbidden_names = {
+        "service.py",
+        "constants.py",
+        "factories.py",
+        "support.py",
+        "helpers.py",
+        "utils.py",
+        "common.py",
+        "models.py",
+        "context.py",
+    }
+    offenders = [
+        path.relative_to(Path("app"))
+        for path in Path("app/capabilities").rglob("*.py")
+        if path.name in forbidden_names
+    ]
+    assert offenders == []
 
 
 def test_core_contracts_are_grouped_into_subpackages() -> None:
@@ -161,7 +203,6 @@ def test_investigation_multi_class_modules_are_grouped() -> None:
         "persistence_service.py",
         "read_service.py",
         "source_location.py",
-        "specialist_reasoning_client.py",
         "specialist_service.py",
     }
     assert [

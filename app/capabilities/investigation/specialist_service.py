@@ -6,11 +6,10 @@
 """
 from __future__ import annotations
 
-from app.infrastructure.database.models.specialist_definition import (
-    SpecialistDefinitionModel,
-)
-from app.infrastructure.database.repositories.specialist_definition_repository import (
-    SpecialistDefinitionRepository,
+from typing import Any
+
+from app.core.ports.investigation.specialist_definition_repository import (
+    SpecialistDefinitionRepositoryPort,
 )
 from app.core.contracts.specialists.create_specialist_definition_dto import CreateSpecialistDefinitionDTO
 from app.core.contracts.specialists.update_specialist_definition_dto import UpdateSpecialistDefinitionDTO
@@ -24,7 +23,7 @@ class SpecialistDefinitionService:
     """
     def __init__(
         self,
-        repository: SpecialistDefinitionRepository,
+        repository: SpecialistDefinitionRepositoryPort,
     ) -> None:
         """
         يهيئ SpecialistDefinitionService ويربط الاعتماديات اللازمة لدورة التحقيق.
@@ -35,7 +34,7 @@ class SpecialistDefinitionService:
         self,
         *,
         enabled_only: bool = False,
-    ) -> list[SpecialistDefinitionModel]:
+    ) -> list[Any]:
         """
         يعرض تعريفات الاختصاصيين مع خيار الاقتصار على المفعلة.
         """
@@ -47,7 +46,7 @@ class SpecialistDefinitionService:
     def get_specialist(
         self,
         specialist_id: int,
-    ) -> SpecialistDefinitionModel:
+    ) -> Any:
         """
         يجلب تعريف اختصاصي ويرفع خطأ عند غيابه.
         """
@@ -65,7 +64,7 @@ class SpecialistDefinitionService:
     def create_specialist(
         self,
         data: CreateSpecialistDefinitionDTO,
-    ) -> SpecialistDefinitionModel:
+    ) -> Any:
         """
         ينشئ تعريف اختصاصي بعد التحقق من الحقول والروابط.
         """
@@ -89,7 +88,7 @@ class SpecialistDefinitionService:
         self,
         specialist_id: int,
         data: UpdateSpecialistDefinitionDTO,
-    ) -> SpecialistDefinitionModel:
+    ) -> Any:
         """
         يحدّث تعريف اختصاصي موجودًا.
         """
@@ -111,7 +110,7 @@ class SpecialistDefinitionService:
         self,
         specialist_id: int,
         enabled: bool,
-    ) -> SpecialistDefinitionModel:
+    ) -> Any:
         """
         يغير حالة تفعيل الاختصاصي.
         """

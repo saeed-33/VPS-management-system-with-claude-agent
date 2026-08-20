@@ -8,10 +8,6 @@ from types import MappingProxyType
 
 from typing import Any, Iterable, Mapping
 
-from app.infrastructure.database.repositories.specialist_definition_repository import (
-    SpecialistDefinitionRepository,
-)
-
 from app.core.contracts.specialists.helpers import validate_specialist_slug
 
 class SpecialistRegistryValidationError(ValueError):

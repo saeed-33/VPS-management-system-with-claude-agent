@@ -14,9 +14,6 @@ from app.core.contracts.final_diagnosis.final_diagnosis_narrative import FinalDi
 from app.capabilities.investigation.execution_contracts.investigation_execution_result import InvestigationExecutionResult
 from app.core.contracts.investigation.evidence_kind import EvidenceKind
 from app.core.contracts.investigation.evidence_reference import EvidenceReference
-from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
-
-
 
 
 from .json_safe import JsonSafeValueConverter

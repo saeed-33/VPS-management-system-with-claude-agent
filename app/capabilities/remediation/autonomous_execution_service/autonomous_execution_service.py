@@ -15,6 +15,8 @@ from app.core.contracts.autonomous_remediation.autonomous_policy_status import A
 from app.core.contracts.remediation.remediation_action import RemediationAction
 from app.core.contracts.remediation.remediation_plan_status import RemediationPlanStatus
 from app.core.policies.autonomous_remediation import AutonomousRemediationPolicyEvaluator
+from app.core.ports.remediation.autonomous_remediation_repository import AutonomousRemediationRepositoryPort
+from app.core.ports.remediation.remediation_repository import RemediationRepositoryPort
 from app.core.utils.datetime import utc_now
 
 
@@ -27,7 +29,10 @@ class AutonomousExecutionService:
     ينسق تقييم وتنفيذ القرارات الآلية مع الحجز والتدقيق وحالة التشغيل والتاريخ.
     """
 
-    def __init__(self, *, repository, remediation_repository, remediation_service, policy_service, history_service, candidate_service, authorization_service, evaluator=None, automatic_remediation_allowed=False):
+    def __init__(self, *, repository: AutonomousRemediationRepositoryPort,
+                 remediation_repository: RemediationRepositoryPort, remediation_service,
+                 policy_service, history_service, candidate_service, authorization_service,
+                 evaluator=None, automatic_remediation_allowed=False):
         """
         يربط مستودعات القرار والحجز والتفويض والتدقيق والسياسة والمنفذ وحالة التشغيل والتاريخ.
         """

@@ -1,6 +1,6 @@
 """إنشاء لقطات تشغيلية من مستودع مصادر المعرفة."""
 from __future__ import annotations
-from app.infrastructure.database.repositories.knowledge_source_repository import KnowledgeSourceRepository
+from app.core.ports.knowledge.source_repository import KnowledgeSourceRepositoryPort
 from .runtime_definition import KnowledgeSourceRuntimeDefinition
 from .snapshot import KnowledgeSourceRegistrySnapshot
 
@@ -10,7 +10,7 @@ class KnowledgeSourceRegistry:
     """
     def __init__(
         self,
-        repository: KnowledgeSourceRepository,
+        repository: KnowledgeSourceRepositoryPort,
     ) -> None:
         """
         يحفظ مستودع مصادر المعرفة الذي ستبنى منه اللقطات.

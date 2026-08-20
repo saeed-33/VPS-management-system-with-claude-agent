@@ -1,11 +1,11 @@
 """منفذ أو عقد من مكونات تنفيذ المعالجة."""
 from __future__ import annotations
 
-from .service_state_observation import ServiceStateObservation
+from app.core.contracts.remediation.service_state_observation import ServiceStateObservation
 
-class UnavailableEvidenceCollector:
+class FallbackEvidenceCollector:
     """
-    يمثل جامع أدلة غير متاح ويعيد نتيجة عدم توفر الدليل.
+    يمثل جامع أدلة احتياطياً يعيد نتيجة آمنة عند غياب المنفذ الحقيقي.
     """
     def collect(self, **_kwargs) -> ServiceStateObservation:
         """

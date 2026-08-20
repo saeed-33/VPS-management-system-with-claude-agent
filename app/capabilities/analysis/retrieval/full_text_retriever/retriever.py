@@ -4,9 +4,7 @@ from __future__ import annotations
 import logging
 from time import perf_counter
 
-from app.infrastructure.database.repositories.retrieval_repository import (
-    RetrievalRepository,
-)
+from app.core.ports.analysis.retrieval_repository import AnalysisRetrievalRepositoryPort
 from app.capabilities.analysis.retrieval.performance_profiler import (
     record_timing,
     set_counter,
@@ -22,7 +20,7 @@ class FullTextRetriever:
     def __init__(
         self,
         *,
-        retrieval_repository: RetrievalRepository,
+        retrieval_repository: AnalysisRetrievalRepositoryPort,
         query_builder: FullTextQueryBuilder | None = None,
         candidate_limit: int = 20,
         minimum_rank: float = 0.0,

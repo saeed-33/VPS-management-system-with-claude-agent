@@ -13,7 +13,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
-from app.capabilities.remediation.service.service import RemediationService
+from app.capabilities.remediation.service.remediation_service import RemediationService
 from app.interfaces.admin.dependencies import get_remediation_service
 from app.interfaces.admin.schemas.remediation.approval_decision_request import ApprovalDecisionRequest
 from app.interfaces.admin.schemas.remediation.approval_request import ApprovalRequest

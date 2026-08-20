@@ -7,7 +7,7 @@ packages under `app/domain`, `app/admin`, `app/mcp`, `app/shared`, or
 
 ```text
 app/
-├── core/            contracts, policies, configuration, exceptions
+├── core/            contracts, ports, policies, configuration, exceptions
 ├── capabilities/    monitoring, analysis, investigation, knowledge
 ├── runtime/claude/  native Claude session/runtime integration
 ├── interfaces/
@@ -27,7 +27,9 @@ tools/
 ## Responsibility and dependency rules
 
 - `core` owns provider-neutral contracts, configuration, exceptions, utilities,
-  and fail-closed policy. It does not import outer layers.
+  ports, and fail-closed policy. Ports describe the dependencies required by
+  capabilities without coupling them to infrastructure implementations. It
+  does not import outer layers.
 - `capabilities` owns bounded monitoring, analysis/RAG, investigation/evidence,
   and knowledge behavior. It does not import interfaces, composition, or the
   runtime.

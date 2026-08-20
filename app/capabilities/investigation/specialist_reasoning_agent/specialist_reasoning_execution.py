@@ -15,7 +15,7 @@ from app.core.policies.diagnostic_tools.diagnostic_tool_call import DiagnosticTo
 
 from app.capabilities.investigation.specialist_context.specialist_context_snapshot import SpecialistContextSnapshot
 
-from app.capabilities.investigation.specialist_reasoning_client import (
+from app.core.contracts.specialist_reasoning.specialist_reasoning_client import (
     SpecialistReasoningClient,
 )
 

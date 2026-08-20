@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Test suite.
 يُستدعى بواسطة: pytest أو أدوات acceptance.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.full_text_retriever، app.capabilities.analysis.retrieval.hybrid_retriever، app.capabilities.analysis.retrieval.rag_context، app.capabilities.analysis.retrieval.structured_compatibility.
+يعتمد مباشرة على: app.capabilities.analysis.retrieval.full_text_retriever، app.capabilities.analysis.retrieval.hybrid_retriever، app.core.contracts.analysis.retrieved_analysis_context، app.capabilities.analysis.retrieval.structured_compatibility.
 الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -16,7 +16,7 @@ import pytest
 
 from app.capabilities.analysis.retrieval.full_text_retriever.candidate import FullTextCandidate
 from app.capabilities.analysis.retrieval.hybrid_retriever.retriever import HybridRetriever
-from app.capabilities.analysis.retrieval.rag_context import (
+from app.core.contracts.analysis.retrieved_analysis_context import (
     RetrievedAnalysisContext,
 )
 from app.capabilities.analysis.retrieval.structured_compatibility.checker import StructuredCompatibilityChecker

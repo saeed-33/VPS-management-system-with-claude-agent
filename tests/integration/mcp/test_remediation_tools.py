@@ -19,7 +19,7 @@ from app.interfaces.mcp.schemas.call import ProjectToolCall
 from app.infrastructure.database.models.remediation.plan import RemediationPlanModel
 from app.infrastructure.database.models.remediation.sandbox_result import RemediationSandboxResultModel
 from app.infrastructure.database.repositories.remediation_repository.repository import RemediationRepository
-from app.capabilities.remediation.service.service import RemediationService
+from app.capabilities.remediation.service.remediation_service import RemediationService
 
 from tests.integration.mcp.test_tool_boundary import (
     MonitoringService,

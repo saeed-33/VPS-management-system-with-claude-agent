@@ -4,7 +4,7 @@
 يتحقق المصنع من تفعيل التحليل ومزوّده، ثم يبني العميل الذي يطابق إعدادات
 التطبيق قبل تمريره إلى خدمة تحليل التقارير.
 """
-from app.capabilities.analysis.llm_client import (
+from app.core.ports.analysis.report_analysis_client import (
     LLMAnalysisClient,
 )
 from app.infrastructure.llm.ollama.analysis_client import (

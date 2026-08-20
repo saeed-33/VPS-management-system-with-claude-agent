@@ -10,8 +10,8 @@
 """
 import pytest
 from app.capabilities.knowledge.ingestion_contracts.chunk_draft import KnowledgeChunkDraft
-from app.capabilities.knowledge.ingestion_contracts.status import KnowledgeDocumentStatus
-from app.capabilities.knowledge.ingestion_contracts.parsed_document import ParsedKnowledgeDocument
+from app.core.contracts.knowledge_sources.document_status import KnowledgeDocumentStatus
+from app.core.contracts.knowledge_sources.parsed_document import ParsedKnowledgeDocument
 
 def test_document_status_lifecycle_is_explicit():
     """

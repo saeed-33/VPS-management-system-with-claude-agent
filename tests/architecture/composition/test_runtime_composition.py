@@ -22,7 +22,7 @@ def test_runtime_composition_is_outside_builder():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
     runtime = (
         ROOT / "app/composition/runtime.py"
@@ -69,7 +69,7 @@ def test_builder_is_composition_coordinator_after_a4_2d():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
 
     assert "build_repositories()" in builder

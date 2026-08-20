@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-class MonitoringRunnerProtocol(Protocol):
+class MonitoringRunnerPort(Protocol):
     """
     عقد لعامل يبدأ دورة مراقبة لسيرفر واحد.
     """

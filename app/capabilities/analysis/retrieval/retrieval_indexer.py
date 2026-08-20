@@ -7,9 +7,9 @@
 import json
 import logging
 
-from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
-from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
-from app.infrastructure.database.repositories.retrieval_repository import RetrievalRepository
+from app.core.ports.analysis.embedding_client import EmbeddingClient
+from app.core.ports.analysis.analysis_repository import AnalysisRepositoryPort
+from app.core.ports.analysis.retrieval_repository import AnalysisRetrievalRepositoryPort
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class RetrievalIndexer:
     """
     يدير إنشاء مستندات الاسترجاع للتحليلات المكتملة أو نسخ مستند التحليل المعاد استخدامه.
     """
-    def __init__(self, *, analysis_repository: AnalysisRepository, retrieval_repository: RetrievalRepository, embedding_client: EmbeddingClient) -> None:
+    def __init__(self, *, analysis_repository: AnalysisRepositoryPort, retrieval_repository: AnalysisRetrievalRepositoryPort, embedding_client: EmbeddingClient) -> None:
         """
         يربط مستودعي التحليل والاسترجاع وعميل embedding اللازم لبناء المستندات.
         """

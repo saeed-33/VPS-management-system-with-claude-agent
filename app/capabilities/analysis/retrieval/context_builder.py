@@ -6,7 +6,7 @@
 """
 from typing import Any
 
-from app.capabilities.analysis.retrieval.rag_context import (
+from app.core.contracts.analysis.retrieved_analysis_context import (
     RetrievedAnalysisContext,
 )
 

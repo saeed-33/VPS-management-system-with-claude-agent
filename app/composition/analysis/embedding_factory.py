@@ -4,7 +4,7 @@
 يتحقق المصنع من اسم المزوّد ويهيئ عميل Ollama بعنوان الخدمة والنموذج والأبعاد
 والمهلة المطلوبة.
 """
-from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
+from app.core.ports.analysis.embedding_client import EmbeddingClient
 from app.infrastructure.llm.ollama.embedding_client import OllamaEmbeddingClient
 from app.core.config import Settings
 

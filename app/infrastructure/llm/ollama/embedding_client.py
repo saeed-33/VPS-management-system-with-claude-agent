@@ -3,7 +3,7 @@
 """
 import httpx
 
-from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
+from app.core.ports.analysis.embedding_client import EmbeddingClient
 
 
 class OllamaEmbeddingClient(EmbeddingClient):

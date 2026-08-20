@@ -19,7 +19,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from app.capabilities.remediation.autonomous_execution_service.service import AutonomousExecutionService
+from app.capabilities.remediation.autonomous_execution_service.autonomous_execution_service import AutonomousExecutionService
 from app.core.contracts.autonomous_remediation.autonomous_authorization import AutonomousAuthorization
 from app.core.contracts.autonomous_remediation.autonomous_authorization_status import AutonomousAuthorizationStatus
 from app.core.contracts.autonomous_remediation.autonomous_decision_outcome import AutonomousDecisionOutcome

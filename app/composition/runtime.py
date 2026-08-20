@@ -11,8 +11,8 @@ from pathlib import Path
 
 from app.composition.analysis.analysis_investigation_composition import AnalysisInvestigationComposition
 from app.composition.analysis.retrieval_composition import RetrievalComposition
-from app.composition.repositories import RepositoryBundle
-from app.composition.services import CoreServiceBundle
+from app.composition.repository_bundle import RepositoryBundle
+from app.composition.service_bundle import CoreServiceBundle
 from app.runtime.claude.native_monitoring import ClaudeNativeMonitoringRunner
 from app.runtime.claude.ollama_runtime import OllamaClaudeCommandBuilder
 from app.runtime.claude.runtime.adapter import ClaudeRuntimeAdapter
@@ -21,6 +21,7 @@ from app.runtime.claude.supervisor.supervisor import ClaudeSupervisor
 from app.core.config import Settings
 from app.capabilities.monitoring.scheduler.monitoring_scheduler import MonitoringScheduler
 from app.capabilities.monitoring.service.monitoring_service import MonitoringService
+from app.infrastructure.ssh.monitoring.command_runner import SSHMonitoringCommandRunner
 from app.capabilities.investigation.backlog_worker import (
     InvestigationBacklogWorker,
 )
@@ -63,6 +64,7 @@ def build_runtime_composition(
         connection_timeout_seconds=(
             settings.ssh_connect_timeout_seconds
         ),
+        command_runner=SSHMonitoringCommandRunner(),
     )
 
     project_mcp_tool_boundary = ProjectMcpToolBoundary(

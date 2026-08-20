@@ -15,7 +15,7 @@ from app.capabilities.investigation.correlation.diagnosis_certainty import Diagn
 from app.capabilities.investigation.correlation.diagnosis_conflict import DiagnosisConflict
 from app.capabilities.investigation.correlation.final_diagnosis import FinalDiagnosis
 from app.core.contracts.final_diagnosis.final_diagnosis_narrative_output import FinalDiagnosisNarrativeOutput
-from app.capabilities.investigation.final_diagnosis_synthesizer.service import FinalDiagnosisSynthesizer
+from app.capabilities.investigation.final_diagnosis_synthesizer.final_diagnosis_synthesizer import FinalDiagnosisSynthesizer
 
 
 def diagnosis(

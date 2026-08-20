@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Test suite.
 يُستدعى بواسطة: pytest أو أدوات acceptance.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.rag_context، app.capabilities.knowledge.retrieval، app.interfaces.mcp.
+يعتمد مباشرة على: app.core.contracts.analysis.retrieved_analysis_context، app.core.contracts.knowledge_sources.knowledge_retrieval_context، app.interfaces.mcp.
 الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -11,10 +11,10 @@
 import asyncio
 from dataclasses import dataclass
 
-from app.capabilities.analysis.retrieval.rag_context import (
+from app.core.contracts.analysis.retrieved_analysis_context import (
     RetrievedAnalysisContext,
 )
-from app.capabilities.knowledge.retrieval.context import KnowledgeRetrievalContext
+from app.core.contracts.knowledge_sources.knowledge_retrieval_context import KnowledgeRetrievalContext
 from app.interfaces.mcp.registry import ProjectMcpToolBoundary
 from app.interfaces.mcp.schemas.call import ProjectToolCall
 

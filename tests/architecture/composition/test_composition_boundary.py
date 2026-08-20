@@ -36,7 +36,7 @@ def test_composition_builder_owns_dependency_wiring():
     تُستدعى عندما يصل المسار إلى test_composition_builder_owns_dependency_wiring؛ المدخلات المهمة: لا توجد مدخلات موضعية مهمة.
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
-    builder = ROOT / "app/composition/builder.py"
+    builder = ROOT / "app/composition/container_builder.py"
     builder_text = builder.read_text(encoding="utf-8")
 
     container = ROOT / "app/composition/container.py"

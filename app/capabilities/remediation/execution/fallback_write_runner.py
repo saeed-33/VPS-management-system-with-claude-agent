@@ -1,11 +1,11 @@
 """منفذ أو عقد من مكونات تنفيذ المعالجة."""
 from __future__ import annotations
 
-from .write_command_result import WriteCommandResult
+from app.core.contracts.remediation.write_command_result import WriteCommandResult
 
-class UnavailableWriteRunner:
+class FallbackWriteRunner:
     """
-    يمثل منفذ كتابة غير متاح ويعيد فشلًا صريحًا بدل تنفيذ وهمي.
+    يمثل منفذ كتابة احتياطياً يعيد فشلاً صريحاً بدل تنفيذ وهمي.
     """
     def run(self, **_kwargs) -> WriteCommandResult:
         """

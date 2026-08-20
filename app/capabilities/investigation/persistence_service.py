@@ -10,7 +10,7 @@ from uuid import uuid4
 
 from app.core.contracts.investigation.investigation_budget import InvestigationBudget
 from app.capabilities.investigation.investigation_router.investigation_routing_decision import InvestigationRoutingDecision
-from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
+from app.core.ports.investigation.investigation_repository import InvestigationRepositoryPort
 from app.core.contracts.investigations.persist_investigation_candidate_dto import PersistInvestigationCandidateDTO
 from app.core.contracts.investigations.persist_investigation_dto import PersistInvestigationDTO
 
@@ -19,7 +19,7 @@ class InvestigationPersistenceService:
     """
     يحفظ قرار توجيه التحقيق ويقرأه من المستودع.
     """
-    def __init__(self, repository: InvestigationRepository) -> None:
+    def __init__(self, repository: InvestigationRepositoryPort) -> None:
         """
         يهيئ InvestigationPersistenceService ويربط الاعتماديات اللازمة لدورة التحقيق.
         """

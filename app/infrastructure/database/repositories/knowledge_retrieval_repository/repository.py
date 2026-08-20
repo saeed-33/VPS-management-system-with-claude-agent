@@ -15,7 +15,7 @@ from app.infrastructure.database.models.knowledge_source import (
     KnowledgeSourceModel,
 )
 from app.infrastructure.database.session import SessionLocal
-from .search_row import KnowledgeSearchRow
+from app.core.contracts.knowledge_sources.knowledge_search_row import KnowledgeSearchRow
 
 
 @dataclass(slots=True, frozen=True)

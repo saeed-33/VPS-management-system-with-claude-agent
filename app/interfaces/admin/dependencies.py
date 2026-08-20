@@ -34,10 +34,10 @@ from app.capabilities.monitoring.server_service import ServerService
 from app.capabilities.monitoring.profile_service import (
     MonitoringProfileService,
 )
-from app.capabilities.remediation.service.service import RemediationService
+from app.capabilities.remediation.service.remediation_service import RemediationService
 from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
 from app.capabilities.remediation.autonomous_candidate_service import AutonomousCandidateService
-from app.capabilities.remediation.autonomous_execution_service.service import AutonomousExecutionService
+from app.capabilities.remediation.autonomous_execution_service.autonomous_execution_service import AutonomousExecutionService
 from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
 from app.interfaces.admin.auth.service import AdminAuthService
 from app.interfaces.admin.auth.principal import AdminPrincipal

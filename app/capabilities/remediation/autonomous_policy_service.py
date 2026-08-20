@@ -12,6 +12,7 @@ from uuid import uuid4
 from app.core.contracts.autonomous_remediation.autonomous_policy_status import AutonomousPolicyStatus
 from app.core.contracts.autonomous_remediation.autonomous_remediation_policy import AutonomousRemediationPolicy
 from app.core.contracts.autonomous_remediation.helpers import V1_AUTONOMOUS_ACTIONS
+from app.core.ports.remediation.autonomous_remediation_repository import AutonomousRemediationRepositoryPort
 
 
 class AutonomousPolicyService:
@@ -19,7 +20,7 @@ class AutonomousPolicyService:
     ينفذ عمليات إدارة سياسة المعالجة الآلية والتحقق من صلاحيتها وتسجيل تغييراتها.
     """
 
-    def __init__(self, *, repository) -> None:
+    def __init__(self, *, repository: AutonomousRemediationRepositoryPort) -> None:
         """
         يربط مستودع السياسات ومستودع تدقيقها والساعة الافتراضية.
         """

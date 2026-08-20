@@ -6,8 +6,7 @@
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-
+from app.composition.repository_bundle import RepositoryBundle
 from app.infrastructure.database.repositories.server_repository import (
     ServerRepository,
 )
@@ -38,27 +37,6 @@ from app.infrastructure.database.repositories.agent_job_repository import (
 )
 from app.infrastructure.database.repositories.remediation_repository.repository import RemediationRepository
 from app.infrastructure.database.repositories.autonomous_remediation_repository.repository import AutonomousRemediationRepository
-
-
-@dataclass(slots=True, frozen=True)
-class RepositoryBundle:
-    """
-    يمثل جميع مستودعات التطبيق التي تُبنى مرة واحدة وتُشارك بين الخدمات.
-    """
-    server_repository: ServerRepository
-    command_repository: CommandRepository
-    profile_repository: MonitoringProfileRepository
-    report_repository: ReportRepository
-    analysis_repository: AnalysisRepository
-    retrieval_repository: RetrievalRepository
-    analysis_source_repository: AnalysisSourceRepository
-    specialist_definition_repository: SpecialistDefinitionRepository
-    investigation_repository: InvestigationRepository
-    knowledge_source_repository: KnowledgeSourceRepository
-    knowledge_document_repository: KnowledgeDocumentRepository
-    agent_job_repository: AgentJobRepository
-    remediation_repository: RemediationRepository
-    autonomous_remediation_repository: AutonomousRemediationRepository
 
 
 def build_repositories() -> RepositoryBundle:
@@ -112,6 +90,5 @@ def build_repositories() -> RepositoryBundle:
 
 
 __all__ = [
-    "RepositoryBundle",
     "build_repositories",
 ]

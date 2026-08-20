@@ -19,7 +19,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.capabilities.remediation.service.service import RemediationService
+from app.capabilities.remediation.service.remediation_service import RemediationService
 from app.infrastructure.database.base import Base
 from app.infrastructure.database.models.admin_auth.audit_event import AdminAuthAuditEventModel
 from app.infrastructure.database.models.admin_auth.session import AdminSessionModel

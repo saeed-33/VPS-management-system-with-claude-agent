@@ -3,7 +3,6 @@
 """
 from datetime import UTC, datetime
 
-from app.infrastructure.ssh.command_executor.result import CommandExecutionResult
 from app.core.contracts.reports.command_execution_data import CommandExecutionData
 from app.core.contracts.reports.monitoring_report_data import MonitoringReportData
 from app.core.contracts.reports.monitoring_report_status import MonitoringReportStatus
@@ -20,7 +19,7 @@ class ReportService:
         started_at: datetime,
         finished_at: datetime,
         duration_ms: float,
-        executions: list[CommandExecutionResult],
+        executions: list[CommandExecutionData],
     ) -> MonitoringReportData:
         """
         يبني تقريرًا من اتصال ناجح ونتائج الفحوص التي نفذت.

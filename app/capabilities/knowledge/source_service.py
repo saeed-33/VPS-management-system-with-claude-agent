@@ -6,9 +6,7 @@
 """
 from __future__ import annotations
 
-from app.infrastructure.database.repositories.knowledge_source_repository import (
-    KnowledgeSourceRepository,
-)
+from app.core.ports.knowledge.source_repository import KnowledgeSourceRepositoryPort
 from app.core.contracts.knowledge_sources.create_knowledge_source_dto import CreateKnowledgeSourceDTO
 from app.core.contracts.knowledge_sources.update_knowledge_source_dto import UpdateKnowledgeSourceDTO
 
@@ -19,7 +17,7 @@ class KnowledgeSourceService:
     """
     def __init__(
         self,
-        repository: KnowledgeSourceRepository,
+        repository: KnowledgeSourceRepositoryPort,
     ) -> None:
         """
         يربط مستودع مصادر المعرفة بخدمة الإدارة.

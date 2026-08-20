@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Developer tooling.
 يُستدعى بواسطة: CLI أو المطور مباشرة.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.embedding_factory، app.capabilities.knowledge.retrieval، app.core.config، app.infrastructure.database.repositories.knowledge_retrieval_repository.
+يعتمد مباشرة على: app.composition.analysis.embedding_factory، app.capabilities.knowledge.retrieval، app.core.config، app.infrastructure.database.repositories.knowledge_retrieval_repository.
 الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.capabilities.analysis.retrieval.embedding_factory import (
+from app.composition.analysis.embedding_factory import (
     create_embedding_client,
 )
 from app.capabilities.knowledge.retrieval.retriever import KnowledgeHybridRetriever

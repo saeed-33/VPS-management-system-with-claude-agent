@@ -7,7 +7,7 @@ from typing import Any
 
 import httpx
 
-from app.capabilities.analysis.llm_client import (
+from app.core.ports.analysis.report_analysis_client import (
     LLMAnalysisClient,
 )
 from app.core.contracts.analysis.report_analysis_result import ReportAnalysisResult

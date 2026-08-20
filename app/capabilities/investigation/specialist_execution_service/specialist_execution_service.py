@@ -13,9 +13,9 @@ from app.capabilities.investigation.correlation.cross_specialist_correlator impo
 from app.capabilities.investigation.execution_contracts.investigation_execution_result import InvestigationExecutionResult
 from app.capabilities.investigation.execution_contracts.investigation_specialist_run import InvestigationSpecialistRun
 
-from app.capabilities.investigation.final_diagnosis_synthesizer.service import FinalDiagnosisSynthesizer
+from app.capabilities.investigation.final_diagnosis_synthesizer.final_diagnosis_synthesizer import FinalDiagnosisSynthesizer
 
-from app.capabilities.investigation.runtime_snapshot_service.service import InvestigationRuntimeSnapshotService
+from app.capabilities.investigation.runtime_snapshot_service.runtime_snapshot_service import InvestigationRuntimeSnapshotService
 
 from app.capabilities.investigation.specialist_investigation_loop.specialist_investigation_loop_result import SpecialistInvestigationLoopResult
 from app.capabilities.investigation.specialist_investigation_loop.specialist_loop_stop_reason import SpecialistLoopStopReason
@@ -31,9 +31,9 @@ from app.core.contracts.investigation.specialist_result import SpecialistResult
 from app.core.contracts.investigation.specialist_task import SpecialistTask
 from app.core.contracts.investigation.specialist_task_status import SpecialistTaskStatus
 
-from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
+from app.core.ports.investigation.investigation_repository import InvestigationRepositoryPort
 
-from .constants import logger
+logger = logging.getLogger(__name__)
 
 class SpecialistExecutionService:
     """
@@ -43,7 +43,7 @@ class SpecialistExecutionService:
     def __init__(
         self,
         *,
-        repository: InvestigationRepository,
+        repository: InvestigationRepositoryPort,
         snapshot_service: InvestigationRuntimeSnapshotService,
         correlator: CrossSpecialistCorrelator | None = None,
         synthesizer: FinalDiagnosisSynthesizer | None = None,

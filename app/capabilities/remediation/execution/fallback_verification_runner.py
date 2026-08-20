@@ -1,9 +1,9 @@
 """منفذ أو عقد من مكونات تنفيذ المعالجة."""
 from __future__ import annotations
 
-class UnavailableVerificationRunner:
+class FallbackVerificationRunner:
     """
-    يمثل متحققًا غير متاح ويبلغ عن عدم إمكانية التحقق.
+    يمثل متحققاً احتياطياً يبلغ عن عدم إمكانية التحقق.
     """
     def verify(self, **_kwargs) -> tuple[bool, dict]:
         """

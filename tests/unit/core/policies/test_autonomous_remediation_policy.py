@@ -19,7 +19,7 @@ from app.core.contracts.autonomous_remediation.autonomous_history_snapshot impor
 from app.core.contracts.autonomous_remediation.autonomous_policy_status import AutonomousPolicyStatus
 from app.core.contracts.autonomous_remediation.autonomous_remediation_policy import AutonomousRemediationPolicy
 from app.core.policies.autonomous_remediation import AutonomousRemediationPolicyEvaluator
-from app.capabilities.remediation.autonomous_execution_service.service import AutonomousExecutionService
+from app.capabilities.remediation.autonomous_execution_service.autonomous_execution_service import AutonomousExecutionService
 
 
 NOW = datetime(2026, 8, 14, tzinfo=timezone.utc)

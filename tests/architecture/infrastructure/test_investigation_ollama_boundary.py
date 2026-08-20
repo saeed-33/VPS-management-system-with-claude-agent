@@ -46,11 +46,11 @@ def test_investigation_capability_keeps_contracts_not_ollama_implementations():
     """
     specialist = (
         ROOT
-        / "app/capabilities/investigation/specialist_reasoning_client.py"
+        / "app/composition/investigation/specialist_reasoning_client_factory.py"
     ).read_text(encoding="utf-8")
     final = (
         ROOT
-        / "app/capabilities/investigation/final_diagnosis_synthesizer/client_factory.py"
+        / "app/composition/investigation/final_diagnosis_narrative_client_factory.py"
     ).read_text(encoding="utf-8")
 
     specialist_contract = (
@@ -87,20 +87,20 @@ def test_capability_contracts_resolve_provider_adapters_lazily():
     """
     specialist = (
         ROOT
-        / "app/capabilities/investigation/specialist_reasoning_client.py"
+        / "app/composition/investigation/specialist_reasoning_client_factory.py"
     ).read_text(encoding="utf-8")
     final = (
         ROOT
-        / "app/capabilities/investigation/final_diagnosis_synthesizer/client_factory.py"
+        / "app/composition/investigation/final_diagnosis_narrative_client_factory.py"
     ).read_text(encoding="utf-8")
 
     assert any(
         isinstance(node, ast.FunctionDef)
         and node.name == "__getattr__"
         for node in ast.parse(specialist).body
-    )
+    ) is False
     assert any(
         isinstance(node, ast.FunctionDef)
         and node.name == "__getattr__"
         for node in ast.parse(final).body
-    )
+    ) is False

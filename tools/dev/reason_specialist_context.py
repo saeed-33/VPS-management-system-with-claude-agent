@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Developer tooling.
 يُستدعى بواسطة: CLI أو المطور مباشرة.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.embedding_factory، app.core.contracts.investigation، app.capabilities.knowledge.retrieval، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_reasoning_agent، app.capabilities.investigation.specialist_reasoning_client.
+يعتمد مباشرة على: app.composition.analysis.embedding_factory، app.core.contracts.investigation، app.capabilities.knowledge.retrieval، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_reasoning_agent، app.composition.investigation.specialist_reasoning_client_factory.
 الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -21,14 +21,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.capabilities.analysis.retrieval.embedding_factory import (
+from app.composition.analysis.embedding_factory import (
     create_embedding_client,
 )
 from app.core.contracts.investigation.specialist_task import SpecialistTask
 from app.capabilities.knowledge.retrieval.retriever import KnowledgeHybridRetriever
 from app.capabilities.investigation.specialist_context.specialist_context_builder import SpecialistContextBuilder
 from app.capabilities.investigation.specialist_reasoning_agent.specialist_reasoning_agent import SpecialistReasoningAgent
-from app.capabilities.investigation.specialist_reasoning_client import (
+from app.composition.investigation.specialist_reasoning_client_factory import (
     create_specialist_reasoning_client,
 )
 from app.composition import container

@@ -6,7 +6,7 @@
 """
 from __future__ import annotations
 
-from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
+from app.core.ports.investigation.investigation_repository import InvestigationRepositoryPort
 from app.core.contracts.investigation_read_models.investigation_candidate_read_model import InvestigationCandidateReadModel
 from app.core.contracts.investigation_read_models.investigation_detail_read_model import InvestigationDetailReadModel
 from app.core.contracts.investigation_read_models.investigation_runtime_read_model import InvestigationRuntimeReadModel
@@ -19,7 +19,7 @@ class InvestigationReadService:
     """
     def __init__(
         self,
-        repository: InvestigationRepository,
+        repository: InvestigationRepositoryPort,
     ) -> None:
         """
         يهيئ InvestigationReadService ويربط الاعتماديات اللازمة لدورة التحقيق.

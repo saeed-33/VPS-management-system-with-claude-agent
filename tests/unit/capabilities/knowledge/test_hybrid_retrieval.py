@@ -11,7 +11,7 @@
 import asyncio
 
 from app.capabilities.knowledge.retrieval.retriever import KnowledgeHybridRetriever
-from app.infrastructure.database.repositories.knowledge_retrieval_repository.search_row import KnowledgeSearchRow
+from app.core.contracts.knowledge_sources.knowledge_search_row import KnowledgeSearchRow
 
 
 class EmbeddingClient:

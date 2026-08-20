@@ -14,7 +14,7 @@ from app.core.contracts.final_diagnosis.final_diagnosis_narrative import FinalDi
 from app.capabilities.investigation.execution_contracts.investigation_execution_result import InvestigationExecutionResult
 from app.core.contracts.investigation.evidence_kind import EvidenceKind
 from app.core.contracts.investigation.evidence_reference import EvidenceReference
-from app.infrastructure.database.repositories.investigation_repository.repository import InvestigationRepository
+from app.core.ports.investigation.investigation_repository import InvestigationRepositoryPort
 
 
 from .runtime_snapshot_serializer import InvestigationRuntimeSnapshotSerializer
@@ -30,7 +30,7 @@ class InvestigationRuntimeSnapshotService:
 
     def __init__(
         self,
-        repository: InvestigationRepository,
+        repository: InvestigationRepositoryPort,
     ) -> None:
         """
         يهيئ InvestigationRuntimeSnapshotService ويربط الاعتماديات اللازمة لدورة التحقيق.

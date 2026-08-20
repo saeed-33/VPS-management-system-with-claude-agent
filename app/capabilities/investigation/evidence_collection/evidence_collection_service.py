@@ -2,37 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from datetime import UTC, datetime
-
-from time import perf_counter
-
-from typing import Protocol
-
+from app.core.contracts.investigation.diagnostic_connection_config import DiagnosticConnectionConfig
+from app.core.contracts.investigation.diagnostic_execution_outcome import DiagnosticExecutionOutcome
+from app.core.contracts.investigation.evidence_collection_request import EvidenceCollectionRequest
 from app.core.contracts.investigation.evidence_kind import EvidenceKind
 from app.core.contracts.investigation.evidence_reference import EvidenceReference
-
 from app.capabilities.investigation.source_location import extract_source_locations
-
-from app.core.policies.diagnostic_policy.diagnostic_policy_result import DiagnosticPolicyResult
-
-from asyncssh import Error
-
-from app.infrastructure.ssh.client.client import SSHClient
-from app.infrastructure.ssh.client.config import SSHConnectionConfig
-
-from app.infrastructure.ssh.command_executor.executor import SSHCommandExecutor
-
-from .diagnostic_command_runner import DiagnosticCommandRunner
-
-from .diagnostic_execution_outcome import DiagnosticExecutionOutcome
-
-from .evidence_collection_request import EvidenceCollectionRequest
-
-from .ssh_diagnostic_command_runner import SSHDiagnosticCommandRunner
-
-from .server_repository_protocol import ServerRepositoryProtocol
+from app.core.ports.investigation.diagnostic_command_runner import DiagnosticCommandRunnerPort
+from app.core.ports.investigation.server_repository import InvestigationServerRepositoryPort
 
 class EvidenceCollectionService:
     """
@@ -41,11 +18,11 @@ class EvidenceCollectionService:
     def __init__(
         self,
         *,
-        server_repository: ServerRepositoryProtocol,
+        server_repository: InvestigationServerRepositoryPort,
         default_private_key_path: str,
         known_hosts_path: str,
         connection_timeout_seconds: float,
-        runner: DiagnosticCommandRunner | None = None,
+        runner: DiagnosticCommandRunnerPort,
     ) -> None:
         """
         يهيئ EvidenceCollectionService ويربط الاعتماديات اللازمة لدورة التحقيق.
@@ -65,7 +42,7 @@ class EvidenceCollectionService:
         self._default_private_key_path = default_private_key_path
         self._known_hosts_path = known_hosts_path
         self._connection_timeout_seconds = connection_timeout_seconds
-        self._runner = runner or SSHDiagnosticCommandRunner()
+        self._runner = runner
 
     async def collect(
         self,
@@ -103,7 +80,7 @@ class EvidenceCollectionService:
                 f"Server with id {request.server_id} was not found."
             )
 
-        config = SSHConnectionConfig(
+        config = DiagnosticConnectionConfig(
             host=server.host,
             port=server.port,
             username=server.username,

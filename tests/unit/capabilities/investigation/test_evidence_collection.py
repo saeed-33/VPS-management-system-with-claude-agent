@@ -18,8 +18,8 @@ from app.core.contracts.investigation.evidence_kind import EvidenceKind
 from app.core.policies.diagnostic_policy.diagnostic_policy_decision import DiagnosticPolicyDecision
 from app.core.policies.diagnostic_policy.diagnostic_policy_reason import DiagnosticPolicyReason
 from app.core.policies.diagnostic_policy.diagnostic_policy_result import DiagnosticPolicyResult
-from app.capabilities.investigation.evidence_collection.diagnostic_execution_outcome import DiagnosticExecutionOutcome
-from app.capabilities.investigation.evidence_collection.evidence_collection_request import EvidenceCollectionRequest
+from app.core.contracts.investigation.diagnostic_execution_outcome import DiagnosticExecutionOutcome
+from app.core.contracts.investigation.evidence_collection_request import EvidenceCollectionRequest
 from app.capabilities.investigation.evidence_collection.evidence_collection_service import EvidenceCollectionService
 
 

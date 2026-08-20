@@ -636,6 +636,7 @@ def main() -> int:
     preferred_order = (
         "Repository root / configuration",
         "Application core",
+        "Core contracts, policies, and configuration",
         "Claude Runtime",
         "Monitoring Capability",
         "SSH Infrastructure",

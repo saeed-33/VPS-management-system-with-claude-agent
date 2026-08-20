@@ -24,21 +24,21 @@ from ._candidate import _Candidate
 
 from ._issue_signal import _IssueSignal
 
-from .factories import _actionable_issues
+from .routing_signal_helpers import _actionable_issues
 
-from .factories import _contains_phrase
+from .routing_signal_helpers import _contains_phrase
 
-from .factories import _health_status
+from .routing_signal_helpers import _health_status
 
-from .factories import _issue_signals
+from .routing_signal_helpers import _issue_signals
 
-from .factories import _normalize_text
+from .routing_signal_helpers import _normalize_text
 
-from .factories import _report_failed
+from .routing_signal_helpers import _report_failed
 
-from .factories import _report_signal_text
+from .routing_signal_helpers import _report_signal_text
 
-from .factories import _value
+from .routing_signal_helpers import _value
 
 class InvestigationRouter:
     """

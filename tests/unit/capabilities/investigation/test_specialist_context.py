@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Test suite.
 يُستدعى بواسطة: pytest أو أدوات acceptance.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.rag_context، app.core.contracts.investigation، app.capabilities.knowledge.retrieval، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_registry.
+يعتمد مباشرة على: app.core.contracts.analysis.retrieved_analysis_context، app.core.contracts.investigation، app.core.contracts.knowledge_sources.knowledge_retrieval_context، app.capabilities.investigation.specialist_context، app.capabilities.investigation.specialist_registry.
 الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -11,13 +11,13 @@
 import asyncio
 from types import MappingProxyType
 
-from app.capabilities.analysis.retrieval.rag_context import (
+from app.core.contracts.analysis.retrieved_analysis_context import (
     RetrievedAnalysisContext,
 )
 from app.core.contracts.investigation.evidence_kind import EvidenceKind
 from app.core.contracts.investigation.evidence_reference import EvidenceReference
 from app.core.contracts.investigation.specialist_task import SpecialistTask
-from app.capabilities.knowledge.retrieval.context import KnowledgeRetrievalContext
+from app.core.contracts.knowledge_sources.knowledge_retrieval_context import KnowledgeRetrievalContext
 from app.capabilities.investigation.specialist_context.specialist_context_budget import SpecialistContextBudget
 from app.capabilities.investigation.specialist_context.specialist_context_builder import SpecialistContextBuilder
 from app.capabilities.investigation.specialist_registry.specialist_runtime_definition import SpecialistRuntimeDefinition

@@ -1,7 +1,7 @@
 """مرشح دمج نتائج استرجاع المعرفة."""
 from __future__ import annotations
 from dataclasses import dataclass
-from app.infrastructure.database.repositories.knowledge_retrieval_repository.search_row import KnowledgeSearchRow
+from app.core.contracts.knowledge_sources.knowledge_search_row import KnowledgeSearchRow
 
 @dataclass(slots=True)
 class _FusionCandidate:

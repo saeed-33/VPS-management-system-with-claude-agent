@@ -1,8 +1,8 @@
 """منفذ أو عقد من مكونات تنفيذ المعالجة."""
 from __future__ import annotations
 
-from .service_state_observation import ServiceStateObservation
-from .ssh_named_command_runner import _SSHNamedCommandRunner
+from app.core.contracts.remediation.service_state_observation import ServiceStateObservation
+from .named_command_runner import _SSHNamedCommandRunner
 
 
 class SSHServiceStateEvidenceCollector(_SSHNamedCommandRunner):

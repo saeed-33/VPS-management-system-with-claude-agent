@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Test suite.
 يُستدعى بواسطة: pytest أو أدوات acceptance.
-يعتمد مباشرة على: app.capabilities.investigation.specialist_reasoning_client.
+يعتمد مباشرة على: app.infrastructure.llm.ollama.specialist_reasoning_client.
 الحد المعماري: لا يضيف هذا الملف production behavior؛ يثبت behavior قائمًا.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -13,7 +13,7 @@ import json
 
 import httpx
 
-from app.capabilities.investigation.specialist_reasoning_client import (
+from app.infrastructure.llm.ollama.specialist_reasoning_client.client import (
     OllamaSpecialistReasoningClient,
 )
 

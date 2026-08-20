@@ -5,7 +5,7 @@ from typing import Protocol
 
 from .schedulable_server_record import SchedulableServerRecord
 
-class SchedulerServerRepositoryProtocol(Protocol):
+class SchedulerServerRepositoryPort(Protocol):
     """
     عقد يعيد السيرفرات المفعلة التي قد تستحق فحصًا جديدًا.
     """

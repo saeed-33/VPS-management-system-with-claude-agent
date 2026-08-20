@@ -22,15 +22,18 @@ def test_repository_construction_lives_in_repository_composition_module():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
-    repositories = (
-        ROOT / "app/composition/repositories.py"
+    repository_factory = (
+        ROOT / "app/composition/repository_factory.py"
+    ).read_text(encoding="utf-8")
+    repository_bundle = (
+        ROOT / "app/composition/repository_bundle.py"
     ).read_text(encoding="utf-8")
 
     assert "repositories = build_repositories()" in builder
-    assert "class RepositoryBundle" in repositories
-    assert "def build_repositories()" in repositories
+    assert "class RepositoryBundle" in repository_bundle
+    assert "def build_repositories()" in repository_factory
 
     constructor_names = [
         "ServerRepository",
@@ -51,7 +54,7 @@ def test_repository_construction_lives_in_repository_composition_module():
     import ast
 
     builder_tree = ast.parse(builder)
-    repository_tree = ast.parse(repositories)
+    repository_tree = ast.parse(repository_factory)
 
     builder_calls = {
         node.func.id
@@ -83,7 +86,7 @@ def test_repository_composition_module_is_not_eager():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     repositories = (
-        ROOT / "app/composition/repositories.py"
+        ROOT / "app/composition/repository_factory.py"
     ).read_text(encoding="utf-8")
 
     assert "\nrepositories = build_repositories()" not in repositories

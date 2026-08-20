@@ -1,10 +1,9 @@
 """
 إدارة هوية السيرفر وإعدادات الاتصال وتفعيل المراقبة الخاصة به.
 """
-from app.infrastructure.database.models.server.server import ServerModel
-from app.infrastructure.database.repositories.server_repository import (
-    ServerRepository,
-)
+from typing import Any
+
+from app.core.ports.monitoring.server_repository import ServerRepositoryPort
 from app.core.contracts.servers.create_server_dto import CreateServerDTO
 from app.core.contracts.servers.update_server_dto import UpdateServerDTO
 from app.core.exceptions.duplicate_server_error import DuplicateServerError
@@ -17,14 +16,14 @@ class ServerService:
     """
     def __init__(
         self,
-        repository: ServerRepository,
+        repository: ServerRepositoryPort,
     ) -> None:
         """
         يربط خدمة السيرفر بمستودع السيرفر وملفات المراقبة.
         """
         self._repository = repository
 
-    def list_servers(self) -> list[ServerModel]:
+    def list_servers(self) -> list[Any]:
         """
         يعرض السيرفرات المسجلة لإدارة الاتصال والمراقبة.
         """
@@ -33,7 +32,7 @@ class ServerService:
     def get_server(
         self,
         server_id: int,
-    ) -> ServerModel:
+    ) -> Any:
         """
         يسترجع سيرفرًا محددًا أو يوضح عدم وجوده.
         """
@@ -49,7 +48,7 @@ class ServerService:
     def create_server(
         self,
         data: CreateServerDTO,
-    ) -> ServerModel:
+    ) -> Any:
         """
         ينشئ سجل سيرفر بعد التحقق من بيانات الاتصال وملف المراقبة.
         """
@@ -68,7 +67,7 @@ class ServerService:
         self,
         server_id: int,
         data: UpdateServerDTO,
-    ) -> ServerModel:
+    ) -> Any:
         """
         يحدث بيانات السيرفر أو إعداد المراقبة مع الحفاظ على تقاريره.
         """

@@ -14,7 +14,7 @@ from app.capabilities.analysis.retrieval.performance_profiler import (
     set_counter,
 )
 
-from app.capabilities.analysis.llm_client import (
+from app.core.ports.analysis.report_analysis_client import (
     LLMAnalysisClient,
 )
 from app.capabilities.analysis.prompts import (
@@ -24,7 +24,7 @@ from app.capabilities.analysis.prompts import (
 from app.capabilities.analysis.report_serializer import (
     ReportSerializer,
 )
-from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
+from app.core.ports.analysis.analysis_repository import AnalysisRepositoryPort
 from app.core.contracts.analysis.report_analysis_result import ReportAnalysisResult
 from app.capabilities.monitoring.report_query_service import (
     ReportQueryService,
@@ -42,7 +42,7 @@ class ReportAnalyzer:
         self,
         *,
         report_query_service: ReportQueryService,
-        analysis_repository: AnalysisRepository,
+        analysis_repository: AnalysisRepositoryPort,
         llm_client: LLMAnalysisClient,
         max_report_characters: int,
     ) -> None:

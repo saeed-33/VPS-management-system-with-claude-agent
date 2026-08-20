@@ -22,7 +22,7 @@ def test_analysis_and_investigation_composition_is_outside_builder():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
     analysis = (
         ROOT / "app/composition/analysis/analysis.py"
@@ -50,7 +50,7 @@ def test_claude_mcp_and_scheduler_wiring_moves_to_runtime_composition():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
     runtime = (
         ROOT / "app/composition/runtime.py"

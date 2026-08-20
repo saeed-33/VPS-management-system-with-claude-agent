@@ -1,8 +1,8 @@
 """فهرسة مقاطع المعرفة باستخدام embeddings."""
 from __future__ import annotations
-from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
-from app.capabilities.knowledge.ingestion_contracts.status import KnowledgeDocumentStatus
-from app.infrastructure.database.repositories.knowledge_document_repository import KnowledgeDocumentRepository
+from app.core.ports.analysis.embedding_client import EmbeddingClient
+from app.core.contracts.knowledge_sources.document_status import KnowledgeDocumentStatus
+from app.core.ports.knowledge.document_repository import KnowledgeDocumentRepositoryPort
 from .result import KnowledgeIndexingResult
 
 class KnowledgeIndexer:
@@ -12,7 +12,7 @@ class KnowledgeIndexer:
     def __init__(
         self,
         *,
-        document_repository: KnowledgeDocumentRepository,
+        document_repository: KnowledgeDocumentRepositoryPort,
         embedding_client: EmbeddingClient,
     ) -> None:
         """

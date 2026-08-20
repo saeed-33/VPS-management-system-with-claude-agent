@@ -41,10 +41,10 @@ def test_analysis_capability_factories_use_infrastructure_implementations():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     analysis_factory = (
-        ROOT / "app/capabilities/analysis/client_factory.py"
+        ROOT / "app/composition/analysis/client_factory.py"
     ).read_text(encoding="utf-8")
     embedding_factory = (
-        ROOT / "app/capabilities/analysis/retrieval/embedding_factory.py"
+        ROOT / "app/composition/analysis/embedding_factory.py"
     ).read_text(encoding="utf-8")
 
     assert "app.infrastructure.llm.ollama.analysis_client" in analysis_factory

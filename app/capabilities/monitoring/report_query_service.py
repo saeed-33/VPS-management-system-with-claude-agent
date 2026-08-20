@@ -1,9 +1,7 @@
 """
 قراءة تقارير المراقبة وعرض ملخصاتها وتفاصيل قياساتها.
 """
-from app.infrastructure.database.repositories.report_repository import (
-    ReportRepository,
-)
+from app.core.ports.monitoring.report_repository import ReportRepositoryPort
 from app.core.contracts.reports.command_execution_dto import CommandExecutionDTO
 from app.core.contracts.reports.report_details_dto import ReportDetailsDTO
 from app.core.contracts.reports.report_list_item_dto import ReportListItemDTO
@@ -16,7 +14,7 @@ class ReportQueryService:
     """
     def __init__(
         self,
-        repository: ReportRepository,
+        repository: ReportRepositoryPort,
     ) -> None:
         """
         يدير دورة حياة عنصر تقارير المراقبة داخل الخدمة.

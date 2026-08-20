@@ -8,8 +8,8 @@ from types import MappingProxyType
 
 from typing import Any, Iterable, Mapping
 
-from app.infrastructure.database.repositories.specialist_definition_repository import (
-    SpecialistDefinitionRepository,
+from app.core.ports.investigation.specialist_definition_repository import (
+    SpecialistDefinitionRepositoryPort,
 )
 
 from app.core.contracts.specialists.helpers import validate_specialist_slug
@@ -28,7 +28,7 @@ class SpecialistRegistry:
     """
     def __init__(
         self,
-        repository: SpecialistDefinitionRepository,
+        repository: SpecialistDefinitionRepositoryPort,
     ) -> None:
         """
         يهيئ SpecialistRegistry ويربط الاعتماديات اللازمة لدورة التحقيق.

@@ -23,7 +23,7 @@ def test_application_container_is_outside_builder():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
     container = (
         ROOT / "app/composition/container.py"
@@ -45,15 +45,18 @@ def test_core_service_construction_is_outside_builder():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
-    services = (
-        ROOT / "app/composition/services.py"
+    service_factory = (
+        ROOT / "app/composition/service_factory.py"
+    ).read_text(encoding="utf-8")
+    service_bundle = (
+        ROOT / "app/composition/service_bundle.py"
     ).read_text(encoding="utf-8")
 
     assert "services = build_core_services(" in builder
-    assert "class CoreServiceBundle" in services
-    assert "def build_core_services(" in services
+    assert "class CoreServiceBundle" in service_bundle
+    assert "def build_core_services(" in service_factory
 
     constructor_names = {
         "ServerService",
@@ -77,7 +80,7 @@ def test_core_service_construction_is_outside_builder():
     }
 
     builder_tree = ast.parse(builder)
-    services_tree = ast.parse(services)
+    services_tree = ast.parse(service_factory)
 
     builder_calls = {
         node.func.id
@@ -105,7 +108,7 @@ def test_analysis_and_runtime_are_outside_builder():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     builder = (
-        ROOT / "app/composition/builder.py"
+        ROOT / "app/composition/container_builder.py"
     ).read_text(encoding="utf-8")
     analysis = (
         ROOT / "app/composition/analysis/analysis.py"

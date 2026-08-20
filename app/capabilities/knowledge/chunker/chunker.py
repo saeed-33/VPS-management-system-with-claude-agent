@@ -4,7 +4,7 @@ import re
 from app.capabilities.knowledge.ingestion_contracts.chunk_draft import KnowledgeChunkDraft
 from .block import _Block
 from .config import KnowledgeChunkerConfig
-from .constants import _MARKDOWN_HEADING_RE, _SENTENCE_BOUNDARY_RE
+from .chunking_patterns import _MARKDOWN_HEADING_RE, _SENTENCE_BOUNDARY_RE
 class StructureAwareKnowledgeChunker:
     """
     يقسم الوثيقة إلى مقاطع تراعي الفقرات والعناوين والصفحات وحدود الحجم.

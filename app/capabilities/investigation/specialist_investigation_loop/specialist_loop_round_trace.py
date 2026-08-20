@@ -20,7 +20,7 @@ from app.core.policies.diagnostic_policy.diagnostic_policy_request import Diagno
 from app.core.policies.diagnostic_tools.diagnostic_tool_call import DiagnosticToolCall
 from app.core.policies.diagnostic_tools.diagnostic_tool_registry import DiagnosticToolRegistry
 
-from app.capabilities.investigation.evidence_collection.evidence_collection_request import EvidenceCollectionRequest
+from app.core.contracts.investigation.evidence_collection_request import EvidenceCollectionRequest
 from app.capabilities.investigation.evidence_collection.evidence_collection_service import EvidenceCollectionService
 
 from app.capabilities.investigation.specialist_context.specialist_context_builder import SpecialistContextBuilder

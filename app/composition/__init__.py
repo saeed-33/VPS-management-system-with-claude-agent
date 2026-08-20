@@ -6,7 +6,7 @@
 """
 # نقطة تجميع رحلة مراقبة السيرفر وربط مراحلها بخدماتها المشتركة.
 
-from app.composition.builder import (
+from app.composition.container_builder import (
     ApplicationContainer,
     build_container,
 )

@@ -11,14 +11,14 @@ from uuid import uuid4
 
 from sqlalchemy.exc import OperationalError
 
-from app.capabilities.remediation.execution.service_state_evidence_collector import ServiceStateEvidenceCollector
-from app.capabilities.remediation.execution.service_state_observation import ServiceStateObservation
-from app.capabilities.remediation.execution.unavailable_evidence_collector import UnavailableEvidenceCollector
-from app.capabilities.remediation.execution.unavailable_verification_runner import UnavailableVerificationRunner
-from app.capabilities.remediation.execution.unavailable_write_runner import UnavailableWriteRunner
-from app.capabilities.remediation.execution.verification_runner import VerificationRunner
-from app.capabilities.remediation.execution.write_command_result import WriteCommandResult
-from app.capabilities.remediation.execution.write_command_runner import WriteCommandRunner
+from app.core.ports.remediation.service_state_evidence_collector import ServiceStateEvidenceCollector
+from app.core.contracts.remediation.service_state_observation import ServiceStateObservation
+from app.capabilities.remediation.execution.fallback_evidence_collector import FallbackEvidenceCollector
+from app.capabilities.remediation.execution.fallback_verification_runner import FallbackVerificationRunner
+from app.capabilities.remediation.execution.fallback_write_runner import FallbackWriteRunner
+from app.core.ports.remediation.verification_runner import VerificationRunner
+from app.core.contracts.remediation.write_command_result import WriteCommandResult
+from app.core.ports.remediation.write_command_runner import WriteCommandRunner
 from app.capabilities.remediation.sandbox_runtime import NativeSandboxRuntime
 from app.core.contracts.sandbox_validation.sandbox_runtime_check import SandboxRuntimeCheck
 from app.core.contracts.sandbox_validation.sandbox_target import SandboxTarget
@@ -41,7 +41,6 @@ from app.core.policies.remediation_risk import RemediationRiskClassifier
 from app.core.policies.remediation_tools.named_write_tool_registry import NamedWriteToolRegistry
 from app.core.policies.remediation_tools.factories import build_default_write_tool_registry
 from app.core.utils.datetime import utc_now
-from app.infrastructure.database.repositories.remediation_repository.repository import RemediationRepository
 
 
 class _RemediationPlanningMixin:

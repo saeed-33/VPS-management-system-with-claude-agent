@@ -10,12 +10,8 @@ from hashlib import sha256
 
 from app.capabilities.knowledge.parsers.content_parser import KnowledgeContentParser
 from app.capabilities.knowledge.source_loader.loader import KnowledgeSourceLoader
-from app.infrastructure.database.repositories.knowledge_document_repository import (
-    KnowledgeDocumentRepository,
-)
-from app.infrastructure.database.repositories.knowledge_source_repository import (
-    KnowledgeSourceRepository,
-)
+from app.core.ports.knowledge.document_repository import KnowledgeDocumentRepositoryPort
+from app.core.ports.knowledge.source_repository import KnowledgeSourceRepositoryPort
 from app.core.utils.datetime import utc_now
 
 
@@ -26,8 +22,8 @@ class KnowledgeIngestionService:
     def __init__(
         self,
         *,
-        source_repository: KnowledgeSourceRepository,
-        document_repository: KnowledgeDocumentRepository,
+        source_repository: KnowledgeSourceRepositoryPort,
+        document_repository: KnowledgeDocumentRepositoryPort,
         loader: KnowledgeSourceLoader,
         parser: KnowledgeContentParser,
     ) -> None:

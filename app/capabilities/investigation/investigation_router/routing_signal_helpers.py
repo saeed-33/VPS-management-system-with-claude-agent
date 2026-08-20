@@ -21,9 +21,9 @@ from app.capabilities.investigation.specialist_registry.specialist_runtime_defin
 
 from ._issue_signal import _IssueSignal
 
-from .constants import _BOUNDARY_RE
+from .routing_patterns import _BOUNDARY_RE
 
-from .constants import _SPACE_RE
+from .routing_patterns import _SPACE_RE
 
 def _normalize_text(value: str | None) -> str:
     """

@@ -12,6 +12,7 @@ from uuid import uuid4
 
 from app.core.contracts.autonomous_remediation.autonomous_authorization import AutonomousAuthorization
 from app.core.contracts.autonomous_remediation.autonomous_authorization_status import AutonomousAuthorizationStatus
+from app.core.ports.remediation.autonomous_remediation_repository import AutonomousRemediationRepositoryPort
 from app.core.utils.datetime import utc_now
 
 
@@ -19,7 +20,7 @@ class AutonomousAuthorizationService:
     """
     يدير إنشاء التفويضات الآلية والتحقق من صلاحيتها واستهلاكها لمرة واحدة.
     """
-    def __init__(self, *, repository) -> None:
+    def __init__(self, *, repository: AutonomousRemediationRepositoryPort) -> None:
         """
         يربط مستودع التفويضات والساعة الافتراضية ومدة التفويض.
         """

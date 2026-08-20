@@ -1,16 +1,10 @@
 """
 إدارة تعريفات فحوص المراقبة وربطها بالسيرفرات.
 """
-from app.infrastructure.database.models.monitor_command import (
-    MonitorCommandModel,
-)
-from app.infrastructure.database.models.profile_command import (
-    MonitoringProfileCommandModel,
-)
-from app.infrastructure.database.repositories.command_repository.repository import CommandRepository
-from app.infrastructure.database.repositories.server_repository import (
-    ServerRepository,
-)
+from typing import Any
+
+from app.core.ports.monitoring.command_repository import CommandRepositoryPort
+from app.core.ports.monitoring.server_repository import ServerRepositoryPort
 from app.core.contracts.commands.create_command_dto import CreateCommandDTO
 from app.core.contracts.commands.update_command_dto import UpdateCommandDTO
 from app.core.exceptions.command_not_found_error import CommandNotFoundError
@@ -24,8 +18,8 @@ class CommandService:
     """
     def __init__(
         self,
-        command_repository: CommandRepository,
-        server_repository: ServerRepository,
+        command_repository: CommandRepositoryPort,
+        server_repository: ServerRepositoryPort,
     ) -> None:
         """
         يربط خدمة الفحوص بمستودع الأوامر والسيرفرات وملفات المراقبة.
@@ -39,7 +33,7 @@ class CommandService:
 
     def list_commands(
         self,
-    ) -> list[MonitorCommandModel]:
+    ) -> list[Any]:
         """
         يعرض تعريفات الفحوص المسجلة لإدارتها أو اختيارها في ملف مراقبة.
         """
@@ -48,7 +42,7 @@ class CommandService:
     def get_command(
         self,
         command_id: int,
-    ) -> MonitorCommandModel:
+    ) -> Any:
         """
         يسترجع فحصًا واحدًا أو يرفع خطأ مجال واضحًا عند غيابه.
         """
@@ -66,7 +60,7 @@ class CommandService:
     def create_command(
         self,
         data: CreateCommandDTO,
-    ) -> MonitorCommandModel:
+    ) -> Any:
         """
         ينشئ فحصًا مسجلًا بعد التحقق من اسمه ونصه وإعدادات بصمته.
         """
@@ -91,7 +85,7 @@ class CommandService:
         self,
         command_id: int,
         data: UpdateCommandDTO,
-    ) -> MonitorCommandModel:
+    ) -> Any:
         """
         يحدث تعريف فحص دون فقدان علاقاته وتقاريره السابقة.
         """
@@ -156,7 +150,7 @@ class CommandService:
         custom_timeout_seconds: (
             float | None
         ) = None,
-    ) -> MonitoringProfileCommandModel:
+    ) -> Any:
         """
         يربط فحصًا بسيرفر ويحدد إعدادات تشغيله داخل المراقبة.
         """

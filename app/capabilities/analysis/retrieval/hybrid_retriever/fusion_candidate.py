@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.capabilities.analysis.retrieval.rag_context import RetrievedAnalysisContext
+from app.core.contracts.analysis.retrieved_analysis_context import RetrievedAnalysisContext
 
 @dataclass(slots=True)
 class _FusionCandidate:

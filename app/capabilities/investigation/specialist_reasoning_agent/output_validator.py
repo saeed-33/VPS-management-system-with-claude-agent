@@ -15,7 +15,7 @@ from app.core.policies.diagnostic_tools.diagnostic_tool_call import DiagnosticTo
 
 from app.capabilities.investigation.specialist_context.specialist_context_snapshot import SpecialistContextSnapshot
 
-from app.capabilities.investigation.specialist_reasoning_client import (
+from app.core.contracts.specialist_reasoning.specialist_reasoning_client import (
     SpecialistReasoningClient,
 )
 
@@ -29,7 +29,7 @@ from .specialist_diagnostic_tool_request import SpecialistDiagnosticToolRequest
 
 from .specialist_reasoning_execution import SpecialistReasoningExecution
 
-from .constants import SYSTEM_PROMPT
+from .reasoning_prompt import SYSTEM_PROMPT
 
 class SpecialistReasoningOutputValidator:
     """يتحقق من مراجع مخرجات الاختصاصي ويوحد توصيات المجالات."""

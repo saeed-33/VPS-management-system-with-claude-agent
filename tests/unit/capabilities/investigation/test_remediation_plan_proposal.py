@@ -12,7 +12,7 @@ from sqlalchemy.pool import StaticPool
 from app.capabilities.remediation.plan_proposal_service import (
     RemediationPlanProposalService,
 )
-from app.capabilities.remediation.service.service import RemediationService
+from app.capabilities.remediation.service.remediation_service import RemediationService
 from app.core.contracts.remediation.remediation_plan_status import RemediationPlanStatus
 from app.infrastructure.database.base import Base
 from app.infrastructure.database.models.remediation.plan import RemediationPlanModel

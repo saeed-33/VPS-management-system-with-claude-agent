@@ -110,6 +110,29 @@ def test_capabilities_do_not_depend_on_interfaces_composition_or_runtime():
     ) == []
 
 
+def test_investigation_does_not_depend_on_analysis_or_knowledge_implementations():
+    """تمنع اعتماد التحقيق المباشر على قدرات التحليل والمعرفة."""
+    assert _violations(
+        "app/capabilities/investigation",
+        (
+            "app.capabilities.analysis",
+            "app.capabilities.knowledge",
+        ),
+    ) == []
+
+
+def test_monitoring_and_remediation_do_not_depend_on_each_other():
+    """تثبت استقلال قدرات المراقبة والمعالجة عن بعضها."""
+    assert _violations(
+        "app/capabilities/monitoring",
+        ("app.capabilities.remediation",),
+    ) == []
+    assert _violations(
+        "app/capabilities/remediation",
+        ("app.capabilities.monitoring",),
+    ) == []
+
+
 def test_infrastructure_does_not_depend_on_interface_or_runtime_layers():
     """
     يثبت contract محددًا من خلال حالة اختبار معزولة ضمن طبقة Test suite.

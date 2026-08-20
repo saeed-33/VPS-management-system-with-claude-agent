@@ -6,9 +6,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 from app.infrastructure.ssh.client.client import SSHClient
 from app.infrastructure.ssh.client.config import SSHConnectionConfig
+from app.infrastructure.ssh.command_executor.executor import SSHCommandExecutor
 
 from .runtime_path import _resolve_runtime_file_path
-from .write_command_result import WriteCommandResult
+from app.core.contracts.remediation.write_command_result import WriteCommandResult
 
 class _SSHNamedCommandRunner:
     """

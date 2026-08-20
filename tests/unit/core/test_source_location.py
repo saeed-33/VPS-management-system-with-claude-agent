@@ -14,7 +14,7 @@ from app.capabilities.investigation.correlation.cross_specialist_correlator impo
 from app.capabilities.investigation.correlation.final_diagnosis import FinalDiagnosis
 from app.capabilities.investigation.source_location import extract_source_locations
 from app.capabilities.investigation.specialist_reasoning_agent.specialist_reasoning_agent import SpecialistReasoningAgent
-from app.capabilities.investigation.runtime_snapshot_service.service import InvestigationRuntimeSnapshotService
+from app.capabilities.investigation.runtime_snapshot_service.runtime_snapshot_service import InvestigationRuntimeSnapshotService
 from app.core.contracts.investigation.evidence_kind import EvidenceKind
 from app.core.contracts.investigation.evidence_reference import EvidenceReference
 from app.core.contracts.specialist_reasoning.specialist_finding_output import SpecialistFindingOutput

@@ -6,19 +6,17 @@ from datetime import UTC, datetime
 from time import perf_counter
 
 from app.capabilities.monitoring.report_service import ReportService
-from asyncssh import Error
-from app.infrastructure.ssh.client.client import SSHClient
-from app.infrastructure.ssh.client.config import SSHConnectionConfig
-from app.infrastructure.ssh.command_executor.result import CommandExecutionResult
-from app.infrastructure.ssh.command_executor.executor import SSHCommandExecutor
+from app.core.contracts.monitoring.monitoring_connection_config import MonitoringConnectionConfig
+from app.core.contracts.reports.command_execution_data import CommandExecutionData
 from app.core.contracts.reports.monitoring_report_data import MonitoringReportData
 from app.core.contracts.reports.monitoring_report_status import MonitoringReportStatus
 
-from .monitoring_command_record import MonitoringCommandRecord
-from .monitoring_profile_repository_protocol import MonitoringProfileRepositoryProtocol
-from .report_repository_protocol import ReportRepositoryProtocol
-from .server_record import ServerRecord
-from .server_repository_protocol import ServerRepositoryProtocol
+from app.core.ports.monitoring.monitoring_command_record import MonitoringCommandRecord
+from app.core.ports.monitoring.profile_repository import MonitoringProfileRepositoryPort
+from app.core.ports.monitoring.report_repository import ReportRepositoryPort
+from app.core.ports.monitoring.server_record import ServerRecord
+from app.core.ports.monitoring.server_repository import ServerRepositoryPort
+from app.core.ports.monitoring.command_runner import MonitoringCommandRunnerPort
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +28,15 @@ class MonitoringService:
     def __init__(
         self,
         *,
-        server_repository: ServerRepositoryProtocol,
+        server_repository: ServerRepositoryPort,
         profile_repository: (
-            MonitoringProfileRepositoryProtocol
+            MonitoringProfileRepositoryPort
         ),
-        report_repository: ReportRepositoryProtocol,
+        report_repository: ReportRepositoryPort,
         default_private_key_path: str,
         known_hosts_path: str,
         connection_timeout_seconds: float,
+        command_runner: MonitoringCommandRunnerPort,
     ) -> None:
         """
         يجهز دورة المراقبة بمصادر السيرفر والفحوص والتقارير وإعدادات الاتصال.
@@ -57,6 +56,8 @@ class MonitoringService:
         self._connection_timeout_seconds = (
             connection_timeout_seconds
         )
+
+        self._command_runner = command_runner
 
         self._report_service = ReportService()
 
@@ -114,7 +115,7 @@ class MonitoringService:
             or self._default_private_key_path
         )
 
-        connection_config = SSHConnectionConfig(
+        connection_config = MonitoringConnectionConfig(
             host=server.host,
             port=server.port,
             username=server.username,
@@ -146,12 +147,7 @@ class MonitoringService:
                 )
             )
 
-        except (
-            SSHError,
-            OSError,
-            TimeoutError,
-            FileNotFoundError,
-        ) as exc:
+        except (ConnectionError, OSError, TimeoutError, FileNotFoundError) as exc:
             logger.warning(
                 "SSH connection failed | "
                 "server_id=%s | error=%s",
@@ -215,61 +211,16 @@ class MonitoringService:
     async def _execute_commands(
         self,
         *,
-        connection_config: SSHConnectionConfig,
+        connection_config: MonitoringConnectionConfig,
         commands: list[MonitoringCommandRecord],
-    ) -> list[CommandExecutionResult]:
+    ) -> list[CommandExecutionData]:
         """
         ينفذ الفحوص المفعلة بالترتيب ويعيد نتيجة كل فحص حتى لا تضيع مخرجات أو أخطاء الدورة.
         """
-        executions: list[
-            CommandExecutionResult
-        ] = []
-
-        async with SSHClient(
-            connection_config
-        ) as ssh_client:
-            executor = SSHCommandExecutor(
-                ssh_client
-            )
-
-            sorted_commands = sorted(
-                commands,
-                key=lambda item: (
-                    item.execution_order
-                ),
-            )
-
-            for command in sorted_commands:
-                logger.debug(
-                    "Executing monitoring command | "
-                    "command_id=%s | command_name=%s | "
-                    "order=%s",
-                    command.id,
-                    command.name,
-                    command.execution_order,
-                )
-
-                result = await executor.execute(
-                    command_id=command.id,
-                    command_name=command.name,
-                    command_text=command.command,
-                    execution_order=(
-                        command.execution_order
-                    ),
-                    timeout_seconds=(
-                        command.timeout_seconds
-                    ),
-                    fingerprint_strategy=(
-                        command.fingerprint_strategy
-                    ),
-                    fingerprint_config=(
-                        command.fingerprint_config
-                    ),
-                )
-
-                executions.append(result)
-
-        return executions
+        return await self._command_runner.run(
+            config=connection_config,
+            commands=commands,
+        )
 
 
     def _update_server_status(

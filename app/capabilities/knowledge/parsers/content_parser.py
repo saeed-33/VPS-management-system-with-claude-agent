@@ -3,7 +3,7 @@ from __future__ import annotations
 from io import BytesIO
 from pathlib import Path
 from pypdf import PdfReader
-from app.capabilities.knowledge.ingestion_contracts.parsed_document import ParsedKnowledgeDocument
+from app.core.contracts.knowledge_sources.parsed_document import ParsedKnowledgeDocument
 from .html_text_extractor import _HTMLTextExtractor
 from .text_normalization import normalize_text
 

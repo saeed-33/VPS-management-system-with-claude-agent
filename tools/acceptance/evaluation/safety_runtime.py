@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Acceptance tooling.
 يُستدعى بواسطة: المشغل اليدوي أو CI.
-يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_policy، app.core.policies.diagnostic_tools، app.capabilities.investigation.investigation_router، app.capabilities.investigation.specialist_reasoning_client، app.capabilities.investigation.specialist_registry.
+يعتمد مباشرة على: app.core.contracts.investigation، app.core.policies.diagnostic_policy، app.core.policies.diagnostic_tools، app.capabilities.investigation.investigation_router، app.infrastructure.llm.ollama.specialist_reasoning_client، app.capabilities.investigation.specialist_registry.
 الحد المعماري: لا يغير policy الإنتاجية؛ ينفذ evaluation خارج runtime المعتاد.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -31,7 +31,7 @@ from app.core.policies.diagnostic_tools.diagnostic_tool_definition import Diagno
 from app.core.policies.diagnostic_tools.diagnostic_tool_parameter import DiagnosticToolParameter
 from app.core.policies.diagnostic_tools.diagnostic_tool_registry import DiagnosticToolRegistry
 from app.capabilities.investigation.investigation_router.investigation_router import InvestigationRouter
-from app.capabilities.investigation.specialist_reasoning_client import (
+from app.infrastructure.llm.ollama.specialist_reasoning_client.client import (
     OllamaSpecialistReasoningClient,
 )
 from app.capabilities.investigation.specialist_registry.specialist_registry_snapshot import SpecialistRegistrySnapshot

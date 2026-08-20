@@ -16,7 +16,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.capabilities.remediation.autonomous_execution_service.service import AutonomousExecutionService
+from app.capabilities.remediation.autonomous_execution_service.autonomous_execution_service import AutonomousExecutionService
 from app.core.contracts.autonomous_remediation.autonomous_decision_outcome import AutonomousDecisionOutcome
 from app.core.contracts.autonomous_remediation.autonomous_history_snapshot import AutonomousHistorySnapshot
 from app.core.contracts.autonomous_remediation.autonomous_policy_status import AutonomousPolicyStatus

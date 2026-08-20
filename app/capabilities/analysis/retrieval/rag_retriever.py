@@ -7,10 +7,10 @@
 import logging
 from time import perf_counter
 
-from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
-from app.capabilities.analysis.retrieval.rag_context import RetrievedAnalysisContext
-from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
-from app.infrastructure.database.repositories.retrieval_repository import RetrievalRepository
+from app.core.ports.analysis.embedding_client import EmbeddingClient
+from app.core.contracts.analysis.retrieved_analysis_context import RetrievedAnalysisContext
+from app.core.ports.analysis.analysis_repository import AnalysisRepositoryPort
+from app.core.ports.analysis.retrieval_repository import AnalysisRetrievalRepositoryPort
 from app.capabilities.analysis.retrieval.performance_profiler import (
     record_timing,
     set_counter,
@@ -27,8 +27,8 @@ class RagRetriever:
         self,
         *,
         embedding_client: EmbeddingClient,
-        retrieval_repository: RetrievalRepository,
-        analysis_repository: AnalysisRepository,
+        retrieval_repository: AnalysisRetrievalRepositoryPort,
+        analysis_repository: AnalysisRepositoryPort,
         top_k: int = 3,
         minimum_score: float = 0.72,
         hnsw_ef_search: int = 100,

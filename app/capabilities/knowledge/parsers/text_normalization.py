@@ -1,6 +1,6 @@
 """تطبيع النصوص قبل تخزينها أو تقطيعها."""
 from __future__ import annotations
-from .constants import _BLANKS_RE, _SPACE_RE
+from .normalization_patterns import _BLANKS_RE, _SPACE_RE
 
 def normalize_text(value: str) -> str:
     """

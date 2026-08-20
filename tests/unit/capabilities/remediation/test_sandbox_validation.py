@@ -17,9 +17,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.capabilities.remediation.execution.service_state_observation import ServiceStateObservation
-from app.capabilities.remediation.execution.write_command_result import WriteCommandResult
-from app.capabilities.remediation.service.service import RemediationService
+from app.core.contracts.remediation.service_state_observation import ServiceStateObservation
+from app.core.contracts.remediation.write_command_result import WriteCommandResult
+from app.capabilities.remediation.service.remediation_service import RemediationService
 from app.core.contracts.sandbox_validation.sandbox_runtime_check import SandboxRuntimeCheck
 from app.core.contracts.sandbox_validation.sandbox_validation_status import SandboxValidationStatus
 from app.infrastructure.database.base import Base

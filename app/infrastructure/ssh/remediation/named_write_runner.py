@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from app.core.contracts.remediation.remediation_action import RemediationAction
-from .ssh_named_command_runner import _SSHNamedCommandRunner
-from .write_command_result import WriteCommandResult
+from .named_command_runner import _SSHNamedCommandRunner
+from app.core.contracts.remediation.write_command_result import WriteCommandResult
 
 class SSHNamedWriteRunner(_SSHNamedCommandRunner):
     """

@@ -3,7 +3,7 @@
 
 الموقع في المعمارية: Developer tooling.
 يُستدعى بواسطة: CLI أو المطور مباشرة.
-يعتمد مباشرة على: app.capabilities.analysis.retrieval.embedding_factory، app.core.contracts.investigation، app.capabilities.knowledge.retrieval، app.capabilities.investigation.specialist_context، app.composition، app.core.config.
+يعتمد مباشرة على: app.composition.analysis.embedding_factory، app.core.contracts.investigation، app.capabilities.knowledge.retrieval، app.capabilities.investigation.specialist_context، app.composition، app.core.config.
 الحد المعماري: ليست application boundary ولا ينبغي اعتبارها API production.
 سير البيانات المختصر: يجهز هذا الملف مدخلاته، يشغل العملية المحددة، ثم يعيد
 نتيجة CLI/evaluation أو assertion إلى caller.
@@ -28,7 +28,7 @@ if str(PROJECT_ROOT) not in sys.path:
         str(PROJECT_ROOT),
     )
 
-from app.capabilities.analysis.retrieval.embedding_factory import (
+from app.composition.analysis.embedding_factory import (
     create_embedding_client,
 )
 from app.core.contracts.investigation.specialist_task import SpecialistTask

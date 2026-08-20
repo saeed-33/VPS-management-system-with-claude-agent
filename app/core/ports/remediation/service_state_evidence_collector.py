@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from .service_state_observation import ServiceStateObservation
+from app.core.contracts.remediation.service_state_observation import ServiceStateObservation
 
 class ServiceStateEvidenceCollector(Protocol):
     """

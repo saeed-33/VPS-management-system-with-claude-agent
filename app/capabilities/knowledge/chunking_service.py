@@ -9,10 +9,8 @@ from __future__ import annotations
 from hashlib import sha256
 
 from app.capabilities.knowledge.chunker.chunker import StructureAwareKnowledgeChunker
-from app.capabilities.knowledge.ingestion_contracts.status import KnowledgeDocumentStatus
-from app.infrastructure.database.repositories.knowledge_document_repository import (
-    KnowledgeDocumentRepository,
-)
+from app.core.contracts.knowledge_sources.document_status import KnowledgeDocumentStatus
+from app.core.ports.knowledge.document_repository import KnowledgeDocumentRepositoryPort
 
 
 class KnowledgeChunkingService:
@@ -22,7 +20,7 @@ class KnowledgeChunkingService:
     def __init__(
         self,
         *,
-        document_repository: KnowledgeDocumentRepository,
+        document_repository: KnowledgeDocumentRepositoryPort,
         chunker: StructureAwareKnowledgeChunker,
     ) -> None:
         """

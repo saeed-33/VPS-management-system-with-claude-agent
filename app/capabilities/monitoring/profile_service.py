@@ -1,21 +1,11 @@
 """
 إدارة ملفات المراقبة والفحوص التي تنتمي إليها وربطها بالسيرفر.
 """
-from app.infrastructure.database.models.monitor_command import (
-    MonitorCommandModel,
-)
-from app.infrastructure.database.models.monitoring_profile import (
-    MonitoringProfileModel,
-)
-from app.infrastructure.database.models.profile_command import (
-    MonitoringProfileCommandModel,
-)
-from app.infrastructure.database.models.server.server import ServerModel
-from app.infrastructure.database.repositories.command_repository.repository import CommandRepository
-from app.infrastructure.database.repositories.profile_repository.repository import MonitoringProfileRepository
-from app.infrastructure.database.repositories.server_repository import (
-    ServerRepository,
-)
+from typing import Any
+
+from app.core.ports.monitoring.command_repository import CommandRepositoryPort
+from app.core.ports.monitoring.profile_repository import MonitoringProfileRepositoryPort
+from app.core.ports.monitoring.server_repository import ServerRepositoryPort
 from app.core.contracts.profiles.create_monitoring_profile_dto import CreateMonitoringProfileDTO
 from app.core.contracts.profiles.update_monitoring_profile_dto import UpdateMonitoringProfileDTO
 from app.core.exceptions.command_not_found_error import CommandNotFoundError
@@ -32,9 +22,9 @@ class MonitoringProfileService:
     def __init__(
         self,
         *,
-        profile_repository: MonitoringProfileRepository,
-        command_repository: CommandRepository,
-        server_repository: ServerRepository,
+        profile_repository: MonitoringProfileRepositoryPort,
+        command_repository: CommandRepositoryPort,
+        server_repository: ServerRepositoryPort,
     ) -> None:
         """
         يربط خدمة ملفات المراقبة بمستودعات الملفات والفحوص والسيرفرات.
@@ -45,7 +35,7 @@ class MonitoringProfileService:
 
     def list_profiles(
         self,
-    ) -> list[MonitoringProfileModel]:
+    ) -> list[Any]:
         """
         يعرض ملفات المراقبة التي يمكن ربطها بالسيرفرات.
         """
@@ -54,7 +44,7 @@ class MonitoringProfileService:
     def get_profile(
         self,
         profile_id: int,
-    ) -> MonitoringProfileModel:
+    ) -> Any:
         """
         يسترجع ملف مراقبة واحدًا أو يوضح عدم وجوده.
         """
@@ -72,7 +62,7 @@ class MonitoringProfileService:
     def create_profile(
         self,
         data: CreateMonitoringProfileDTO,
-    ) -> MonitoringProfileModel:
+    ) -> Any:
         """
         ينشئ ملف مراقبة يمثل مجموعة فحوص قابلة لإعادة الاستخدام.
         """
@@ -96,7 +86,7 @@ class MonitoringProfileService:
         self,
         profile_id: int,
         data: UpdateMonitoringProfileDTO,
-    ) -> MonitoringProfileModel:
+    ) -> Any:
         """
         يحدث وصف ملف المراقبة أو تفعيله دون حذف فحوصه.
         """
@@ -150,8 +140,8 @@ class MonitoringProfileService:
         profile_id: int,
     ) -> list[
         tuple[
-            MonitorCommandModel,
-            MonitoringProfileCommandModel,
+            Any,
+            Any,
         ]
     ]:
         """
@@ -172,7 +162,7 @@ class MonitoringProfileService:
         execution_order: int,
         enabled: bool,
         custom_timeout_seconds: float | None,
-    ) -> MonitoringProfileCommandModel:
+    ) -> Any:
         """
         يضيف فحصًا إلى ملف مراقبة مع ترتيبه وإعدادات بصمته.
         """
@@ -210,7 +200,7 @@ class MonitoringProfileService:
         enabled: bool | None,
         custom_timeout_seconds: float | None,
         update_custom_timeout: bool,
-    ) -> MonitoringProfileCommandModel:
+    ) -> Any:
         """
         يحدث ترتيب فحص أو مهلة أو إعداد بصمته داخل الملف.
         """
@@ -267,7 +257,7 @@ class MonitoringProfileService:
         *,
         server_id: int,
         profile_id: int | None,
-    ) -> ServerModel:
+    ) -> Any:
         """
         يربط ملف مراقبة بسيرفر ليستخدمه المجدول في دوراته.
         """

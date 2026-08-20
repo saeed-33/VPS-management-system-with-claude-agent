@@ -35,10 +35,8 @@ from app.capabilities.analysis.retrieval.performance_profiler import (
     snapshot,
     start_profile,
 )
-from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
-from app.infrastructure.database.repositories.analysis_source_repository import (
-    AnalysisSourceRepository,
-)
+from app.core.ports.analysis.analysis_repository import AnalysisRepositoryPort
+from app.core.ports.analysis.source_repository import AnalysisSourceRepositoryPort
 from app.capabilities.monitoring.report_query_service import (
     ReportQueryService,
 )
@@ -54,13 +52,13 @@ class AnalysisOrchestrator:
         self,
         *,
         report_query_service: ReportQueryService,
-        analysis_repository: AnalysisRepository,
+        analysis_repository: AnalysisRepositoryPort,
         report_analyzer: ReportAnalyzer,
         exact_reuse_enabled: bool = True,
         retrieval_indexer: RetrievalIndexer | None = None,
         rag_retriever: RagRetriever | HybridRetriever | None = None,
         rag_context_builder: RagContextBuilder | None = None,
-        analysis_source_repository: AnalysisSourceRepository | None = None,
+        analysis_source_repository: AnalysisSourceRepositoryPort | None = None,
         rag_assisted_enabled: bool = True,
         analysis_reuse_policy: AnalysisReusePolicy | None = None,
     ) -> None:

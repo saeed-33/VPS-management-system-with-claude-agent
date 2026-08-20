@@ -65,7 +65,7 @@ def test_production_composition_uses_infrastructure_repositories():
     تعيد نتيجة العملية الحالية أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. يفشل الاختبار عند خرق الـcontract.
     """
     text = (
-        ROOT / "app/composition/repositories.py"
+        ROOT / "app/composition/repository_factory.py"
     ).read_text(encoding="utf-8")
 
     assert "app.infrastructure.database.repositories" in text

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import json
 
-from app.capabilities.analysis.retrieval.rag_context import (
+from app.core.contracts.analysis.retrieved_analysis_context import (
     RetrievedAnalysisContext,
 )
 
@@ -15,8 +15,7 @@ from app.core.contracts.investigation.knowledge_source_reference import Knowledg
 from app.core.contracts.investigation.knowledge_source_type import KnowledgeSourceType
 from app.core.contracts.investigation.specialist_task import SpecialistTask
 
-from app.capabilities.knowledge.retrieval.retriever import KnowledgeHybridRetriever
-from app.capabilities.knowledge.retrieval.context import KnowledgeRetrievalContext
+from app.core.contracts.knowledge_sources.knowledge_retrieval_context import KnowledgeRetrievalContext
 
 from app.capabilities.investigation.specialist_registry.specialist_runtime_definition import SpecialistRuntimeDefinition
 

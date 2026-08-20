@@ -1,9 +1,9 @@
 """استرجاع مقاطع المعرفة بالبحث المتجهي والنصي الهجين."""
 from __future__ import annotations
 import asyncio
-from app.capabilities.analysis.retrieval.embedding_client import EmbeddingClient
-from app.infrastructure.database.repositories.knowledge_retrieval_repository.repository import KnowledgeRetrievalRepository
-from .context import KnowledgeRetrievalContext
+from app.core.ports.analysis.embedding_client import EmbeddingClient
+from app.core.ports.knowledge.retrieval_repository import KnowledgeRetrievalRepositoryPort
+from app.core.contracts.knowledge_sources.knowledge_retrieval_context import KnowledgeRetrievalContext
 from .fusion_candidate import _FusionCandidate
 
 class KnowledgeHybridRetriever:
@@ -13,7 +13,7 @@ class KnowledgeHybridRetriever:
     def __init__(
         self,
         *,
-        repository: KnowledgeRetrievalRepository,
+        repository: KnowledgeRetrievalRepositoryPort,
         embedding_client: EmbeddingClient,
         vector_candidate_limit: int = 12,
         full_text_candidate_limit: int = 20,

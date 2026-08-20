@@ -5,11 +5,11 @@ import logging
 from time import perf_counter
 
 from app.capabilities.analysis.retrieval.full_text_retriever.retriever import FullTextRetriever
-from app.capabilities.analysis.retrieval.rag_context import RetrievedAnalysisContext
+from app.core.contracts.analysis.retrieved_analysis_context import RetrievedAnalysisContext
 from app.capabilities.analysis.retrieval.rag_retriever import RagRetriever
-from app.infrastructure.database.repositories.analysis_repository.repository import AnalysisRepository
+from app.core.ports.analysis.analysis_repository import AnalysisRepositoryPort
 from app.capabilities.analysis.retrieval.structured_compatibility.checker import StructuredCompatibilityChecker
-from app.infrastructure.database.repositories.retrieval_repository import RetrievalRepository
+from app.core.ports.analysis.retrieval_repository import AnalysisRetrievalRepositoryPort
 from app.capabilities.analysis.retrieval.performance_profiler import record_timing, set_counter
 
 from .fusion_candidate import _FusionCandidate
@@ -23,8 +23,8 @@ class HybridRetriever:
     def __init__(
         self,
         *,
-        analysis_repository: AnalysisRepository,
-        retrieval_repository: RetrievalRepository,
+        analysis_repository: AnalysisRepositoryPort,
+        retrieval_repository: AnalysisRetrievalRepositoryPort,
         compatibility_checker: StructuredCompatibilityChecker | None,
         vector_retriever: RagRetriever | None,
         full_text_retriever: FullTextRetriever | None,

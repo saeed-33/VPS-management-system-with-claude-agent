@@ -26,7 +26,7 @@ if PROJECT_ROOT_TEXT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT_TEXT)
 
 
-from app.composition.builder import build_container
+from app.composition.container_builder import build_container
 from app.core.config import settings
 from app.infrastructure.database.engine import (
     create_database_tables,

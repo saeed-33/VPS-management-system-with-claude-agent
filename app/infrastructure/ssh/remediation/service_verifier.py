@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from app.core.contracts.remediation.remediation_action import RemediationAction
-from .ssh_named_command_runner import _SSHNamedCommandRunner
+from .named_command_runner import _SSHNamedCommandRunner
 
 class SSHServiceVerifier(_SSHNamedCommandRunner):
     """

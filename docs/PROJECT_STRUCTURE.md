@@ -1088,6 +1088,23 @@ Evaluation / Production Readiness Gate
 - `.mcp.json` — Claude MCP configuration exposing project tool servers.
 - `.phase6-native-sandbox-attestation.json` — Structured configuration or generated data.
 - `.python-version` — Project asset.
+- `.tmp/report-selected-montage.png` — Project asset.
+- `.tmp/report-selected/page-1.png` — Project asset.
+- `.tmp/report-selected/page-3.png` — Project asset.
+- `.tmp/report-selected/page-34.png` — Project asset.
+- `.tmp/report-selected/page-38.png` — Project asset.
+- `.tmp/report-selected/page-44.png` — Project asset.
+- `.tmp/report-selected/page-74.png` — Project asset.
+- `.tmp/report-selected/page-75.png` — Project asset.
+- `.tmp/report-selected/page-76.png` — Project asset.
+- `.tmp/report-selected/page-84.png` — Project asset.
+- `.tmp/report-selected/page-85.png` — Project asset.
+- `.tmp/report-selected/page-92.png` — Project asset.
+- `.tmp/report-selected/page-93.png` — Project asset.
+- `.tmp/report-selected/page-95.png` — Project asset.
+- `.tmp/report-selected/page-96.png` — Project asset.
+- `.tmp/report-selected/page-97.png` — Project asset.
+- `.tmp/report-text.txt` — Text data/documentation asset.
 - `CLAUDE.md` — Claude project instruction entrypoint loaded at session start; defines architecture, workflow, and coding rules.
 - `README.md` — Top-level project overview and startup guidance.
 - `assets/fonts/NotoNaskhArabic-Regular.ttf` — Project asset.
@@ -7414,44 +7431,42 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/remediation/autonomous_authorization_service.py` — إدارة تفويضات التنفيذ الآلي قصيرة العمر.
 - `app/capabilities/remediation/autonomous_candidate_service.py` — عرض مرشحي المعالجة الآلية.
 - `app/capabilities/remediation/autonomous_execution_service/attempt_handler.py` — تنفيذ المعالجة الآلية تحت الحجز والسياسة والتدقيق.
+- `app/capabilities/remediation/autonomous_execution_service/autonomous_execution_service.py` — تنفيذ المعالجة الآلية تحت الحجز والسياسة والتدقيق.
 - `app/capabilities/remediation/autonomous_execution_service/policy_evaluation.py` — تنفيذ المعالجة الآلية تحت الحجز والسياسة والتدقيق.
 - `app/capabilities/remediation/autonomous_execution_service/runtime_recorder.py` — تنفيذ المعالجة الآلية تحت الحجز والسياسة والتدقيق.
-- `app/capabilities/remediation/autonomous_execution_service/service.py` — تنفيذ المعالجة الآلية تحت الحجز والسياسة والتدقيق.
 - `app/capabilities/remediation/autonomous_history_service.py` — قراءة ملخص تاريخ المعالجة الآلية.
 - `app/capabilities/remediation/autonomous_policy_service.py` — إدارة سياسات المعالجة الآلية.
-- `app/capabilities/remediation/execution/runtime_path.py` — حل مسارات ملفات runtime المسموح بها.
-- `app/capabilities/remediation/execution/service_state_evidence_collector.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/service_state_observation.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/ssh_named_command_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/ssh_named_write_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/ssh_service_state_evidence_collector.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/ssh_service_verifier.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/unavailable_evidence_collector.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/unavailable_verification_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/unavailable_write_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/verification_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/write_command_result.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
-- `app/capabilities/remediation/execution/write_command_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/capabilities/remediation/execution/fallback_evidence_collector.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/capabilities/remediation/execution/fallback_verification_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/capabilities/remediation/execution/fallback_write_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
 - `app/capabilities/remediation/issue_fingerprint_service.py` — حساب بصمة مستقرة للمشكلة المكتشفة.
 - `app/capabilities/remediation/plan_proposal_service.py` — إنشاء خطط معالجة مقترحة من التشخيص النهائي.
 - `app/capabilities/remediation/sandbox_runtime.py` — فحص جاهزية بيئة التحقق المعزولة المحلية.
 - `app/capabilities/remediation/service/approval.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
+- `app/capabilities/remediation/service/audit_support.py` — دعم تحميل خطط المعالجة وتسجيل أحداث التدقيق.
+- `app/capabilities/remediation/service/evidence_support.py` — دعم جمع أدلة حالة الخدمة والتحقق منها أثناء المعالجة.
 - `app/capabilities/remediation/service/execution.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
 - `app/capabilities/remediation/service/planning.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
 - `app/capabilities/remediation/service/query.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
+- `app/capabilities/remediation/service/remediation_service.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
 - `app/capabilities/remediation/service/sandbox.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
-- `app/capabilities/remediation/service/service.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
-- `app/capabilities/remediation/service/support.py` — إدارة دورة معالجة المشكلة بعد التشخيص.
+- `app/capabilities/remediation/service/validation_support.py` — دعم ضوابط صحة خطط المعالجة وأفعالها.
 - `app/composition/__init__.py` — Application composition root / dependency container. Exports the canonical wired application container.
 - `app/composition/analysis/analysis.py` — تركيب مكونات التحليل والاسترجاع والتحقيق.
 - `app/composition/analysis/analysis_investigation_composition.py` — تركيب مكونات التحليل والاسترجاع والتحقيق.
+- `app/composition/analysis/client_factory.py` — إنشاء عميل التحليل المعتمد على النموذج اللغوي.
+- `app/composition/analysis/embedding_factory.py` — إنشاء مزوّد embedding وفق إعدادات التطبيق.
 - `app/composition/analysis/retrieval.py` — تركيب مكونات التحليل والاسترجاع والتحقيق.
 - `app/composition/analysis/retrieval_composition.py` — تركيب مكونات التحليل والاسترجاع والتحقيق.
-- `app/composition/builder.py` — بناء حاوية تطبيق مراقبة السيرفر.
 - `app/composition/container.py` — تعريف حاوية اعتماديات التطبيق.
-- `app/composition/repositories.py` — تركيب حزمة مستودعات قاعدة البيانات.
+- `app/composition/container_builder.py` — بناء حاوية تطبيق مراقبة السيرفر.
+- `app/composition/investigation/final_diagnosis_narrative_client_factory.py` — إنشاء عميل السرد النهائي ضمن طبقة تركيب التطبيق.
+- `app/composition/investigation/specialist_reasoning_client_factory.py` — إنشاء عميل reasoning للاختصاصيين ضمن طبقة تركيب التطبيق.
+- `app/composition/repository_bundle.py` — حزمة مستودعات التطبيق التي تُشاركها الخدمات.
+- `app/composition/repository_factory.py` — تركيب حزمة مستودعات قاعدة البيانات.
 - `app/composition/runtime.py` — تركيب مكونات وقت تشغيل المراقبة والتنفيذ.
-- `app/composition/services.py` — تركيب حزمة خدمات المجال الأساسية.
+- `app/composition/service_bundle.py` — حزمة الخدمات التي تُحقن في واجهات التطبيق ووقت التشغيل.
+- `app/composition/service_factory.py` — تركيب حزمة خدمات المجال الأساسية.
 - `app/infrastructure/__init__.py` — التكاملات الخارجية التي تصل التطبيق بالسيرفرات وبمزودي النماذج.
 - `app/infrastructure/database/base.py` — الأساس المشترك الذي ترث منه نماذج قاعدة بيانات التطبيق.
 - `app/infrastructure/database/engine.py` — إنشاء محرك الاتصال بقاعدة البيانات وتهيئة جداول الحالة التشغيلية.
@@ -7527,7 +7542,6 @@ Evaluation / Production Readiness Gate
 - `app/infrastructure/database/repositories/investigation_repository/specialist_execution.py` — حالة التحقيق ولقطات تشغيله وحجوز مهام المتخصصين ونتائجهم.
 - `app/infrastructure/database/repositories/knowledge_document_repository.py` — وثائق المعرفة ومقاطعها وحالة تحليلها وفهرستها.
 - `app/infrastructure/database/repositories/knowledge_retrieval_repository/repository.py` — البحث الدلالي والنصي في مقاطع المعرفة المؤهلة لسياق التحقيق.
-- `app/infrastructure/database/repositories/knowledge_retrieval_repository/search_row.py` — البحث الدلالي والنصي في مقاطع المعرفة المؤهلة لسياق التحقيق.
 - `app/infrastructure/database/repositories/knowledge_source_repository.py` — مصادر المعرفة التي يمكن تفعيلها واسترجاعها أثناء التحليل.
 - `app/infrastructure/database/repositories/profile_repository/profile_assignments.py` — ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
 - `app/infrastructure/database/repositories/profile_repository/profile_queries.py` — ملفات المراقبة وفحوصها والسيرفرات المرتبطة بها.
@@ -7571,6 +7585,183 @@ Evaluation / Production Readiness Gate
 - `app/main.py` — FastAPI application entry point; registers API/web routers and startup/shutdown behavior.
 - `app/runtime/__init__.py` — حزمة تشغيل المهام التي تربط المراقبة بجلسات التنفيذ وتحفظ نتائجها.
 
+### Core contracts, policies, and configuration
+
+- `app/core/__init__.py` — القواعد المشتركة التي تستخدمها مراحل مراقبة السيرفر وتحليله ومعالجته.
+- `app/core/config.py` — Environment-backed application configuration.
+- `app/core/contracts/agent_jobs/create_agent_job_dto.py` — Contract class extracted from agent_jobs.py during the structure refactor.
+- `app/core/contracts/agent_jobs/update_agent_job_dto.py` — Contract class extracted from agent_jobs.py during the structure refactor.
+- `app/core/contracts/analysis/analysis_health_status.py` — Contract class extracted from analysis.py during the structure refactor.
+- `app/core/contracts/analysis/analysis_issue.py` — Contract class extracted from analysis.py during the structure refactor.
+- `app/core/contracts/analysis/analysis_severity.py` — Contract class extracted from analysis.py during the structure refactor.
+- `app/core/contracts/analysis/error_classification.py` — Contract class extracted from analysis.py during the structure refactor.
+- `app/core/contracts/analysis/report_analysis_result.py` — Contract class extracted from analysis.py during the structure refactor.
+- `app/core/contracts/analysis/retrieved_analysis_context.py` — نموذج السياق المسترجع من تحليل تاريخي.
+- `app/core/contracts/analysis/stored_report_analysis.py` — Contract class extracted from analysis.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_authorization.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_authorization_status.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_decision_outcome.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_decision_reason_code.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_evaluation_context.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_execution_reservation.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_history_snapshot.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_policy_candidate.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_policy_decision.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_policy_status.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_remediation_policy.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/autonomous_suspension_reason.py` — Contract class extracted from autonomous_remediation.py during the structure refactor.
+- `app/core/contracts/autonomous_remediation/helpers.py` — عقود قرار المعالجة الذاتية وحدود السماح بتنفيذها على السيرفر.
+- `app/core/contracts/commands/command_execution_config.py` — Contract class extracted from commands.py during the structure refactor.
+- `app/core/contracts/commands/create_command_dto.py` — Contract class extracted from commands.py during the structure refactor.
+- `app/core/contracts/commands/update_command_dto.py` — Contract class extracted from commands.py during the structure refactor.
+- `app/core/contracts/final_diagnosis/final_diagnosis_narrative.py` — Contract class extracted from final_diagnosis.py during the structure refactor.
+- `app/core/contracts/final_diagnosis/final_diagnosis_narrative_client.py` — Contract class extracted from final_diagnosis.py during the structure refactor.
+- `app/core/contracts/final_diagnosis/final_diagnosis_narrative_output.py` — Contract class extracted from final_diagnosis.py during the structure refactor.
+- `app/core/contracts/investigation/diagnostic_connection_config.py` — Connection settings passed from investigation capabilities to an SSH adapter.
+- `app/core/contracts/investigation/diagnostic_execution_outcome.py` — Result contract for executing one diagnostic command.
+- `app/core/contracts/investigation/evidence_collection_request.py` — Request contract for collecting diagnostic evidence.
+- `app/core/contracts/investigation/evidence_kind.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/evidence_reference.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/investigation_budget.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/investigation_finding.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/investigation_hypothesis.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/investigation_status.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/knowledge_source_reference.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/knowledge_source_type.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/server_investigation_state.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/specialist_result.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/specialist_task.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation/specialist_task_status.py` — Contract class extracted from investigation.py during the structure refactor.
+- `app/core/contracts/investigation_read_models/investigation_candidate_read_model.py` — Contract class extracted from investigation_read_models.py during the structure refactor.
+- `app/core/contracts/investigation_read_models/investigation_detail_read_model.py` — Contract class extracted from investigation_read_models.py during the structure refactor.
+- `app/core/contracts/investigation_read_models/investigation_runtime_read_model.py` — Contract class extracted from investigation_read_models.py during the structure refactor.
+- `app/core/contracts/investigation_read_models/investigation_summary_read_model.py` — Contract class extracted from investigation_read_models.py during the structure refactor.
+- `app/core/contracts/investigations/persist_investigation_candidate_dto.py` — Contract class extracted from investigations.py during the structure refactor.
+- `app/core/contracts/investigations/persist_investigation_dto.py` — Contract class extracted from investigations.py during the structure refactor.
+- `app/core/contracts/knowledge_sources/create_knowledge_source_dto.py` — Contract class extracted from knowledge_sources.py during the structure refactor.
+- `app/core/contracts/knowledge_sources/document_status.py` — حالات دورة إدخال وثائق المعرفة.
+- `app/core/contracts/knowledge_sources/helpers.py` — عقود بيانات مصادر المعرفة.
+- `app/core/contracts/knowledge_sources/knowledge_retrieval_context.py` — سياق مقطع معرفة مسترجع.
+- `app/core/contracts/knowledge_sources/knowledge_search_row.py` — البحث الدلالي والنصي في مقاطع المعرفة المؤهلة لسياق التحقيق.
+- `app/core/contracts/knowledge_sources/parsed_document.py` — وثيقة معرفة بعد تحليل محتواها.
+- `app/core/contracts/knowledge_sources/update_knowledge_source_dto.py` — Contract class extracted from knowledge_sources.py during the structure refactor.
+- `app/core/contracts/monitoring/monitoring_connection_config.py` — Connection settings passed from monitoring capabilities to an SSH adapter.
+- `app/core/contracts/profiles/create_monitoring_profile_dto.py` — Contract class extracted from profiles.py during the structure refactor.
+- `app/core/contracts/profiles/monitoring_profile_command_config.py` — Contract class extracted from profiles.py during the structure refactor.
+- `app/core/contracts/profiles/update_monitoring_profile_dto.py` — Contract class extracted from profiles.py during the structure refactor.
+- `app/core/contracts/remediation/approval_request.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/approval_status.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/create_remediation_plan_dto.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/create_sandbox_result_dto.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/execution_status.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/helpers.py` — عقود خطة المعالجة، الموافقة، التنفيذ، والتحقق من أثر التغيير.
+- `app/core/contracts/remediation/policy_decision.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/policy_result.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/remediation_action.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/remediation_plan_status.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/remediation_risk.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/rollback_status.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/service_state_observation.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/core/contracts/remediation/verification_status.py` — Contract class extracted from remediation.py during the structure refactor.
+- `app/core/contracts/remediation/write_command_result.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/core/contracts/remediation_events/remediation_event.py` — Contract class extracted from remediation_events.py during the structure refactor.
+- `app/core/contracts/remediation_events/remediation_event_type.py` — Contract class extracted from remediation_events.py during the structure refactor.
+- `app/core/contracts/reports/command_execution_data.py` — Contract class extracted from reports.py during the structure refactor.
+- `app/core/contracts/reports/command_execution_dto.py` — Contract class extracted from reports.py during the structure refactor.
+- `app/core/contracts/reports/monitoring_report_data.py` — Contract class extracted from reports.py during the structure refactor.
+- `app/core/contracts/reports/monitoring_report_status.py` — Contract class extracted from reports.py during the structure refactor.
+- `app/core/contracts/reports/report_details_dto.py` — Contract class extracted from reports.py during the structure refactor.
+- `app/core/contracts/reports/report_list_item_dto.py` — Contract class extracted from reports.py during the structure refactor.
+- `app/core/contracts/sandbox_validation/sandbox_runtime_check.py` — Contract class extracted from sandbox_validation.py during the structure refactor.
+- `app/core/contracts/sandbox_validation/sandbox_target.py` — Contract class extracted from sandbox_validation.py during the structure refactor.
+- `app/core/contracts/sandbox_validation/sandbox_validation_result.py` — Contract class extracted from sandbox_validation.py during the structure refactor.
+- `app/core/contracts/sandbox_validation/sandbox_validation_status.py` — Contract class extracted from sandbox_validation.py during the structure refactor.
+- `app/core/contracts/servers/create_server_dto.py` — Contract class extracted from servers.py during the structure refactor.
+- `app/core/contracts/servers/update_server_dto.py` — Contract class extracted from servers.py during the structure refactor.
+- `app/core/contracts/source_location/source_location.py` — عقد يحدد موضع الدليل داخل ملف أو مخرج أو وظيفة مرتبطة بالتحقيق.
+- `app/core/contracts/specialist_reasoning/specialist_diagnostic_tool_request_output.py` — Contract class extracted from specialist_reasoning.py during the structure refactor.
+- `app/core/contracts/specialist_reasoning/specialist_final_synthesis_output.py` — Contract class extracted from specialist_reasoning.py during the structure refactor.
+- `app/core/contracts/specialist_reasoning/specialist_finding_output.py` — Contract class extracted from specialist_reasoning.py during the structure refactor.
+- `app/core/contracts/specialist_reasoning/specialist_hypothesis_output.py` — Contract class extracted from specialist_reasoning.py during the structure refactor.
+- `app/core/contracts/specialist_reasoning/specialist_reasoning_client.py` — Contract class extracted from specialist_reasoning.py during the structure refactor.
+- `app/core/contracts/specialist_reasoning/specialist_reasoning_output.py` — Contract class extracted from specialist_reasoning.py during the structure refactor.
+- `app/core/contracts/specialist_reasoning/specialist_remediation_action_output.py` — Contract class extracted from specialist_reasoning.py during the structure refactor.
+- `app/core/contracts/specialists/create_specialist_definition_dto.py` — Contract class extracted from specialists.py during the structure refactor.
+- `app/core/contracts/specialists/helpers.py` — عقود تعريف المتخصصين الذين يحققون في مجالات مختلفة من عطل السيرفر.
+- `app/core/contracts/specialists/update_specialist_definition_dto.py` — Contract class extracted from specialists.py during the structure refactor.
+- `app/core/exceptions/application_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/command_already_assigned_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/command_not_found_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/duplicate_command_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/duplicate_entity_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/duplicate_monitoring_profile_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/duplicate_server_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/duplicate_specialist_definition_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/entity_not_found_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/invalid_operation_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/monitoring_profile_not_found_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/profile_command_not_found_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/report_not_found_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/server_not_found_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/exceptions/specialist_definition_not_found_error.py` — Class extracted from exceptions during the structure refactor.
+- `app/core/logging.py` — تهيئة سجل الأحداث الذي يشرح ما يحدث أثناء تشغيل التطبيق.
+- `app/core/policies/autonomous_remediation.py` — التقييم الحتمي لأهلية تنفيذ المعالجة الذاتية.
+- `app/core/policies/diagnostic_policy/diagnostic_policy_decision.py` — Class extracted from diagnostic_policy during the structure refactor.
+- `app/core/policies/diagnostic_policy/diagnostic_policy_engine.py` — Class extracted from diagnostic_policy during the structure refactor.
+- `app/core/policies/diagnostic_policy/diagnostic_policy_reason.py` — Class extracted from diagnostic_policy during the structure refactor.
+- `app/core/policies/diagnostic_policy/diagnostic_policy_request.py` — Class extracted from diagnostic_policy during the structure refactor.
+- `app/core/policies/diagnostic_policy/diagnostic_policy_result.py` — Class extracted from diagnostic_policy during the structure refactor.
+- `app/core/policies/diagnostic_policy/specialist_policy_definition.py` — Class extracted from diagnostic_policy during the structure refactor.
+- `app/core/policies/diagnostic_tools/constants.py` — تعريف أدوات التشخيص الآمنة ومعاملاتها وقائمة الأدوات المتاحة.
+- `app/core/policies/diagnostic_tools/diagnostic_parameter_kind.py` — Class extracted from diagnostic_tools during the structure refactor.
+- `app/core/policies/diagnostic_tools/diagnostic_tool_call.py` — Class extracted from diagnostic_tools during the structure refactor.
+- `app/core/policies/diagnostic_tools/diagnostic_tool_definition.py` — Class extracted from diagnostic_tools during the structure refactor.
+- `app/core/policies/diagnostic_tools/diagnostic_tool_parameter.py` — Class extracted from diagnostic_tools during the structure refactor.
+- `app/core/policies/diagnostic_tools/diagnostic_tool_registry.py` — Class extracted from diagnostic_tools during the structure refactor.
+- `app/core/policies/diagnostic_tools/diagnostic_tool_risk.py` — Class extracted from diagnostic_tools during the structure refactor.
+- `app/core/policies/diagnostic_tools/factories.py` — تعريف أدوات التشخيص الآمنة ومعاملاتها وقائمة الأدوات المتاحة.
+- `app/core/policies/error_classification.py` — تصنيف أولي لمخاطر المشكلات التي أخرجها تحليل التقرير.
+- `app/core/policies/fingerprint_strategy.py` — الاستراتيجيات التي تحدد كيف تقارن المراقبة مخرجات فحصين.
+- `app/core/policies/remediation_policy.py` — سياسة الانتقال من خطة معالجة إلى تغيير فعلي على السيرفر.
+- `app/core/policies/remediation_risk.py` — تصنيف خطر أفعال المعالجة وفق الأداة وبيئة السيرفر.
+- `app/core/policies/remediation_tools/constants.py` — قائمة أفعال التغيير المسموحة وأهداف خدماتها.
+- `app/core/policies/remediation_tools/factories.py` — قائمة أفعال التغيير المسموحة وأهداف خدماتها.
+- `app/core/policies/remediation_tools/named_write_tool.py` — Class extracted from remediation_tools during the structure refactor.
+- `app/core/policies/remediation_tools/named_write_tool_registry.py` — Class extracted from remediation_tools during the structure refactor.
+- `app/core/policies/remediation_tools/remediation_tool_validation_error.py` — Class extracted from remediation_tools during the structure refactor.
+- `app/core/policies/sandbox_validation.py` — التحقق من أن هدف sandbox معرّف صراحة كسيرفر غير إنتاجي آمن للاختبار.
+- `app/core/ports/__init__.py` — Provider-neutral ports used by application capabilities and adapters.
+- `app/core/ports/analysis/analysis_repository.py` — Port required to persist report-analysis lifecycle and retrieval metadata.
+- `app/core/ports/analysis/embedding_client.py` — العقد المجرد لخدمات تحويل التقارير إلى متجهات.
+- `app/core/ports/analysis/report_analysis_client.py` — العقد المجرد لعملاء تحليل تقارير المراقبة.
+- `app/core/ports/analysis/retrieval_repository.py` — Port required to index and search analyzed reports.
+- `app/core/ports/analysis/source_repository.py` — Port required to persist analysis provenance sources.
+- `app/core/ports/investigation/diagnostic_command_runner.py` — Port for executing an approved diagnostic command.
+- `app/core/ports/investigation/investigation_repository.py` — Port required to persist investigation state and specialist execution.
+- `app/core/ports/investigation/server_record.py` — Provider-neutral server data required by investigation capabilities.
+- `app/core/ports/investigation/server_repository.py` — Port required to load servers for investigation evidence collection.
+- `app/core/ports/investigation/specialist_definition_repository.py` — Port required to manage specialist definitions.
+- `app/core/ports/knowledge/document_repository.py` — Port required to ingest, chunk, and index knowledge documents.
+- `app/core/ports/knowledge/retrieval_repository.py` — Port required to search indexed knowledge chunks.
+- `app/core/ports/knowledge/retriever.py` — Port used by investigation to retrieve technical knowledge.
+- `app/core/ports/knowledge/source_repository.py` — Port required to manage configured knowledge sources.
+- `app/core/ports/monitoring/command_repository.py` — Port required to manage monitoring command definitions and assignments.
+- `app/core/ports/monitoring/command_runner.py` — Port for executing the enabled monitoring commands.
+- `app/core/ports/monitoring/monitoring_command_record.py` — مكوّن دورة مراقبة السيرفر.
+- `app/core/ports/monitoring/monitoring_runner.py` — مكوّن جدولة مراقبة السيرفرات.
+- `app/core/ports/monitoring/profile_repository.py` — مكوّن دورة مراقبة السيرفر.
+- `app/core/ports/monitoring/report_repository.py` — مكوّن دورة مراقبة السيرفر.
+- `app/core/ports/monitoring/schedulable_server_record.py` — مكوّن جدولة مراقبة السيرفرات.
+- `app/core/ports/monitoring/scheduler_server_repository.py` — مكوّن جدولة مراقبة السيرفرات.
+- `app/core/ports/monitoring/server_record.py` — مكوّن دورة مراقبة السيرفر.
+- `app/core/ports/monitoring/server_repository.py` — مكوّن دورة مراقبة السيرفر.
+- `app/core/ports/remediation/autonomous_remediation_repository.py` — Port required by autonomous-remediation capabilities.
+- `app/core/ports/remediation/remediation_repository.py` — Port required by the remediation capability to persist its lifecycle.
+- `app/core/ports/remediation/service_state_evidence_collector.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/core/ports/remediation/verification_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/core/ports/remediation/write_command_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/core/utils/datetime.py` — أداة الوقت الموحد لتسجيل أحداث رحلة مراقبة السيرفر.
+
 ### Claude Runtime
 
 - `app/runtime/claude/__init__.py` — واجهة تشغيل Claude الأصلية المستخدمة من طبقة التركيب والاختبارات.
@@ -7613,17 +7804,9 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/monitoring/profile_service.py` — إدارة ملفات المراقبة والفحوص التي تنتمي إليها وربطها بالسيرفر.
 - `app/capabilities/monitoring/report_query_service.py` — قراءة تقارير المراقبة وعرض ملخصاتها وتفاصيل قياساتها.
 - `app/capabilities/monitoring/report_service.py` — تجميع نتائج دورة المراقبة في تقرير يصف الاتصال والفحوص دون تشخيص السبب.
-- `app/capabilities/monitoring/scheduler/monitoring_runner_protocol.py` — مكوّن جدولة مراقبة السيرفرات.
 - `app/capabilities/monitoring/scheduler/monitoring_scheduler.py` — مكوّن جدولة مراقبة السيرفرات.
-- `app/capabilities/monitoring/scheduler/schedulable_server_record.py` — مكوّن جدولة مراقبة السيرفرات.
-- `app/capabilities/monitoring/scheduler/server_repository_protocol.py` — مكوّن جدولة مراقبة السيرفرات.
 - `app/capabilities/monitoring/server_service.py` — إدارة هوية السيرفر وإعدادات الاتصال وتفعيل المراقبة الخاصة به.
-- `app/capabilities/monitoring/service/monitoring_command_record.py` — مكوّن دورة مراقبة السيرفر.
-- `app/capabilities/monitoring/service/monitoring_profile_repository_protocol.py` — مكوّن دورة مراقبة السيرفر.
 - `app/capabilities/monitoring/service/monitoring_service.py` — مكوّن دورة مراقبة السيرفر.
-- `app/capabilities/monitoring/service/report_repository_protocol.py` — مكوّن دورة مراقبة السيرفر.
-- `app/capabilities/monitoring/service/server_record.py` — مكوّن دورة مراقبة السيرفر.
-- `app/capabilities/monitoring/service/server_repository_protocol.py` — مكوّن دورة مراقبة السيرفر.
 
 ### SSH Infrastructure
 
@@ -7631,27 +7814,29 @@ Evaluation / Production Readiness Gate
 - `app/infrastructure/ssh/client/config.py` — إدارة اتصال SSH موثق إلى سيرفر مراقب.
 - `app/infrastructure/ssh/command_executor/executor.py` — تنفيذ فحص مراقبة واحد عبر اتصال SSH وإرجاع نتيجته المقاسة.
 - `app/infrastructure/ssh/command_executor/result.py` — تنفيذ فحص مراقبة واحد عبر اتصال SSH وإرجاع نتيجته المقاسة.
+- `app/infrastructure/ssh/investigation/ssh_diagnostic_command_runner.py` — SSH adapter for executing approved diagnostic commands.
+- `app/infrastructure/ssh/monitoring/command_runner.py` — SSH adapter for executing the enabled monitoring commands.
+- `app/infrastructure/ssh/remediation/named_command_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/infrastructure/ssh/remediation/named_write_runner.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/infrastructure/ssh/remediation/runtime_path.py` — حل مسارات ملفات runtime المسموح بها.
+- `app/infrastructure/ssh/remediation/service_state_evidence_collector.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
+- `app/infrastructure/ssh/remediation/service_verifier.py` — منفذ أو عقد من مكونات تنفيذ المعالجة.
 
 ### Analysis Domain
 
 - `app/capabilities/analysis/analysis_orchestrator/exact_reuse_handler.py` — تنسيق قرار تحليل تقرير المراقبة.
 - `app/capabilities/analysis/analysis_orchestrator/generated_analysis_persister.py` — تنسيق قرار تحليل تقرير المراقبة.
 - `app/capabilities/analysis/analysis_orchestrator/orchestrator.py` — تنسيق قرار تحليل تقرير المراقبة.
-- `app/capabilities/analysis/client_factory.py` — إنشاء عميل التحليل المعتمد على النموذج اللغوي.
-- `app/capabilities/analysis/llm_client.py` — العقد المجرد لعملاء تحليل تقارير المراقبة.
 - `app/capabilities/analysis/prompts.py` — قوالب التعليمات الموجهة إلى محلل تقارير المراقبة.
 - `app/capabilities/analysis/report_analyzer.py` — تنفيذ تحليل تقرير مراقبة وحفظ نتيجته.
 - `app/capabilities/analysis/report_serializer.py` — تهيئة تقرير المراقبة لإرساله إلى محلل النموذج اللغوي.
 - `app/capabilities/analysis/retrieval/context_builder.py` — تحويل نتائج الاسترجاع إلى سياق صالح لمطالبة التحليل.
-- `app/capabilities/analysis/retrieval/embedding_client.py` — العقد المجرد لخدمات تحويل التقارير إلى متجهات.
-- `app/capabilities/analysis/retrieval/embedding_factory.py` — إنشاء مزوّد embedding وفق إعدادات التطبيق.
 - `app/capabilities/analysis/retrieval/full_text_retriever/candidate.py` — مرشح بحث نصي موحد.
 - `app/capabilities/analysis/retrieval/full_text_retriever/query_builder.py` — بناء استعلامات البحث النصي من التقرير المنظم.
 - `app/capabilities/analysis/retrieval/full_text_retriever/retriever.py` — تنفيذ البحث النصي وتحويل نتائجه إلى مرشحين.
 - `app/capabilities/analysis/retrieval/hybrid_retriever/fusion_candidate.py` — مرشح دمج لترتيب نتائج الاسترجاع.
 - `app/capabilities/analysis/retrieval/hybrid_retriever/retriever.py` — دمج نتائج الاسترجاع المتجهي والنصي.
 - `app/capabilities/analysis/retrieval/performance_profiler.py` — قياس مراحل الاسترجاع والتحليل داخل سياق التنفيذ الحالي.
-- `app/capabilities/analysis/retrieval/rag_context.py` — نموذج السياق المسترجع من تحليل تاريخي.
 - `app/capabilities/analysis/retrieval/rag_retriever.py` — استرجاع تحليلات تاريخية بالبحث المتجهي.
 - `app/capabilities/analysis/retrieval/report_fingerprint.py` — حساب بصمة مستقرة للتقرير بعد تطبيعه.
 - `app/capabilities/analysis/retrieval/report_normalizer.py` — تطبيع تقرير المراقبة قبل المقارنة والفهرسة.
@@ -7672,31 +7857,24 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/investigation/correlation/diagnosis_certainty.py` — Class extracted from correlation during the structure refactor.
 - `app/capabilities/investigation/correlation/diagnosis_conflict.py` — Class extracted from correlation during the structure refactor.
 - `app/capabilities/investigation/correlation/final_diagnosis.py` — Class extracted from correlation during the structure refactor.
-- `app/capabilities/investigation/evidence_collection/diagnostic_command_runner.py` — Class extracted from evidence_collection during the structure refactor.
-- `app/capabilities/investigation/evidence_collection/diagnostic_execution_outcome.py` — Class extracted from evidence_collection during the structure refactor.
-- `app/capabilities/investigation/evidence_collection/evidence_collection_request.py` — Class extracted from evidence_collection during the structure refactor.
 - `app/capabilities/investigation/evidence_collection/evidence_collection_service.py` — Class extracted from evidence_collection during the structure refactor.
-- `app/capabilities/investigation/evidence_collection/server_record.py` — Class extracted from evidence_collection during the structure refactor.
-- `app/capabilities/investigation/evidence_collection/server_repository_protocol.py` — Class extracted from evidence_collection during the structure refactor.
-- `app/capabilities/investigation/evidence_collection/ssh_diagnostic_command_runner.py` — Class extracted from evidence_collection during the structure refactor.
 - `app/capabilities/investigation/execution_contracts/investigation_execution_result.py` — Class extracted from execution_contracts during the structure refactor.
 - `app/capabilities/investigation/execution_contracts/investigation_specialist_run.py` — Class extracted from execution_contracts during the structure refactor.
-- `app/capabilities/investigation/final_diagnosis_synthesizer/client_factory.py` — إنشاء عميل السرد النهائي وفق إعدادات النظام.
-- `app/capabilities/investigation/final_diagnosis_synthesizer/service.py` — تجميع التشخيص النهائي من نتائج التحقيق والتحقق من مخرجاته.
+- `app/capabilities/investigation/final_diagnosis_synthesizer/final_diagnosis_synthesizer.py` — تجميع التشخيص النهائي من نتائج التحقيق والتحقق من مخرجاته.
 - `app/capabilities/investigation/investigation_router/_candidate.py` — Class extracted from investigation_router during the structure refactor.
 - `app/capabilities/investigation/investigation_router/_issue_signal.py` — Class extracted from investigation_router during the structure refactor.
-- `app/capabilities/investigation/investigation_router/constants.py` — توجيه تقرير المراقبة إلى الاختصاصيين المناسبين.
-- `app/capabilities/investigation/investigation_router/factories.py` — توجيه تقرير المراقبة إلى الاختصاصيين المناسبين.
 - `app/capabilities/investigation/investigation_router/investigation_router.py` — Class extracted from investigation_router during the structure refactor.
 - `app/capabilities/investigation/investigation_router/investigation_routing_decision.py` — Class extracted from investigation_router during the structure refactor.
+- `app/capabilities/investigation/investigation_router/routing_patterns.py` — توجيه تقرير المراقبة إلى الاختصاصيين المناسبين.
 - `app/capabilities/investigation/investigation_router/routing_reason.py` — Class extracted from investigation_router during the structure refactor.
+- `app/capabilities/investigation/investigation_router/routing_signal_helpers.py` — توجيه تقرير المراقبة إلى الاختصاصيين المناسبين.
 - `app/capabilities/investigation/investigation_router/specialist_routing_match.py` — Class extracted from investigation_router during the structure refactor.
 - `app/capabilities/investigation/persistence_service.py` — حفظ قرار توجيه التحقيق وقراءته.
 - `app/capabilities/investigation/read_service.py` — قراءة التحقيقات وملخصاتها وتفاصيلها.
 - `app/capabilities/investigation/runtime_snapshot_service/json_safe.py` — تحويل القيم المعقدة إلى قيم قابلة للتسلسل بصيغة JSON.
 - `app/capabilities/investigation/runtime_snapshot_service/runtime_snapshot_merger.py` — حفظ ودمج لقطة تشغيل التحقيق.
 - `app/capabilities/investigation/runtime_snapshot_service/runtime_snapshot_serializer.py` — حفظ ودمج لقطة تشغيل التحقيق.
-- `app/capabilities/investigation/runtime_snapshot_service/service.py` — حفظ ودمج لقطة تشغيل التحقيق.
+- `app/capabilities/investigation/runtime_snapshot_service/runtime_snapshot_service.py` — حفظ ودمج لقطة تشغيل التحقيق.
 - `app/capabilities/investigation/source_location.py` — استخراج مواقع المصادر من نصوص نتائج التحقيق.
 - `app/capabilities/investigation/specialist_context/context_renderer.py` — Class extracted from specialist_context during the structure refactor.
 - `app/capabilities/investigation/specialist_context/context_selector.py` — Class extracted from specialist_context during the structure refactor.
@@ -7704,7 +7882,6 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/investigation/specialist_context/specialist_context_builder.py` — Class extracted from specialist_context during the structure refactor.
 - `app/capabilities/investigation/specialist_context/specialist_context_snapshot.py` — Class extracted from specialist_context during the structure refactor.
 - `app/capabilities/investigation/specialist_context/specialist_knowledge_query_builder.py` — Class extracted from specialist_context during the structure refactor.
-- `app/capabilities/investigation/specialist_execution_service/constants.py` — حجز تنفيذ الاختصاصي وإنهاؤه.
 - `app/capabilities/investigation/specialist_execution_service/specialist_execution_in_progress.py` — Class extracted from specialist_execution_service during the structure refactor.
 - `app/capabilities/investigation/specialist_execution_service/specialist_execution_service.py` — Class extracted from specialist_execution_service during the structure refactor.
 - `app/capabilities/investigation/specialist_investigation_loop/finalizer.py` — Class extracted from specialist_investigation_loop during the structure refactor.
@@ -7717,14 +7894,13 @@ Evaluation / Production Readiness Gate
 - `app/capabilities/investigation/specialist_investigation_loop/specialist_loop_tool_decision.py` — Class extracted from specialist_investigation_loop during the structure refactor.
 - `app/capabilities/investigation/specialist_investigation_loop/tool_execution_result.py` — Class extracted from specialist_investigation_loop during the structure refactor.
 - `app/capabilities/investigation/specialist_investigation_loop/tool_executor.py` — Class extracted from specialist_investigation_loop during the structure refactor.
-- `app/capabilities/investigation/specialist_reasoning_agent/constants.py` — تحويل reasoning الاختصاصي إلى نتيجة تشخيصية منظمة.
 - `app/capabilities/investigation/specialist_reasoning_agent/output_validator.py` — Class extracted from specialist_reasoning_agent during the structure refactor.
+- `app/capabilities/investigation/specialist_reasoning_agent/reasoning_prompt.py` — تحويل reasoning الاختصاصي إلى نتيجة تشخيصية منظمة.
 - `app/capabilities/investigation/specialist_reasoning_agent/result_builder.py` — Class extracted from specialist_reasoning_agent during the structure refactor.
 - `app/capabilities/investigation/specialist_reasoning_agent/specialist_diagnostic_tool_request.py` — Class extracted from specialist_reasoning_agent during the structure refactor.
 - `app/capabilities/investigation/specialist_reasoning_agent/specialist_reasoning_agent.py` — Class extracted from specialist_reasoning_agent during the structure refactor.
 - `app/capabilities/investigation/specialist_reasoning_agent/specialist_reasoning_execution.py` — Class extracted from specialist_reasoning_agent during the structure refactor.
-- `app/capabilities/investigation/specialist_reasoning_client.py` — إنشاء عميل reasoning للاختصاصيين.
-- `app/capabilities/investigation/specialist_registry/factories.py` — سجل الاختصاصيين وتعريفاتهم التشغيلية.
+- `app/capabilities/investigation/specialist_registry/registry_field_parsers.py` — سجل الاختصاصيين وتعريفاتهم التشغيلية.
 - `app/capabilities/investigation/specialist_registry/specialist_domain_match.py` — Class extracted from specialist_registry during the structure refactor.
 - `app/capabilities/investigation/specialist_registry/specialist_registry.py` — Class extracted from specialist_registry during the structure refactor.
 - `app/capabilities/investigation/specialist_registry/specialist_registry_snapshot.py` — Class extracted from specialist_registry during the structure refactor.
@@ -7736,20 +7912,17 @@ Evaluation / Production Readiness Gate
 
 - `app/capabilities/knowledge/chunker/block.py` — كتلة داخلية قبل إنشاء مقطع المعرفة.
 - `app/capabilities/knowledge/chunker/chunker.py` — تقطيع محتوى المعرفة مع مراعاة البنية والعناوين.
+- `app/capabilities/knowledge/chunker/chunking_patterns.py` — أنماط التقطيع النصي.
 - `app/capabilities/knowledge/chunker/config.py` — إعدادات تقطيع وثائق المعرفة.
-- `app/capabilities/knowledge/chunker/constants.py` — أنماط التقطيع النصي.
 - `app/capabilities/knowledge/chunking_service.py` — تنسيق مرحلة تقطيع وثيقة المعرفة المحللة.
 - `app/capabilities/knowledge/indexer/indexer.py` — فهرسة مقاطع المعرفة باستخدام embeddings.
 - `app/capabilities/knowledge/indexer/result.py` — نتيجة فهرسة وثيقة معرفة.
 - `app/capabilities/knowledge/ingestion_contracts/chunk_draft.py` — مسودة مقطع معرفة قبل التخزين.
-- `app/capabilities/knowledge/ingestion_contracts/parsed_document.py` — وثيقة معرفة بعد تحليل محتواها.
-- `app/capabilities/knowledge/ingestion_contracts/status.py` — حالات دورة إدخال وثائق المعرفة.
 - `app/capabilities/knowledge/ingestion_service.py` — تنفيذ رحلة إدخال مصدر معرفة إلى وثيقة قابلة للمعالجة.
-- `app/capabilities/knowledge/parsers/constants.py` — أنماط تطبيع النص.
 - `app/capabilities/knowledge/parsers/content_parser.py` — تحليل النص وHTML وPDF إلى وثيقة معرفة موحدة.
 - `app/capabilities/knowledge/parsers/html_text_extractor.py` — استخراج النص المرئي والعناوين من HTML.
+- `app/capabilities/knowledge/parsers/normalization_patterns.py` — أنماط تطبيع النص.
 - `app/capabilities/knowledge/parsers/text_normalization.py` — تطبيع النصوص قبل تخزينها أو تقطيعها.
-- `app/capabilities/knowledge/retrieval/context.py` — سياق مقطع معرفة مسترجع.
 - `app/capabilities/knowledge/retrieval/fusion_candidate.py` — مرشح دمج نتائج استرجاع المعرفة.
 - `app/capabilities/knowledge/retrieval/retriever.py` — استرجاع مقاطع المعرفة بالبحث المتجهي والنصي الهجين.
 - `app/capabilities/knowledge/source_loader/loaded_content.py` — محتوى مصدر معرفة محمل.

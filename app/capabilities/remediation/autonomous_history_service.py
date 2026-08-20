@@ -7,13 +7,14 @@
 from __future__ import annotations
 
 from app.core.contracts.autonomous_remediation.autonomous_history_snapshot import AutonomousHistorySnapshot
+from app.core.ports.remediation.autonomous_remediation_repository import AutonomousRemediationRepositoryPort
 
 
 class AutonomousHistoryService:
     """
     يبني لقطة تاريخية موحدة لعمليات المعالجة الآلية المرتبطة بالسيرفر أو التشخيص.
     """
-    def __init__(self, *, repository) -> None:
+    def __init__(self, *, repository: AutonomousRemediationRepositoryPort) -> None:
         """
         يربط مستودعات قرارات وحجوزات وتفويضات وأحداث المعالجة الآلية.
         """

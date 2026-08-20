@@ -10,13 +10,13 @@ import logging
 from dataclasses import dataclass
 
 from app.interfaces.admin.services.report_pdf_service import ReportPdfService
-from app.composition.repositories import RepositoryBundle
-from app.composition.services import CoreServiceBundle
+from app.composition.repository_bundle import RepositoryBundle
+from app.composition.service_bundle import CoreServiceBundle
 from app.capabilities.analysis.analysis_orchestrator.orchestrator import AnalysisOrchestrator
-from app.capabilities.analysis.client_factory import create_llm_analysis_client
+from app.composition.analysis.client_factory import create_llm_analysis_client
 from app.capabilities.analysis.report_analyzer import ReportAnalyzer
 from app.capabilities.analysis.retrieval.context_builder import RagContextBuilder
-from app.capabilities.analysis.retrieval.embedding_factory import create_embedding_client
+from app.composition.analysis.embedding_factory import create_embedding_client
 from app.capabilities.analysis.retrieval.full_text_retriever.retriever import FullTextRetriever
 from app.capabilities.analysis.retrieval.hybrid_retriever.retriever import HybridRetriever
 from app.capabilities.analysis.retrieval.rag_retriever import RagRetriever
@@ -25,7 +25,7 @@ from app.capabilities.analysis.retrieval.structured_compatibility.checker import
 from app.capabilities.investigation.specialist_context.specialist_context_builder import SpecialistContextBuilder
 from app.capabilities.investigation.specialist_investigation_loop.specialist_investigation_loop import SpecialistInvestigationLoop
 from app.capabilities.investigation.specialist_reasoning_agent.specialist_reasoning_agent import SpecialistReasoningAgent
-from app.capabilities.investigation.specialist_reasoning_client import (
+from app.composition.investigation.specialist_reasoning_client_factory import (
     create_specialist_reasoning_client,
 )
 from app.capabilities.knowledge.retrieval.retriever import KnowledgeHybridRetriever

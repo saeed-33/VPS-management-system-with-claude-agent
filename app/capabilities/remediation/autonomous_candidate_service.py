@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 from app.core.contracts.autonomous_remediation.autonomous_policy_candidate import AutonomousPolicyCandidate
+from app.core.ports.remediation.autonomous_remediation_repository import AutonomousRemediationRepositoryPort
 
 
 class AutonomousCandidateService:
@@ -14,7 +15,7 @@ class AutonomousCandidateService:
     يقرأ مرشحي المعالجة الآلية ويعيدهم بصيغة العقود المخصصة للقرار.
     """
 
-    def __init__(self, *, repository) -> None:
+    def __init__(self, *, repository: AutonomousRemediationRepositoryPort) -> None:
         """
         يربط مستودع مرشحي المعالجة الآلية.
         """
