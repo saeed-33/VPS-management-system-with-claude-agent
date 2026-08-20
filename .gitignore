@@ -29,3 +29,4 @@ apply**.py
 *.c14-*-backup
 app/.venv/
 draft
+output
