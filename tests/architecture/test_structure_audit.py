@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from tools.dev.generate_project_structure import ROOT, should_skip
 from tools.dev.structure_audit import audit, top_level_class_names
 
 
@@ -63,6 +64,16 @@ def test_current_application_sources_are_parseable() -> None:
 
 def test_current_application_sources_meet_the_structure_gate() -> None:
     assert audit(Path("app"), max_lines=350) == []
+
+
+def test_generated_structure_ignores_local_only_output_directories() -> None:
+    for relative_path in (
+        ".claude/runtime-events/session.json",
+        ".tmp/github-logs/output.txt",
+        "draft/.codex-test-venv/Lib/site-packages/example.py",
+        "docs/report/rendered_final/page-1.png",
+    ):
+        assert should_skip(ROOT / relative_path) is True
 
 
 def test_app_keeps_init_files_only_at_main_package_boundaries() -> None:

@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.interfaces.admin.services.report_pdf_service import ReportPdfService
+from app.core.ports.analysis.embedding_client import EmbeddingClient
 from app.interfaces.admin.services.ssh_test_service.service import SSHTestService
 from app.capabilities.remediation.autonomous_policy_service import AutonomousPolicyService
 from app.capabilities.remediation.autonomous_history_service import AutonomousHistoryService
@@ -116,6 +117,7 @@ class ApplicationContainer:
     report_analyzer: ReportAnalyzer | None
     analysis_orchestrator: AnalysisOrchestrator | None
     report_pdf_service: ReportPdfService | None
+    embedding_client: EmbeddingClient | None
 
 
 __all__ = [

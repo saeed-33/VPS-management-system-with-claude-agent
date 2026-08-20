@@ -268,26 +268,43 @@ class HybridRetriever:
         """
         يحمّل التحليل المكتمل ويحوّل المرشح المدمج إلى سياق يحمل الدرجات والاستراتيجية والمحتوى.
         """
-        analysis = self._analysis_repository.get_by_id(
-            candidate.analysis_id
-        )
-        if analysis is None or analysis.status != "completed":
-            return None
+        analysis_context = candidate.vector_context
+        if analysis_context is None:
+            analysis = self._analysis_repository.get_by_id(
+                candidate.analysis_id
+            )
+            if analysis is None or analysis.status != "completed":
+                return None
+            health_status = analysis.health_status
+            summary = analysis.summary
+            issues = list(analysis.issues or [])
+            positive_findings = list(
+                analysis.positive_findings or []
+            )
+            recommended_actions = list(
+                analysis.recommended_actions or []
+            )
+        else:
+            health_status = analysis_context.health_status
+            summary = analysis_context.summary
+            issues = list(analysis_context.issues)
+            positive_findings = list(
+                analysis_context.positive_findings
+            )
+            recommended_actions = list(
+                analysis_context.recommended_actions
+            )
 
         return RetrievedAnalysisContext(
             source_report_id=candidate.report_id,
             source_analysis_id=candidate.analysis_id,
             score=candidate.rrf_score(self._rrf_k),
             rank=final_rank,
-            health_status=analysis.health_status,
-            summary=analysis.summary,
-            issues=list(analysis.issues or []),
-            positive_findings=list(
-                analysis.positive_findings or []
-            ),
-            recommended_actions=list(
-                analysis.recommended_actions or []
-            ),
+            health_status=health_status,
+            summary=summary,
+            issues=issues,
+            positive_findings=positive_findings,
+            recommended_actions=recommended_actions,
             retrieval_strategy=candidate.strategy,
             vector_score=candidate.vector_score,
             text_score=candidate.text_score,

@@ -80,6 +80,7 @@ def build_container() -> ApplicationContainer:
     )
     rag_retriever = retrieval_composition.rag_retriever
     report_pdf_service = retrieval_composition.report_pdf_service
+    embedding_client = retrieval_composition.embedding_client
 
     # نضيف خدمات الإدارة التي تعرض حالة السيرفر وتستقبل طلبات المستخدم.
 
@@ -224,4 +225,5 @@ def build_container() -> ApplicationContainer:
         report_analyzer=report_analyzer,
         analysis_orchestrator=analysis_orchestrator,
         report_pdf_service=report_pdf_service,
+        embedding_client=embedding_client,
     )

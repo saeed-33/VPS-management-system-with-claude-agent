@@ -5,6 +5,7 @@
 والملف ومجموعة الأوامر، ثم يحمّل التحليلات المكتملة كسياق قابل للتدقيق.
 """
 import logging
+import asyncio
 from time import perf_counter
 
 from app.core.ports.analysis.embedding_client import EmbeddingClient
@@ -65,7 +66,8 @@ class RagRetriever:
         )
 
         vector_search_started = perf_counter()
-        candidates = self._retrieval_repository.find_similar(
+        candidates = await asyncio.to_thread(
+            self._retrieval_repository.find_similar,
             server_id=server_id,
             monitoring_profile_id=monitoring_profile_id,
             command_set_hash=command_set_hash,
@@ -85,6 +87,15 @@ class RagRetriever:
             len(candidates),
         )
 
+        analysis_ids = [
+            document.analysis_id
+            for document, _score in candidates
+        ]
+        analyses = await asyncio.to_thread(
+            self._analysis_repository.get_by_ids,
+            analysis_ids,
+        )
+
         contexts: list[RetrievedAnalysisContext] = []
         hydration_started = perf_counter()
 
@@ -92,9 +103,7 @@ class RagRetriever:
             candidates,
             start=1,
         ):
-            analysis = self._analysis_repository.get_by_id(
-                document.analysis_id
-            )
+            analysis = analyses.get(document.analysis_id)
             if analysis is None or analysis.status != "completed":
                 continue
 

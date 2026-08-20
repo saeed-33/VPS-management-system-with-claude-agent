@@ -22,6 +22,7 @@ from app.capabilities.analysis.retrieval.hybrid_retriever.retriever import Hybri
 from app.capabilities.analysis.retrieval.rag_retriever import RagRetriever
 from app.capabilities.analysis.retrieval.retrieval_indexer import RetrievalIndexer
 from app.capabilities.analysis.retrieval.structured_compatibility.checker import StructuredCompatibilityChecker
+from app.core.ports.analysis.embedding_client import EmbeddingClient
 from app.capabilities.investigation.specialist_context.specialist_context_builder import SpecialistContextBuilder
 from app.capabilities.investigation.specialist_investigation_loop.specialist_investigation_loop import SpecialistInvestigationLoop
 from app.capabilities.investigation.specialist_reasoning_agent.specialist_reasoning_agent import SpecialistReasoningAgent
@@ -42,6 +43,7 @@ class RetrievalComposition:
     يحمل مكونات الاسترجاع المتجهي والنصي والهجين وسياسة إعادة الاستخدام وسياق RAG.
     """
     retrieval_indexer: RetrievalIndexer | None
+    embedding_client: EmbeddingClient | None
     rag_retriever: HybridRetriever | None
     rag_context_builder: RagContextBuilder | None
     report_pdf_service: ReportPdfService | None

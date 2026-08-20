@@ -32,6 +32,23 @@ class _AnalysisQueriesMixin:
                 analysis_id,
             )
 
+    def get_by_ids(
+        self,
+        analysis_ids: list[int],
+    ) -> dict[int, ReportAnalysisModel]:
+        """Load multiple analyses with one database round trip."""
+        unique_ids = list(dict.fromkeys(analysis_ids))
+        if not unique_ids:
+            return {}
+
+        with self._session_factory() as session:
+            statement = select(ReportAnalysisModel).where(
+                ReportAnalysisModel.id.in_(unique_ids)
+            )
+            models = session.scalars(statement).all()
+
+        return {model.id: model for model in models}
+
     def get_by_report_id(
         self,
         report_id: int,

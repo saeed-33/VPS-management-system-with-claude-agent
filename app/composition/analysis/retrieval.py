@@ -112,6 +112,7 @@ def build_retrieval_composition(
 
     return RetrievalComposition(
         retrieval_indexer=retrieval_indexer,
+        embedding_client=embedding_client,
         rag_retriever=rag_retriever,
         rag_context_builder=rag_context_builder,
         report_pdf_service=report_pdf_service,

@@ -74,7 +74,8 @@ class KnowledgeHybridRetriever:
 
         embedding = await self._embedding_client.embed(query)
 
-        vector_rows = self._repository.find_by_vector(
+        vector_rows = await asyncio.to_thread(
+            self._repository.find_by_vector,
             query_embedding=embedding,
             specialist_slug=specialist_slug,
             domains=domains,

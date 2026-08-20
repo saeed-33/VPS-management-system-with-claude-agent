@@ -21,12 +21,16 @@ OUTPUT = ROOT / "docs" / "PROJECT_STRUCTURE.md"
 EXCLUDED_DIRS = {
     ".git",
     ".venv",
+    ".tmp",
     "__pycache__",
     ".pytest_cache",
     ".mypy_cache",
     ".ruff_cache",
+    "draft",
     "node_modules",
     "artifacts",
+    "rendered_final",
+    "runtime-events",
 }
 
 EXCLUDED_PREFIXES = (

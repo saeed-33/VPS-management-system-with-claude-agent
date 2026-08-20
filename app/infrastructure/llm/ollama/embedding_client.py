@@ -18,6 +18,15 @@ class OllamaEmbeddingClient(EmbeddingClient):
         self._model = model
         self._dimensions = dimensions
         self._timeout_seconds = timeout_seconds
+        self._client = httpx.AsyncClient(
+            base_url=self._base_url,
+            timeout=httpx.Timeout(
+                connect=10.0,
+                read=timeout_seconds,
+                write=30.0,
+                pool=10.0,
+            ),
+        )
 
     @property
     def provider_name(self) -> str:
@@ -47,13 +56,12 @@ class OllamaEmbeddingClient(EmbeddingClient):
         if not text.strip():
             raise ValueError("Cannot embed empty text.")
 
-        async with httpx.AsyncClient(timeout=self._timeout_seconds) as client:
-            response = await client.post(
-                f"{self._base_url}/api/embed",
-                json={"model": self._model, "input": text},
-            )
-            response.raise_for_status()
-            payload = response.json()
+        response = await self._client.post(
+            "/api/embed",
+            json={"model": self._model, "input": text},
+        )
+        response.raise_for_status()
+        payload = response.json()
 
         embeddings = payload.get("embeddings") or []
         if not embeddings:
@@ -65,3 +73,7 @@ class OllamaEmbeddingClient(EmbeddingClient):
                 f"Embedding dimension mismatch: expected {self._dimensions}, got {len(vector)}."
             )
         return vector
+
+    async def close(self) -> None:
+        """Close the shared HTTP connection pool."""
+        await self._client.aclose()

@@ -41,3 +41,7 @@ class EmbeddingClient(ABC):
         يحوّل النص إلى متجه embedding يمكن تخزينه ومقارنته بمتجهات التقارير السابقة.
         """
         raise NotImplementedError
+
+    async def close(self) -> None:
+        """Release provider resources owned by the embedding client."""
+        return None

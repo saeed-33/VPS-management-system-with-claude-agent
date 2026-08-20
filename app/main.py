@@ -163,6 +163,9 @@ async def lifespan(
                     "Investigation backlog worker shutdown failed."
                 )
 
+        if container.embedding_client is not None:
+            await container.embedding_client.close()
+
         logger.info(
             "Application shutdown completed."
         )
