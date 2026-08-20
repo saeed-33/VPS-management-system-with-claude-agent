@@ -1084,6 +1084,7 @@ Evaluation / Production Readiness Gate
 - `.claude/skills/plan-remediation/SKILL.md` — Claude skill instructions for remediation planning and validation.
 - `.env` — Project asset.
 - `.env.example` — Example environment variables for local/runtime configuration.
+- `.github/workflows/quality.yml` — GitHub Actions quality gate for tests, compilation, architecture audits, and generated-structure consistency.
 - `.gitignore` — Project asset.
 - `.mcp.json` — Claude MCP configuration exposing project tool servers.
 - `.phase6-native-sandbox-attestation.json` — Structured configuration or generated data.

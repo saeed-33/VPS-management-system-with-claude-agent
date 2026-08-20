@@ -34,6 +34,10 @@ EXCLUDED_PREFIXES = (
 )
 
 SPECIAL = {
+    ".github/workflows/quality.yml": (
+        "GitHub Actions quality gate for tests, compilation, architecture audits, "
+        "and generated-structure consistency."
+    ),
     "CLAUDE.md": (
         "Claude project instruction entrypoint loaded at session start; "
         "defines architecture, workflow, and coding rules."
