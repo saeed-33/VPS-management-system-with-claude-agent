@@ -9,7 +9,7 @@ __pycache__/
 .coverage
 coverage.xml
 htmlcov/
-reports/
+/reports/
 artifacts/
 tmp/
 docs/report/rendered_final/

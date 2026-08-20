@@ -37,6 +37,18 @@ EXCLUDED_PREFIXES = (
     ".step_",
 )
 
+EXCLUDED_FILE_NAMES = {
+    ".env",
+}
+
+EXCLUDED_FILE_SUFFIXES = {
+    ".bak",
+    ".backup",
+    ".old",
+    ".orig",
+    ".tmp",
+}
+
 SPECIAL = {
     ".github/workflows/quality.yml": (
         "GitHub Actions quality gate for tests, compilation, architecture audits, "
@@ -180,6 +192,12 @@ def should_skip(path: Path) -> bool:
     تعيد bool أو تسجل/ترجع الأثر الذي يحدده هذا الـworkflow. قد يعيد exit code أو يرفع exception عند فشل المدخلات أو dependency.
     """
     parts = path.relative_to(ROOT).parts
+
+    if path.name in EXCLUDED_FILE_NAMES:
+        return True
+
+    if path.suffix.lower() in EXCLUDED_FILE_SUFFIXES:
+        return True
 
     if any(
         part in EXCLUDED_DIRS
